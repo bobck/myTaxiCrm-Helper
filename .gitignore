@@ -1,0 +1,5 @@
+/.DS_Store
+/.env
+/id_rsa
+/node_modules
+/package-lock.json
