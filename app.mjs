@@ -7,6 +7,8 @@ import express from 'express'
 
 const app = express()
 
+app.use(express.json());
+
 const { Client } = ssh2;
 const c = new Client();
 
@@ -97,7 +99,29 @@ c.on('ready', async function () {
         }
     })
 
-});
+    app.post('/query', async function (req, res) {
+        const { query, body } = req
+        const { sql } = body
 
+        if (!sql) {
+            res.statusCode = 400;
+            return res.send(JSON.stringify({
+                error: "sql is missing"
+            }))
+        }
+
+        try {
+            const result = await client.query(sql)
+            const { rows } = result
+            return res.send(JSON.stringify(rows))
+        } catch (err) {
+            console.error(err)
+            res.statusCode = 404;
+            return res.send(JSON.stringify(err))
+        }
+    })
+
+
+});
 
 app.listen(3000)
