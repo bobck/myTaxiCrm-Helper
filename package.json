@@ -4,14 +4,21 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "dev": "node -r dotenv/config app.mjs"
+    "dev": "node -r dotenv/config app.mjs",
+    "notification": "ENV=TEST node -r dotenv/config src/cron/modules/rooms-notification.mjs"
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",
   "dependencies": {
+    "cron": "^3.1.6",
+    "db-migrate": "^0.11.14",
+    "db-migrate-sqlite3": "^0.5.0",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "pg": "^8.11.3",
-    "ssh2": "^1.14.0"
+    "sqlite": "^5.0.1",
+    "sqlite3": "^5.1.6",
+    "ssh2": "^1.14.0",
+    "telegraf": "^4.15.0"
   }
 }
