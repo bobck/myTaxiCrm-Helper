@@ -5,11 +5,13 @@
   "main": "app.js",
   "scripts": {
     "dev": "node -r dotenv/config app.mjs",
-    "notification": "ENV=TEST node -r dotenv/config src/cron/modules/rooms-notification.mjs"
+    "update_plan": "ENV=TEST node -r dotenv/config src/sheets/modules/get-and-save-current-plan.mjs",
+    "notification": "ENV=TEST node -r dotenv/config src/telegram/modules/rooms-notification.mjs"
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",
   "dependencies": {
+    "@googleapis/sheets": "^5.0.5",
     "cron": "^3.1.6",
     "db-migrate": "^0.11.14",
     "db-migrate-sqlite3": "^0.5.0",

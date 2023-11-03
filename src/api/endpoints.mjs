@@ -10,9 +10,13 @@ export async function initApi() {
     const conString = `postgres://${process.env.PG_USER}:${process.env.PG_PASSWORD}@${process.env.PROXY_HOST}:${process.env.PROXY_PORT}/${process.env.PG_DB}`;
     const client = new pg.Client(conString);
 
-    client.connect(function (err) {
-        console.log({ message: 'initApi', err });
-    });
+    const result = await client.connect();
+
+    console.log({
+        message: 'initApi...',
+        time: new Date(),
+        pg_errors: result
+    })
 
     app.post('/query', async function (req, res) {
         const { body } = req

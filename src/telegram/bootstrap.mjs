@@ -1,9 +1,9 @@
 import {
     startRoomNotificationJob,
     roomNotificationJob
-} from '../cron/jobs/rooms-notification-job.mjs'
+} from './jobs/rooms-notification-job.mjs'
 
-export function bootCron() {
+export function telegramJobs() {
     console.log('roomNotificationJob...')
     try {
         roomNotificationJob.start();
@@ -12,8 +12,8 @@ export function bootCron() {
         console.error({ error })
         console.error('Trying to restart...')
         roomNotificationJob.stop();
-        sync();
+        telegramJobs();
     }
 }
 
-// bootCron();
+// telegranJobs();
