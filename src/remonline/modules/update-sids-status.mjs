@@ -9,6 +9,7 @@ import { remonlineTokenToEnv } from "../remonline.api.mjs";
 export async function checkIsSidStatusWasUpdated() {
 
     const statusesToBeClosed = JSON.parse(process.env.STATUSES_TO_BE_CLOSED);
+    //TODO нужно обновлять все статусы. вдруг обновится статус там где ожидается оплата
     const result = await getSidsNotReadyDoBeClosed({ statusesToBeClosed: statusesToBeClosed.join(',') })
     const ids = result.map(r => r.sid_id)
     const { orders } = await getOrders({ ids })

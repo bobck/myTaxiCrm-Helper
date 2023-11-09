@@ -26,6 +26,11 @@ export async function getAndSaveCurrentPlan() {
   await markAllAsNotLastVersion();
   for (let row of rows) {
     const [trips, autopark_id] = row
+
+    if (isNaN(trips)) {
+      continue;
+    }
+    
     await savePlanRow({ trips, autopark_id });
   }
 
