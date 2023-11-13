@@ -16,7 +16,7 @@ export async function startRoomsNotification() {
     console.log({ time: new Date(), message: 'startRoomsNotification', result })
 
     const { chatRooms } = await chatRoomsWithParkIds();
-    console.log({ chatRooms })
+    // console.log({ chatRooms })
 
     const sqlp = fs.readFileSync('./src/sql/online_data_by_parks.sql').toString();
 
