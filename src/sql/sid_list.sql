@@ -10,7 +10,7 @@ WITH
         WHEN ct."comment" LIKE '%SID\_%' THEN SUBSTRING(
           ct."comment"
           FROM
-            'SID_\d{2}-\d{2}-\d{4}-\d+'
+            'SID\_\w{0,3}\d{2}-\d{2}-\d{4}-\d+'
         )
         ELSE NULL
       END AS sid_lable
