@@ -2,6 +2,7 @@ import {
     generateDriversWithFuelCardReport,
     insertRowsAsStream
 } from "../bq-utils.mjs";
+import { DateTime } from "luxon";
 
 export async function generateAndSaveDriversWithFuelCardsReport() {
     console.log({ time: new Date(), message: 'generateAndSaveDriversWithFuelCardsReport' });
