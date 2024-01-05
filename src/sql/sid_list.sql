@@ -30,7 +30,8 @@ WITH
         'TIRE_CHANGE',
         'ROAD_ACCIDENT_ADMIN_SERVICES',
         'ROAD_ACCIDENT_WORKS',
-        'DIAGNOSTICS'
+        'DIAGNOSTICS',
+        'CAR_WASH'
       )
   )
 SELECT
