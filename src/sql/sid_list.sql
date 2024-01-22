@@ -22,7 +22,7 @@ WITH
         '4ea03592-9278-4ede-adf8-f7345a856893',
         'b52d5c3c-9a8e-4898-8101-7c65f3ee70a4'
       )
-      AND ct.purpose IN (
+      AND ct.expense_type IN (
         'SPARE_PARTS_BY_ROAD_ACCIDENT',
         'CAR_VEHICLE_MAINTENANCE',
         'REPAIR_WORK',
