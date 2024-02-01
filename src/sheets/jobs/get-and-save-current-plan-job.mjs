@@ -14,7 +14,7 @@ const job = CronJob.from({
             await getAndSaveCurrentPlan();
         } catch (error) {
             console.error('Error occurred in onTick getAndSaveCurrentPlan');
-            console.error(error);
+            console.error({ time: new Date(), error });
         }
     }
 });

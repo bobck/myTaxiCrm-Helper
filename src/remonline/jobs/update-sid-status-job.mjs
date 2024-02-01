@@ -13,7 +13,7 @@ const job = CronJob.from({
             await checkIsSidStatusWasUpdated();
         } catch (error) {
             console.error('Error occurred in onTick checkIsSidStatusWasUpdatedJob');
-            console.error(error);
+            console.error({ time: new Date(), error });
         }
     }
 });
