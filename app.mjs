@@ -5,9 +5,11 @@ import { sheetJobs } from './src/sheets/bootstrap.mjs';
 import { remonlineJobs } from './src/remonline/bootstrap.mjs';
 import { remonlineTokenToEnv } from './src/remonline/remonline.api.mjs';
 import { bqJobs } from './src/bq/bootstrap.mjs';
+import { pool } from './src/api/pool.mjs';
 
 await openSShTunel;
-await initApi();
+
+await initApi({ pool });
 telegramJobs();
 sheetJobs();
 bqJobs();

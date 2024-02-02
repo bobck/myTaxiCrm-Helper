@@ -1,12 +1,7 @@
 
-import pg from 'pg';
 import fs from 'fs'
 import { saveSidRow } from '../remonline.utils.mjs';
 import { getLastSidCreatedAt } from '../remonline.queries.mjs';
-
-const { Client } = pg;
-
-const conString = `postgres://${process.env.PG_USER}:${process.env.PG_PASSWORD}@${process.env.PROXY_HOST}:${process.env.PROXY_PORT}/${process.env.PG_DB}`;
 
 export async function saveSidList() {
 
@@ -21,16 +16,12 @@ export async function saveSidList() {
         lastSidCreatedAt = new Date(created_at + 1)
     }
 
-    const client = new Client(conString);
-    const connect = await client.connect();
-
-    console.log({ time: new Date(), message: 'saveSidList', lastSidCreatedAt, connect })
+    console.log({ time: new Date(), message: 'saveSidList', lastSidCreatedAt })
 
     const sql = fs.readFileSync('./src/sql/sid_list.sql').toString();
 
-    const result = await client.query(sql, [lastSidCreatedAt])
+    const result = await pool.query(sql, [lastSidCreatedAt])
     const { rows } = result
-    await client.end()
 
     if (rows.length == 0) {
         return

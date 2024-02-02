@@ -1,21 +1,14 @@
 
 
 import express from 'express'
-import pg from 'pg';
 
-export async function initApi() {
+export async function initApi({ pool }) {
     const app = express()
     app.use(express.json());
 
-    const conString = `postgres://${process.env.PG_USER}:${process.env.PG_PASSWORD}@${process.env.PROXY_HOST}:${process.env.PROXY_PORT}/${process.env.PG_DB}`;
-    const client = new pg.Client(conString);
-
-    const result = await client.connect();
-
     console.log({
         message: 'initApi...',
-        time: new Date(),
-        pg_errors: result
+        time: new Date()
     })
 
     app.post('/query', async function (req, res) {
@@ -30,7 +23,7 @@ export async function initApi() {
         }
 
         try {
-            const result = await client.query(sql)
+            const result = await pool.query(sql)
             const { rows } = result
             return res.send(JSON.stringify(rows))
         } catch (err) {

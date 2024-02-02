@@ -1,26 +1,20 @@
-import pg from 'pg';
 import fs from 'fs'
-const { Client } = pg;
 import { BigQuery } from '@google-cloud/bigquery';
+import { pool } from '../api/pool.mjs';
 
 const bigquery = new BigQuery({
     projectId: process.env.BQ_PROJECT_NAME,
     keyFilename: 'token.json'
 });
 
-const conString = `postgres://${process.env.PG_USER}:${process.env.PG_PASSWORD}@${process.env.PROXY_HOST}:${process.env.PROXY_PORT}/${process.env.PG_DB}`;
-
 export async function generateDriversWithFuelCardReport({ date }) {
-    const client = new Client(conString);
-    const connect = await client.connect();
 
-    console.log({ time: new Date(), message: 'generateDriversWithFuelCardReport', connect })
+    console.log({ time: new Date(), message: 'generateDriversWithFuelCardReport' })
 
     const sqlp = fs.readFileSync('./src/sql/drivers_with_fuel_cards.sql').toString();
-    await client.query("SET timezone='Europe/Kyiv';");
-    const result = await client.query(sqlp, [date]);
+    await pool.query("SET timezone='Europe/Kyiv';");
+    const result = await pool.query(sqlp, [date]);
     const { rows } = result
-    await client.end()
     return { rows }
 }
 
