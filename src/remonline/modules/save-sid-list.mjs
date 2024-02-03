@@ -2,6 +2,7 @@
 import fs from 'fs'
 import { saveSidRow } from '../remonline.utils.mjs';
 import { getLastSidCreatedAt } from '../remonline.queries.mjs';
+import { pool } from '../../api/pool.mjs';
 
 export async function saveSidList() {
 
