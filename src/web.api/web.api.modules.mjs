@@ -1,22 +1,14 @@
-import pg from 'pg';
 import fs from 'fs'
 import { setTimeout } from 'timers/promises';
-
+import { pool } from './../api/pool.mjs'
 import { makeCRMRequest } from './web.api.utlites.mjs';
-const { Client } = pg;
-
-
-const conString = `postgres://${process.env.PG_USER}:${process.env.PG_PASSWORD}@${process.env.PROXY_HOST}:${process.env.PROXY_PORT}/${process.env.PG_DB}`;
 
 async function getAndFireDrivers() {
-    const client = new Client(conString);
-    const connect = await client.connect();
-
-    console.log({ time: new Date(), message: 'getAndFireDrivers', connect })
+    console.log({ time: new Date(), message: 'getAndFireDrivers' })
 
     const sql = fs.readFileSync('./src/sql/drivers_with_no_status.sql').toString();
 
-    const result = await client.query(sql)
+    const result = await pool.query(sql)
     const { rows, rowCount } = result
     console.log({ rowCount })
 
@@ -71,8 +63,6 @@ async function getAndFireDrivers() {
         }
 
     }
-
-    await client.end()
     return
 }
 
