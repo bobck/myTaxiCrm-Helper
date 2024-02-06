@@ -12,7 +12,7 @@
     "updsidstatus": "ENV=TEST node -r dotenv/config src/remonline/modules/update-sids-status.mjs",
     "closeorder": "ENV=TEST node -r dotenv/config src/remonline/modules/move-order-to-close.mjs",
     "bqutils": "ENV=REWRITE_REPORT REPORT_DATE='2023-12-01' node -r dotenv/config  src/bq/bq-utils.mjs",
-    "firedrivers": "ENV=TEST node -r dotenv/config src/web.api.client/client.mjs"
+    "firedrivers": "ENV=TEST node -r dotenv/config src/web.api/web.api.modules.mjs"
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",
