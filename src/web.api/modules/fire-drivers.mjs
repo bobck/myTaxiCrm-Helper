@@ -1,7 +1,7 @@
+
 import fs from 'fs'
-import { setTimeout } from 'timers/promises';
-import { pool } from './../api/pool.mjs'
-import { makeCRMRequest } from './web.api.utlites.mjs';
+import { pool } from "../../api/pool.mjs";
+import { makeCRMRequestlimited } from '../web.api.utlites.mjs';
 
 async function getAndFireDrivers() {
     console.log({ time: new Date(), message: 'getAndFireDrivers' })
@@ -12,20 +12,20 @@ async function getAndFireDrivers() {
     const { rows, rowCount } = result
     console.log({ rowCount })
 
+    let totalCount = 0;
     let errorsCount = 0
     let doneCount = 0
-    let lastError = ''
     for (let driver of rows) {
 
-        const { auto_park_id, id } = driver
-        await setTimeout(500);
+        const { auto_park_id: autoParkId, id: driverId } = driver
+        console.log({ autoParkId, driverId })
 
         const body = {
             operationName: "FireOutDriver",
             variables: {
                 fireOutDriverInput: {
-                    driverId: id,
-                    autoParkId: auto_park_id,
+                    driverId,
+                    // autoParkId,
                     status: "BACK_TO_MAIN_JOB",
                     eventTime: "2023-08-30T23:59:59.999Z",
                     comment: "Перенесення з гугл каси"
@@ -40,26 +40,27 @@ async function getAndFireDrivers() {
         }
 
         try {
-            const response = await makeCRMRequest({ body });
+            totalCount++
+            console.log({ totalCount })
+            const response = await makeCRMRequestlimited({ body });
 
             const { errors, data } = response
-            if (errors) {
-                lastError = errors
-                errorsCount++
-            }
+
             if (data) {
                 doneCount++
             }
+
             console.log({
-                lastError,
                 driverId,
                 autoParkId,
                 errorsCount,
                 doneCount,
                 total: `${errorsCount + doneCount}/${rowCount}`
             })
-        } catch (e) {
-            console.log({ text: 'skip cause error', auto_park_id, id })
+        } catch (errors) {
+            errorsCount++
+            console.log({ text: 'skip cause error', autoParkId, driverId })
+            console.error({ errors })
         }
 
     }

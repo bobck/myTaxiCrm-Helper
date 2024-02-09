@@ -27,7 +27,6 @@ export async function initApi({ pool }) {
             const { rows } = result
             return res.send(JSON.stringify(rows))
         } catch (err) {
-            console.error(err)
             res.statusCode = 404;
             return res.send(JSON.stringify(err))
         }

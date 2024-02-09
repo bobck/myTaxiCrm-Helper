@@ -12,13 +12,16 @@
     "updsidstatus": "ENV=TEST node -r dotenv/config src/remonline/modules/update-sids-status.mjs",
     "closeorder": "ENV=TEST node -r dotenv/config src/remonline/modules/move-order-to-close.mjs",
     "bqutils": "ENV=REWRITE_REPORT REPORT_DATE='2023-12-01' node -r dotenv/config  src/bq/bq-utils.mjs",
-    "firedrivers": "ENV=TEST node -r dotenv/config src/web.api/web.api.modules.mjs"
+    "firedrivers": "ENV=TEST node -r dotenv/config src/web.api/modules/fire-drivers.mjs",
+    "settariffcd": "ENV=TEST ISODATE='2024-02-06' DAYNAME='Wednesday' node -r dotenv/config src/web.api/modules/drivers-custom-tariff.mjs",
+    "settariff": "ENV=TEST node -r dotenv/config src/web.api/modules/drivers-custom-tariff.mjs"
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",
   "dependencies": {
     "@google-cloud/bigquery": "^7.3.0",
     "@googleapis/sheets": "^5.0.5",
+    "bottleneck": "^2.19.5",
     "cron": "^3.1.6",
     "db-migrate": "^0.11.14",
     "db-migrate-sqlite3": "^0.5.0",
