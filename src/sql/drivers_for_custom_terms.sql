@@ -36,10 +36,10 @@ FROM
     FROM
       drivers_editing_history deh
     WHERE
-      deh.diff - > 'inner_status' - >> 'new' = 'WORKING'
+      deh.diff -> 'inner_status' ->> 'new' = 'WORKING'
       AND (
-        deh.diff - > 'inner_status' - >> 'prev' = 'WITHOUT_STATUS'
-        OR deh.diff - > 'inner_status' - >> 'prev' = 'FIRED_OUT'
+        deh.diff -> 'inner_status' ->> 'prev' = 'WITHOUT_STATUS'
+        OR deh.diff -> 'inner_status' ->> 'prev' = 'FIRED_OUT'
       )
     ORDER BY
       deh.driver_id,

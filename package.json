@@ -14,7 +14,9 @@
     "bqutils": "ENV=REWRITE_REPORT REPORT_DATE='2023-12-01' node -r dotenv/config  src/bq/bq-utils.mjs",
     "firedrivers": "ENV=TEST node -r dotenv/config src/web.api/modules/fire-drivers.mjs",
     "settariffcd": "ENV=TEST ISODATE='2024-02-06' DAYNAME='Wednesday' node -r dotenv/config src/web.api/modules/drivers-custom-tariff.mjs",
-    "settariff": "ENV=TEST node -r dotenv/config src/web.api/modules/drivers-custom-tariff.mjs"
+    "settariff": "ENV=TEST node -r dotenv/config src/web.api/modules/drivers-custom-tariff.mjs",
+    "setbonuscd": "ENV=TEST ISODATE='2024-02-12' DAYNAME='Tuesday' node -r dotenv/config src/web.api/modules/drivers-custom-bonus.mjs",
+    "setbonus": "ENV=TEST node -r dotenv/config src/web.api/modules/drivers-custom-bonus.mjs"
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",

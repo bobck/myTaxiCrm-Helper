@@ -147,3 +147,57 @@ export async function getDiscountTariffsForAutoparksByDay({ dayOfWeek, companyId
 
     return { discountTariffsForAutoparks };
 }
+
+async function getOriginalBonuses({ companyId, autoParksIds }) {
+    const sql = fs.readFileSync('./src/sql/bonuses_to_be_discounted.sql').toString();
+
+    const result = await pool.query(sql, [companyId, autoParksIds])
+    const { rows, rowCount } = result
+    return { rows }
+}
+
+export async function getDiscountBonusesByAutoparksAndIntegrationsByDay({ dayOfWeek, companyId, autoParksIds }) {
+    const discount = discountByDay[dayOfWeek]
+    console.log({ dayOfWeek, discount })
+
+    let { rows } = await getOriginalBonuses({ companyId, autoParksIds });
+    const discountBonusesByAutoparksAndIntegrations = []
+    for (let bonuseRuleCard of rows) {
+        const createDriverBonusRulesInput = {}
+        const { auto_park_id, avg_check_rules, integration_ids, trips_rules } = bonuseRuleCard
+
+        createDriverBonusRulesInput.autoParkId = auto_park_id
+        createDriverBonusRulesInput.bonusRules = {}
+        createDriverBonusRulesInput.bonusRules.integrationIds = integration_ids
+
+        createDriverBonusRulesInput.bonusRules.avgCheckRules = []
+
+        for (let avg_check_rule of avg_check_rules) {
+            createDriverBonusRulesInput.bonusRules.avgCheckRules.push(avg_check_rule);
+        }
+
+        createDriverBonusRulesInput.bonusRules.tripsRules = []
+
+        let nextFrom = null;
+        for (let row of trips_rules) {
+
+            const rule = {}
+            if (nextFrom) {
+                rule.from = nextFrom
+                nextFrom = null;
+            }
+
+            if (row.to !== 1000000) {
+                rule.to = Math.round(row.to * discount)
+                nextFrom = rule.to + 1
+            }
+            rule.bonusValues = row.bonusValues
+
+            createDriverBonusRulesInput.bonusRules.tripsRules.push(rule)
+        }
+        discountBonusesByAutoparksAndIntegrations.push(createDriverBonusRulesInput)
+    }
+
+    return { discountBonusesByAutoparksAndIntegrations }
+}
+
