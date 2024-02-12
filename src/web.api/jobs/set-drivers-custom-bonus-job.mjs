@@ -10,6 +10,11 @@ const job = CronJob.from({
     cronTime,
     timeZone,
     onTick: async () => {
+
+        if (process.env.CUSTOM_TERMS == 'OFF') {
+            return
+        }
+
         try {
             await setDriversCustomBonus();
         } catch (error) {
