@@ -73,29 +73,29 @@ const discountByDay = {
     'Friday': 0.333
 }
 
-export async function getDriversForCustomTerms({ isoDate, companyId }) {
+export async function getDriversForCustomTerms({ isoDate, companyId, autoParksIds }) {
     console.log({ isoDate })
 
     const sql = fs.readFileSync('./src/sql/drivers_for_custom_terms.sql').toString();
 
-    const result = await pool.query(sql, [isoDate, companyId])
+    const result = await pool.query(sql, [isoDate, companyId, autoParksIds])
     const { rows, rowCount } = result
     return { driversForCustomTerms: rows }
 }
 
-async function getOriginalTariffs({ companyId }) {
+async function getOriginalTariffs({ companyId, autoParksIds }) {
     const sql = fs.readFileSync('./src/sql/tariffs_to_be_discounted.sql').toString();
 
-    const result = await pool.query(sql, [companyId])
+    const result = await pool.query(sql, [companyId, autoParksIds])
     const { rows, rowCount } = result
     return { rows }
 }
 
-export async function getDiscountTariffsForAutoparksByDay({ dayOfWeek, companyId }) {
+export async function getDiscountTariffsForAutoparksByDay({ dayOfWeek, companyId, autoParksIds }) {
     const discount = discountByDay[dayOfWeek]
     console.log({ dayOfWeek, discount })
 
-    let { rows } = await getOriginalTariffs({ companyId });
+    let { rows } = await getOriginalTariffs({ companyId, autoParksIds });
 
     const uniqueAutoParkIds = [];
 
