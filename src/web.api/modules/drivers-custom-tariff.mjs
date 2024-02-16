@@ -123,8 +123,11 @@ export async function deleteDriversCustomTariff() {
 
 }
 
-if (process.env.ENV == "TEST") {
+if (process.env.ENV == "SET") {
     setDriversCustomTariff();
-    // deleteDriversCustomTariff();
+}
+
+if (process.env.ENV == "DEL") {
+    deleteDriversCustomTariff();
 }
 

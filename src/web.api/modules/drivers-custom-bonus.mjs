@@ -126,7 +126,10 @@ export async function deleteDriversCustomBonus() {
 
 }
 
-if (process.env.ENV == "TEST") {
-    // setDriversCustomBonus();
+if (process.env.ENV == "SET") {
+    setDriversCustomBonus();
+}
+
+if (process.env.ENV == "DEL") {
     deleteDriversCustomBonus();
 }
