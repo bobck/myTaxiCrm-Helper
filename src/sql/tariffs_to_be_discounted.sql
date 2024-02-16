@@ -43,5 +43,5 @@ WHERE
   t.is_enabled = TRUE
   AND t.type = 'AUTO_PARK'
   AND ltct.last_created_at IS NOT NULL
-    AND t.auto_park_id = ANY($3)
+    AND t.auto_park_id = ANY($2)
   AND t.company_id = $1
