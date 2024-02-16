@@ -1,7 +1,7 @@
 WITH
   mileage_trip AS (
     SELECT
-      cr.mapon_id,
+      cr.car_id,
       cr.company_id,
       cr.auto_park_id,
       SUM(cr.mileage) AS mileage
@@ -11,7 +11,7 @@ WITH
       cr.trip_id IS NULL
       and (cr.period_to)::date = $1
     GROUP BY
-      cr.mapon_id,
+      cr.car_id,
       cr.company_id,
       cr.auto_park_id
   ),
@@ -38,7 +38,7 @@ WITH
       END AS wog_card,
       drc.total_income,
       drc.total_trips,
-      drc.mapon_mileage,
+      drc.mileage as mapon_mileage,
       mt.mileage AS mileage_no_trips,
       drc.event_types,
       CAST($1 AS DATE)::text AS DATE,
@@ -55,7 +55,7 @@ WITH
       AND c.auto_park_id = d.auto_park_id
       AND c.company_id = d.company_id
       LEFT JOIN driver_report_cards drc ON drc.driver_id = d.id
-      LEFT JOIN mileage_trip mt ON mt.mapon_id = c.mapon_id
+      LEFT JOIN mileage_trip mt ON mt.car_id = c.id
       AND c.company_id = mt.company_id
       AND c.auto_park_id = mt.auto_park_id
     WHERE
