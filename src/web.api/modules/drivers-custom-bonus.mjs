@@ -1,6 +1,6 @@
 import {
     getDiscountBonusesByAutoparksAndIntegrationsByDay,
-    getDriversForCustomTerms,
+    getDriversCandidatsForCustomTerms,
     makeCRMRequestlimited
 } from '../web.api.utlites.mjs'
 
@@ -45,9 +45,15 @@ export async function setDriversCustomBonus() {
 
     const { discountBonusesByAutoparksAndIntegrations } = await getDiscountBonusesByAutoparksAndIntegrationsByDay({ dayOfWeek, companyId, autoParksIds });
 
-    const { driversForCustomTerms } = await getDriversForCustomTerms({ isoDate, companyId, autoParksIds });
-    console.log({ driversForCustomTermsLength: driversForCustomTerms.length })
+    const { driversCandidatsForCustomTerms } = await getDriversCandidatsForCustomTerms({ isoDate, companyId, autoParksIds });
 
+    console.log({ driversCandidatsForCustomTerms: driversCandidatsForCustomTerms.length })
+    const driversForCustomTerms = driversCandidatsForCustomTerms.filter(driver => {
+        const { was_fider_days, custom_bonus_created_at, rent_event_id } = driver
+        return (was_fider_days >= 14 || !was_fider_days) && !custom_bonus_created_at && !rent_event_id
+    })
+    console.log({ driversForCustomTermsLength: driversForCustomTerms.length })
+    
     const discountBonusesByAutoparksAndIntegrationsWithDriver = []
 
     for (let driver of driversForCustomTerms) {
