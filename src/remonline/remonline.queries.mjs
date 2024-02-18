@@ -6,6 +6,8 @@ const db = await open({
     driver: sqlite3.Database
 })
 
+await db.exec('PRAGMA foreign_keys = ON;');
+
 export async function getLastSidCreatedAt() {
     const sql = `SELECT max(created_at) as created_at from sids`
     const lastSidCreatedAt = await db.get(sql)
@@ -66,4 +68,14 @@ export async function saveRemonlineToken({ token, validTo }) {//
 export async function getRemonlineToken({ now }) {
     const sql = `SELECT token FROM remonline_tokens WHERE valid_to > ? ORDER BY created_at DESC LIMIT 1 `
     return await db.get(sql, now)
+}
+
+export async function getCaboxesWithCrmMapping() {
+    const sql = `SELECT id,last_transaction_created_at,auto_park_id,auto_park_cashbox_id,auto_park_contator_id,custom_contator_id FROM remonline_cashboxes WHERE is_enabled = TRUE`
+    return await db.all(sql)
+}
+
+export async function updateLastCreatedTransactionTimeFoxRemonlineCashbox({ createdAt, remonlineCashboxId }) {
+    const sql = `UPDATE remonline_cashboxes SET last_transaction_created_at = ? WHERE id = ?`
+    return await db.all(sql, createdAt, remonlineCashboxId)
 }

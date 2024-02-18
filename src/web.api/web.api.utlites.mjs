@@ -50,20 +50,21 @@ async function makeCRMRequestWithRetry({ body }) {
 
             return json;
         } catch (error) {
-            console.error(`Attempt ${retryCount + 1} failed. Retrying in ${retryDelay}ms. Error: ${JSON.stringify(error)}`);
+            console.error(`Attempt ${retryCount + 1} failed. Retrying in ${retryDelay}ms.`);
 
             if (retryCount < (maxRetries - 1)) {
                 await setTimeout(retryDelay);
                 retryDelay *= 2;
             } else {
+                console.error({ error });
                 throw new Error('Max retries reached. Unable to complete the request.');
             }
         }
     }
 }
 
-export const makeCRMRequestlimited = globalLimiter.wrap(makeCRMRequest);
-// export const makeCRMRequestlimited = globalLimiter.wrap(makeCRMRequestWithRetry);
+// export const makeCRMRequestlimited = globalLimiter.wrap(makeCRMRequest);
+export const makeCRMRequestlimited = globalLimiter.wrap(makeCRMRequestWithRetry);
 
 
 const discountByDay = {
@@ -201,3 +202,25 @@ export async function getDiscountBonusesByAutoparksAndIntegrationsByDay({ dayOfW
     return { discountBonusesByAutoparksAndIntegrations }
 }
 
+export async function createCashlessPaymentApplication({ type, autoParkId, cashboxId, expenseType, sum, contractorId, payByDate, comment }) {
+
+    const body = {
+        operationName: "CreateCashlessPaymentApplication",
+        variables: {
+            createCashlessPaymentApplicationInput: {
+                type,
+                autoParkId,
+                cashboxId,
+                expenseType,
+                sum,
+                contractorId,
+                payByDate,
+                comment
+            }
+        },
+        query: "mutation CreateCashlessPaymentApplication($createCashlessPaymentApplicationInput: CreateCashlessPaymentApplicationInput!) {\n  createCashlessPaymentApplication(\n    createCashlessPaymentApplicationInput: $createCashlessPaymentApplicationInput\n  ) {\n    id\n    __typename\n  }\n}\n"
+    }
+    const { data } = await makeCRMRequestlimited({ body });
+    const { createCashlessPaymentApplication: cashlessPaymentApplication } = data
+    return { cashlessPaymentApplication }
+}
