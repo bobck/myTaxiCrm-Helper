@@ -13,10 +13,10 @@
     "closeorder": "ENV=TEST node -r dotenv/config src/remonline/modules/move-order-to-close.mjs",
     "bqutils": "ENV=REWRITE_REPORT REPORT_DATE='2023-12-01' node -r dotenv/config  src/bq/bq-utils.mjs",
     "firedrivers": "ENV=TEST node -r dotenv/config src/web.api/modules/fire-drivers.mjs",
-    "settariffcd": "ENV=SET ISODATE='2024-02-06' DAYNAME='Wednesday' node -r dotenv/config src/web.api/modules/drivers-custom-tariff.mjs",
+    "settariffcd": "ENV=SET ISODATE='2024-02-14' DAYNAME='Thursday' node -r dotenv/config src/web.api/modules/drivers-custom-tariff.mjs",
     "settariff": "ENV=SET node -r dotenv/config src/web.api/modules/drivers-custom-tariff.mjs",
     "deltariff": "ENV=DEL node -r dotenv/config src/web.api/modules/drivers-custom-tariff.mjs",
-    "setbonuscd": "ENV=SET ISODATE='2024-02-12' DAYNAME='Tuesday' node -r dotenv/config src/web.api/modules/drivers-custom-bonus.mjs",
+    "setbonuscd": "ENV=SET ISODATE='2024-02-13' DAYNAME='Tuesday' node -r dotenv/config src/web.api/modules/drivers-custom-bonus.mjs",
     "setbonus": "ENV=SET node -r dotenv/config src/web.api/modules/drivers-custom-bonus.mjs",
     "delbonus": "ENV=DEL node -r dotenv/config src/web.api/modules/drivers-custom-bonus.mjs"
   },

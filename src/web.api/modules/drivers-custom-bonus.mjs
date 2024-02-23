@@ -13,15 +13,11 @@ import {
 export async function setDriversCustomBonus() {
 
     const autoParksIds = [
-        '2d3e566e-01a2-486f-ac7f-446d13f96f27',
         'eef0dbe4-38f8-4299-95e2-25586bb02a38',
         '6897e6f0-b33d-405a-b110-8c623c864cfc',
         '45dcaa21-bceb-45f2-bba9-5c72bbac441f',
-        '03328f6b-1336-4ee3-8407-bf5520411136',
-        '4dd93df2-c172-488c-846f-d81452ddba70',
         '2f4c5352-0296-4fba-859b-9f8955f3f2a0',
         'ee12f8cd-570e-4eab-8ec8-1ead1c619bb7',
-        'd34e7c17-ccf3-49d1-875c-67e4378c4562',
         'ff2368ca-dce1-4315-af7b-9850056ab3ce'
     ]
 

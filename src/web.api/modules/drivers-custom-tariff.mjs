@@ -13,6 +13,10 @@ import {
 export async function setDriversCustomTariff() {
 
     const autoParksIds = [
+        'd34e7c17-ccf3-49d1-875c-67e4378c4562',//
+        '4dd93df2-c172-488c-846f-d81452ddba70',//
+        '03328f6b-1336-4ee3-8407-bf5520411136',//
+        '2d3e566e-01a2-486f-ac7f-446d13f96f27',//
         '2bfb0c23-33d8-4bc3-ab03-442d6ba13712',
         '2964e082-0e86-4695-b5f5-98915d190518',
         'c6dc6608-1cb3-488d-97f6-3f1132732bb9',
