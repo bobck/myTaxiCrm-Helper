@@ -1,7 +1,7 @@
 import { CronJob } from 'cron';
 import { deleteDriversCustomBonus } from '../modules/drivers-custom-bonus.mjs'
 
-const cronTime = '20 4 * * 1';
+const cronTime = '20 9 * * 1';
 
 const timeZone = 'Europe/Kiev';
 
