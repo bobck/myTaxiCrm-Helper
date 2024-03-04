@@ -2,7 +2,7 @@ import { CronJob } from 'cron';
 import { setDriversCustomTariff } from '../modules/drivers-custom-tariff.mjs'
 
 
-const cronTime = '0 23 * * 2-4';
+const cronTime = '0 23 * * 2-5';
 
 const timeZone = 'Europe/Kiev';
 
