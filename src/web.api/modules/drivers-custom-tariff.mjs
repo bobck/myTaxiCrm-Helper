@@ -56,8 +56,8 @@ export async function setDriversCustomTariff() {
 
     console.log({ driversCandidatsForCustomTerms: driversCandidatsForCustomTerms.length })
     const driversForCustomTerms = driversCandidatsForCustomTerms.filter(driver => {
-        const { was_fider_days, custom_tariff_enabled, rent_event_id } = driver
-        return (was_fider_days >= 14 || !was_fider_days) && (!custom_tariff_enabled || custom_tariff_enabled == null) && !rent_event_id
+        const { was_fired_days, custom_tariff_enabled, rent_event_id } = driver
+        return (was_fired_days >= 14 || !was_fired_days) && (!custom_tariff_enabled || custom_tariff_enabled == null) && !rent_event_id
     })
     console.log({ driversForCustomTermsLength: driversForCustomTerms.length })
 

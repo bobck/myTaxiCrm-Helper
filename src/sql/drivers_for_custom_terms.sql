@@ -27,11 +27,7 @@ SELECT
   d.created_at,
   deh.start_working_at,
   dl.fired_at,
-  EXTRACT(
-    days
-    FROM
-      AGE($1::timestamp, dl.fired_at)
-  ) AS was_fider_days,
+  DATE_PART('day', deh.start_working_at -  dl.fired_at) AS was_fired_days,
   t.is_enabled AS custom_tariff_enabled,
   dbr.created_at AS custom_bonus_created_at,
   rs.id AS rent_event_id

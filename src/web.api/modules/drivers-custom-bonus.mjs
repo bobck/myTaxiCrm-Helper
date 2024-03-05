@@ -45,8 +45,8 @@ export async function setDriversCustomBonus() {
 
     console.log({ driversCandidatsForCustomTerms: driversCandidatsForCustomTerms.length })
     const driversForCustomTerms = driversCandidatsForCustomTerms.filter(driver => {
-        const { was_fider_days, custom_bonus_created_at, rent_event_id } = driver
-        return (was_fider_days >= 14 || !was_fider_days) && !custom_bonus_created_at && !rent_event_id
+        const { was_fired_days, custom_bonus_created_at, rent_event_id } = driver
+        return (was_fired_days >= 14 || !was_fired_days) && !custom_bonus_created_at && !rent_event_id
     })
     console.log({ driversForCustomTermsLength: driversForCustomTerms.length })
     
