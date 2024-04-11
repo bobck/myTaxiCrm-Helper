@@ -1,6 +1,5 @@
 with online_data as (
 select
-	odi.id,
 	c."name" as company_name,
 	odi.auto_park_id,
 	ap."name" as auto_park_name,
