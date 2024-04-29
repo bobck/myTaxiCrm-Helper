@@ -19,10 +19,11 @@
     "setbonuscd": "ENV=SET ISODATE='2024-02-13' DAYNAME='Tuesday' node -r dotenv/config src/web.api/modules/drivers-custom-bonus.mjs",
     "setbonus": "ENV=SET node -r dotenv/config src/web.api/modules/drivers-custom-bonus.mjs",
     "delbonus": "ENV=DEL node -r dotenv/config src/web.api/modules/drivers-custom-bonus.mjs"
-  },
+    },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",
   "dependencies": {
+    "@2bad/bitrix": "^2.5.1",
     "@google-cloud/bigquery": "^7.3.0",
     "@googleapis/sheets": "^5.0.5",
     "bottleneck": "^2.19.5",

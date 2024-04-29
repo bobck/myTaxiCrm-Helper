@@ -7,6 +7,7 @@ import { remonlineTokenToEnv } from './src/remonline/remonline.api.mjs';
 import { bqJobs } from './src/bq/bootstrap.mjs';
 import { driversCustomTariffJobs } from './src/web.api/bootstrap.mjs';
 import { pool } from './src/api/pool.mjs';
+import { bitrixJobs } from './src/bitrix/bootstrap.mjs';
 
 await openSShTunel;
 
@@ -19,3 +20,4 @@ await remonlineTokenToEnv();
 remonlineJobs();
 
 driversCustomTariffJobs();
+bitrixJobs();
