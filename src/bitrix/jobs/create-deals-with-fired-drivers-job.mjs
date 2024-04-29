@@ -1,7 +1,7 @@
 import { CronJob } from 'cron';
 import { createDealsWithFiredDrivers } from '../modules/create-deals-with-fired-drivers.mjs';
 
-const cronTime = '*/2 * * * *';
+const cronTime = '*/15 * * * *';
 
 const timeZone = 'Europe/Kiev';
 
