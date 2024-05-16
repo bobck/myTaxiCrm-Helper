@@ -1,7 +1,8 @@
 import {
     getFreshFiredDrivers,
     cityListWithAssignedBy,
-    createDeal
+    createDeal,
+    findContactByPhone
 } from "../bitrix.utils.mjs";
 
 import { getLastUnixCreatedAt, saveLastUnixCreatedAt } from "../bitrix.queries.mjs";
@@ -41,10 +42,13 @@ export async function createDealsWithFiredDrivers() {
             status,
             comment,
             rides_count: ridesCount,
+            worked_days: workedDays,
             assignedBy,
             cityId,
             cityName,
             unix_created_at: unixCreatedAt } = driverToImport
+
+        const contactId = await findContactByPhone({ phone })
 
         const firedReason = `${status} - ${comment}`
         const title = `${name} - ${cityName} - ${ridesCount}`
@@ -56,7 +60,9 @@ export async function createDealsWithFiredDrivers() {
             name,
             phone,
             firedReason,
-            ridesCount
+            ridesCount,
+            workedDays,
+            contactId
         })
 
         await saveLastUnixCreatedAt({ unixCreatedAt, categoryId: process.env.FIRED_CATEGORY_ID })

@@ -12,7 +12,7 @@ export async function getFreshFiredDrivers({ unixCreatedAt }) {
     return { rows }
 }
 
-export async function createDeal({ title, name, phone, cityId, firedReason, ridesCount, assignedBy }) {
+export async function createDeal({ title, name, phone, cityId, firedReason, ridesCount, assignedBy, workedDays, contactId }) {
 
     const response = await bitrix.deals.create({
         TITLE: title,
@@ -24,7 +24,9 @@ export async function createDeal({ title, name, phone, cityId, firedReason, ride
         UF_CRM_1714048836815: firedReason,
         UF_CRM_1714048883273: ridesCount,
         ASSIGNED_BY_ID: assignedBy,
-        SOURCE_ID: process.env.FIRED_SOURCE_ID
+        SOURCE_ID: process.env.FIRED_SOURCE_ID,
+        UF_CRM_1714568766491: workedDays,
+        CONTACT_ID: contactId
     })
     const { result } = response
     return result
@@ -58,3 +60,19 @@ export const cityListWithAssignedBy = [
     { 'assignedBy': '106546', 'auto_park_id': '45dcaa21-bceb-45f2-bba9-5c72bbac441f', 'cityId': '1362', 'cityName': 'Мукачево' },
     { 'assignedBy': '106546', 'auto_park_id': '2a76a356-8b99-4650-83c0-d0ad84d2c004', 'cityId': '1362', 'cityName': 'Мукачево usa' }
 ]
+
+export async function findContactByPhone({ phone }) {
+    const response = await bitrix.call('crm.contact.list', {
+        filter: { 'PHONE': phone },
+        select: ['ID', 'NAME', 'PHONE']
+    });
+
+    const { result } = response
+
+    if (result.length > 0) {
+        const [firstContact] = result
+        return firstContact.ID;
+    } else {
+        return null;
+    }
+}

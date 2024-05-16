@@ -11,7 +11,8 @@ SELECT
 		FROM
 			dl.created_at
 		)* 1000
-	) AS unix_created_at
+	) AS unix_created_at,
+	dl.created_at::date - d.created_at::date AS worked_days
 FROM
 	drivers_logs dl
 LEFT JOIN drivers d ON
@@ -38,6 +39,7 @@ GROUP BY
 	d.phone,
 	dl.status,
 	dl."comment",
-	dl.created_at
+	dl.created_at,
+	d.created_at 
 ORDER BY
 	dl.created_at
