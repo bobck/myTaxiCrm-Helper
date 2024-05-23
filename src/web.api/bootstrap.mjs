@@ -14,6 +14,8 @@ import {
     deleteDriversCustomBonusJob
 } from './jobs/delete-drivers-custom-bonus-job.mjs'
 
+import { createCRMApplicationsFromRemonlineTransactionJob } from './jobs/create-applications-from-remonline-transactions.mjs'
+
 
 export function driversCustomTariffJobs() {
     try {
@@ -23,6 +25,9 @@ export function driversCustomTariffJobs() {
         setDriversCustomBonusJob.start();
         deleteDriversCustomBonusJob.start();
         console.log('driversCustomTariff And Bonus Jobs runs...')
+
+        createCRMApplicationsFromRemonlineTransactionJob.start();
+        console.log('createCRMApplicationsFromRemonlineTransaction Job runs...')
     } catch (error) {
         console.error('sync error, app down...')
         console.error({ time: new Date(), error });
@@ -32,6 +37,8 @@ export function driversCustomTariffJobs() {
 
         setDriversCustomBonusJob.stop();
         deleteDriversCustomBonusJob.stop();
+
+        createCRMApplicationsFromRemonlineTransactionJob.stop();
         driversCustomTariffJobs();
     }
 }

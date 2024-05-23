@@ -20,8 +20,9 @@ exports.up = function (db, callback) {
     last_transaction_created_at TIMESTAMP,
     auto_park_id TEXT NOT NULL,
     auto_park_cashbox_id TEXT NOT NULL,
-    auto_park_contator_id TEXT NOT NULL, 
-    custom_contator_id TEXT NOT NULL,
+    default_contator_id TEXT NOT NULL,
+    usa_contator_id TEXT,
+    scooter_contator_id TEXT,
     is_enabled BOOLEAN DEFAULT TRUE
     )`
   db.runSql(data, function (err) {

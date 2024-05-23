@@ -59,3 +59,12 @@ export async function saveCreatedCashlessApplicationId({ id, autoParkId, remonli
         id, autoParkId, remonlineTransactionId
     )
 }
+
+export async function  updateSavedCashlessApplicationId({ id, status }) {
+    const sql = `UPDATE cashless_payments_applications SET status=? WHERE id = ?`
+    await db.run(
+        sql,
+        status,
+        id
+    )
+}

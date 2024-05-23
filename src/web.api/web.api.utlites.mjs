@@ -50,6 +50,12 @@ async function makeCRMRequestWithRetry({ body }) {
 
             return json;
         } catch (error) {
+            const [firstError] = error
+            const { message } = firstError || {}
+            if (message == 'Cashbox balance after transaction become negative') {
+                throw new Error(message);
+            }
+
             console.error(`Attempt ${retryCount + 1} failed. Retrying in ${retryDelay}ms.`);
 
             if (retryCount < (maxRetries - 1)) {
@@ -202,7 +208,7 @@ export async function getDiscountBonusesByAutoparksAndIntegrationsByDay({ dayOfW
     return { discountBonusesByAutoparksAndIntegrations }
 }
 
-export async function createCashlessPaymentApplication({ type, autoParkId, cashboxId, expenseType, sum, contractorId, payByDate, comment }) {
+export async function createCashlessPaymentApplication({ type, autoParkId, cashboxId, expenseType, carId, sum, contractorId, payByDate, comment }) {
 
     const body = {
         operationName: "CreateCashlessPaymentApplication",
@@ -213,6 +219,7 @@ export async function createCashlessPaymentApplication({ type, autoParkId, cashb
                 cashboxId,
                 expenseType,
                 sum,
+                carId,
                 contractorId,
                 payByDate,
                 comment
@@ -223,4 +230,78 @@ export async function createCashlessPaymentApplication({ type, autoParkId, cashb
     const { data } = await makeCRMRequestlimited({ body });
     const { createCashlessPaymentApplication: cashlessPaymentApplication } = data
     return { cashlessPaymentApplication }
+}
+
+export async function editCashlessPaymentApplication({ applicationId, status }) {
+    const body = {
+        operationName: "EditCashlessPaymentApplication",
+        variables: {
+            editCashlessPaymentApplicationInput: {
+                applicationId,
+                status
+            }
+        },
+        query: "mutation EditCashlessPaymentApplication($editCashlessPaymentApplicationInput: EditCashlessPaymentApplicationInput!) {\n  editCashlessPaymentApplication(\n    editCashlessPaymentApplicationInput: $editCashlessPaymentApplicationInput\n  ) {\n    status\n    __typename\n  }\n}\n"
+    }
+    const { data } = await makeCRMRequestlimited({ body });
+    const { editCashlessPaymentApplication: cashlessPaymentApplication } = data
+    return { cashlessPaymentApplication }
+}
+
+export async function payApplication({ applicationId, autoParkId }) {
+    const body = {
+        operationName: "PayApplication",
+        variables: {
+            payApplicationInput: {
+                applicationId,
+                autoParkId
+            }
+        },
+        query: "mutation PayApplication($payApplicationInput: PayApplicationInput!) {\n  payApplication(payApplicationInput: $payApplicationInput) {\n    success\n    __typename\n  }\n}\n"
+    }
+    const { data } = await makeCRMRequestlimited({ body });
+    const { payApplication } = data
+    return { payApplication }
+}
+
+
+export const repairExpensesTypes = {
+    "0.1": "CALCULATED_STATEMENT_CORRECTION",
+    "2.1": "GASOLINE",
+    "2.13": "CAR_WASH",
+    "2.2": "GAS",
+    "2.21": "DIESEL_FUEL",
+    "2.4": "SPARE_PARTS_BY_URGENT_REPAIR",
+    "2.41": "SPARE_PARTS_BY_WAREHOUSE",
+    "2.5": "SPARE_PARTS_BY_ROAD_ACCIDENT",
+    "2.52": "REPAIR_WORK",
+    "2.532": "TIRE_BYING",
+    "2.54": "MAINTENANCE_STATION_SUPPLIES",
+    "2.55": "MAINTENANCE_STATION_EQUIPMENT",
+    "2.56": "MAINTENANCE_STATION_SERVICES",
+    "2.8": "TOP_UP_TELEPHONE_BALANCE",
+    "2.9": "PURCHASE_SUPPLIES",
+    "3.2": "SALARY_OR_ADVANCE_OFFICE",
+    "3.209": "SALARY_OR_ADVANCE_OFFICE_CENTRAL",
+    "3.5": "TRAVEL_COSTS_OFFICE",
+    "3.6": "HOSPITALITY",
+    "3.91": "KPI_BONUSES",
+    "3.919": "WORK_BONUS_OFFICE_CENTRAL",
+    "3.92": "WORK_BONUS_OFFICE",
+    "4.1": "ROOM_RENTAL",
+    "4.2": "UTILITY_BILLS",
+    "4.21": "UTILITY_BILLS_METERS",
+    "4.3": "STATIONARY",
+    "4.4": "HOUSEHOLD_GOODS",
+    "4.41": "DOCUMENT_FLOW",
+    "4.42": "DELIVERY",
+    "4.5": "CATERING_OFFICE",
+    "4.6": "OFFICE_TRANSPORTATION",
+    "4.7": "ADVERTISING",
+    "4.8": "REPAIR_OFFICE",
+    "4.809": "REPAIR_OFFICE_CENTRAL",
+    "4.9": "EQUIPMENT_OFFICE",
+    "5.3": "BANK_COMMISSION",
+    "5.4": "SIDE_CAR_RENTAL",
+    "8.1": "TAXES"
 }

@@ -71,7 +71,7 @@ export async function getRemonlineToken({ now }) {
 }
 
 export async function getCaboxesWithCrmMapping() {
-    const sql = `SELECT id,last_transaction_created_at,auto_park_id,auto_park_cashbox_id,auto_park_contator_id,custom_contator_id FROM remonline_cashboxes WHERE is_enabled = TRUE`
+    const sql = `SELECT id,last_transaction_created_at,auto_park_id,auto_park_cashbox_id,default_contator_id,usa_contator_id,scooter_contator_id FROM remonline_cashboxes WHERE is_enabled = TRUE`
     return await db.all(sql)
 }
 
