@@ -51,3 +51,20 @@ export async function markDriverCustomBonusRulesAsDeleted({ bonusRuleId }) {
         bonusRuleId
     )
 }
+
+export async function saveCreatedCashlessApplicationId({ id, autoParkId, remonlineTransactionId }) {
+    const sql = `INSERT INTO cashless_payments_applications(id, auto_park_id,remonline_transaction_id) VALUES(?,?,?)`
+    await db.run(
+        sql,
+        id, autoParkId, remonlineTransactionId
+    )
+}
+
+export async function  updateSavedCashlessApplicationId({ id, status }) {
+    const sql = `UPDATE cashless_payments_applications SET status=? WHERE id = ?`
+    await db.run(
+        sql,
+        status,
+        id
+    )
+}

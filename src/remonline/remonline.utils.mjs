@@ -124,3 +124,52 @@ export async function changeOrderStatus({
     const { data: changeOrderStatusData } = data
     return { changeOrderStatusData };
 }
+
+export async function getCashboxTransactions(
+    { createdAt, cashboxId },
+    _page = 1,
+    _transactions = []
+) {
+    let createdAtUrl = ''
+    if (createdAt) {
+        createdAtUrl += `&created_at[]=${createdAt}`
+    }
+
+    const response = await fetch(`${process.env.REMONLINE_API}/cashbox/report/${cashboxId}?token=${process.env.REMONLINE_API_TOKEN}&page=${_page}${createdAtUrl}&sort_dir=asc`);
+
+    if (response.status == 414) {
+        throw await response.text()
+    }
+
+    const data = await response.json();
+    const { success } = data
+    if (!success) {
+        const { message, code } = data
+        const { validation } = message
+
+        if (response.status == 403 && code == 101) {
+            console.info({ function: 'getCashboxTransactions', message: 'Get new Auth' })
+            await remonlineTokenToEnv(true);
+            return await getCashboxTransactions({ createdAt, cashboxId }, _page, _transactions);
+        }
+
+        console.error({ function: 'getCashboxTransactions', message, validation, status: response.status })
+        return
+    }
+
+    const { data: transactions, count, page } = data
+
+    const doneOnPrevPage = (page - 1) * 50;
+
+    const leftTofinish = (count - doneOnPrevPage) - transactions.length;
+
+    _transactions.push(...transactions);
+
+    console.log({ count, page, doneOnPrevPage, leftTofinish })
+
+    if (leftTofinish > 0) {
+        return await getCashboxTransactions({ createdAt, cashboxId }, parseInt(page) + 1, _transactions);
+    }
+
+    return { transactions: _transactions }
+}
