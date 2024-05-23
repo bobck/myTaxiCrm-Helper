@@ -80,14 +80,14 @@ const discountByDay = {
     'Friday': 0.333
 }
 
-export async function getDriversForCustomTerms({ isoDate, companyId, autoParksIds }) {
+export async function getDriversCandidatsForCustomTerms({ isoDate, companyId, autoParksIds }) {
     console.log({ isoDate })
 
     const sql = fs.readFileSync('./src/sql/drivers_for_custom_terms.sql').toString();
 
     const result = await pool.query(sql, [isoDate, companyId, autoParksIds])
     const { rows, rowCount } = result
-    return { driversForCustomTerms: rows }
+    return { driversCandidatsForCustomTerms: rows }
 }
 
 async function getOriginalTariffs({ companyId, autoParksIds }) {
@@ -119,7 +119,7 @@ export async function getDiscountTariffsForAutoparksByDay({ dayOfWeek, companyId
     for (let autoParkId of uniqueAutoParkIds) {
         discountTariffsForAutoparks[autoParkId] = {}
 
-        const autoparkRows = rows.filter(r => r.auto_park_id == autoParkId)
+        const autoparkRows = rows.filter(r => r.auto_park_id == autoParkId).reverse();
         const [firstRow] = autoparkRows
         const { name, tax_percent, tax_type, target_marker, accounting } = firstRow
 
@@ -131,25 +131,28 @@ export async function getDiscountTariffsForAutoparksByDay({ dayOfWeek, companyId
 
         discountTariffsForAutoparks[autoParkId].tariffRules = []
 
-        let nextFrom = null;
+        let prevTo = null;
         for (let row of autoparkRows) {
 
             const rule = {}
-            if (nextFrom) {
-                rule.from = nextFrom
-                nextFrom = null;
+
+            if (row.from != 0) {
+                rule.from = Math.round(row.from * discount)
             }
 
-            if (row.to !== 1000000) {
-                rule.to = Math.round(row.to * discount)
-                nextFrom = rule.to + 1
+            if (prevTo) {
+                rule.to = prevTo
+                prevTo = null;
             }
+
+            prevTo = rule.from - 1
+
             rule.rate = row.rate
             rule.isRateInPercent = true;
 
-            discountTariffsForAutoparks[autoParkId].tariffRules.push(rule)
+            discountTariffsForAutoparks[autoParkId].tariffRules.unshift(rule)
         }
-        nextFrom = null;
+        prevTo = null;
     }
 
     return { discountTariffsForAutoparks };
@@ -185,23 +188,28 @@ export async function getDiscountBonusesByAutoparksAndIntegrationsByDay({ dayOfW
 
         createDriverBonusRulesInput.bonusRules.tripsRules = []
 
-        let nextFrom = null;
-        for (let row of trips_rules) {
+        let prevTo = null;
+        for (let row of trips_rules.reverse()) {
 
             const rule = {}
-            if (nextFrom) {
-                rule.from = nextFrom
-                nextFrom = null;
+
+            if (row.from != 0) {
+                rule.from = Math.round(row.from * discount)
             }
 
-            if (row.to !== 1000000) {
-                rule.to = Math.round(row.to * discount)
-                nextFrom = rule.to + 1
+            if (prevTo) {
+                rule.to = prevTo
+                prevTo = null;
             }
+
+            prevTo = rule.from - 1
+
             rule.bonusValues = row.bonusValues
 
-            createDriverBonusRulesInput.bonusRules.tripsRules.push(rule)
+            createDriverBonusRulesInput.bonusRules.tripsRules.unshift(rule)
         }
+
+
         discountBonusesByAutoparksAndIntegrations.push(createDriverBonusRulesInput)
     }
 

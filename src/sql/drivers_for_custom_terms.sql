@@ -1,3 +1,23 @@
+WITH
+  rent_shcedule AS (
+    SELECT
+      id,
+      event_period_start,
+      event_period_end,
+      (
+        jsonb_array_elements (rental_settings -> 'mapping') ->> 'driverId'
+      ):: UUID AS rent_driver_id
+    FROM
+      schedule s
+    WHERE
+      is_latest_version
+      AND NOT is_deleted
+      AND event_type = 'RENTAL'
+      AND (
+        TO_TIMESTAMP ($1 || ' 23:59', 'YYYY-MM-DD HH24:MI') BETWEEN event_period_start AND event_period_end
+      )
+      AND event_period_end != TO_TIMESTAMP ($1 || ' 23:59', 'YYYY-MM-DD HH24:MI')
+  )
 SELECT
   d.id,
   d.company_id,
@@ -7,12 +27,10 @@ SELECT
   d.created_at,
   deh.start_working_at,
   dl.fired_at,
-  EXTRACT(
-    days
-    FROM
-      AGE (CURRENT_TIMESTAMP, dl.fired_at)
-  ) AS was_fider_days,
-  t.is_enabled
+  DATE_PART('day', deh.start_working_at -  dl.fired_at) AS was_fired_days,
+  t.is_enabled AS custom_tariff_enabled,
+  dbr.created_at AS custom_bonus_created_at,
+  rs.id AS rent_event_id
 FROM
   drivers d
   LEFT JOIN (
@@ -67,21 +85,15 @@ FROM
     WHERE
       dbr.driver_id IS NOT NULL
   ) dbr ON dbr.driver_id = d.id
+  LEFT JOIN (
+    SELECT
+      id,
+      rent_driver_id
+    FROM
+      rent_shcedule
+  ) rs ON rs.rent_driver_id = d.id
 WHERE
   d.inner_status = 'WORKING'
-  AND (
-    t.is_enabled = 'false'
-    OR t.is_enabled IS NULL
-  )
-  AND dbr.created_at IS NULL
-  AND (
-    dl.fired_at IS NULL
-    OR EXTRACT(
-      days
-      FROM
-        AGE (CURRENT_TIMESTAMP, dl.fired_at)
-    ) >= 14
-  )
   AND deh.start_working_at BETWEEN TO_TIMESTAMP ($1 || ' 00:00', 'YYYY-MM-DD HH24:MI')
   AND TO_TIMESTAMP ($1 || ' 23:59', 'YYYY-MM-DD HH24:MI')
   AND d.auto_park_id = ANY($3)
