@@ -19,7 +19,7 @@
     "setbonuscd": "ENV=SET ISODATE='2024-02-13' DAYNAME='Tuesday' node -r dotenv/config src/web.api/modules/drivers-custom-bonus.mjs",
     "setbonus": "ENV=SET node -r dotenv/config src/web.api/modules/drivers-custom-bonus.mjs",
     "delbonus": "ENV=DEL node -r dotenv/config src/web.api/modules/drivers-custom-bonus.mjs",
-    "t": "ENV=TEST node -r dotenv/config src/web.api/modules/create-crm-applications-from-remonline-transactions.mjs"
+    "forcesavecontractors": "ENV=TEST node -r dotenv/config src/web.api/modules/save-contractors-list.mjs"
     },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",

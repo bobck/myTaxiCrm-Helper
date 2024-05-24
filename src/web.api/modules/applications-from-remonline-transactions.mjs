@@ -12,7 +12,8 @@ import {
 
 import {
     saveCreatedCashlessApplicationId,
-    updateSavedCashlessApplicationId
+    updateSavedCashlessApplicationId,
+    getContractorIdByName
 } from "../web.api.queries.mjs";
 
 
@@ -48,10 +49,10 @@ export async function createCRMApplicationsFromRemonlineTransaction() {
 
             const expenseType = repairExpensesTypes[expenseCode] || process.env.DEFAULT_EXPENSE_TYPE
 
-            let contractorId = default_contator_id;
+            let contractorId = null;
 
             if (contatorFullCode) {
-                const contatorCode = contatorFullCode.split('.')[1]
+                const contatorCode = contatorFullCode.split('.')[1]?.trim();
                 if (contatorCode == '02' && usa_contator_id) {
                     contractorId = usa_contator_id
                 }
@@ -59,6 +60,16 @@ export async function createCRMApplicationsFromRemonlineTransaction() {
                 if (contatorCode == '03' && scooter_contator_id) {
                     contractorId = scooter_contator_id
                 }
+
+                if (!contractorId) {
+                    const { id: _contractorId } = await getContractorIdByName(contatorFullCode) || {};
+                    contractorId = _contractorId;
+                }
+
+            }
+
+            if (!contractorId) {
+                contractorId = default_contator_id;
             }
 
             let type = 'BUSINESS_REVENUE_AUTO_PARK'

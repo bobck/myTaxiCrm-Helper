@@ -26,7 +26,7 @@ Getting Started:
 `insert into autoparks_chat(chat_id,chat_title,autopark_id) values(<chat_id>,"<chat_title>","<my_taxi_crm_autopark_id>");`
 
 5.1 Add remonline cashbox id to parse it
-`insert into remonline_cashboxes(id,auto_park_id,auto_park_cashbox_id,auto_park_contator_id,custom_contator_id) values('192582','4dd93df2-c172-488c-846f-d81452ddba70','c45f39a1-ed93-4851-8776-0aeb7da552dd','40792397-1719-4a3c-add4-cf3dab28c31c','88a353ea-a342-4d24-b046-6671fa27e588');`
+`INSERT INTO remonline_cashboxes(id, last_transaction_created_at,auto_park_id,auto_park_cashbox_id,default_contator_id) VALUES('270856','1716444000000','499e334b-8916-42ab-b41a-0f0b979d6f69','3cc1b081-aeb2-4d48-be69-15ed256577d6','51ed3eff-ad7d-49e4-b0f0-806f99d9870f')`
 
 
 6. Install PM2 

@@ -60,11 +60,30 @@ export async function saveCreatedCashlessApplicationId({ id, autoParkId, remonli
     )
 }
 
-export async function  updateSavedCashlessApplicationId({ id, status }) {
+export async function updateSavedCashlessApplicationId({ id, status }) {
     const sql = `UPDATE cashless_payments_applications SET status=? WHERE id = ?`
     await db.run(
         sql,
         status,
         id
     )
+}
+
+export async function insertContractors(contractorsList) {
+    await db.exec('DELETE FROM contractors');
+    await db.exec('BEGIN TRANSACTION');
+    try {
+        for (const contractor of contractorsList) {
+            await db.run('INSERT INTO contractors (id,name) VALUES (?,?)', contractor.id, contractor.name);
+        }
+        await db.exec('COMMIT');
+    } catch (error) {
+        await db.exec('ROLLBACK');
+        console.error('Ошибка при вставке данных:', error);
+    }
+}
+
+export async function getContractorIdByName(contractorName) {
+    const sql = `SELECT id FROM contractors WHERE name = ?`
+    return await db.get(sql, contractorName)
 }

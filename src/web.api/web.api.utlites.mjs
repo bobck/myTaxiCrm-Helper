@@ -313,3 +313,12 @@ export const repairExpensesTypes = {
     "5.4": "SIDE_CAR_RENTAL",
     "8.1": "TAXES"
 }
+
+export async function getContractorsList() {
+
+    const sql = fs.readFileSync('./src/sql/get_contractors_list.sql').toString();
+
+    const result = await pool.query(sql);
+    const { rows, rowCount } = result
+    return { contractorsList: rows }
+}
