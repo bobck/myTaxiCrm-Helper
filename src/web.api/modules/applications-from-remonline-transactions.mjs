@@ -18,8 +18,6 @@ import {
 
 
 export async function createCRMApplicationsFromRemonlineTransaction() {
-    process.env.runs_createCRMApplicationsFromRemonlineTransaction = 'TRUE';
-
     const cashboxes = await getCaboxesWithCrmMapping();
 
     for (let cashbox of cashboxes) {
@@ -52,7 +50,7 @@ export async function createCRMApplicationsFromRemonlineTransaction() {
             let contractorId = null;
 
             if (contatorFullCode) {
-                const contatorCode = contatorFullCode.split('.')[1]?.trim();
+                const contatorCode = contatorFullCode.split('.')[1];
                 if (contatorCode == '02' && usa_contator_id) {
                     contractorId = usa_contator_id
                 }
@@ -62,7 +60,7 @@ export async function createCRMApplicationsFromRemonlineTransaction() {
                 }
 
                 if (!contractorId) {
-                    const { id: _contractorId } = await getContractorIdByName(contatorFullCode) || {};
+                    const { id: _contractorId } = await getContractorIdByName(contatorFullCode.trim()) || {};
                     contractorId = _contractorId;
                 }
 
@@ -121,9 +119,6 @@ export async function createCRMApplicationsFromRemonlineTransaction() {
         }
 
     }
-
-    process.env.runs_createCRMApplicationsFromRemonlineTransaction = false;
-
 }
 
 
