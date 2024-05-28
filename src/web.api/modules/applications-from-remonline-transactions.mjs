@@ -43,6 +43,12 @@ export async function createCRMApplicationsFromRemonlineTransaction() {
 
             const { id: transactionId, value, direction, description, created_at } = transaction
 
+            const toBeSkipped = /^\*\*\*/.test(description.replaceAll(' ',''));
+
+            if (toBeSkipped) {
+                continue
+            }
+
             const [expenseCode, contatorFullCode, carCode, sid] = description.split(';');
 
             const expenseType = repairExpensesTypes[expenseCode] || process.env.DEFAULT_EXPENSE_TYPE
