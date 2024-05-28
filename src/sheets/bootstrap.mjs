@@ -12,5 +12,3 @@ export function sheetJobs() {
         sheetJobs();
     }
 }
-
-// telegranJobs();

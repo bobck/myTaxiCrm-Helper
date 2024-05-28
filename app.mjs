@@ -12,8 +12,8 @@ import { bitrixJobs } from './src/bitrix/bootstrap.mjs';
 await openSShTunel;
 
 await initApi({ pool });
-telegramJobs();
-sheetJobs();
+// telegramJobs();
+// sheetJobs();
 // bqJobs();
 
 await remonlineTokenToEnv();
