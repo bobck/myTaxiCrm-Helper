@@ -46,12 +46,18 @@ export async function createDealsWithFiredDrivers() {
             assignedBy,
             cityId,
             cityName,
-            unix_created_at: unixCreatedAt } = driverToImport
+            unix_created_at: unixCreatedAt,
+            rides_count_current_week = 0,
+            rides_count_prev_week = 0,
+            rides_count_two_weeks_ago = 0,
+            rides_count_three_weeks_ago = 0
+        } = driverToImport
 
         const contactId = await findContactByPhone({ phone })
 
         const firedReason = `${status} - ${comment}`
         const title = `${name} - ${cityName} - ${ridesCount}`
+        const ridesCountWithPastWeeks = `${rides_count_three_weeks_ago}-${rides_count_two_weeks_ago}-${rides_count_prev_week}-${rides_count_current_week} (${ridesCount})`
 
         await createDeal({
             cityId,
@@ -60,7 +66,7 @@ export async function createDealsWithFiredDrivers() {
             name,
             phone,
             firedReason,
-            ridesCount,
+            ridesCount: ridesCountWithPastWeeks,
             workedDays,
             contactId
         })
