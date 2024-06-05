@@ -1,6 +1,6 @@
 import { CronJob } from 'cron';
 import { saveContractorsList } from '../modules/save-contractors-list.mjs';
-const cronTime = '0 */6 * * *';
+const cronTime = '0 */1 * * *';
 
 const timeZone = 'Europe/Kiev';
 

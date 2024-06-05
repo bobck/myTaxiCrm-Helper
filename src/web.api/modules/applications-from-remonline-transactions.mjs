@@ -18,6 +18,8 @@ import {
 
 
 export async function createCRMApplicationsFromRemonlineTransaction() {
+    console.log({ message: 'createCRMApplicationsFromRemonlineTransaction'})
+
     const cashboxes = await getCaboxesWithCrmMapping();
 
     for (let cashbox of cashboxes) {
@@ -32,8 +34,6 @@ export async function createCRMApplicationsFromRemonlineTransaction() {
             scooter_contator_id
         } = cashbox
 
-        console.log({ message: 'createCRMApplicationsFromRemonlineTransaction', remonlineCashboxId, last_transaction_created_at, cashboxId })
-
         const { transactions } = await getCashboxTransactions(
             {
                 cashboxId: remonlineCashboxId,
@@ -43,7 +43,7 @@ export async function createCRMApplicationsFromRemonlineTransaction() {
 
             const { id: transactionId, value, direction, description, created_at } = transaction
 
-            const toBeSkipped = /^\*\*\*/.test(description.replaceAll(' ',''));
+            const toBeSkipped = /^\*\*\*/.test(description.replaceAll(' ', ''));
 
             if (toBeSkipped) {
                 continue
