@@ -52,13 +52,13 @@ FROM
       deh.auto_park_id,
       deh.created_at AS start_working_at
     FROM
-      drivers_editing_history deh
+      drivers_editing_history deh,
+		  jsonb_array_elements(diff) AS elem
     WHERE
-      deh.diff -> 'inner_status' ->> 'new' = 'WORKING'
-      AND (
-        deh.diff -> 'inner_status' ->> 'prev' = 'WITHOUT_STATUS'
-        OR deh.diff -> 'inner_status' ->> 'prev' = 'FIRED_OUT'
-      )
+      elem -> 'fieldName' ->> 'value' = 'inner_status' 
+      AND  elem -> 'new' ->> 'value' = 'WORKING' 
+      AND ( elem -> 'prev' ->> 'value' = 'WITHOUT_STATUS' OR  elem -> 'prev' ->> 'value' = 'FIRED_OUT' )
+      AND jsonb_typeof(diff) = 'array'
     ORDER BY
       deh.driver_id,
       deh.created_at DESC
