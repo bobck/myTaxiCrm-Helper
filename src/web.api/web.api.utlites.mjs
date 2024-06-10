@@ -312,7 +312,8 @@ export const repairExpensesTypes = {
     "5.3": "BANK_COMMISSION",
     "5.4": "SIDE_CAR_RENTAL",
     "8.1": "TAXES",
-    "3.3.1": "DRIVER_MOTIVATION_PROGRAM"
+    "3.3.1": "DRIVER_MOTIVATION_PROGRAM",
+    "5.1": "ENCASHMENT"
 }
 
 export async function getContractorsList() {
