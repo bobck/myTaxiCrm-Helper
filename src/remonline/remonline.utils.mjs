@@ -165,7 +165,7 @@ export async function getCashboxTransactions(
 
     _transactions.push(...transactions);
 
-    console.log({ count, page, doneOnPrevPage, leftTofinish })
+    // console.log({ count, page, doneOnPrevPage, leftTofinish })
 
     if (leftTofinish > 0) {
         return await getCashboxTransactions({ createdAt, cashboxId }, parseInt(page) + 1, _transactions);
