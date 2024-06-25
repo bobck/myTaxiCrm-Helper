@@ -87,3 +87,38 @@ export async function getContractorIdByName(contractorName) {
     const sql = `SELECT id FROM contractors WHERE name = ?`
     return await db.get(sql, contractorName)
 }
+
+export async function insertDriversWithRevenue(driversWithRevenue) {
+    await db.exec('BEGIN TRANSACTION');
+    try {
+        for (const driver of driversWithRevenue) {
+            const { company_id, auto_park_id, driver_id, phone, auto_park_revenue, rides_count } = driver
+            await db.run('INSERT INTO drivers_revenue (company_id,auto_park_id,driver_id,phone,auto_park_revenue,rides_count) VALUES (?,?,?,?,?,?)', company_id, auto_park_id, driver_id, phone, auto_park_revenue, rides_count);
+        }
+        await db.exec('COMMIT');
+    } catch (error) {
+        await db.exec('ROLLBACK');
+        console.error('Ошибка при вставке данных:', error);
+    }
+}
+
+export async function getExistedDriversWithRevenue(driverIds) {
+    const placeholders = driverIds.map(() => '?').join(',');
+    const sql = `SELECT driver_id,auto_park_revenue,rides_count FROM drivers_revenue WHERE driver_id IN (${placeholders})`;
+    const existedDriversWithRevenue = await db.all(sql, driverIds)
+    return { existedDriversWithRevenue }
+}
+
+export async function updateExistedDriversWithRevenue(updatedExistedDriversWithRevenue) {
+    await db.exec('BEGIN TRANSACTION');
+    try {
+        for (const driver of updatedExistedDriversWithRevenue) {
+            const { driver_id, auto_park_revenue, rides_count } = driver
+            await db.run('UPDATE drivers_revenue SET auto_park_revenue = ?, rides_count = ?, updated_at = CURRENT_TIMESTAMP WHERE driver_id = ?', auto_park_revenue, rides_count, driver_id);
+        }
+        await db.exec('COMMIT');
+    } catch (error) {
+        await db.exec('ROLLBACK');
+        console.error('Ошибка при вставке данных:', error);
+    }
+}

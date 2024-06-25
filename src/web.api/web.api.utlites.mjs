@@ -324,3 +324,10 @@ export async function getContractorsList() {
     const { rows, rowCount } = result
     return { contractorsList: rows }
 }
+
+export async function getCompanyDriversAutoparkRevenue({ autoParksIds, fromYear, fromWeek }) {
+    const sql = fs.readFileSync('./src/sql/company_drivers_auto_park_revenue.sql').toString();
+    const result = await pool.query(sql, [autoParksIds, fromYear, fromWeek])
+    const { rows, rowCount } = result
+    return { rows }
+}

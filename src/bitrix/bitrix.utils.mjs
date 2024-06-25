@@ -1,4 +1,4 @@
-import { Bitrix } from '@2bad/bitrix'
+import { Bitrix, Method } from '@2bad/bitrix'
 import fs from 'fs'
 import { pool } from './../api/pool.mjs'
 
@@ -75,4 +75,68 @@ export async function findContactByPhone({ phone }) {
     } else {
         return null;
     }
+}
+
+export async function findContactsByPhones({ drivers }) {
+
+    let batchArray = []
+
+    for (let driver of drivers) {
+        const params = {
+            'entity_type': 'CONTACT',
+            'type': 'PHONE',
+            'values[]': driver.phone
+        }
+        batchArray.push({ method: 'crm.duplicate.findbycomm', params })
+    }
+    const { result, time } = await bitrix.batch(batchArray)
+
+    return result
+}
+
+export async function findDealByContact({ drivers, category_id }) {
+
+    let batchObj = {}
+
+    for (let driver of drivers) {
+        const contacts = JSON.parse(driver.contacts_array);
+        for (let contact of contacts) {
+            const params = {
+                'filter[CATEGORY_ID]': category_id,
+                'filter[CONTACT_ID]': contact,
+                'select[]': 'ID',
+                'order[DATE_CREATE]': 'ASC'
+            }
+            batchObj[contact] = { method: Method.CRM_DEAL_LIST, params }
+        }
+    }
+
+    const { result, time } = await bitrix.batch(batchObj)
+
+    return result
+}
+
+export async function updateDealsOpportunity({ drivers }) {
+
+    let batchObj = {}
+
+    for (let driver of drivers) {
+        const { deal_id, auto_park_revenue } = driver
+        const params = {
+            'ID': deal_id,
+            'fields[OPPORTUNITY]': auto_park_revenue
+        }
+        batchObj[deal_id] = { method: Method.CRM_DEAL_UPDATE, params }
+    }
+
+    const { result, time } = await bitrix.batch(batchObj)
+    return result
+}
+
+export function chunkArray(array, chunkSize) {
+    const result = [];
+    for (let i = 0; i < array.length; i += chunkSize) {
+        result.push(array.slice(i, i + chunkSize));
+    }
+    return result;
 }

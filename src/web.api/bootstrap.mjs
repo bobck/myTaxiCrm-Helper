@@ -18,6 +18,8 @@ import { saveContractorsListJob } from './jobs/save-and-update-contractors.mjs'
 
 import { createCRMApplicationsFromRemonlineTransactionJob } from './jobs/create-applications-from-remonline-transactions.mjs'
 
+import { addNewDriversAutoparkRevenueJob } from './jobs/add-drivers-with-revenue-job.mjs'
+import { updateDriversWithRevenueJob } from './jobs/update-drivers-with-revenue-job.mjs'
 
 export function driversCustomTariffJobs() {
     try {
@@ -30,6 +32,9 @@ export function driversCustomTariffJobs() {
         saveContractorsListJob.start();
         createCRMApplicationsFromRemonlineTransactionJob.start();
         console.log('createCRMApplicationsFromRemonlineTransaction Job runs...')
+        updateDriversWithRevenueJob.start();
+        addNewDriversAutoparkRevenueJob.start();
+        console.log('add and update DriversWithRevenue Job runs...')
     } catch (error) {
         console.error('sync error, app down...')
         console.error({ time: new Date(), error });
@@ -43,6 +48,9 @@ export function driversCustomTariffJobs() {
         saveContractorsListJob.stop();
 
         createCRMApplicationsFromRemonlineTransactionJob.stop();
+
+        updateDriversWithRevenueJob.stop();
+        addNewDriversAutoparkRevenueJob.stop();
         driversCustomTariffJobs();
     }
 }

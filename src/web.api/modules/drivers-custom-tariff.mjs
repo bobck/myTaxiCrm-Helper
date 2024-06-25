@@ -105,7 +105,7 @@ export async function deleteDriversCustomTariff() {
     const { undeletedDriversCustomTariffIds } = await getUndeletedDriversCustomTariffIds();
 
     for (let deleteDriverCustomTariffInput of undeletedDriversCustomTariffIds) {
-        console.log({ deleteDriverCustomTariffInput })
+        // console.log({ deleteDriverCustomTariffInput })
         const { tariff_id: tariffId, driver_id: driverId } = deleteDriverCustomTariffInput
 
         const body = {
@@ -119,7 +119,7 @@ export async function deleteDriversCustomTariff() {
         try {
             const response = await makeCRMRequestlimited({ body });
             const { data } = response
-            console.log({ data })
+            // console.log({ data })
             await markDriverCustomTariffAsDeleted({ tariffId });
 
         } catch (errors) {

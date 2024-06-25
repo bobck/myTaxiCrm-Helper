@@ -101,7 +101,7 @@ export async function deleteDriversCustomBonus() {
     const { undeletedDriversCustomBonuses } = await getUndeletedDriversCustomBonuses();
 
     for (let deleteDriverBonusRulesInput of undeletedDriversCustomBonuses) {
-        console.log({ deleteDriverBonusRulesInput })
+        // console.log({ deleteDriverBonusRulesInput })
         const { auto_park_id: autoParkId, bonus_rule_id: bonusRuleId } = deleteDriverBonusRulesInput
 
         const body = {
@@ -115,7 +115,7 @@ export async function deleteDriversCustomBonus() {
         try {
             const response = await makeCRMRequestlimited({ body });
             const { data } = response
-            console.log({ data })
+            // console.log({ data })
             await markDriverCustomBonusRulesAsDeleted({ bonusRuleId });
 
         } catch (errors) {
