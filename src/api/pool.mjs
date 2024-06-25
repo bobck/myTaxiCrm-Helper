@@ -7,6 +7,14 @@ export const pool = new pg.Pool({
     connectionString
 });
 
+pool.on('connect', () => {
+    console.log('New client connected');
+});
+
+pool.on('remove', () => {
+    console.log('Client removed');
+});
+
 process.on('SIGINT', async () => {
     console.log('SIGINT');
     await pool.end();
@@ -27,5 +35,22 @@ process.on('uncaughtException', async (error) => {
     console.log('pool closed');
     process.exit();
 });
+
+function getPoolState() {
+    console.log({
+        pool
+    })
+
+    console.log({
+        total: pool.totalCount, // Общее количество соединений в пуле
+        idle: pool.idleCount,   // Количество простаивающих соединений
+        waiting: pool.waitingCount // Количество ожидающих запросов
+    })
+}
+
+if (process.env.ENV == "TEST") {
+    getPoolState();
+}
+
 
 

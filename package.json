@@ -22,7 +22,8 @@
     "forcesavecontractors": "ENV=TEST node -r dotenv/config src/web.api/modules/save-contractors-list.mjs",
     "driversrevenue": "ENV=TEST node -r dotenv/config src/web.api/modules/add-and-update-drivers-with-revenue.mjs",
     "syncbitrixids": "ENV=TEST node -r dotenv/config src/bitrix/modules/sync-contact-and-deals.mjs",
-    "revenuetodeal": "ENV=TEST node -r dotenv/config src/bitrix/modules/sync-drivers-revenue-to-deal.mjs"
+    "revenuetodeal": "ENV=TEST node -r dotenv/config src/bitrix/modules/sync-drivers-revenue-to-deal.mjs",
+    "pullstate": "ENV=TEST node -r dotenv/config src/api/pool.mjs"
     },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",
