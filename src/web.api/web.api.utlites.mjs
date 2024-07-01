@@ -56,6 +56,10 @@ async function makeCRMRequestWithRetry({ body }) {
                 throw new Error(message);
             }
 
+            if (message == 'driver bonus rules not found') {
+                throw new Error(message);
+            }
+
             console.error(`Attempt ${retryCount + 1} failed. Retrying in ${retryDelay}ms.`);
 
             if (retryCount < (maxRetries - 1)) {
