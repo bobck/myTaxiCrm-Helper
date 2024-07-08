@@ -55,9 +55,9 @@ FROM
       drivers_editing_history deh,
 		  jsonb_array_elements(diff) AS elem
     WHERE
-      elem -> 'fieldName' ->> 'value' = 'inner_status' 
-      AND  elem -> 'new' ->> 'value' = 'WORKING' 
-      AND ( elem -> 'prev' ->> 'value' = 'WITHOUT_STATUS' OR  elem -> 'prev' ->> 'value' = 'FIRED_OUT' )
+      elem -> 'fieldName' ->> 'translation' = 'common.status' 
+      AND  elem -> 'new' ->> 'translation' = 'common.working' 
+      AND  elem -> 'prev' ->> 'translation' = 'common.withoutStatus' 
       AND jsonb_typeof(diff) = 'array'
     ORDER BY
       deh.driver_id,
