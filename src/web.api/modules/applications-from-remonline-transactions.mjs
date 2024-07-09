@@ -18,7 +18,7 @@ import {
 
 
 export async function createCRMApplicationsFromRemonlineTransaction() {
-    console.log({ message: 'createCRMApplicationsFromRemonlineTransaction'})
+    console.log({ message: 'createCRMApplicationsFromRemonlineTransaction' })
 
     const cashboxes = await getCaboxesWithCrmMapping();
 
@@ -49,9 +49,15 @@ export async function createCRMApplicationsFromRemonlineTransaction() {
                 continue
             }
 
+            let customExpenseCode = null;
+
+            if (/^Переміщення грошей/.test(description)) {
+                customExpenseCode = '5.1'
+            }
+
             const [expenseCode, contatorFullCode, carCode, sid] = description.split(';');
 
-            const expenseType = repairExpensesTypes[expenseCode] || process.env.DEFAULT_EXPENSE_TYPE
+            const expenseType = repairExpensesTypes[expenseCode] || repairExpensesTypes[customExpenseCode] || process.env.DEFAULT_EXPENSE_TYPE
 
             let contractorId = null;
 
