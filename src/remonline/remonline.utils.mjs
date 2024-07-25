@@ -54,8 +54,8 @@ export async function getOrders(
         throw await response.text()
     }
 
-    if (process.env.ENV == "LOG") {
-        console.log(response.text())
+    if (process.env.LOG == "LOG") {
+        console.log(await response.text())
     }
 
     const data = await response.json();
