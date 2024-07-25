@@ -18,8 +18,8 @@ export async function generateDriversWithFuelCardReport({ date }) {
     return { rows }
 }
 
-export async function insertRowsAsStream(rows) {
-    await bigquery.dataset(process.env.BQ_DATASET_ID).table(process.env.BQ_TABLE_ID).insert(rows);
+export async function insertRowsAsStream({ rows, bqTableId }) {
+    await bigquery.dataset(process.env.BQ_DATASET_ID).table(bqTableId).insert(rows);
 }
 
 
@@ -51,29 +51,52 @@ export async function createTableReportTable() {
         schema,
         location: 'US',
     };
-    const response = await bigquery.dataset(process.env.BQ_DATASET_ID).createTable(process.env.BQ_TABLE_ID, options)
+    const response = await bigquery.dataset(process.env.BQ_DATASET_ID).createTable('drivers_with_fuel_card_report', options)
     console.log({ response })
 
 }
 
-if (process.env.ENV == "RESET_TABLE") {
-    await bigquery.dataset(process.env.BQ_DATASET_ID).table(process.env.BQ_TABLE_ID).delete()
-    await createTable()
+export async function generateFleetsIncomAndExpensesReport({ year, week }) {
+
+    console.log({ time: new Date(), message: 'generateDriversWithFuelCardReport' })
+
+    const sqlp = fs.readFileSync('./src/sql/fleets_income_and_expenses_report.sql').toString();
+    await pool.query("SET timezone='Europe/Kyiv';");
+    const result = await pool.query(sqlp, [year, week]);
+    const { rows } = result
+    return { rows }
 }
 
-if (process.env.ENV == "REWRITE_REPORT") {
-    const date = process.env.REPORT_DATE;
-    console.log({ env: 'REWRITE_REPORT', date })
+export async function createFleetsIncomAndExpensesReportTable() {
+    console.log({ time: new Date(), message: 'createFleetsIncomAndExpensesReportTable' })
 
-    const query = `delete from \`${process.env.BQ_DATASET_ID}.${process.env.BQ_TABLE_ID}\` where date = '${date}'`
-    await bigquery.dataset(process.env.BQ_DATASET_ID).table(process.env.BQ_TABLE_ID).query(query)
+    const schema = [
+        { name: 'company_name', type: 'STRING', mode: 'REQUIRED' },
+        { name: 'auto_park_name', type: 'STRING', mode: 'REQUIRED' },
+        { name: 'week', type: 'INTEGER', mode: 'REQUIRED' },
+        { name: 'year', type: 'INTEGER', mode: 'REQUIRED' },
+        { name: 'flow', type: 'STRING', mode: 'REQUIRED' },
+        { name: 'type', type: 'STRING', mode: 'REQUIRED' },
+        { name: 'purpose', type: 'STRING', mode: 'NULLABLE' },
+        { name: 'expense_type', type: 'STRING', mode: 'NULLABLE' },
+        { name: 'sum', type: 'FLOAT', mode: 'REQUIRED' }
+    ];
 
-    const { rows } = await generateDriversWithFuelCardReport({ date });
-    const mapRows = rows.map(r => {
-        r.date = new Date(r.date).toISOString().split('T')[0]
-        r.event_types = JSON.stringify(r.event_types)
-        return r
-    })
-    await insertRowsAsStream(mapRows);
+    const options = {
+        schema,
+        location: 'US',
+    };
+    const response = await bigquery.dataset(process.env.BQ_DATASET_ID).createTable('fleet_income_and_expenses', options)
+    console.log({ response })
 
+}
+
+export async function clearFleetsIncomAndExpensesReportTableByYearAndWeek({ bqTableId, year, week }) {
+    const query = `DELETE FROM \`${process.env.BQ_PROJECT_NAME}.${process.env.BQ_DATASET_ID}.${bqTableId}\` WHERE (year > ${year}) OR (year = ${year} AND week >= ${week})`;
+    const options = {
+        query: query,
+        location: 'US',
+    };
+
+    await bigquery.query(options);
 }
