@@ -22,12 +22,16 @@ export async function getAndSaveLeadsByCreatedDate() {
 
     console.log({ getLeadsByCreateDateAndAssigned: result.length })
 
+    if (result.length == 0) {
+        return
+    }
+
     const jsonData = result.map(row => {
         const { ID, SOURCE_ID, UF_CRM_1688301710585, UF_CRM_1526673568 } = row
         return {
             id: ID,
             source_id: SOURCE_ID,
-            is_duplicate: (UF_CRM_1688301710585 == '0') ? false : true,
+            is_duplicate: (UF_CRM_1688301710585 == '1') ? true : false,
             city_id: UF_CRM_1526673568,
             date
         }
@@ -44,6 +48,7 @@ export async function getAndSaveLeadsByCreatedDate() {
 }
 
 if (process.env.ENV == "TEST") {
-    // await createOrResetLeadsTable()
+    const bqTableId = 'leads_own'
+    // await createOrResetLeadsTable({bqTableId})
     await getAndSaveLeadsByCreatedDate()
 }

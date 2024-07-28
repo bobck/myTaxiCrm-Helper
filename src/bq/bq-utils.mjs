@@ -101,10 +101,14 @@ export async function clearFleetsIncomAndExpensesReportTableByYearAndWeek({ bqTa
     await bigquery.query(options);
 }
 
-export async function createOrResetLeadsTable() {
+export async function createOrResetLeadsTable({ bqTableId }) {
     console.log({ time: new Date(), message: 'createOrResetLeadsTable' })
 
-    await bigquery.dataset(process.env.BQ_DATASET_ID).table('leads_own').delete()
+    try {
+        await bigquery.dataset(process.env.BQ_DATASET_ID).table(bqTableId).delete()
+    } catch (e) {
+
+    }
 
     const schema = [
         { name: 'id', type: 'INTEGER', mode: 'NULLABLE' },
@@ -118,7 +122,7 @@ export async function createOrResetLeadsTable() {
         schema,
         location: 'US',
     };
-    const response = await bigquery.dataset(process.env.BQ_DATASET_ID).createTable('leads_own', options)
+    const response = await bigquery.dataset(process.env.BQ_DATASET_ID).createTable(bqTableId, options)
     console.log({ response })
 }
 
@@ -130,7 +134,7 @@ export async function loadJsonToTable({ json, bqTableId }) {
     await bigquery.dataset(process.env.BQ_DATASET_ID).table(bqTableId).load(json, metadata);
 }
 
-export async function clearLeadsTableByDate({ bqTableId, date }) {
+export async function clearTableByDate({ bqTableId, date }) {
     const query = `DELETE FROM \`${process.env.BQ_PROJECT_NAME}.${process.env.BQ_DATASET_ID}.${bqTableId}\` WHERE date = '${date}'`;
     const options = {
         query: query,
@@ -138,4 +142,30 @@ export async function clearLeadsTableByDate({ bqTableId, date }) {
     };
 
     await bigquery.query(options);
+}
+
+export async function createOrResetDealsHrInterviewTable({ bqTableId }) {
+    console.log({ time: new Date(), message: 'createOrResetDealsHrInterviewTable' })
+
+    try {
+        await bigquery.dataset(process.env.BQ_DATASET_ID).table(bqTableId).delete()
+    } catch (e) {
+
+    }
+
+    const schema = [
+        { name: 'id', type: 'INTEGER', mode: 'NULLABLE' },
+        { name: 'source_id', type: 'STRING', mode: 'NULLABLE' },
+        { name: 'city_id', type: 'INTEGER', mode: 'NULLABLE' },
+        { name: 'stage_id', type: 'STRING', mode: 'NULLABLE' },
+        { name: 'is_rescheduled', type: 'BOOLEAN', mode: 'NULLABLE' },
+        { name: 'date', type: 'DATE', mode: 'NULLABLE' }
+    ];
+
+    const options = {
+        schema,
+        location: 'US',
+    };
+    const response = await bigquery.dataset(process.env.BQ_DATASET_ID).createTable(bqTableId, options)
+    console.log({ response })
 }

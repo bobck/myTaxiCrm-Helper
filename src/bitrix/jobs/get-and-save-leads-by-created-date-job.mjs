@@ -1,7 +1,7 @@
 import { CronJob } from 'cron';
 import { getAndSaveLeadsByCreatedDate } from '../modules/get-and-save-leads-by-created-date.mjs';
 
-const cronTime = '15 0 * * *';
+const cronTime = '01 0 * * *';
 
 const timeZone = 'Europe/Kiev';
 

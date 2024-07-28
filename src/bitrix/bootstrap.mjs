@@ -3,6 +3,7 @@ import { contactsForDriversWithRevenueJob } from "./jobs/sync-contacts-for-drive
 import { dealForDriversWithRevenueJob } from "./jobs/sync-deals-for-drivers-with-revenue-job.mjs";
 import { syncRevenueToDealsJob } from "./jobs/sync-drivers-revenue-to-deal-job.mjs";
 import { getAndSaveLeadsByCreatedDateJob } from "./jobs/get-and-save-leads-by-created-date-job.mjs";
+import { getAndSaveDealsByInterviewDateJob } from "./jobs/get-and-save-deals-by-interview-date-job.mjs";
 
 export function bitrixJobs() {
     console.log('bitrixJobs...')
@@ -12,6 +13,7 @@ export function bitrixJobs() {
         dealForDriversWithRevenueJob.start();
         syncRevenueToDealsJob.start();
         getAndSaveLeadsByCreatedDateJob.start();
+        getAndSaveDealsByInterviewDateJob.start();
     } catch (error) {
         console.error('sync error, app down...')
         console.error({ time: new Date(), error });
@@ -22,7 +24,8 @@ export function bitrixJobs() {
         dealForDriversWithRevenueJob.stop();
         syncRevenueToDealsJob.stop();
         getAndSaveLeadsByCreatedDateJob.stop();
-
+        getAndSaveDealsByInterviewDateJob.stop();
+        
         bitrixJobs();
     }
 }
