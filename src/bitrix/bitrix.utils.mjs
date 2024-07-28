@@ -140,3 +140,18 @@ export function chunkArray(array, chunkSize) {
     }
     return result;
 }
+
+export async function getLeadsByCreateDateAndAssigned({ date, assigned }) {
+
+    const response = await bitrix.leads.list({
+        filter: {
+            '>=DATE_CREATE': `${date}T00:00:00`,
+            '<=DATE_CREATE': `${date}T23:59:59`,
+            'ASSIGNED_BY_ID': assigned
+        },
+        select: ['ID', 'SOURCE_ID', 'UF_CRM_1688301710585']
+    });
+
+    const { result } = response
+    return result
+}

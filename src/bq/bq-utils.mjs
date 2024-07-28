@@ -100,3 +100,41 @@ export async function clearFleetsIncomAndExpensesReportTableByYearAndWeek({ bqTa
 
     await bigquery.query(options);
 }
+
+export async function createOrResetLeadsTable() {
+    console.log({ time: new Date(), message: 'createOrResetLeadsTable' })
+
+    await bigquery.dataset(process.env.BQ_DATASET_ID).table('leads_own').delete()
+
+    const schema = [
+        { name: 'id', type: 'INTEGER', mode: 'NULLABLE' },
+        { name: 'source_id', type: 'STRING', mode: 'NULLABLE' },
+        { name: 'is_duplicate', type: 'BOOLEAN', mode: 'NULLABLE' },
+        { name: 'date', type: 'DATE', mode: 'NULLABLE' }
+    ];
+
+    const options = {
+        schema,
+        location: 'US',
+    };
+    const response = await bigquery.dataset(process.env.BQ_DATASET_ID).createTable('leads_own', options)
+    console.log({ response })
+}
+
+export async function loadJsonToTable({ json, bqTableId }) {
+    const metadata = {
+        sourceFormat: 'NEWLINE_DELIMITED_JSON',
+        autodetect: true,
+    };
+    await bigquery.dataset(process.env.BQ_DATASET_ID).table(bqTableId).load(json, metadata);
+}
+
+export async function clearLeadsTableByDate({ bqTableId, date }) {
+    const query = `DELETE FROM \`${process.env.BQ_PROJECT_NAME}.${process.env.BQ_DATASET_ID}.${bqTableId}\` WHERE date = '${date}'`;
+    const options = {
+        query: query,
+        location: 'US',
+    };
+
+    await bigquery.query(options);
+}
