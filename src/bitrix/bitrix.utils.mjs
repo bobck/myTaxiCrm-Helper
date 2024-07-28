@@ -140,3 +140,49 @@ export function chunkArray(array, chunkSize) {
     }
     return result;
 }
+
+export async function getLeadsByCreateDateAndAssigned({ date, assigned }) {
+
+    const response = await bitrix.leads.list({
+        filter: {
+            '>=DATE_CREATE': `${date}T00:00:00`,
+            '<=DATE_CREATE': `${date}T23:59:59`,
+            'ASSIGNED_BY_ID': assigned
+        },
+        select: ['ID', 'SOURCE_ID', 'UF_CRM_1688301710585', 'UF_CRM_1526673568']
+    });
+
+    const { result } = response
+    return result
+}
+
+export async function getDealsByInterviewDate({ date }) {
+
+    const response = await bitrix.deals.list({
+        filter: {
+            '>=UF_CRM_1608302466359': `${date}T00:00:00`,
+            '<=UF_CRM_1608302466359': `${date}T23:59:59`,
+            'CATEGORY_ID': '3'
+        },
+        select: ['ID', 'SOURCE_ID', 'STAGE_ID', 'UF_CRM_1527615815', 'UF_CRM_1722203030883']
+    });
+
+    const { result } = response
+    return result
+}
+
+export async function getDealsByClosedDate({ date }) {
+
+    const response = await bitrix.deals.list({
+        filter: {
+            '>=CLOSEDATE': `${date}T00:00:00`,
+            '<=CLOSEDATE': `${date}T23:59:59`,
+            'CATEGORY_ID': '3',
+            'CLOSED': 'Y'
+        },
+        select: ['ID', 'SOURCE_ID', 'STAGE_ID', 'UF_CRM_1527615815']
+    });
+
+    const { result } = response
+    return result
+}

@@ -24,8 +24,12 @@
     "syncbitrixids": "ENV=TEST node -r dotenv/config src/bitrix/modules/sync-contact-and-deals.mjs",
     "revenuetodeal": "ENV=TEST node -r dotenv/config src/bitrix/modules/sync-drivers-revenue-to-deal.mjs",
     "pullstate": "ENV=TEST node -r dotenv/config src/api/pool.mjs",
-    "incomeandexpensestest":  "ENV=TEST node -r dotenv/config src/bq/modules/generate-and-save-fleets-income-and-expenses_report.mjs"
-    },
+    "incomeandexpensestest": "ENV=TEST node -r dotenv/config src/bq/modules/generate-and-save-fleets-income-and-expenses_report.mjs",
+    "leads": "ENV=TEST node -r dotenv/config src/bitrix/modules/get-and-save-leads-by-created-date.mjs",
+    "dealshri": "ENV=TEST node -r dotenv/config src/bitrix/modules/get-and-save-deals-by-interview-date.mjs",
+    "dealshrc": "ENV=TEST node -r dotenv/config src/bitrix/modules/get-and-save-deals-by-closed-date.mjs",
+    "manualsync": "node -r dotenv/config src/bitrix/modules/manual-get-and-save-leads-and-deals.mjs"
+  },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",
   "dependencies": {
