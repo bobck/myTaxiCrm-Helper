@@ -1,6 +1,13 @@
 import fs from 'fs'
 import { BigQuery } from '@google-cloud/bigquery';
 import { pool } from '../api/pool.mjs';
+import {
+    fuelReportTableSchema,
+    dealsHrClosedTableSchema,
+    dealsHrInterviewTableSchema,
+    leadsTableSchema,
+    fleetsIncomAndExpensesReportTableSchema
+} from './schemas.mjs';
 
 const bigquery = new BigQuery({
     projectId: process.env.BQ_PROJECT_NAME,
@@ -26,29 +33,8 @@ export async function insertRowsAsStream({ rows, bqTableId }) {
 export async function createTableReportTable() {
     console.log({ time: new Date(), message: 'createTableReportTable' })
 
-    const schema = [
-        { name: 'auto_park_name', type: 'STRING', mode: 'REQUIRED' },
-        { name: 'auto_park_id', type: 'STRING', mode: 'REQUIRED' },
-        { name: 'driver_id', type: 'STRING', mode: 'REQUIRED' },
-        { name: 'full_name', type: 'STRING', mode: 'REQUIRED' },
-        { name: 'car_id', type: 'STRING', mode: 'REQUIRED' },
-        { name: 'mapon_id', type: 'INTEGER', mode: 'REQUIRED' },
-        { name: 'license_plate', type: 'STRING', mode: 'REQUIRED' },
-        { name: 'wog_card', type: 'STRING', mode: 'REQUIRED' },
-        { name: 'total_income', type: 'FLOAT', mode: 'NULLABLE' },
-        { name: 'total_trips', type: 'INTEGER', mode: 'NULLABLE' },
-        { name: 'mapon_mileage', type: 'INTEGER', mode: 'NULLABLE' },
-        { name: 'mileage_no_trips', type: 'INTEGER', mode: 'NULLABLE' },
-        { name: 'event_types', type: 'JSON', mode: 'NULLABLE' },
-        { name: 'date', type: 'DATE', mode: 'REQUIRED' },
-        { name: 'schedule_event_period_start', type: 'TIMESTAMP', mode: 'REQUIRED' },
-        { name: 'schedule_event_period_end', type: 'TIMESTAMP', mode: 'REQUIRED' },
-        { name: 'driver_report_card_period_from', type: 'TIMESTAMP', mode: 'REQUIRED' },
-        { name: 'driver_report_card_period_to', type: 'TIMESTAMP', mode: 'REQUIRED' },
-    ];
-
     const options = {
-        schema,
+        schema: fuelReportTableSchema,
         location: 'US',
     };
     const response = await bigquery.dataset(process.env.BQ_DATASET_ID).createTable('drivers_with_fuel_card_report', options)
@@ -70,20 +56,8 @@ export async function generateFleetsIncomAndExpensesReport({ year, week }) {
 export async function createFleetsIncomAndExpensesReportTable() {
     console.log({ time: new Date(), message: 'createFleetsIncomAndExpensesReportTable' })
 
-    const schema = [
-        { name: 'company_name', type: 'STRING', mode: 'REQUIRED' },
-        { name: 'auto_park_name', type: 'STRING', mode: 'REQUIRED' },
-        { name: 'week', type: 'INTEGER', mode: 'REQUIRED' },
-        { name: 'year', type: 'INTEGER', mode: 'REQUIRED' },
-        { name: 'flow', type: 'STRING', mode: 'REQUIRED' },
-        { name: 'type', type: 'STRING', mode: 'REQUIRED' },
-        { name: 'purpose', type: 'STRING', mode: 'NULLABLE' },
-        { name: 'expense_type', type: 'STRING', mode: 'NULLABLE' },
-        { name: 'sum', type: 'FLOAT', mode: 'REQUIRED' }
-    ];
-
     const options = {
-        schema,
+        schema: fleetsIncomAndExpensesReportTableSchema,
         location: 'US',
     };
     const response = await bigquery.dataset(process.env.BQ_DATASET_ID).createTable('fleet_income_and_expenses', options)
@@ -110,25 +84,18 @@ export async function createOrResetLeadsTable({ bqTableId }) {
 
     }
 
-    const schema = [
-        { name: 'id', type: 'INTEGER', mode: 'NULLABLE' },
-        { name: 'source_id', type: 'STRING', mode: 'NULLABLE' },
-        { name: 'is_duplicate', type: 'BOOLEAN', mode: 'NULLABLE' },
-        { name: 'city_id', type: 'INTEGER', mode: 'NULLABLE' },
-        { name: 'date', type: 'DATE', mode: 'NULLABLE' }
-    ];
-
     const options = {
-        schema,
+        schema: leadsTableSchema,
         location: 'US',
     };
     const response = await bigquery.dataset(process.env.BQ_DATASET_ID).createTable(bqTableId, options)
     console.log({ response })
 }
 
-export async function loadJsonToTable({ json, bqTableId }) {
+export async function loadJsonToTable({ json, bqTableId, schema }) {
     const metadata = {
         sourceFormat: 'NEWLINE_DELIMITED_JSON',
+        schema: { fields: schema },
         autodetect: true,
     };
     await bigquery.dataset(process.env.BQ_DATASET_ID).table(bqTableId).load(json, metadata);
@@ -153,17 +120,25 @@ export async function createOrResetDealsHrInterviewTable({ bqTableId }) {
 
     }
 
-    const schema = [
-        { name: 'id', type: 'INTEGER', mode: 'NULLABLE' },
-        { name: 'source_id', type: 'STRING', mode: 'NULLABLE' },
-        { name: 'city_id', type: 'INTEGER', mode: 'NULLABLE' },
-        { name: 'stage_id', type: 'STRING', mode: 'NULLABLE' },
-        { name: 'is_rescheduled', type: 'BOOLEAN', mode: 'NULLABLE' },
-        { name: 'date', type: 'DATE', mode: 'NULLABLE' }
-    ];
+    const options = {
+        schema: dealsHrInterviewTableSchema,
+        location: 'US',
+    };
+    const response = await bigquery.dataset(process.env.BQ_DATASET_ID).createTable(bqTableId, options)
+    console.log({ response })
+}
+
+export async function createOrResetDealsHrClosedTable({ bqTableId }) {
+    console.log({ time: new Date(), message: 'createOrResetDealsHrClosedTable' })
+
+    try {
+        await bigquery.dataset(process.env.BQ_DATASET_ID).table(bqTableId).delete()
+    } catch (e) {
+
+    }
 
     const options = {
-        schema,
+        schema: dealsHrClosedTableSchema,
         location: 'US',
     };
     const response = await bigquery.dataset(process.env.BQ_DATASET_ID).createTable(bqTableId, options)

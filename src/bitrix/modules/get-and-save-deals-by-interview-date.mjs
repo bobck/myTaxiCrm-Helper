@@ -11,8 +11,10 @@ import {
     clearTableByDate
 } from "../../bq/bq-utils.mjs";
 
-export async function getAndSaveDealsByInterviewDate() {
-    const date = DateTime.now().setZone('Europe/Kyiv').minus({ days: 1 }).toFormat('yyyy-MM-dd');
+import { dealsHrInterviewTableSchema } from '../../bq/schemas.mjs';
+
+export async function getAndSaveDealsByInterviewDate(manualDate) {
+    const date = manualDate || DateTime.now().setZone('Europe/Kyiv').minus({ days: 1 }).toFormat('yyyy-MM-dd');
     console.log({ time: new Date(), date, message: 'getAndSaveDealsByInterviewDate' });
 
     const bqTableId = 'deals_hr_interviewees'
@@ -42,7 +44,7 @@ export async function getAndSaveDealsByInterviewDate() {
     const jsonString = jsonData.map(JSON.stringify).join('\n');
     fs.writeFileSync(tempFilePath, jsonString);
 
-    await loadJsonToTable({ json: tempFilePath, bqTableId });
+    await loadJsonToTable({ json: tempFilePath, bqTableId, schema: dealsHrInterviewTableSchema });
 
     fs.unlinkSync(tempFilePath);
 }

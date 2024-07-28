@@ -170,3 +170,19 @@ export async function getDealsByInterviewDate({ date }) {
     const { result } = response
     return result
 }
+
+export async function getDealsByClosedDate({ date }) {
+
+    const response = await bitrix.deals.list({
+        filter: {
+            '>=CLOSEDATE': `${date}T00:00:00`,
+            '<=CLOSEDATE': `${date}T23:59:59`,
+            'CATEGORY_ID': '3',
+            'CLOSED': 'Y'
+        },
+        select: ['ID', 'SOURCE_ID', 'STAGE_ID', 'UF_CRM_1527615815']
+    });
+
+    const { result } = response
+    return result
+}

@@ -8,11 +8,13 @@ import { getLeadsByCreateDateAndAssigned } from "../bitrix.utils.mjs";
 import {
     createOrResetLeadsTable,
     loadJsonToTable,
-    clearLeadsTableByDate
+    clearTableByDate
 } from "../../bq/bq-utils.mjs";
 
-export async function getAndSaveLeadsByCreatedDate() {
-    const date = DateTime.now().setZone('Europe/Kyiv').minus({ days: 1 }).toFormat('yyyy-MM-dd');
+import { leadsTableSchema } from '../../bq/schemas.mjs';
+
+export async function getAndSaveLeadsByCreatedDate(manualDate) {
+    const date = manualDate || DateTime.now().setZone('Europe/Kyiv').minus({ days: 1 }).toFormat('yyyy-MM-dd');
     console.log({ time: new Date(), date, message: 'getAndSaveLeadsByCreatedDate' });
 
     const bqTableId = 'leads_own'
@@ -37,18 +39,18 @@ export async function getAndSaveLeadsByCreatedDate() {
         }
     })
 
-    await clearLeadsTableByDate({ bqTableId, date });
+    await clearTableByDate({ bqTableId, date });
     const tempFilePath = path.join(os.tmpdir(), 'temp_data.json');
     const jsonString = jsonData.map(JSON.stringify).join('\n');
     fs.writeFileSync(tempFilePath, jsonString);
 
-    await loadJsonToTable({ json: tempFilePath, bqTableId });
+    await loadJsonToTable({ json: tempFilePath, bqTableId, schema: leadsTableSchema });
 
     fs.unlinkSync(tempFilePath);
 }
 
 if (process.env.ENV == "TEST") {
     const bqTableId = 'leads_own'
-    // await createOrResetLeadsTable({bqTableId})
+    // await createOrResetLeadsTable({ bqTableId })
     await getAndSaveLeadsByCreatedDate()
 }
