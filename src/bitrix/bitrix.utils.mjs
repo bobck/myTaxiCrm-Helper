@@ -149,7 +149,7 @@ export async function getLeadsByCreateDateAndAssigned({ date, assigned }) {
             '<=DATE_CREATE': `${date}T23:59:59`,
             'ASSIGNED_BY_ID': assigned
         },
-        select: ['ID', 'SOURCE_ID', 'UF_CRM_1688301710585']
+        select: ['ID', 'SOURCE_ID', 'UF_CRM_1688301710585', 'UF_CRM_1526673568']
     });
 
     const { result } = response

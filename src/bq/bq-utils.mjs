@@ -110,6 +110,7 @@ export async function createOrResetLeadsTable() {
         { name: 'id', type: 'INTEGER', mode: 'NULLABLE' },
         { name: 'source_id', type: 'STRING', mode: 'NULLABLE' },
         { name: 'is_duplicate', type: 'BOOLEAN', mode: 'NULLABLE' },
+        { name: 'city_id', type: 'INTEGER', mode: 'NULLABLE' },
         { name: 'date', type: 'DATE', mode: 'NULLABLE' }
     ];
 

@@ -13,7 +13,7 @@ import {
 
 export async function getAndSaveLeadsByCreatedDate() {
     const date = DateTime.now().setZone('Europe/Kyiv').minus({ days: 1 }).toFormat('yyyy-MM-dd');
-    console.log({ time: new Date(), date, message: 'generateAndSaveDriversWithFuelCardsReport' });
+    console.log({ time: new Date(), date, message: 'getAndSaveLeadsByCreatedDate' });
 
     const bqTableId = 'leads_own'
     const assigned = ['109046', '88062', '79570', '112604', '50222', '110576', '66110', '103156', '46392', '128320']
@@ -23,11 +23,12 @@ export async function getAndSaveLeadsByCreatedDate() {
     console.log({ getLeadsByCreateDateAndAssigned: result.length })
 
     const jsonData = result.map(row => {
-        const { ID, SOURCE_ID, UF_CRM_1688301710585 } = row
+        const { ID, SOURCE_ID, UF_CRM_1688301710585, UF_CRM_1526673568 } = row
         return {
             id: ID,
             source_id: SOURCE_ID,
             is_duplicate: (UF_CRM_1688301710585 == '0') ? false : true,
+            city_id: UF_CRM_1526673568,
             date
         }
     })
