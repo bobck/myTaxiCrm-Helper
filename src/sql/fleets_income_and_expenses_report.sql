@@ -21,7 +21,7 @@ WITH
         'be6ab23a-d6ba-4add-b0f7-cfb8abd0586b',
         '499e334b-8916-42ab-b41a-0f0b979d6f69'
       )
-      AND ct.YEAR > $1 OR (ct.YEAR = $1 AND ct.week >= $2)
+      AND (ct.YEAR > $1 OR (ct.YEAR = $1 AND ct.week >= $2))
   ),
   income AS (
     SELECT
@@ -64,7 +64,7 @@ WITH
         OR cs.total_payable_to_driver < 0
         OR cs.last_week_balance < 0
       )
-      AND cs.YEAR > $1 OR (cs.YEAR = $1 AND cs.week >= $2)
+      AND (cs.YEAR > $1 OR (cs.YEAR = $1 AND cs.week >= $2))
       AND cs.company_id IN (
         'b52d5c3c-9a8e-4898-8101-7c65f3ee70a4',
         '4ea03592-9278-4ede-adf8-f7345a856893'
@@ -108,7 +108,7 @@ WITH
         OR cs.total_payable_to_driver < 0
         OR cs.last_week_balance < 0
       )
-      AND cs.YEAR > $1 OR (cs.YEAR = $1 AND cs.week >= $2)
+      AND (cs.YEAR > $1 OR (cs.YEAR = $1 AND cs.week >= $2))
       AND cs.company_id IN (
         'b52d5c3c-9a8e-4898-8101-7c65f3ee70a4',
         '4ea03592-9278-4ede-adf8-f7345a856893'
@@ -135,7 +135,7 @@ WITH
         'CAR_RENTAL_REFUND',
         'CAR_RENTAL_OVERRUN_PAYMENT'
       )
-      AND ct.YEAR > $1 OR (ct.YEAR = $1 AND ct.week >= $2)
+      AND (ct.YEAR > $1 OR (ct.YEAR = $1 AND ct.week >= $2))
       AND ct.company_id IN (
         'b52d5c3c-9a8e-4898-8101-7c65f3ee70a4',
         '4ea03592-9278-4ede-adf8-f7345a856893'
@@ -167,7 +167,7 @@ WITH
         'FORCED_PAY_OFF_DEBT',
         'TOP_UP_CASHBOX_ROAD_ACCIDENT_COMPENSATION'
       )
-      AND ct.YEAR > $1 OR (ct.YEAR = $1 AND ct.week >= $2)
+      AND (ct.YEAR > $1 OR (ct.YEAR = $1 AND ct.week >= $2))
       AND ct.company_id IN (
         'b52d5c3c-9a8e-4898-8101-7c65f3ee70a4',
         '4ea03592-9278-4ede-adf8-f7345a856893'
@@ -201,7 +201,7 @@ WITH
         'FINES_DOWNTIME',
         'FINES_OVERRUN'
       )
-      AND ct.YEAR > $1 OR (ct.YEAR = $1 AND ct.week >= $2)
+      AND (ct.YEAR > $1 OR (ct.YEAR = $1 AND ct.week >= $2))
       AND ct.company_id IN (
         'b52d5c3c-9a8e-4898-8101-7c65f3ee70a4',
         '4ea03592-9278-4ede-adf8-f7345a856893'
@@ -228,7 +228,7 @@ WITH
       _cashbox_transactions ct
     WHERE
       ct.purpose IN ('TOP_UP_CASHBOX_RECYCLING')
-      AND ct.YEAR > $1 OR (ct.YEAR = $1 AND ct.week >= $2)
+      AND (ct.YEAR > $1 OR (ct.YEAR = $1 AND ct.week >= $2))
       AND ct.company_id IN (
         'b52d5c3c-9a8e-4898-8101-7c65f3ee70a4',
         '4ea03592-9278-4ede-adf8-f7345a856893'
@@ -255,7 +255,7 @@ WITH
       _cashbox_transactions ct
     WHERE
       ct.purpose IN ('COMPENSATION')
-      AND ct.YEAR > $1 OR (ct.YEAR = $1 AND ct.week >= $2)
+      AND (ct.YEAR > $1 OR (ct.YEAR = $1 AND ct.week >= $2))
       AND ct.company_id IN (
         'b52d5c3c-9a8e-4898-8101-7c65f3ee70a4',
         '4ea03592-9278-4ede-adf8-f7345a856893'
@@ -307,7 +307,7 @@ WITH
         'AUTO_PARK_EXPENSE_PAID_BY_DRIVER',
         'COMPENSATION'
       )
-      AND ct.YEAR > $1 OR (ct.YEAR = $1 AND ct.week >= $2)
+      AND (ct.YEAR > $1 OR (ct.YEAR = $1 AND ct.week >= $2))
       AND ct.company_id IN (
         'b52d5c3c-9a8e-4898-8101-7c65f3ee70a4',
         '4ea03592-9278-4ede-adf8-f7345a856893'
@@ -365,7 +365,7 @@ WITH
         'AUTO_PARK_EXPENSE_PAID_BY_DRIVER',
         'COMPENSATION'
       )
-      AND ct.YEAR > $1 OR (ct.YEAR = $1 AND ct.week >= $2)
+      AND (ct.YEAR > $1 OR (ct.YEAR = $1 AND ct.week >= $2))
       AND ct.company_id IN (
         'b52d5c3c-9a8e-4898-8101-7c65f3ee70a4',
         '4ea03592-9278-4ede-adf8-f7345a856893'
@@ -406,7 +406,7 @@ WITH
         'AUTO_PARK_EXPENSE_PAID_BY_DRIVER',
         'COMPENSATION'
       )
-      AND ct.YEAR > $1 OR (ct.YEAR = $1 AND ct.week >= $2)
+      AND (ct.YEAR > $1 OR (ct.YEAR = $1 AND ct.week >= $2))
       AND ct.company_id IN (
         'b52d5c3c-9a8e-4898-8101-7c65f3ee70a4',
         '4ea03592-9278-4ede-adf8-f7345a856893'
@@ -440,7 +440,7 @@ WITH
         'AUTO_PARK_EXPENSE_PAID_BY_DRIVER',
         'COMPENSATION'
       )
-      AND ct.YEAR > $1 OR (ct.YEAR = $1 AND ct.week >= $2)
+      AND (ct.YEAR > $1 OR (ct.YEAR = $1 AND ct.week >= $2))
       AND ct.company_id IN (
         'b52d5c3c-9a8e-4898-8101-7c65f3ee70a4',
         '4ea03592-9278-4ede-adf8-f7345a856893'
@@ -474,7 +474,7 @@ WITH
         'AUTO_PARK_EXPENSE_PAID_BY_DRIVER',
         'COMPENSATION'
       )
-      AND ct.YEAR > $1 OR (ct.YEAR = $1 AND ct.week >= $2)
+      AND (ct.YEAR > $1 OR (ct.YEAR = $1 AND ct.week >= $2))
       AND ct.company_id IN (
         'b52d5c3c-9a8e-4898-8101-7c65f3ee70a4',
         '4ea03592-9278-4ede-adf8-f7345a856893'
@@ -508,7 +508,7 @@ WITH
         'AUTO_PARK_EXPENSE_PAID_BY_DRIVER',
         'COMPENSATION'
       )
-      AND ct.YEAR > $1 OR (ct.YEAR = $1 AND ct.week >= $2)
+      AND (ct.YEAR > $1 OR (ct.YEAR = $1 AND ct.week >= $2))
       AND ct.company_id IN (
         'b52d5c3c-9a8e-4898-8101-7c65f3ee70a4',
         '4ea03592-9278-4ede-adf8-f7345a856893'
@@ -542,7 +542,7 @@ WITH
         'AUTO_PARK_EXPENSE_PAID_BY_DRIVER',
         'COMPENSATION'
       )
-      AND ct.YEAR > $1 OR (ct.YEAR = $1 AND ct.week >= $2)
+      AND (ct.YEAR > $1 OR (ct.YEAR = $1 AND ct.week >= $2))
       AND ct.company_id IN (
         'b52d5c3c-9a8e-4898-8101-7c65f3ee70a4',
         '4ea03592-9278-4ede-adf8-f7345a856893'
@@ -576,7 +576,7 @@ WITH
         'AUTO_PARK_EXPENSE_PAID_BY_DRIVER',
         'COMPENSATION'
       )
-      AND ct.YEAR > $1 OR (ct.YEAR = $1 AND ct.week >= $2)
+      AND (ct.YEAR > $1 OR (ct.YEAR = $1 AND ct.week >= $2))
       AND ct.company_id IN (
         'b52d5c3c-9a8e-4898-8101-7c65f3ee70a4',
         '4ea03592-9278-4ede-adf8-f7345a856893'
@@ -606,7 +606,7 @@ WITH
         'TOP_UP_CASHBOX_CORRECTION',
         'TOP_UP_CASHBOX_RETURNING'
       )
-      AND ct.YEAR > $1 OR (ct.YEAR = $1 AND ct.week >= $2)
+      AND (ct.YEAR > $1 OR (ct.YEAR = $1 AND ct.week >= $2))
       AND ct.company_id IN (
         'b52d5c3c-9a8e-4898-8101-7c65f3ee70a4',
         '4ea03592-9278-4ede-adf8-f7345a856893'
@@ -647,4 +647,4 @@ WHERE
     'be6ab23a-d6ba-4add-b0f7-cfb8abd0586b',
     '499e334b-8916-42ab-b41a-0f0b979d6f69'
   )
-  AND i.year > $1 OR (i.year = $1 AND i.week >= $2)
+  AND (i.year > $1 OR (i.year = $1 AND i.week >= $2))

@@ -45,7 +45,7 @@ export async function createTableReportTable() {
 
 export async function generateFleetsIncomAndExpensesReport({ year, week }) {
 
-    console.log({ time: new Date(), message: 'generateDriversWithFuelCardReport' })
+    console.log({ time: new Date(), message: 'generateFleetsIncomAndExpensesReport' })
 
     const sqlp = fs.readFileSync('./src/sql/fleets_income_and_expenses_report.sql').toString();
     await pool.query("SET timezone='Europe/Kyiv';");
