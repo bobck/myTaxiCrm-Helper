@@ -57,3 +57,11 @@ export const dealsHrClosedTableSchema = [
     { name: 'date', type: 'DATE', mode: 'REQUIRED' }
 ]
 
+export const dealsHrRescheduledTableSchema = [
+    { name: 'id', type: 'STRING', mode: 'REQUIRED' },
+    { name: 'source_id', type: 'STRING', mode: 'NULLABLE' },
+    { name: 'city_id', type: 'STRING', mode: 'NULLABLE' },
+    { name: 'year', type: 'INTEGER', mode: 'REQUIRED' },
+    { name: 'week', type: 'INTEGER', mode: 'REQUIRED' }
+]
+

@@ -186,3 +186,17 @@ export async function getDealsByClosedDate({ date }) {
     const { result } = response
     return result
 }
+
+export async function getDealsRescheduled() {
+
+    const response = await bitrix.deals.list({
+        filter: {
+            'CATEGORY_ID': '3',
+            'STAGE_ID': 'C3:5'
+        },
+        select: ['ID', 'SOURCE_ID', 'UF_CRM_1527615815']
+    });
+
+    const { result } = response
+    return result
+}

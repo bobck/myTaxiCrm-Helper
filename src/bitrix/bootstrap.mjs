@@ -5,6 +5,7 @@ import { syncRevenueToDealsJob } from "./jobs/sync-drivers-revenue-to-deal-job.m
 import { getAndSaveLeadsByCreatedDateJob } from "./jobs/get-and-save-leads-by-created-date-job.mjs";
 import { getAndSaveDealsByInterviewDateJob } from "./jobs/get-and-save-deals-by-interview-date-job.mjs";
 import { getAndSaveDealsByClosedDateJob } from "./jobs/get-and-save-deals-by-closed-date-job.mjs";
+import { getAndSaveDealsRescheduledJob } from "./jobs/get-and-save-deals-rescheduled-job.mjs";
 
 export function bitrixJobs() {
     console.log('bitrixJobs...')
@@ -16,6 +17,7 @@ export function bitrixJobs() {
         getAndSaveLeadsByCreatedDateJob.start();
         getAndSaveDealsByInterviewDateJob.start();
         getAndSaveDealsByClosedDateJob.start();
+        getAndSaveDealsRescheduledJob.start();
     } catch (error) {
         console.error('sync error, app down...')
         console.error({ time: new Date(), error });
@@ -28,6 +30,7 @@ export function bitrixJobs() {
         getAndSaveLeadsByCreatedDateJob.stop();
         getAndSaveDealsByInterviewDateJob.stop();
         getAndSaveDealsByClosedDateJob.stop();
+        getAndSaveDealsRescheduledJob.stop();
 
         bitrixJobs();
     }

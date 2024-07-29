@@ -1,6 +1,7 @@
 import { getAndSaveLeadsByCreatedDate } from "./get-and-save-leads-by-created-date.mjs";
 import { getAndSaveDealsByInterviewDate } from "./get-and-save-deals-by-interview-date.mjs";
 import { getAndSaveDealsByClosedDate } from "./get-and-save-deals-by-closed-date.mjs";
+import { getAndSaveDealsRescheduled } from "./get-and-save-deals-rescheduled.mjs";
 import { DateTime } from "luxon";
 
 
@@ -13,11 +14,11 @@ import { DateTime } from "luxon";
     if (!days) {
         return
     }
-
-    const manualDate = DateTime.now().setZone('Europe/Kyiv').minus({ days }).toFormat('yyyy-MM-dd');
+    const dateTime = DateTime.now().setZone('Europe/Kyiv').minus({ days })
+    const manualDate = dateTime.toFormat('yyyy-MM-dd');
 
     getAndSaveLeadsByCreatedDate(manualDate)
     getAndSaveDealsByInterviewDate(manualDate)
     getAndSaveDealsByClosedDate(manualDate)
-
+    getAndSaveDealsRescheduled(dateTime)
 })();

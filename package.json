@@ -28,6 +28,7 @@
     "leads": "ENV=TEST node -r dotenv/config src/bitrix/modules/get-and-save-leads-by-created-date.mjs",
     "dealshri": "ENV=TEST node -r dotenv/config src/bitrix/modules/get-and-save-deals-by-interview-date.mjs",
     "dealshrc": "ENV=TEST node -r dotenv/config src/bitrix/modules/get-and-save-deals-by-closed-date.mjs",
+    "dealshrrs": "ENV=TEST node -r dotenv/config src/bitrix/modules/get-and-save-deals-rescheduled.mjs",
     "manualsync": "node -r dotenv/config src/bitrix/modules/manual-get-and-save-leads-and-deals.mjs"
   },
   "author": "bobockx10@gmail.com <bobozlo>",

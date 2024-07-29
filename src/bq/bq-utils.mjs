@@ -6,7 +6,8 @@ import {
     dealsHrClosedTableSchema,
     dealsHrInterviewTableSchema,
     leadsTableSchema,
-    fleetsIncomAndExpensesReportTableSchema
+    fleetsIncomAndExpensesReportTableSchema,
+    dealsHrRescheduledTableSchema
 } from './schemas.mjs';
 
 const bigquery = new BigQuery({
@@ -143,4 +144,31 @@ export async function createOrResetDealsHrClosedTable({ bqTableId }) {
     };
     const response = await bigquery.dataset(process.env.BQ_DATASET_ID).createTable(bqTableId, options)
     console.log({ response })
+}
+
+export async function createOrResetDealsHrRescheduledTable({ bqTableId }) {
+    console.log({ time: new Date(), message: 'createOrResetDealsHrRescheduledTable' })
+
+    try {
+        await bigquery.dataset(process.env.BQ_DATASET_ID).table(bqTableId).delete()
+    } catch (e) {
+
+    }
+
+    const options = {
+        schema: dealsHrRescheduledTableSchema,
+        location: 'US',
+    };
+    const response = await bigquery.dataset(process.env.BQ_DATASET_ID).createTable(bqTableId, options)
+    console.log({ response })
+}
+
+export async function clearTableByWeekAndYear({ bqTableId, week, year }) {
+    const query = `DELETE FROM \`${process.env.BQ_PROJECT_NAME}.${process.env.BQ_DATASET_ID}.${bqTableId}\` WHERE year = ${year} and week = ${week}`;
+    const options = {
+        query: query,
+        location: 'US',
+    };
+
+    await bigquery.query(options);
 }
