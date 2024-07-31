@@ -71,6 +71,7 @@ export const workingDriversTableSchema = [
     { name: 'start_working_at', type: 'TIMESTAMP', mode: 'REQUIRED' },
     { name: 'temporary_leave_at', type: 'TIMESTAMP', mode: 'NULLABLE' },
     { name: 'fired_out_time', type: 'TIMESTAMP', mode: 'NULLABLE' },
+    { name: 'type', type: 'STRING', mode: 'REQUIRED' },
     { name: 'date', type: 'DATE', mode: 'REQUIRED' }
 ]
 

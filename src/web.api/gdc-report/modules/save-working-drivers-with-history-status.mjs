@@ -27,8 +27,36 @@ export async function saveWorkingDriversWithHistoryStatus(manualDate) {
     }
 
     const jsonData = rows.map(row => {
+
+        let type
+
+        const { temporary_leave_at, fired_out_time } = row
+
+        if (!temporary_leave_at && !fired_out_time) {
+            type = 'NEW'
+        }
+
+        if (temporary_leave_at && !fired_out_time) {
+            type = 'FROM_TEMPORARY'
+        }
+
+        if (!temporary_leave_at && fired_out_time) {
+            type = 'FROM_FIRED'
+        }
+
+        if (temporary_leave_at && fired_out_time) {
+            if (temporary_leave_at > fired_out_time) {
+                type = 'FROM_TEMPORARY'
+            }
+
+            if (temporary_leave_at < fired_out_time) {
+                type = 'FROM_FIRED'
+            }
+        }
+
         return {
             ...row,
+            type,
             date
         }
     })
