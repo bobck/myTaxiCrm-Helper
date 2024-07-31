@@ -92,7 +92,7 @@ WITH
           cs.driver_revenue,
           cs.accounting,
           cs.tariff_tax,
-          cs.total_rate_revenue_without_initial_details::NUMERIC * -1,
+          (cs.total_rate_revenue_without_initial_details::numeric + cs.tariff_tax - cs.accounting::numeric - cs.total_bonuses::numeric ) * -1,
           cs.total_bonuses * -1
         ]
       ) AS SUM

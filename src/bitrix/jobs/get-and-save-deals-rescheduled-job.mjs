@@ -1,7 +1,7 @@
 import { CronJob } from 'cron';
 import { getAndSaveDealsRescheduled } from '../modules/get-and-save-deals-rescheduled.mjs';
 
-const cronTime = '50 23 * * *';
+const cronTime = '03 0 * * *';
 
 const timeZone = 'Europe/Kiev';
 

@@ -14,7 +14,7 @@ import {
 import { dealsHrRescheduledTableSchema } from '../../bq/schemas.mjs';
 
 export async function getAndSaveDealsRescheduled(dateTime) {
-    const dateTimeReport = dateTime || DateTime.now().setZone('Europe/Kyiv')
+    const dateTimeReport = dateTime || DateTime.now().setZone('Europe/Kyiv').minus({ days: 1 })
     const week = dateTimeReport.weekNumber
     const year = dateTimeReport.year
 

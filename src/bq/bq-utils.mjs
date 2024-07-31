@@ -172,3 +172,20 @@ export async function clearTableByWeekAndYear({ bqTableId, week, year }) {
 
     await bigquery.query(options);
 }
+
+export async function createOrResetTableByName({ bqTableId, schema }) {
+    console.log({ time: new Date(), message: 'createOrResetTableByName' })
+
+    try {
+        await bigquery.dataset(process.env.BQ_DATASET_ID).table(bqTableId).delete()
+    } catch (e) {
+
+    }
+
+    const options = {
+        schema,
+        location: 'US',
+    };
+    const response = await bigquery.dataset(process.env.BQ_DATASET_ID).createTable(bqTableId, options)
+    // console.log({ response })
+}

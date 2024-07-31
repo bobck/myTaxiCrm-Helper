@@ -335,3 +335,45 @@ export async function getCompanyDriversAutoparkRevenue({ autoParksIds, fromYear,
     const { rows, rowCount } = result
     return { rows }
 }
+
+export async function getWorkingDriversWithHistoryStatus({ date }) {
+    const sql = fs.readFileSync('./src/sql/gdc-report/working_drivers_with_history_status.sql').toString();
+    const result = await pool.query(sql, [date])
+    const { rows, rowCount } = result
+    return { rows }
+}
+
+export async function getUniqWorkedDriversAndAvgLifeTime({ week, year }) {
+    const sql = fs.readFileSync('./src/sql/gdc-report/uniq_worked_drivers_and_avg_life_time.sql').toString();
+    const result = await pool.query(sql, [week, year])
+    const { rows, rowCount } = result
+    return { rows }
+}
+
+export async function getTemporaryLeaveByDriversEditingHistory({ date }) {
+    const sql = fs.readFileSync('./src/sql/gdc-report/temporary_leave_by_drivers_editing_history.sql').toString();
+    const result = await pool.query(sql, [date])
+    const { rows, rowCount } = result
+    return { rows }
+}
+
+export async function getMileagesAndHoursOnline({ week, year }) {
+    const sql = fs.readFileSync('./src/sql/gdc-report/mileages_and_hours_online.sql').toString();
+    const result = await pool.query(sql, [week, year])
+    const { rows, rowCount } = result
+    return { rows }
+}
+
+export async function getFiredByDriversLogs({ date }) {
+    const sql = fs.readFileSync('./src/sql/gdc-report/fired_by_drivers_logs.sql').toString();
+    const result = await pool.query(sql, [date])
+    const { rows, rowCount } = result
+    return { rows }
+}
+
+export async function getCarUsageReport({ date }) {
+    const sql = fs.readFileSync('./src/sql/gdc-report/car_usage_report.sql').toString();
+    const result = await pool.query(sql, [date])
+    const { rows, rowCount } = result
+    return { rows }
+}

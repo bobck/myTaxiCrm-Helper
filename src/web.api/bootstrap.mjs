@@ -20,6 +20,12 @@ import { createCRMApplicationsFromRemonlineTransactionJob } from './jobs/create-
 
 import { addNewDriversAutoparkRevenueJob } from './jobs/add-drivers-with-revenue-job.mjs'
 import { updateDriversWithRevenueJob } from './jobs/update-drivers-with-revenue-job.mjs'
+import { saveWorkingDriversWithHistoryStatusJob } from './gdc-report/jobs/save-working-drivers-with-history-status-job.mjs'
+import { saveUniqWorkedDriversAndAvgLifeTimeJob } from './gdc-report/jobs/save-uniq-worked-drivers-and-avg-life-time-job.mjs'
+import { saveTemporaryLeaveByDriversEditingHistoryJob } from './gdc-report/jobs/temporary-leave-by-drivers-editing-history-job.mjs'
+import { saveMileagesAndHoursOnlineJob } from './gdc-report/jobs/save-mileage-total-job.mjs'
+import { saveFiredByDriversLogsJob } from './gdc-report/jobs/save-fired-by-drivers-logs-job.mjs'
+import { saveCarUsageReportJob } from './gdc-report/jobs/save-car-usage-report-job.mjs'
 
 export function driversCustomTariffJobs() {
     try {
@@ -35,6 +41,13 @@ export function driversCustomTariffJobs() {
         updateDriversWithRevenueJob.start();
         addNewDriversAutoparkRevenueJob.start();
         console.log('add and update DriversWithRevenue Job runs...')
+        saveWorkingDriversWithHistoryStatusJob.start()
+        saveUniqWorkedDriversAndAvgLifeTimeJob.start()
+        saveTemporaryLeaveByDriversEditingHistoryJob.start()
+        saveMileagesAndHoursOnlineJob.start()
+        saveFiredByDriversLogsJob.start()
+        saveCarUsageReportJob.start()
+        console.log('GDC report Job runs...')
     } catch (error) {
         console.error('sync error, app down...')
         console.error({ time: new Date(), error });
@@ -51,6 +64,14 @@ export function driversCustomTariffJobs() {
 
         updateDriversWithRevenueJob.stop();
         addNewDriversAutoparkRevenueJob.stop();
+
+        saveWorkingDriversWithHistoryStatusJob.stop();
+        saveUniqWorkedDriversAndAvgLifeTimeJob.stop();
+        saveTemporaryLeaveByDriversEditingHistoryJob.stop()
+        saveMileagesAndHoursOnlineJob.stop()
+        saveFiredByDriversLogsJob.stop()
+        saveCarUsageReportJob.stop()
+
         driversCustomTariffJobs();
     }
 }

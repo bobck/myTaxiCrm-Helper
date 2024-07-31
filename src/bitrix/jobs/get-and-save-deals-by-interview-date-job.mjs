@@ -1,7 +1,7 @@
 import { CronJob } from 'cron';
 import { getAndSaveDealsByInterviewDate } from '../modules/get-and-save-deals-by-interview-date.mjs';
 
-const cronTime = '03 0 * * *';
+const cronTime = '07 0 * * *';
 
 const timeZone = 'Europe/Kiev';
 
