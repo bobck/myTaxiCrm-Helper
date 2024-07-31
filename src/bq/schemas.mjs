@@ -114,10 +114,10 @@ export const firedByDriversLogsTableSchema = [
 
 export const carUsageReportTableSchema = [
     { name: 'auto_park_id', type: 'STRING', mode: 'REQUIRED' },
-    { name: 'with_driver', type: 'STRING', mode: 'REQUIRED' },
-    { name: 'total_cars', type: 'STRING', mode: 'REQUIRED' },
-    { name: 'aviable_cars', type: 'STRING', mode: 'REQUIRED' },
-    { name: 'total_trips', type: 'STRING', mode: 'REQUIRED' },
+    { name: 'with_driver', type: 'INTEGER', mode: 'REQUIRED' },
+    { name: 'total_cars', type: 'INTEGER', mode: 'REQUIRED' },
+    { name: 'aviable_cars', type: 'INTEGER', mode: 'REQUIRED' },
+    { name: 'total_trips', type: 'INTEGER', mode: 'REQUIRED' },
     { name: 'date', type: 'DATE', mode: 'REQUIRED' }
 ] 
 
