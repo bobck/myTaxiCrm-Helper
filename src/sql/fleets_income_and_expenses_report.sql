@@ -2,7 +2,7 @@ WITH
   _cashbox_transactions AS (
     SELECT
       ct.company_id,
-      ct.auto_park_id,
+      COALESCE(ct.shared_auto_park_id,ct.auto_park_id) as auto_park_id,
       ct.week,
       ct.year,
       ct.purpose,
