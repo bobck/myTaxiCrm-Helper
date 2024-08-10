@@ -119,5 +119,20 @@ export const carUsageReportTableSchema = [
     { name: 'aviable_cars', type: 'INTEGER', mode: 'REQUIRED' },
     { name: 'total_trips', type: 'INTEGER', mode: 'REQUIRED' },
     { name: 'date', type: 'DATE', mode: 'REQUIRED' }
-] 
+]
+
+export const carsRoutsReportTableSchema = [
+    { name: 'period_from', type: 'TIMESTAMP', mode: 'REQUIRED' },
+    { name: 'period_to', type: 'TIMESTAMP', mode: 'REQUIRED' },
+    { name: 'route_id', type: 'STRING', mode: 'REQUIRED' },
+    { name: 'trip_id', type: 'STRING', mode: 'NULLABLE' },
+    { name: 'mileage', type: 'INTEGER', mode: 'REQUIRED' },
+    { name: 'mapon_id', type: 'STRING', mode: 'REQUIRED' },
+    { name: 'license_plate', type: 'STRING', mode: 'REQUIRED' },
+    { name: 'auto_park_name', type: 'STRING', mode: 'REQUIRED' },
+    { name: 'driver_id', type: 'STRING', mode: 'REQUIRED' },
+    { name: 'driver_name', type: 'STRING', mode: 'REQUIRED' },
+    { name: 'auto_park_id', type: 'STRING', mode: 'REQUIRED' },
+    { name: 'date', type: 'DATE', mode: 'REQUIRED' }
+]
 

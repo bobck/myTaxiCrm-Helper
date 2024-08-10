@@ -189,3 +189,10 @@ export async function createOrResetTableByName({ bqTableId, schema }) {
     const response = await bigquery.dataset(process.env.BQ_DATASET_ID).createTable(bqTableId, options)
     // console.log({ response })
 }
+
+export async function generateCarsRoutsReport({ date }) {
+    const sqlp = fs.readFileSync('./src/sql/cars_routs_report.sql').toString();
+    const result = await pool.query(sqlp, [date]);
+    const { rows } = result
+    return { rows }
+}
