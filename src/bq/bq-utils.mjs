@@ -173,6 +173,16 @@ export async function clearTableByWeekAndYear({ bqTableId, week, year }) {
     await bigquery.query(options);
 }
 
+export async function clearTableByWeekAndYearAndAutoParkId({ bqTableId, week, year, autoParkId }) {
+    const query = `DELETE FROM \`${process.env.BQ_PROJECT_NAME}.${process.env.BQ_DATASET_ID}.${bqTableId}\` WHERE year = ${year} and week = ${week} and auto_park_id = '${autoParkId}'`;
+    const options = {
+        query: query,
+        location: 'US',
+    };
+
+    await bigquery.query(options);
+}
+
 export async function createOrResetTableByName({ bqTableId, schema }) {
     console.log({ time: new Date(), message: 'createOrResetTableByName' })
 
@@ -193,6 +203,13 @@ export async function createOrResetTableByName({ bqTableId, schema }) {
 export async function generateCarsRoutsReport({ date }) {
     const sqlp = fs.readFileSync('./src/sql/cars_routs_report.sql').toString();
     const result = await pool.query(sqlp, [date]);
+    const { rows } = result
+    return { rows }
+}
+
+export async function generatePolandBookkeepingReport({ periodFrom, periodTo, autoParkId }) {
+    const sqlp = fs.readFileSync('./src/sql/poland_bookkeeping.sql').toString();
+    const result = await pool.query(sqlp, [periodFrom, periodTo, autoParkId]);
     const { rows } = result
     return { rows }
 }

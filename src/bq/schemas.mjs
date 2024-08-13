@@ -136,3 +136,23 @@ export const carsRoutsReportTableSchema = [
     { name: 'date', type: 'DATE', mode: 'REQUIRED' }
 ]
 
+export const polandBookkeepingReportTableSchema = [
+    { name: 'license_plate', type: 'STRING', mode: 'REQUIRED' },
+    { name: 'driver_name', type: 'STRING', mode: 'REQUIRED' },
+    { name: 'bill_period_start', type: 'DATE', mode: 'REQUIRED' },
+    { name: 'bill_period_end', type: 'DATE', mode: 'REQUIRED' },
+    { name: 'bill_days', type: 'INTEGER', mode: 'REQUIRED' },
+    { name: 'car_contract_start_date', type: 'DATE', mode: 'REQUIRED' },
+    { name: 'auto_park_name', type: 'STRING', mode: 'REQUIRED' },
+    { name: 'auto_park_id', type: 'STRING', mode: 'REQUIRED' },
+    { name: 'model_id', type: 'STRING', mode: 'REQUIRED' },
+    { name: 'model_price', type: 'INTEGER', mode: 'REQUIRED' },
+    { name: 'kwota', type: 'INTEGER', mode: 'REQUIRED' },
+    { name: 'car_owner_name', type: 'STRING', mode: 'REQUIRED' },
+    { name: 'owner_account_number', type: 'STRING', mode: 'REQUIRED' },
+    { name: 'period_from', type: 'DATE', mode: 'REQUIRED' },
+    { name: 'period_to', type: 'DATE', mode: 'REQUIRED' },
+    { name: 'year', type: 'INTEGER', mode: 'REQUIRED' },
+    { name: 'week', type: 'INTEGER', mode: 'REQUIRED' }
+]
+
