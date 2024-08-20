@@ -5,6 +5,7 @@ import {
 } from "../remonline.queries.mjs";
 import { getOrders } from "../remonline.utils.mjs";
 import { remonlineTokenToEnv } from "../remonline.api.mjs";
+import { chunkArray } from "../../bitrix/bitrix.utils.mjs";
 
 export async function checkIsSidStatusWasUpdated() {
 
@@ -12,7 +13,13 @@ export async function checkIsSidStatusWasUpdated() {
     //TODO нужно обновлять все статусы. вдруг обновится статус там где ожидается оплата
     const result = await getSidsNotReadyDoBeClosed({ statusesToBeClosed: statusesToBeClosed.join(',') })
     const ids = result.map(r => r.sid_id)
-    const { orders } = await getOrders({ ids })
+
+    const idsChunked = chunkArray(ids, 50);
+    const orders = []
+    for (let chunk of idsChunked) {
+        const { orders: _orders } = await getOrders({ ids: chunk })
+        orders.push(..._orders)
+    }
 
     console.log({ time: new Date(), message: 'checkIsSidStatusWasUpdated', sidsNotReadyDoBeClosed: result.length, orders: orders.length })
 
