@@ -45,8 +45,7 @@ WITH
       drivers_with_income dwi
       JOIN (
         SELECT
-          s.driver_id,
-          x.driver_id_rent,
+          COALESCE(s.driver_id,x.driver_id_rent) AS driver_id,
           s.event_period_start,
           s.event_period_end,
           s.car_id,
@@ -65,7 +64,6 @@ WITH
           AND s.is_latest_version = TRUE
       ) AS ss ON (
         ss.driver_id = dwi.driver_id
-        OR ss.driver_id_rent = dwi.driver_id
       )
       AND (
         ss.event_period_start BETWEEN $1
