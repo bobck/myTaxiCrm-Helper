@@ -9,3 +9,4 @@ WHERE
   dbr.auto_park_id = ANY($2)
   AND dbr.company_id = $1
   AND dbr.driver_id is null
+  AND dbr.is_enabled = true

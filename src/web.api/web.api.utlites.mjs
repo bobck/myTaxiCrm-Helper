@@ -187,6 +187,9 @@ export async function getDiscountBonusesByAutoparksAndIntegrationsByDay({ dayOfW
         createDriverBonusRulesInput.bonusRules.avgCheckRules = []
 
         for (let avg_check_rule of avg_check_rules) {
+            if (avg_check_rule.to === 1000000) {
+                delete avg_check_rule.to;
+            }
             createDriverBonusRulesInput.bonusRules.avgCheckRules.push(avg_check_rule);
         }
 

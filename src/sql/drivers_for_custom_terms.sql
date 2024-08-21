@@ -84,6 +84,7 @@ FROM
       driver_bonus_rules dbr
     WHERE
       dbr.driver_id IS NOT NULL
+      AND dbr.is_enabled = TRUE
   ) dbr ON dbr.driver_id = d.id
   LEFT JOIN (
     SELECT
