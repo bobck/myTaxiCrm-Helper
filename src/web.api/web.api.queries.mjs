@@ -39,13 +39,44 @@ export async function saveCreatedDriverBonusRuleId({ autoParkId, driverId, bonus
 
 
 export async function getUndeletedDriversCustomBonuses() {
-    const sql = `SELECT auto_park_id,bonus_rule_id FROM drivers_custom_bonus_rules_ids WHERE is_deleted = false`
+    const sql = `SELECT auto_park_id,bonus_rule_id FROM drivers_custom_bonus_rules_ids WHERE is_deleted = false AND is_not_found = false`
     const undeletedDriversCustomBonuses = await db.all(sql)
     return { undeletedDriversCustomBonuses }
 }
 
 export async function markDriverCustomBonusRulesAsDeleted({ bonusRuleId }) {
     const sql = `UPDATE drivers_custom_bonus_rules_ids SET is_deleted=true WHERE bonus_rule_id = ?`
+    await db.run(
+        sql,
+        bonusRuleId
+    )
+}
+
+export async function markDriverCustomBonusRulesAsNotFound({ bonusRuleId }) {
+    const sql = `UPDATE drivers_custom_bonus_rules_ids SET is_not_found=true WHERE bonus_rule_id = ?`
+    await db.run(
+        sql,
+        bonusRuleId
+    )
+}
+
+export async function getNotFoundDriversCustomBonuses() {
+    const sql = `SELECT driver_id,bonus_rule_id FROM drivers_custom_bonus_rules_ids WHERE is_not_found = true AND is_deleted = false`
+    const notFoundDriversCustomBonuses = await db.all(sql)
+    return { notFoundDriversCustomBonuses }
+}
+
+export async function replaceOldDriverCustomBonusRulesWithNewId({ bonusRuleId, newBonusRuleId }) {
+    const sql = `UPDATE drivers_custom_bonus_rules_ids SET bonus_rule_id=?,is_not_found=false WHERE bonus_rule_id = ?`
+    await db.run(
+        sql,
+        newBonusRuleId,
+        bonusRuleId
+    )
+}
+
+export async function markDriverCustomBonusRulesIsUnDeletedle({ bonusRuleId }) {
+    const sql = `UPDATE drivers_custom_bonus_rules_ids SET is_deleted=null WHERE bonus_rule_id = ?`
     await db.run(
         sql,
         bonusRuleId

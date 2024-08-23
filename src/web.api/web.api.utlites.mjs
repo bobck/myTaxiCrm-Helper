@@ -56,8 +56,8 @@ async function makeCRMRequestWithRetry({ body }) {
                 throw new Error(message);
             }
 
-            if (message == 'driver bonus rules not found') {
-                throw new Error(message);
+            if (message == 'Driver bonus rule not found') {
+                return { bonus_not_found: true }
             }
 
             console.error(`Attempt ${retryCount + 1} failed. Retrying in ${retryDelay}ms.`);
@@ -378,5 +378,12 @@ export async function getCarUsageReport({ date }) {
     const sql = fs.readFileSync('./src/sql/gdc-report/car_usage_report.sql').toString();
     const result = await pool.query(sql, [date])
     const { rows, rowCount } = result
+    return { rows }
+}
+
+export async function getDriversWithActiveBonusesByDriverId({ driversIds }) {
+    const sqlp = fs.readFileSync('./src/sql/drivers_with_active_bonuses.sql').toString();
+    const result = await pool.query(sqlp, [driversIds]);
+    const { rows } = result
     return { rows }
 }

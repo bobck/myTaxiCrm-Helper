@@ -1,23 +1,10 @@
-import {
-    deleteDriversCustomTariffJob
-} from './jobs/delete-drivers-custom-tarrif-job.mjs'
-
-import {
-    setDriversCustomTariffJob
-} from './jobs/set-drivers-custom-tarrif-job.mjs'
-
-import {
-    setDriversCustomBonusJob
-} from './jobs/set-drivers-custom-bonus-job.mjs'
-
-import {
-    deleteDriversCustomBonusJob
-} from './jobs/delete-drivers-custom-bonus-job.mjs'
-
+import { deleteDriversCustomTariffJob } from './jobs/delete-drivers-custom-tarrif-job.mjs'
+import { setDriversCustomTariffJob } from './jobs/set-drivers-custom-tarrif-job.mjs'
+import { setDriversCustomBonusJob } from './jobs/set-drivers-custom-bonus-job.mjs'
+import { deleteDriversCustomBonusJob } from './jobs/delete-drivers-custom-bonus-job.mjs'
+import { updateDriversCustomNotFoundBonusJob } from './jobs/update-drivers-custom-bonus-job.mjs'
 import { saveContractorsListJob } from './jobs/save-and-update-contractors.mjs'
-
 import { createCRMApplicationsFromRemonlineTransactionJob } from './jobs/create-applications-from-remonline-transactions.mjs'
-
 import { addNewDriversAutoparkRevenueJob } from './jobs/add-drivers-with-revenue-job.mjs'
 import { updateDriversWithRevenueJob } from './jobs/update-drivers-with-revenue-job.mjs'
 import { saveWorkingDriversWithHistoryStatusJob } from './gdc-report/jobs/save-working-drivers-with-history-status-job.mjs'
@@ -34,6 +21,7 @@ export function driversCustomTariffJobs() {
 
         setDriversCustomBonusJob.start();
         deleteDriversCustomBonusJob.start();
+        updateDriversCustomNotFoundBonusJob.start();
         console.log('driversCustomTariff And Bonus Jobs runs...')
         saveContractorsListJob.start();
         createCRMApplicationsFromRemonlineTransactionJob.start();
@@ -57,7 +45,7 @@ export function driversCustomTariffJobs() {
 
         setDriversCustomBonusJob.stop();
         deleteDriversCustomBonusJob.stop();
-
+        updateDriversCustomNotFoundBonusJob.stop();
         saveContractorsListJob.stop();
 
         createCRMApplicationsFromRemonlineTransactionJob.stop();

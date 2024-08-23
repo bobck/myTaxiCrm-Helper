@@ -1,13 +1,18 @@
 import {
     getDiscountBonusesByAutoparksAndIntegrationsByDay,
     getDriversCandidatsForCustomTerms,
-    makeCRMRequestlimited
+    makeCRMRequestlimited,
+    getDriversWithActiveBonusesByDriverId
 } from '../web.api.utlites.mjs'
 
 import {
     saveCreatedDriverBonusRuleId,
     markDriverCustomBonusRulesAsDeleted,
-    getUndeletedDriversCustomBonuses
+    markDriverCustomBonusRulesAsNotFound,
+    getNotFoundDriversCustomBonuses,
+    getUndeletedDriversCustomBonuses,
+    markDriverCustomBonusRulesIsUnDeletedle,
+    replaceOldDriverCustomBonusRulesWithNewId
 } from '../web.api.queries.mjs';
 
 export async function setDriversCustomBonus() {
@@ -49,7 +54,7 @@ export async function setDriversCustomBonus() {
         return (was_fired_days >= 14 || !was_fired_days) && !custom_bonus_created_at && !rent_event_id
     })
     console.log({ driversForCustomTermsLength: driversForCustomTerms.length })
-    
+
     const discountBonusesByAutoparksAndIntegrationsWithDriver = []
 
     for (let driver of driversForCustomTerms) {
@@ -114,8 +119,11 @@ export async function deleteDriversCustomBonus() {
 
         try {
             const response = await makeCRMRequestlimited({ body });
-            const { data } = response
-            // console.log({ data })
+            const { data, bonus_not_found } = response
+            if (bonus_not_found) {
+                await markDriverCustomBonusRulesAsNotFound({ bonusRuleId });
+                continue
+            }
             await markDriverCustomBonusRulesAsDeleted({ bonusRuleId });
 
         } catch (errors) {
@@ -128,10 +136,53 @@ export async function deleteDriversCustomBonus() {
 
 }
 
+export async function updateDriversCustomNotFoundBonus() {
+    const { notFoundDriversCustomBonuses } = await getNotFoundDriversCustomBonuses();
+    if (notFoundDriversCustomBonuses.length == 0) {
+        return
+    }
+    const driversIds = notFoundDriversCustomBonuses.map(row => row.driver_id)
+    const { rows } = await getDriversWithActiveBonusesByDriverId({ driversIds })
+
+    const firstCopy = [...rows];
+
+    const notFoundDriversCustomBonusesWithNewBonusId = notFoundDriversCustomBonuses.map(item => {
+        const index = firstCopy.findIndex(f => f.driver_id === item.driver_id);
+
+        if (index !== -1) {
+            const newItem = {
+                ...item,
+                new_bonus_rule_id: firstCopy[index].id
+            };
+
+            firstCopy.splice(index, 1);
+
+            return newItem;
+        }
+
+        return item;
+    });
+
+    for (let newBonusIdWithDriver of notFoundDriversCustomBonusesWithNewBonusId) {
+        const { bonus_rule_id, new_bonus_rule_id } = newBonusIdWithDriver
+
+        if (!new_bonus_rule_id) {
+            await markDriverCustomBonusRulesIsUnDeletedle({ bonusRuleId: bonus_rule_id });
+            continue
+        }
+
+        await replaceOldDriverCustomBonusRulesWithNewId({ bonusRuleId: bonus_rule_id, newBonusRuleId: new_bonus_rule_id });
+    }
+}
+
 if (process.env.ENV == "SET") {
     setDriversCustomBonus();
 }
 
 if (process.env.ENV == "DEL") {
     deleteDriversCustomBonus();
+}
+
+if (process.env.ENV == "UPD") {
+    updateDriversCustomNotFoundBonus();
 }
