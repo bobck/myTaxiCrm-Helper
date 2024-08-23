@@ -3,7 +3,10 @@ import path from 'path'
 import os from 'os'
 import { DateTime } from "luxon";
 
-import { getWorkingDriversWithHistoryStatus } from "../../web.api.utlites.mjs";
+import {
+    getWorkingDriversWithHistoryStatus,
+    polandAutoParksIds
+} from "../../web.api.utlites.mjs";
 import { clearTableByDate } from "../../../bq/bq-utils.mjs";
 import { workingDriversTableSchema } from "../../../bq/schemas.mjs";
 import {
@@ -26,11 +29,17 @@ export async function saveWorkingDriversWithHistoryStatus(manualDate) {
         return
     }
 
-    const jsonData = rows.map(row => {
+    const jsonData = []
+
+    for (let row of rows) {
+
+        const { temporary_leave_at, fired_out_time, integrations, auto_park_id, id } = row
+
+        if (integrations == 0 && polandAutoParksIds.includes(auto_park_id)) {
+            continue
+        }
 
         let type
-
-        const { temporary_leave_at, fired_out_time } = row
 
         if (!temporary_leave_at && !fired_out_time) {
             type = 'NEW'
@@ -54,12 +63,16 @@ export async function saveWorkingDriversWithHistoryStatus(manualDate) {
             }
         }
 
-        return {
+        jsonData.push({
             ...row,
             type,
             date
-        }
-    })
+        })
+    }
+
+    if (jsonData.length == 0) {
+        return
+    }
 
     await clearTableByDate({ bqTableId, date });
     const tempFilePath = path.join(os.tmpdir(), 'temp_data_new_drivers_added.json');

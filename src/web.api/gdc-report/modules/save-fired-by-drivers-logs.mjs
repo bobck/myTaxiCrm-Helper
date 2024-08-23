@@ -3,7 +3,10 @@ import path from 'path'
 import os from 'os'
 import { DateTime } from "luxon";
 
-import { getFiredByDriversLogs } from "../../web.api.utlites.mjs";
+import {
+    getFiredByDriversLogs,
+    polandAutoParksIds
+} from "../../web.api.utlites.mjs";
 import { clearTableByDate } from "../../../bq/bq-utils.mjs";
 import { firedByDriversLogsTableSchema } from "../../../bq/schemas.mjs";
 import {
@@ -13,7 +16,7 @@ import {
 
 const bqTableId = 'fired_by_drivers_logs'
 
-const keywords = ['дубл', 'подмен', 'підмін', 'задвої','задвоил'];
+const keywords = ['дубл', 'подмен', 'підмін', 'задвої', 'задвоил'];
 
 export async function saveFiredByDriversLogs(manualDate) {
     const date = manualDate || DateTime.now().setZone('Europe/Kyiv').minus({ days: 1 }).toFormat('yyyy-MM-dd');
@@ -31,7 +34,12 @@ export async function saveFiredByDriversLogs(manualDate) {
     const jsonData = []
 
     for (let row of rows) {
-        let { comment } = row
+        let { comment, integrations, auto_park_id } = row
+
+        if (integrations == 0 && polandAutoParksIds.includes(auto_park_id)) {
+            continue
+        }
+
         comment = comment.toLowerCase();
         comment = comment.replace(/\s+/g, '');
         if (keywords.some(keyword => comment.includes(keyword))) {

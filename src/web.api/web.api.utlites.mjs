@@ -387,3 +387,9 @@ export async function getDriversWithActiveBonusesByDriverId({ driversIds }) {
     const { rows } = result
     return { rows }
 }
+
+export const polandAutoParksIds = [
+    'de4bf8ba-30c2-452c-a688-104063052961',
+    '58ea1e9e-ebdd-4c4d-870c-6ef06e868c60',
+    'be6ab23a-d6ba-4add-b0f7-cfb8abd0586b'
+]
