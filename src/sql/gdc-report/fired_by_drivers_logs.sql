@@ -2,7 +2,8 @@ SELECT DISTINCT
   ON (dl.driver_id) dl.driver_id,
   dl.auto_park_id,
   dl.event_time,
-  dll.TYPE AS is_restored
+  dll.TYPE AS is_restored,
+  dl.comment
 FROM
   drivers_logs dl
   LEFT JOIN drivers_logs dll ON dll.driver_id = dl.driver_id

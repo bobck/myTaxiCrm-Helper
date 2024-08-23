@@ -13,6 +13,8 @@ import {
 
 const bqTableId = 'fired_by_drivers_logs'
 
+const keywords = ['дубл', 'подмен', 'підмін', 'задвої','задвоил'];
+
 export async function saveFiredByDriversLogs(manualDate) {
     const date = manualDate || DateTime.now().setZone('Europe/Kyiv').minus({ days: 1 }).toFormat('yyyy-MM-dd');
 
@@ -26,12 +28,25 @@ export async function saveFiredByDriversLogs(manualDate) {
         return
     }
 
-    const jsonData = rows.map(row => {
-        return {
+    const jsonData = []
+
+    for (let row of rows) {
+        let { comment } = row
+        comment = comment.toLowerCase();
+        comment = comment.replace(/\s+/g, '');
+        if (keywords.some(keyword => comment.includes(keyword))) {
+            continue;
+        }
+
+        jsonData.push({
             ...row,
             date
-        }
-    })
+        })
+    }
+
+    if (jsonData.length == 0) {
+        return
+    }
 
     await clearTableByDate({ bqTableId, date });
     const tempFilePath = path.join(os.tmpdir(), 'temp_data_fired_by_drivers_logs.json');
