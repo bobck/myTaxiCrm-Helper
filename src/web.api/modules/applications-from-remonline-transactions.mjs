@@ -119,12 +119,12 @@ export async function createCRMApplicationsFromRemonlineTransaction() {
                     const { success } = payApplicationResponse
                     await updateSavedCashlessApplicationId({ id: applicationId, status: 'PAYED' })
                 } catch (e) {
-                    console.error({ e, applicationId })
+                    console.error({ date: new Date(), message: e?.message, applicationId })
                     await updateSavedCashlessApplicationId({ id: applicationId, status: JSON.stringify(e) })
                 }
 
             } catch (error) {
-                console.error({ transactionId, created_at, cashboxId, error });
+                console.error({ date: new Date(), error, transactionId, created_at, cashboxId });
                 break;
             }
 

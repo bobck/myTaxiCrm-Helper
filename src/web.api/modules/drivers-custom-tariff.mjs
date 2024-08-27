@@ -92,8 +92,8 @@ export async function setDriversCustomTariff() {
             console.log({ tariffId, driverId })
             await saveCreatedDriverCustomTariffId({ tariffId, driverId });
 
-        } catch (errors) {
-            console.error({ date: new Date(), createDriverCustomTariffInput, errors })
+        } catch (e) {
+            console.error({ date: new Date(), createDriverCustomTariffInput, message: e?.message })
             continue
         }
     }
@@ -122,10 +122,9 @@ export async function deleteDriversCustomTariff() {
             // console.log({ data })
             await markDriverCustomTariffAsDeleted({ tariffId });
 
-        } catch (errors) {
-            console.error({ date: new Date(), tariffId, errors })
+        } catch (e) {
+            console.error({ date: new Date(), tariffId, message: e?.message })
             continue
-
         }
 
     }

@@ -60,13 +60,13 @@ async function makeCRMRequestWithRetry({ body }) {
                 return { bonus_not_found: true }
             }
 
-            console.error(`Attempt ${retryCount + 1} failed. Retrying in ${retryDelay}ms.`);
+            // console.error(`Attempt ${retryCount + 1} failed. Retrying in ${retryDelay}ms.`);
 
             if (retryCount < (maxRetries - 1)) {
                 await setTimeout(retryDelay);
                 retryDelay *= 2;
             } else {
-                console.error({ error });
+                console.error({ message: 'Max retries reached', error });
                 throw new Error('Max retries reached. Unable to complete the request.');
             }
         }
