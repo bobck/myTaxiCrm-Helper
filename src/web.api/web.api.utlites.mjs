@@ -50,6 +50,11 @@ async function makeCRMRequestWithRetry({ body }) {
 
             return json;
         } catch (error) {
+            if (!Array.isArray(error)) {
+                console.log({error})
+                throw error
+            }
+
             const [firstError] = error || []
             const { message } = firstError || {}
             if (message == 'Cashbox balance after transaction become negative') {
