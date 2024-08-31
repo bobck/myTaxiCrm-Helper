@@ -177,8 +177,8 @@ export async function getCashboxTransactions(
 
         return { transactions: _transactions }
     } catch (e) {
-        console.error({ function: 'getCashboxTransactions', e, response_status: response.status })
-        throw e
+        console.error({ function: 'getCashboxTransactions', e: e?.message, response_status: response.status })
+        throw await response.text();
     }
 
 }
