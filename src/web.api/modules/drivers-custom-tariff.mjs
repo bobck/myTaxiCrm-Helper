@@ -123,7 +123,7 @@ export async function deleteDriversCustomTariff() {
             await markDriverCustomTariffAsDeleted({ tariffId });
 
         } catch (e) {
-            console.error({ date: new Date(), tariffId, message: e?.message })
+            console.error({ date: new Date(), tariffId, message: e?.message, function: 'deleteDriversCustomTariff' })
             continue
         }
 
