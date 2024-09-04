@@ -141,7 +141,7 @@ export async function getCashboxTransactions(
 
     const response = await fetch(`${process.env.REMONLINE_API}/cashbox/report/${cashboxId}?token=${process.env.REMONLINE_API_TOKEN}&page=${_page}${createdAtUrl}&sort_dir=asc`);
 
-    if (response.status == 414) {
+    if (response.status == 414 || response.status == 503) {
         throw await response.text()
     }
 
@@ -178,7 +178,7 @@ export async function getCashboxTransactions(
         return { transactions: _transactions }
     } catch (e) {
         console.error({ function: 'getCashboxTransactions', e: e?.message, response_status: response.status })
-        throw await response.text();
+        throw response.status;
     }
 
 }

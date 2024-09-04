@@ -132,7 +132,7 @@ export async function createCRMApplicationsFromRemonlineTransaction() {
             }
         } catch (e) {
             console.error({
-                message: `Skip remonlineCashboxId:${remonlineCashboxId} in createCRMApplicationsFromRemonlineTransaction`,
+                message: `Skip remonlineCashboxId: ${remonlineCashboxId} in createCRMApplicationsFromRemonlineTransaction`,
                 reason: e
             });
         }
