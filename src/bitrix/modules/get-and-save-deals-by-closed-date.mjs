@@ -28,13 +28,14 @@ export async function getAndSaveDealsByClosedDate(manualDate) {
     }
 
     const jsonData = result.map(row => {
-        const { ID, SOURCE_ID, STAGE_ID, UF_CRM_1527615815 } = row
+        const { ID, SOURCE_ID, STAGE_ID, UF_CRM_1527615815, UF_CRM_1725629985727 } = row
         return {
             id: ID,
             source_id: SOURCE_ID,
             city_id: UF_CRM_1527615815,
             stage_id: STAGE_ID,
-            date
+            date,
+            is_from_fired: (UF_CRM_1725629985727 == '1') ? true : false,
         }
     })
 

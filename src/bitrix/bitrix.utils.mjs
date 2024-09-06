@@ -180,7 +180,7 @@ export async function getDealsByClosedDate({ date }) {
             'CATEGORY_ID': '3',
             'CLOSED': 'Y'
         },
-        select: ['ID', 'SOURCE_ID', 'STAGE_ID', 'UF_CRM_1527615815']
+        select: ['ID', 'SOURCE_ID', 'STAGE_ID', 'UF_CRM_1527615815','UF_CRM_1725629985727']
     });
 
     const { result } = response

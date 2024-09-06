@@ -54,7 +54,8 @@ export const dealsHrClosedTableSchema = [
     { name: 'source_id', type: 'STRING', mode: 'NULLABLE' },
     { name: 'city_id', type: 'STRING', mode: 'NULLABLE' },
     { name: 'stage_id', type: 'STRING', mode: 'REQUIRED' },
-    { name: 'date', type: 'DATE', mode: 'REQUIRED' }
+    { name: 'date', type: 'DATE', mode: 'REQUIRED' },
+    { name: 'is_from_fired', type: 'BOOLEAN', mode: 'REQUIRED' }
 ]
 
 export const dealsHrRescheduledTableSchema = [
