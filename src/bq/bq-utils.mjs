@@ -112,6 +112,16 @@ export async function clearTableByDate({ bqTableId, date }) {
     await bigquery.query(options);
 }
 
+export async function clearTable({ bqTableId }) {
+    const query = `DELETE FROM \`${process.env.BQ_PROJECT_NAME}.${process.env.BQ_DATASET_ID}.${bqTableId}\` where true = true`;
+    const options = {
+        query: query,
+        location: 'US',
+    };
+
+    await bigquery.query(options);
+}
+
 export async function createOrResetDealsHrInterviewTable({ bqTableId }) {
     console.log({ time: new Date(), message: 'createOrResetDealsHrInterviewTable' })
 

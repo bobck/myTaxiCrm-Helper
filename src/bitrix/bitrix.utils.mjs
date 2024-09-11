@@ -180,7 +180,7 @@ export async function getDealsByClosedDate({ date }) {
             'CATEGORY_ID': '3',
             'CLOSED': 'Y'
         },
-        select: ['ID', 'SOURCE_ID', 'STAGE_ID', 'UF_CRM_1527615815','UF_CRM_1725629985727']
+        select: ['ID', 'SOURCE_ID', 'STAGE_ID', 'UF_CRM_1527615815', 'UF_CRM_1725629985727']
     });
 
     const { result } = response
@@ -198,5 +198,49 @@ export async function getDealsRescheduled() {
     });
 
     const { result } = response
+    return result
+}
+
+export async function getManifoldDeals() {
+
+    const response = await bitrix.deals.list({
+        filter: {
+            'CATEGORY_ID': '42'
+        },
+        select: ['ID']
+    });
+
+    const { result } = response
+    return result
+}
+
+export async function getDeals({ ids }) {
+
+    let batchObj = {}
+
+    for (let id of ids) {
+        const params = {
+            'ID': id,
+        }
+        batchObj[id] = { method: Method.CRM_DEAL_GET, params }
+    }
+
+    const { result, time } = await bitrix.batch(batchObj)
+    return result
+}
+
+
+export async function getContacts({ ids }) {
+
+    let batchObj = {}
+
+    for (let id of ids) {
+        const params = {
+            'ID': id,
+        }
+        batchObj[id] = { method: Method.CRM_CONTACT_GET, params }
+    }
+
+    const { result, time } = await bitrix.batch(batchObj)
     return result
 }

@@ -31,7 +31,9 @@
     "dealshrrs": "ENV=TEST node -r dotenv/config src/bitrix/modules/get-and-save-deals-rescheduled.mjs",
     "manualsync": "node -r dotenv/config src/bitrix/modules/manual-get-and-save-leads-and-deals.mjs",
     "carsrouts": "ENV=TEST node -r dotenv/config src/bq/modules/generate-and-save-cars-routs-report.mjs",
-    "book": "ENV=TEST node -r dotenv/config src/bq/modules/generate-and-save-poland-bookkeeping-report.mjs"
+    "book": "ENV=TEST node -r dotenv/config src/bq/modules/generate-and-save-poland-bookkeeping-report.mjs",
+    "manifold": "ENV=TEST node -r dotenv/config src/bitrix/modules/get-and-update-manifold-deals.mjs",
+    "manifoldsave": "ENV=TEST node -r dotenv/config src/bitrix/modules/save-manifold-deals.mjs"
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",

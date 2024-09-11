@@ -81,3 +81,88 @@ export async function updateSyncTimeForDriversWithRevenue(updatedDealsInChunk) {
         console.error('Ошибка при вставке данных:', error);
     }
 }
+
+export async function insertManifoldDeals(manifoldDeals) {
+    await db.exec('BEGIN TRANSACTION');
+    try {
+        for (const deal of manifoldDeals) {
+            await db.run('INSERT INTO manifold_deals (id) VALUES (?)', deal.id);
+        }
+        await db.exec('COMMIT');
+    } catch (error) {
+        await db.exec('ROLLBACK');
+        console.error('Ошибка при вставке данных:', error);
+    }
+}
+
+export async function getSavedManifoldDeals() {
+    const sql = `SELECT id,accident_id,aviable_for_office_only,contact_id,contact_phone FROM manifold_deals`;
+    const manifoldDealsIds = await db.all(sql)
+    return { manifoldDealsIds }
+}
+
+export async function getSavedManifoldDealsWithNoAncidentData() {
+    const sql = `SELECT id FROM manifold_deals where accident_id is null`;
+    const manifoldDealsIds = await db.all(sql)
+    return { manifoldDealsIds }
+}
+
+export async function getSavedManifoldDealsWithNoContactId() {
+    const sql = `SELECT id FROM manifold_deals where contact_id is null`;
+    const manifoldDealsAncidentIds = await db.all(sql)
+    return { manifoldDealsAncidentIds }
+}
+
+export async function getSavedManifoldContactIdsWithNoPhone() {
+    const sql = `SELECT contact_id FROM manifold_deals where contact_phone is null and contact_id is not null`;
+    const manifoldDealsAncidentIds = await db.all(sql)
+    return { manifoldDealsAncidentIds }
+}
+
+
+export async function updateManifoldDealsAncidentData(manifoldDealsData) {
+    await db.exec('BEGIN TRANSACTION');
+    try {
+        for (let [id, data] of Object.entries(manifoldDealsData)) {
+            const {
+                UF_CRM_1654602086875: accident_id,
+                UF_CRM_1672920789484: aviable_for_office_only } = data
+
+            let aviable = (aviable_for_office_only == '') ? 0 : 1
+            await db.run(`UPDATE manifold_deals SET accident_id = ?, aviable_for_office_only = ? WHERE id = ?`, accident_id, aviable, id);
+        }
+        await db.exec('COMMIT');
+    } catch (error) {
+        await db.exec('ROLLBACK');
+        console.error('Ошибка при вставке данных:', error);
+    }
+}
+
+export async function updateManifoldDealsContactId(manifoldDealsData) {
+    await db.exec('BEGIN TRANSACTION');
+    try {
+        for (let [id, data] of Object.entries(manifoldDealsData)) {
+            const {
+                CONTACT_ID: contact_id
+            } = data
+            await db.run(`UPDATE manifold_deals SET contact_id = ? WHERE id = ?`, contact_id, id);
+        }
+        await db.exec('COMMIT');
+    } catch (error) {
+        await db.exec('ROLLBACK');
+        console.error('Ошибка при вставке данных:', error);
+    }
+}
+
+export async function updateManifoldDealsPhone(manifoldDealsData) {
+    await db.exec('BEGIN TRANSACTION');
+    try {
+        for (let [contact_id, data] of Object.entries(manifoldDealsData)) {
+            await db.run(`UPDATE manifold_deals SET contact_phone = ?, contacts_add_at = CURRENT_TIMESTAMP WHERE contact_id = ?`, data.phone, contact_id);
+        }
+        await db.exec('COMMIT');
+    } catch (error) {
+        await db.exec('ROLLBACK');
+        console.error('Ошибка при вставке данных:', error);
+    }
+}

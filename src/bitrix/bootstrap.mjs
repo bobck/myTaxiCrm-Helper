@@ -6,6 +6,8 @@ import { getAndSaveLeadsByCreatedDateJob } from "./jobs/get-and-save-leads-by-cr
 import { getAndSaveDealsByInterviewDateJob } from "./jobs/get-and-save-deals-by-interview-date-job.mjs";
 import { getAndSaveDealsByClosedDateJob } from "./jobs/get-and-save-deals-by-closed-date-job.mjs";
 import { getAndSaveDealsRescheduledJob } from "./jobs/get-and-save-deals-rescheduled-job.mjs";
+import { getAndUpdateManifoldDealsJob } from "./jobs/get-and-update-manifold-deals-job.mjs";
+import { refreshManifoldDealsJob } from "./jobs/save-manifold-deals-job.mjs";
 
 export function bitrixJobs() {
     console.log('bitrixJobs...')
@@ -18,6 +20,8 @@ export function bitrixJobs() {
         getAndSaveDealsByInterviewDateJob.start();
         getAndSaveDealsByClosedDateJob.start();
         getAndSaveDealsRescheduledJob.start();
+        getAndUpdateManifoldDealsJob.start();
+        refreshManifoldDealsJob.start();
     } catch (error) {
         console.error('sync error, app down...')
         console.error({ time: new Date(), error });
@@ -31,6 +35,8 @@ export function bitrixJobs() {
         getAndSaveDealsByInterviewDateJob.stop();
         getAndSaveDealsByClosedDateJob.stop();
         getAndSaveDealsRescheduledJob.stop();
+        getAndUpdateManifoldDealsJob.stop();
+        refreshManifoldDealsJob.stop();
 
         bitrixJobs();
     }

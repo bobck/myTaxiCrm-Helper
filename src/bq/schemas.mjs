@@ -157,3 +157,10 @@ export const polandBookkeepingReportTableSchema = [
     { name: 'week', type: 'INTEGER', mode: 'REQUIRED' }
 ]
 
+export const manifoldDealsTableSchema = [
+    { name: 'id', type: 'STRING', mode: 'REQUIRED' },
+    { name: 'accident_id', type: 'STRING' },
+    { name: 'aviable_for_office_only', type: 'BOOLEAN', mode: 'REQUIRED' },
+    { name: 'contact_id', type: 'STRING' },
+    { name: 'contact_phone', type: 'STRING' }
+]
