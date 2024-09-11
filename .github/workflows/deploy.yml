@@ -22,5 +22,6 @@ jobs:
         script: |
           cd myTaxiCrm-Helper
           git pull
+          node node_modules/db-migrate/bin/db-migrate up
           pm2 restart 1
           pm2 reset 1
