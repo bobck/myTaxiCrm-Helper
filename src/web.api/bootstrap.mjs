@@ -13,6 +13,7 @@ import { saveTemporaryLeaveByDriversEditingHistoryJob } from './gdc-report/jobs/
 import { saveMileagesAndHoursOnlineJob } from './gdc-report/jobs/save-mileage-total-job.mjs'
 import { saveFiredByDriversLogsJob } from './gdc-report/jobs/save-fired-by-drivers-logs-job.mjs'
 import { saveCarUsageReportJob } from './gdc-report/jobs/save-car-usage-report-job.mjs'
+import { inflowOutflowDriversReportJob } from './inflow-outflow-drivers-report/jobs/inflow-outflow-drivers-report-job.mjs'
 
 export function driversCustomTariffJobs() {
     try {
@@ -36,6 +37,8 @@ export function driversCustomTariffJobs() {
         saveFiredByDriversLogsJob.start()
         saveCarUsageReportJob.start()
         console.log('GDC report Job runs...')
+        inflowOutflowDriversReportJob.start()
+        console.log('inflowOutflowDriversReport Job runs...')
     } catch (error) {
         console.error('sync error, app down...')
         console.error({ time: new Date(), error });

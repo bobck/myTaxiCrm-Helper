@@ -51,7 +51,7 @@ async function makeCRMRequestWithRetry({ body }) {
             return json;
         } catch (error) {
             if (!Array.isArray(error)) {
-                console.log({error})
+                console.log({ error })
                 throw error
             }
 
@@ -398,3 +398,31 @@ export const polandAutoParksIds = [
     '58ea1e9e-ebdd-4c4d-870c-6ef06e868c60',
     'be6ab23a-d6ba-4add-b0f7-cfb8abd0586b'
 ]
+
+export async function getCarTransferAcceptanceList({ date }) {
+    const sql = fs.readFileSync('src/sql/inflow-outflow-drivers-report/car_transfer_acceptance_list.sql').toString();
+    const result = await pool.query(sql, [date])
+    const { rows, rowCount } = result
+    return { rows }
+}
+
+export async function getCarTransferAcceptanceCompany({ date }) {
+    const sql = fs.readFileSync('src/sql/inflow-outflow-drivers-report/car_transfer_acceptance_company.sql').toString();
+    const result = await pool.query(sql, [date])
+    const { rows, rowCount } = result
+    return { rows }
+}
+
+export async function getActiveDriversWithScheduleCompany({ date }) {
+    const sql = fs.readFileSync('src/sql/inflow-outflow-drivers-report/actives_with_schedule_company.sql').toString();
+    const result = await pool.query(sql, [date])
+    const { rows, rowCount } = result
+    return { rows }
+}
+
+export async function getActiveDriversWithScheduleEvents({ date }) {
+    const sql = fs.readFileSync('src/sql/inflow-outflow-drivers-report/actives_with_schedule_events.sql').toString();
+    const result = await pool.query(sql, [date])
+    const { rows, rowCount } = result
+    return { rows }
+}

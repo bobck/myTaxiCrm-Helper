@@ -164,3 +164,37 @@ export const manifoldDealsTableSchema = [
     { name: 'contact_id', type: 'STRING' },
     { name: 'contact_phone', type: 'STRING' }
 ]
+
+export const carTransferAcceptanceListTableSchema = [
+    { name: 'auto_park_id', type: 'STRING', mode: 'REQUIRED' },
+    { name: 'car_id', type: 'STRING', mode: 'REQUIRED' },
+    { name: 'license_plate', type: 'STRING', mode: 'REQUIRED' },
+    { name: 'type', type: 'STRING', mode: 'REQUIRED' },
+    { name: 'created_at', type: 'TIMESTAMP', mode: 'REQUIRED' },
+    { name: 'date', type: 'DATE', mode: 'REQUIRED' }
+]
+
+export const carTransferAcceptanceCompanyTableSchema = [
+    { name: 'auto_park_id', type: 'STRING', mode: 'REQUIRED' },
+    { name: 'cars', type: 'INTEGER', mode: 'REQUIRED' },
+    { name: 'date', type: 'DATE', mode: 'REQUIRED' }
+]
+
+export const activeDriversWithScheduleCompanyTableSchema = [
+    { name: 'id', type: 'STRING', mode: 'REQUIRED' },
+    { name: 'auto_park_id', type: 'STRING', mode: 'REQUIRED' },
+    { name: 'event_period_start', type: 'TIMESTAMP' },
+    { name: 'date', type: 'DATE', mode: 'REQUIRED' }
+]
+
+export const activeDriversWithScheduleEventsTableSchema = [
+    { name: 'id', type: 'STRING', mode: 'REQUIRED' },
+    { name: 'auto_park_id', type: 'STRING', mode: 'REQUIRED' },
+    { name: 'start_working_at', type: 'TIMESTAMP', mode: 'REQUIRED' },
+    { name: 'temporary_leave_at', type: 'TIMESTAMP' },
+    { name: 'fired_out_time', type: 'TIMESTAMP' },
+    { name: 'day_events', type: 'INTEGER', mode: 'REQUIRED' },
+    { name: 'event_period_start', type: 'TIMESTAMP', mode: 'REQUIRED' },
+    { name: 'flow', type: 'STRING', mode: 'REQUIRED' },
+    { name: 'date', type: 'DATE', mode: 'REQUIRED' }
+]
