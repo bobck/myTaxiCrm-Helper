@@ -207,7 +207,7 @@ export async function getManifoldDeals() {
         filter: {
             'CATEGORY_ID': '42'
         },
-        select: ['ID']
+        select: ['ID','DATE_CREATE']
     });
 
     const { result } = response

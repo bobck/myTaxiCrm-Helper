@@ -86,7 +86,7 @@ export async function insertManifoldDeals(manifoldDeals) {
     await db.exec('BEGIN TRANSACTION');
     try {
         for (const deal of manifoldDeals) {
-            await db.run('INSERT INTO manifold_deals (id) VALUES (?)', deal.id);
+            await db.run('INSERT INTO manifold_deals (id,deal_created_at) VALUES (?,?)', deal.id, deal.deal_created_at);
         }
         await db.exec('COMMIT');
     } catch (error) {
@@ -96,7 +96,7 @@ export async function insertManifoldDeals(manifoldDeals) {
 }
 
 export async function getSavedManifoldDeals() {
-    const sql = `SELECT id,accident_id,aviable_for_office_only,contact_id,contact_phone FROM manifold_deals`;
+    const sql = `SELECT id,accident_id,aviable_for_office_only,contact_id,contact_phone,deal_created_at FROM manifold_deals`;
     const manifoldDealsIds = await db.all(sql)
     return { manifoldDealsIds }
 }

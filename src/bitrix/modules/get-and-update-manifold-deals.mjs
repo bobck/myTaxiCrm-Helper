@@ -33,13 +33,12 @@ export async function saveNewManifoldDeals() {
     const jsonData = []
 
     for (let row of result) {
-        const { ID, UF_CRM_1654602086875, UF_CRM_1672920789484 } = row
-
+        const { ID, DATE_CREATE } = row
         if (manifoldDealsIdsArray.includes(ID)) {
             continue
         }
 
-        jsonData.push({ id: ID })
+        jsonData.push({ id: ID, deal_created_at: DATE_CREATE })
     }
 
     console.log({ jsonData: jsonData.length })
@@ -53,7 +52,7 @@ export async function saveNewManifoldDeals() {
 }
 
 export async function updateManifoldDealsWithAncidentData() {
-    
+
     console.log({ time: new Date(), message: 'updateManifoldDealsWithAncidentData' });
 
     const { manifoldDealsIds } = await getSavedManifoldDealsWithNoAncidentData();
@@ -66,7 +65,7 @@ export async function updateManifoldDealsWithAncidentData() {
 }
 
 export async function updateManifoldDealsWithContactId() {
-    
+
     console.log({ time: new Date(), message: 'updateManifoldDealsWithContactId' });
 
     const { manifoldDealsAncidentIds } = await getSavedManifoldDealsWithNoContactId();
@@ -81,7 +80,7 @@ export async function updateManifoldDealsWithContactId() {
 }
 
 export async function updateManifoldDealsWithPhone() {
-    
+
     console.log({ time: new Date(), message: 'updateManifoldDealsWithPhone' });
 
     const { manifoldDealsAncidentIds } = await getSavedManifoldContactIdsWithNoPhone();
