@@ -163,7 +163,8 @@ export const manifoldDealsTableSchema = [
     { name: 'aviable_for_office_only', type: 'BOOLEAN', mode: 'REQUIRED' },
     { name: 'contact_id', type: 'STRING' },
     { name: 'contact_phone', type: 'STRING' },
-    { name: 'deal_created_at', type: 'TIMESTAMP', mode: 'REQUIRED' }
+    { name: 'deal_created_at', type: 'TIMESTAMP', mode: 'REQUIRED' },
+    { name: 'stage_id', type: 'STRING', mode: 'REQUIRED' }
 ]
 
 export const carTransferAcceptanceListTableSchema = [

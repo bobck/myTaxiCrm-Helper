@@ -102,7 +102,7 @@ export async function insertManifoldDeals(manifoldDeals) {
 }
 
 export async function getSavedManifoldDeals() {
-    const sql = `SELECT id,accident_id,aviable_for_office_only,contact_id,contact_phone,deal_created_at FROM manifold_deals`;
+    const sql = `SELECT id,accident_id,aviable_for_office_only,contact_id,contact_phone,deal_created_at,stage_id FROM manifold_deals`;
     const manifoldDealsIds = await db.all(sql)
     return { manifoldDealsIds }
 }
