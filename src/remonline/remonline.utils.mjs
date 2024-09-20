@@ -50,7 +50,7 @@ export async function getOrders(
 
     const response = await fetch(`${process.env.REMONLINE_API}/order/?token=${process.env.REMONLINE_API_TOKEN}&page=${_page}${idLabelsUrl}${idUrl}`);
 
-    if (response.status == 414) {
+    if (response.status == 414 || response.status == 503 || response.status == 502 || response.status == 504) {
         throw await response.text()
     }
 
