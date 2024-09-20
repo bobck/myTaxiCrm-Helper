@@ -82,11 +82,17 @@ export async function updateSyncTimeForDriversWithRevenue(updatedDealsInChunk) {
     }
 }
 
+export async function clearManifoldDealsTable() {
+    const sql = `DELETE FROM manifold_deals WHERE ID IS NOT NULL`
+    await db.run(sql)
+}
+
 export async function insertManifoldDeals(manifoldDeals) {
     await db.exec('BEGIN TRANSACTION');
     try {
         for (const deal of manifoldDeals) {
-            await db.run('INSERT INTO manifold_deals (id,deal_created_at) VALUES (?,?)', deal.id, deal.deal_created_at);
+            const { id, deal_created_at, stage_id } = deal
+            await db.run('INSERT INTO manifold_deals (id,deal_created_at,stage_id) VALUES (?,?,?)', id, deal_created_at, stage_id);
         }
         await db.exec('COMMIT');
     } catch (error) {

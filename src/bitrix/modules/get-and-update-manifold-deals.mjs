@@ -5,8 +5,9 @@ import {
 } from "../bitrix.utils.mjs";
 
 import {
+    clearManifoldDealsTable,
     insertManifoldDeals,
-    getSavedManifoldDeals,
+    // getSavedManifoldDeals,
     updateManifoldDealsAncidentData,
     getSavedManifoldDealsWithNoAncidentData,
     getSavedManifoldDealsWithNoContactId,
@@ -27,27 +28,32 @@ export async function saveNewManifoldDeals() {
         return
     }
 
-    const { manifoldDealsIds } = await getSavedManifoldDeals()
-    const manifoldDealsIdsArray = manifoldDealsIds.map(row => row.id)
+    // const { manifoldDealsIds } = await getSavedManifoldDeals()
+    // const manifoldDealsIdsArray = manifoldDealsIds.map(row => row.id)
 
     const jsonData = []
 
     for (let row of result) {
-        const { ID, DATE_CREATE } = row
-        if (manifoldDealsIdsArray.includes(ID)) {
-            continue
-        }
+        const { ID, DATE_CREATE, STAGE_ID } = row
+        //TODO create separate updating process for STAGE_ID only
+        // if (manifoldDealsIdsArray.includes(ID)) {
+        //     continue
+        // }
 
-        jsonData.push({ id: ID, deal_created_at: DATE_CREATE })
+        jsonData.push({
+            id: ID,
+            deal_created_at: DATE_CREATE,
+            stage_id: STAGE_ID
+        })
     }
 
     console.log({ jsonData: jsonData.length })
-
 
     if (jsonData.length == 0) {
         return
     }
 
+    await clearManifoldDealsTable();
     await insertManifoldDeals(jsonData);
 }
 
