@@ -45,7 +45,7 @@ WITH hours_online AS (SELECT
 			SELECT 
 					oev.auto_park_id,
 					round(avg(oev.end_value)/1000,0) AS avg_odometr_end_value,
-					mt.mileage AS mileage_total,
+					mt.mileage::int AS mileage_total,
 					mot.mileage AS mileage_on_trip,
 					hog.hours_online
 				FROM odometr_end_value oev
