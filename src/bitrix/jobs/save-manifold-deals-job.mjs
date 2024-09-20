@@ -1,7 +1,7 @@
 import { CronJob } from 'cron';
 import { refreshManifoldDeals } from '../modules/save-manifold-deals.mjs';
 
-const cronTime = '35 */4 * * *';
+const cronTime = '35 * * * *';
 
 const timeZone = 'Europe/Kiev';
 

@@ -6,7 +6,7 @@ import {
     updateManifoldDealsWithPhone
 } from '../modules/get-and-update-manifold-deals.mjs';
 
-const cronTime = '15 */4 * * *';
+const cronTime = '25 * * * *';
 
 const timeZone = 'Europe/Kiev';
 
