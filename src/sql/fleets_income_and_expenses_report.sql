@@ -199,7 +199,8 @@ WITH
         'FINES_FIRED_OUT_DEDUCT',
         'FINES_OTHER',
         'FINES_DOWNTIME',
-        'FINES_OVERRUN'
+        'FINES_OVERRUN',
+        'FINES_LOW_EFFICIENCY'
       )
       AND (ct.YEAR > $1 OR (ct.YEAR = $1 AND ct.week >= $2))
       AND ct.company_id IN (
