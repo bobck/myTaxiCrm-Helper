@@ -110,7 +110,8 @@ export const firedByDriversLogsTableSchema = [
     { name: 'driver_id', type: 'STRING', mode: 'REQUIRED' },
     { name: 'event_time', type: 'TIMESTAMP', mode: 'REQUIRED' },
     { name: 'is_restored', type: 'STRING', mode: 'NULLABLE' },
-    { name: 'date', type: 'DATE', mode: 'REQUIRED' }
+    { name: 'date', type: 'DATE', mode: 'REQUIRED' },
+    { name: 'status', type: 'STRING', mode: 'NULLABLE' }
 ]
 
 export const carUsageReportTableSchema = [

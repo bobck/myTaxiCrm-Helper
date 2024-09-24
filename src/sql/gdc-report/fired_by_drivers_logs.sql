@@ -4,7 +4,8 @@ SELECT DISTINCT
   dl.event_time,
   dll.TYPE AS is_restored,
   dl.comment,
-  COALESCE(dti.integrations,0) AS integrations
+  COALESCE(dti.integrations,0) AS integrations,
+  dl.status
 FROM
   drivers_logs dl
   LEFT JOIN drivers_logs dll ON dll.driver_id = dl.driver_id
