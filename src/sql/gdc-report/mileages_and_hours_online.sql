@@ -33,6 +33,7 @@ WITH hours_online AS (SELECT
 			WHERE company_id = '4ea03592-9278-4ede-adf8-f7345a856893'
 			AND (EXTRACT(week FROM coh.period_from AT TIME ZONE 'europe/kyiv') >= $1 AND EXTRACT(year FROM coh.period_from AT TIME ZONE 'europe/kyiv') = $2)
 			AND (EXTRACT(week FROM coh.period_to AT TIME ZONE 'europe/kyiv') <= $1 AND EXTRACT(year FROM coh.period_to AT TIME ZONE 'europe/kyiv') = $2)
+			AND coh.auto_park_id IS NOT null
 			ORDER BY coh.car_id, coh.period_to DESC),
 			mileage_total AS (SELECT 
 			coh.auto_park_id,
