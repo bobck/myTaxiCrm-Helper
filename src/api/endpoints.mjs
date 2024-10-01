@@ -32,5 +32,12 @@ export async function initApi({ pool }) {
         }
     })
 
+    app.post('/referral', (req, res) => {
+        const { query } = req;
+        console.log({ message: 'Simple POST request logger', query })
+        res.statusCode = 200;
+        return res.send(JSON.stringify({ status: 'ok' }))
+    });
+
     app.listen(3000)
 }
