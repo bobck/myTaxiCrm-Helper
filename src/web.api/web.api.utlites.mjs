@@ -130,14 +130,21 @@ export async function getDiscountTariffsForAutoparksByDay({ dayOfWeek, companyId
 
         const autoparkRows = rows.filter(r => r.auto_park_id == autoParkId).reverse();
         const [firstRow] = autoparkRows
-        const { name, tax_percent, tax_type, target_marker, accounting } = firstRow
+        const { name,
+            tax_percent,
+            tax_type,
+            target_marker,
+            accounting,
+            divisible_income_type,
+            driver_fleet_bonuses_percent } = firstRow
 
         discountTariffsForAutoparks[autoParkId].name = name
         discountTariffsForAutoparks[autoParkId].taxPercent = tax_percent
         discountTariffsForAutoparks[autoParkId].taxType = tax_type
         discountTariffsForAutoparks[autoParkId].targetMarker = target_marker
         discountTariffsForAutoparks[autoParkId].accounting = accounting
-
+        discountTariffsForAutoparks[autoParkId].divisibleIncomeType = divisible_income_type
+        discountTariffsForAutoparks[autoParkId].driverFleetBonusesPercent = driver_fleet_bonuses_percent
         discountTariffsForAutoparks[autoParkId].tariffRules = []
 
         let prevTo = null;

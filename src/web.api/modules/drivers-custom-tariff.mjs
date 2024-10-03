@@ -65,7 +65,10 @@ export async function setDriversCustomTariff() {
 
     for (let driver of driversForCustomTerms) {
         const { auto_park_id, id } = driver
-        const clonedObjectWithExtraProperty = { driverId: id, ...discountTariffsForAutoparks[auto_park_id] };
+        const clonedObjectWithExtraProperty = {
+            driverId: id,
+            ...discountTariffsForAutoparks[auto_park_id]
+        };
         discountTariffsForAutoparksWithDriver.push(clonedObjectWithExtraProperty)
     }
 

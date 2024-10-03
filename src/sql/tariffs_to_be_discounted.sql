@@ -28,6 +28,8 @@ SELECT
 --   t.driver_id,
 --   t."type",
   t.target_marker,
+  t.divisible_income_type,
+  t.driver_fleet_bonuses_percent,
 --   tr.tariff_id AS tariff_rules_id,
 --   tr.is_rate_in_percent,
   tr."from",
