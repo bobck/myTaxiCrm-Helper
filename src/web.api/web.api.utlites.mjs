@@ -433,3 +433,10 @@ export async function getActiveDriversWithScheduleEvents({ date }) {
     const { rows, rowCount } = result
     return { rows }
 }
+
+export async function getDriverByContract({ contract }) {
+    const sql = fs.readFileSync('src/sql/get_driver_by_contract.sql').toString();
+    const result = await pool.query(sql, [contract])
+    const { rows, rowCount } = result
+    return { rows }
+}

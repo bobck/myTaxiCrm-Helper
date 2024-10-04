@@ -244,3 +244,46 @@ export async function getContacts({ ids }) {
     const { result, time } = await bitrix.batch(batchObj)
     return result
 }
+
+export async function deleteBitrixTaskById({ task_id }) {
+    try {
+
+        const response = await bitrix.call('tasks.task.delete', {
+            taskId: task_id
+        });
+        console.log({ response })
+        const { result } = response
+        const { task } = result
+
+        if (!task) {
+            throw { message: 'Task not found', task_id }
+        }
+
+        return task
+
+    } catch (e) {
+        console.error({ message: 'Unable to delete task', task_id })
+    }
+
+}
+
+export async function completeBitrixTaskById({ task_id }) {
+    try {
+
+        const response = await bitrix.call('tasks.task.complete', {
+            taskId: task_id
+        });
+
+        const { result } = response
+        const { task } = result
+
+        if (!task) {
+            throw { message: 'Task not found', task_id }
+        }
+
+        return task
+
+    } catch (e) {
+        console.error({ message: 'Unable to complete task', task_id })
+    }
+}

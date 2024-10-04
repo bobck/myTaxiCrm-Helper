@@ -1,15 +1,11 @@
 
 
 import express from 'express'
+import { referralValidadion } from '../bitrix/modules/referral-validation.mjs';
 
 export async function initApi({ pool }) {
     const app = express()
     app.use(express.json());
-
-    console.log({
-        message: 'initApi...',
-        time: new Date()
-    })
 
     app.post('/query', async function (req, res) {
         const { body } = req
@@ -32,12 +28,37 @@ export async function initApi({ pool }) {
         }
     })
 
-    app.post('/referral', (req, res) => {
+    app.post('/referral', async (req, res) => {
         const { query } = req;
+        const {
+            task_id,
+            doc_id,
+            first_name,
+            last_name,
+            contract,
+            deal_id
+        } = query;
+
         console.log({ message: 'Simple POST request logger', query })
+
+        await referralValidadion({
+            task_id,
+            doc_id,
+            first_name,
+            last_name,
+            contract,
+            deal_id
+        });
+
         res.statusCode = 200;
         return res.send(JSON.stringify({ status: 'ok' }))
     });
 
     app.listen(3000)
+
+    console.log({
+        message: 'Express listening',
+        time: new Date()
+    })
+
 }
