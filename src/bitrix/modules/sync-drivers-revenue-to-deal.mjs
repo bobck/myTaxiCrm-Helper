@@ -47,7 +47,7 @@ export async function syncRevenueToDeals() {
 
         } catch (e) {
             console.error('Failed updateDealsOpportunity')
-            if (e.includes('Error: [batch] failed to process. Received errors in')) {
+            if (e?.includes('Error: [batch] failed to process. Received errors in')) {
                 console.error('Unknown elements batch failed')
             } else {
                 console.error({ e })
