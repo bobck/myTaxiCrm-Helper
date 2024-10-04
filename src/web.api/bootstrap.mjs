@@ -14,6 +14,7 @@ import { saveMileagesAndHoursOnlineJob } from './gdc-report/jobs/save-mileage-to
 import { saveFiredByDriversLogsJob } from './gdc-report/jobs/save-fired-by-drivers-logs-job.mjs'
 import { saveCarUsageReportJob } from './gdc-report/jobs/save-car-usage-report-job.mjs'
 import { inflowOutflowDriversReportJob } from './inflow-outflow-drivers-report/jobs/inflow-outflow-drivers-report-job.mjs'
+import { upToDateCurrentDateGDCReportJob } from './gdc-report/jobs/up-to-date-current-date.mjs'
 
 export function driversCustomTariffJobs() {
     try {
@@ -36,6 +37,7 @@ export function driversCustomTariffJobs() {
         saveMileagesAndHoursOnlineJob.start()
         saveFiredByDriversLogsJob.start()
         saveCarUsageReportJob.start()
+        upToDateCurrentDateGDCReportJob.start()
         console.log('GDC report Job runs...')
         inflowOutflowDriversReportJob.start()
         console.log('inflowOutflowDriversReport Job runs...')
