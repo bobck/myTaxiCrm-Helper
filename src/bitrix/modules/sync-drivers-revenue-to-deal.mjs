@@ -45,13 +45,8 @@ export async function syncRevenueToDeals() {
             const end = performance.now();
             console.log(`chunk done in: ${Math.round((end - start) / 1000)} sec. maxOperating: ${maxOperating}`);
 
-        } catch (e) {
-            console.error('Failed updateDealsOpportunity')
-            if (e?.includes('Error: [batch] failed to process. Received errors in')) {
-                console.error('Unknown elements batch failed')
-            } else {
-                console.error({ e })
-            }
+        } catch (error) {
+            console.error({ message: 'Failed updateDealsOpportunity', error })
         }
     }
 
