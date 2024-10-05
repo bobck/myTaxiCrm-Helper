@@ -1,10 +1,10 @@
 import { CronJob } from 'cron';
 import { DateTime } from "luxon";
 
-import { getAndSaveDealsByInterviewDate } from "./get-and-save-deals-by-interview-date.mjs";
-import { saveWorkingDriversWithHistoryStatus } from "../../web.api/gdc-report/modules/save-working-drivers-with-history-status.mjs";
-import { saveTemporaryLeaveByDriversEditingHistory } from "../../web.api/gdc-report/modules/temporary-leave-by-drivers-editing-history.mjs";
-import { saveFiredByDriversLogs } from "../../web.api/gdc-report/modules/save-fired-by-drivers-logs.mjs";
+import { getAndSaveDealsByInterviewDate } from '../../../bitrix/modules/get-and-save-deals-by-interview-date.mjs';
+import { saveWorkingDriversWithHistoryStatus } from '../modules/save-working-drivers-with-history-status.mjs';
+import { saveTemporaryLeaveByDriversEditingHistory } from '../modules/temporary-leave-by-drivers-editing-history.mjs';
+import { saveFiredByDriversLogs } from '../modules/save-fired-by-drivers-logs.mjs';
 
 const cronTime = '*/30 * * * *';
 
@@ -18,7 +18,7 @@ const job = CronJob.from({
         try {
             const dateTime = DateTime.now().setZone('Europe/Kyiv').minus({ days: 0 })
             const manualDate = dateTime.toFormat('yyyy-MM-dd');
-        
+            
             getAndSaveDealsByInterviewDate(manualDate)
             saveWorkingDriversWithHistoryStatus(manualDate)
             saveTemporaryLeaveByDriversEditingHistory(manualDate)
