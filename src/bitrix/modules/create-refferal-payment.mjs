@@ -103,7 +103,7 @@ export async function createRefferalPayment() {
     console.log({ time: new Date(), message: 'createRefferalPayment', weekNumber, year, activeRefferals: activeRefferals.length });
 
     for (let refferal of activeRefferals) {
-        let bonusTarget = 150;
+        let bonusTarget = 120;
 
         const {
             driver_id,
