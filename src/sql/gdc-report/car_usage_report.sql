@@ -12,5 +12,13 @@ FROM
 WHERE
   company_id = '4ea03592-9278-4ede-adf8-f7345a856893'
   AND "scale" = 'DAILY'
-  AND cur.period_from AT TIME ZONE 'europe/kyiv' >= TO_TIMESTAMP ($1 || ' 00:00:00.000', 'YYYY-MM-DD HH24:MI:SS.MS')
-  AND cur.period_to AT TIME ZONE 'europe/kyiv' <= TO_TIMESTAMP ($1 || ' 23:59:59.999', 'YYYY-MM-DD HH24:MI:SS.MS')
+  AND (
+    (
+      cur.period_from AT TIME ZONE 'europe/kyiv' >= TO_TIMESTAMP ($1 || ' 00:00:00.000', 'YYYY-MM-DD HH24:MI:SS.MS')
+      AND cur.period_to AT TIME ZONE 'europe/kyiv' <= TO_TIMESTAMP ($1 || ' 23:59:59.999', 'YYYY-MM-DD HH24:MI:SS.MS')
+    )
+    OR (
+      cur.period_from AT TIME ZONE 'europe/warsaw' >= TO_TIMESTAMP ($1 || ' 00:00:00.000', 'YYYY-MM-DD HH24:MI:SS.MS')
+      AND cur.period_to AT TIME ZONE 'europe/warsaw' <= TO_TIMESTAMP ($1 || ' 23:59:59.999', 'YYYY-MM-DD HH24:MI:SS.MS')
+    )
+  )
