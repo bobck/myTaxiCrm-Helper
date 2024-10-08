@@ -3,7 +3,10 @@ SELECT
   cur.with_driver,
   cur.total_cars,
   cur.with_driver + cur.without_driver AS aviable_cars,
-  cur.total_trips
+  cur.total_trips,
+  cur.without_driver,
+  cur.road_accident,
+  cur.on_service_station
 FROM
   car_usage_reports cur
 WHERE

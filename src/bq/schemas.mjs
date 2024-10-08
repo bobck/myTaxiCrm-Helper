@@ -120,6 +120,9 @@ export const carUsageReportTableSchema = [
     { name: 'total_cars', type: 'INTEGER', mode: 'REQUIRED' },
     { name: 'aviable_cars', type: 'INTEGER', mode: 'REQUIRED' },
     { name: 'total_trips', type: 'INTEGER', mode: 'REQUIRED' },
+    { name: 'without_driver', type: 'INTEGER', mode: 'REQUIRED' },
+    { name: 'road_accident', type: 'INTEGER', mode: 'REQUIRED' },
+    { name: 'on_service_station', type: 'INTEGER', mode: 'REQUIRED' },
     { name: 'date', type: 'DATE', mode: 'REQUIRED' }
 ]
 
