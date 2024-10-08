@@ -201,3 +201,14 @@ export const activeDriversWithScheduleEventsTableSchema = [
     { name: 'flow', type: 'STRING', mode: 'REQUIRED' },
     { name: 'date', type: 'DATE', mode: 'REQUIRED' }
 ]
+
+export const repairAndAccidentCarsTableSchema = [
+    { name: 'id', type: 'STRING', mode: 'REQUIRED' },
+    { name: 'auto_park_id', type: 'STRING', mode: 'REQUIRED' },
+    { name: 'license_plate', type: 'STRING', mode: 'REQUIRED' },
+    { name: 'car_id', type: 'STRING', mode: 'REQUIRED' },
+    { name: 'event_type', type: 'STRING', mode: 'REQUIRED' },
+    { name: 'back_to_work', type: 'BOOLEAN', mode: 'REQUIRED' },
+    { name: 'work_stopped', type: 'BOOLEAN', mode: 'REQUIRED' },
+    { name: 'date', type: 'DATE', mode: 'REQUIRED' }
+]

@@ -449,8 +449,15 @@ export async function getDriverRidesCountByWeek({ auto_park_id, driver_id, year,
     if (rowCount == 0) {
         return { rides_count: 0 }
     }
-    
+
     const [row] = rows
     const { rides_count } = row
     return { rides_count }
+}
+
+export async function getRepairAndAccidentCarsByDate({ date }) {
+    const sql = fs.readFileSync('src/sql/repair-accident-report.sql').toString();
+    const result = await pool.query(sql, [date])
+    const { rows, rowCount } = result
+    return { rows }
 }
