@@ -172,3 +172,94 @@ export async function updateManifoldDealsPhone(manifoldDealsData) {
         console.error('Ошибка при вставке данных:', error);
     }
 }
+
+export async function saveRecruitDeal({
+    task_id,
+    doc_id,
+    first_name,
+    last_name,
+    contract,
+    deal_id,
+    auto_park_id,
+    driver_id,
+    expiry_after,
+    contact_id,
+    assigned_by_id,
+    city_id }) {
+
+    const sql = `INSERT INTO referral(driver_id,auto_park_id,deal_id,task_id,contract,doc_id,first_name,last_name,expiry_after,contact_id,assigned_by_id,city_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`
+
+    await db.run(
+        sql,
+        driver_id,
+        auto_park_id,
+        deal_id,
+        task_id,
+        contract,
+        doc_id,
+        first_name,
+        last_name,
+        expiry_after,
+        contact_id,
+        assigned_by_id,
+        city_id
+    )
+}
+
+export async function saveReferralIdForRecruitDeal({
+    deal_id,
+    referral_id,
+    task_id }) {
+
+    const sql = `UPDATE referral SET referral_id = ? WHERE deal_id = ? AND task_id = ?`
+
+    await db.run(
+        sql,
+        referral_id,
+        deal_id,
+        task_id
+    )
+}
+
+export async function approvalReferralById({
+    referral_id,
+    referrer_phone,
+    referrer_name,
+    referrer_position }) {
+    const sql = `UPDATE 
+                    referral 
+                SET is_approved = TRUE,
+                    referrer_phone = ?, 
+                    referrer_name = ?,
+                    referrer_position = ?
+                WHERE referral_id = ?`
+    await db.run(
+        sql,
+        referrer_phone,
+        referrer_name,
+        referrer_position,
+        referral_id
+    )
+}
+
+export async function getActiveRefferals() {
+    const sql = `SELECT 
+                    driver_id,
+                    auto_park_id,
+                    referral_id,
+                    contact_id,
+                    first_name,
+                    last_name,
+                    created_at,
+                    referrer_phone,
+                    referrer_name,
+                    referrer_position,
+                    city_id,
+                    assigned_by_id 
+                FROM referral 
+                WHERE expiry_after > CURRENT_TIMESTAMP 
+                AND referral_id is not null 
+                AND is_approved is TRUE`;
+    const activeRefferals = await db.all(sql)
+    return { activeRefferals }
+}

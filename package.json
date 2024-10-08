@@ -33,7 +33,11 @@
     "carsrouts": "ENV=TEST node -r dotenv/config src/bq/modules/generate-and-save-cars-routs-report.mjs",
     "book": "ENV=TEST node -r dotenv/config src/bq/modules/generate-and-save-poland-bookkeeping-report.mjs",
     "manifold": "ENV=TEST node -r dotenv/config src/bitrix/modules/get-and-update-manifold-deals.mjs",
-    "manifoldsave": "ENV=TEST node -r dotenv/config src/bitrix/modules/save-manifold-deals.mjs"
+    "manifoldsave": "ENV=TEST node -r dotenv/config src/bitrix/modules/save-manifold-deals.mjs",
+    "cta": "ENV=TEST node -r dotenv/config src/web.api/inflow-outflow-drivers-report/modules/save-car-transfer-acceptance-list.mjs",
+    "ctac": "ENV=TEST node -r dotenv/config src/web.api/inflow-outflow-drivers-report/modules/save-car-transfer-acceptance-company.mjs",
+    "iomanualsync": "node -r dotenv/config src/web.api/inflow-outflow-drivers-report/modules/manual-sync.mjs",
+    "createrefferalpayment": "ENV=TEST node -r dotenv/config src/bitrix/modules/create-refferal-payment.mjs"
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",

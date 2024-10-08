@@ -440,3 +440,17 @@ export async function getDriverByContract({ contract }) {
     const { rows, rowCount } = result
     return { rows }
 }
+
+export async function getDriverRidesCountByWeek({ auto_park_id, driver_id, year, weekNumber }) {
+    const sql = fs.readFileSync('src/sql/get_driver_rides_count_by_week.sql').toString();
+    const result = await pool.query(sql, [auto_park_id, driver_id, year, weekNumber])
+    const { rows, rowCount } = result
+
+    if (rowCount == 0) {
+        return { rides_count: 0 }
+    }
+    
+    const [row] = rows
+    const { rides_count } = row
+    return { rides_count }
+}

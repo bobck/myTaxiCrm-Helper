@@ -251,7 +251,6 @@ export async function deleteBitrixTaskById({ task_id }) {
         const response = await bitrix.call('tasks.task.delete', {
             taskId: task_id
         });
-        console.log({ response })
         const { result } = response
         const { task } = result
 
@@ -264,7 +263,6 @@ export async function deleteBitrixTaskById({ task_id }) {
     } catch (e) {
         console.error({ message: 'Unable to delete task', task_id })
     }
-
 }
 
 export async function completeBitrixTaskById({ task_id }) {
@@ -286,4 +284,60 @@ export async function completeBitrixTaskById({ task_id }) {
     } catch (e) {
         console.error({ message: 'Unable to complete task', task_id })
     }
+}
+
+export async function addCommentToDeal({ deal_id, comment }) {
+    try {
+
+        const response = await bitrix.call('crm.timeline.comment.add', {
+            'fields[ENTITY_ID]': deal_id,
+            'fields[ENTITY_TYPE]': 'deal',
+            'fields[COMMENT]': comment
+        });
+
+        return response
+    } catch (e) {
+        console.error({ message: 'Unable to create comment', deal_id })
+    }
+}
+
+export async function createPayment({
+    title,
+    stageId,
+    city,
+    contactId,
+    assignedBy,
+    referrerPhone,
+    referrerName,
+    referrerPosition
+}) {
+
+    const response = await bitrix.call('crm.item.add', {
+        'entityTypeId': '1102',
+        'fields[title]': title,
+        'fields[STAGE_ID]': stageId,
+        'fields[ufCrm38_1728384234]': city,
+        'fields[CONTACT_ID]': contactId,
+        'fields[ASSIGNED_BY_ID]': assignedBy,
+        'fields[ufCrm38_1727460853]': referrerPhone,
+        'fields[ufCrm38_1727460831]': referrerName,
+        'fields[ufCrm38_1727460760]': referrerPosition
+    });
+    const { result } = response
+    const { item } = result
+    const { id } = item
+    return { id }
+
+}
+
+export async function addCommentToEntity({ entityId, typeId, comment }) {
+
+    const response = await bitrix.call('crm.timeline.comment.add', {
+        'fields[ENTITY_ID]': entityId,
+        'fields[ENTITY_TYPE]': `DYNAMIC_${typeId}`,
+        'fields[COMMENT]': comment
+    });
+
+    const { result } = response
+    return { result }
 }
