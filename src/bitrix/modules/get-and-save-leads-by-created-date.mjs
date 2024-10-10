@@ -3,7 +3,10 @@ import path from 'path'
 import os from 'os'
 import { DateTime } from "luxon";
 
-import { getLeadsByCreateDateAndAssigned } from "../bitrix.utils.mjs";
+import {
+    getLeadsByCreateDateAndAssigned,
+    getLeadsByCreateDateAndSourceId
+} from "../bitrix.utils.mjs";
 
 import {
     createOrResetLeadsTable,
@@ -13,22 +16,29 @@ import {
 
 import { leadsTableSchema } from '../../bq/schemas.mjs';
 
+const bqTableId = 'leads_own'
+const assigned = ['109046', '88062', '79570', '112604', '50222', '110576', '66110', '103156', '46392', '128320']
+const sourceId = 'UC_RQG8O3';
+
 export async function getAndSaveLeadsByCreatedDate(manualDate) {
     const date = manualDate || DateTime.now().setZone('Europe/Kyiv').minus({ days: 1 }).toFormat('yyyy-MM-dd');
     console.log({ time: new Date(), date, message: 'getAndSaveLeadsByCreatedDate' });
 
-    const bqTableId = 'leads_own'
-    const assigned = ['109046', '88062', '79570', '112604', '50222', '110576', '66110', '103156', '46392', '128320']
+    const resultByAssigned = await getLeadsByCreateDateAndAssigned({ date, assigned });
+    const resultBySourceId = await getLeadsByCreateDateAndSourceId({ date, sourceId });
 
-    const result = await getLeadsByCreateDateAndAssigned({ date, assigned })
+    console.log({
+        getLeadsByCreateDateAndAssigned: resultByAssigned.length,
+        getLeadsByCreateDateAndSourceId: resultBySourceId.length
+    })
 
-    console.log({ getLeadsByCreateDateAndAssigned: result.length })
-
-    if (result.length == 0) {
+    if (resultByAssigned.length == 0 && resultBySourceId.length == 0) {
         return
     }
 
-    const jsonData = result.map(row => {
+    const data = [...resultByAssigned, ...resultBySourceId];
+
+    const jsonData = data.map(row => {
         const { ID, SOURCE_ID, UF_CRM_1688301710585, UF_CRM_1526673568 } = row
         return {
             id: ID,
@@ -50,7 +60,6 @@ export async function getAndSaveLeadsByCreatedDate(manualDate) {
 }
 
 if (process.env.ENV == "TEST") {
-    const bqTableId = 'leads_own'
     // await createOrResetLeadsTable({ bqTableId })
     await getAndSaveLeadsByCreatedDate()
 }

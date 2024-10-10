@@ -156,6 +156,21 @@ export async function getLeadsByCreateDateAndAssigned({ date, assigned }) {
     return result
 }
 
+export async function getLeadsByCreateDateAndSourceId({ date, sourceId }) {
+
+    const response = await bitrix.leads.list({
+        filter: {
+            '>=DATE_CREATE': `${date}T00:00:00`,
+            '<=DATE_CREATE': `${date}T23:59:59`,
+            'SOURCE_ID': sourceId
+        },
+        select: ['ID', 'SOURCE_ID', 'UF_CRM_1688301710585', 'UF_CRM_1526673568']
+    });
+
+    const { result } = response
+    return result
+}
+
 export async function getDealsByInterviewDate({ date }) {
 
     const response = await bitrix.deals.list({
