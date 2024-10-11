@@ -3,7 +3,7 @@
 import express from 'express'
 import { DateTime } from "luxon";
 import { referralValidadion } from '../bitrix/modules/referral-validation.mjs';
-import { referralTypeId } from '../bitrix/modules/create-refferal-payment.mjs';
+import { referralTypeId } from '../bitrix/bitrix.constants.mjs';
 import {
     saveRecruitDeal,
     saveReferralIdForRecruitDeal,
@@ -72,7 +72,7 @@ export async function initApi({ pool }) {
 
         const { auto_park_id, id } = isValid
         try {
-            const expiryAfter = DateTime.now().plus({ weeks: 5 }).toFormat("yyyy-MM-dd HH:mm:ss");
+            const expiryAfter = DateTime.now().plus({ days: 31 }).toFormat("yyyy-MM-dd HH:mm:ss");
 
             await saveRecruitDeal({
                 task_id,
@@ -129,7 +129,7 @@ export async function initApi({ pool }) {
 
         console.log({ message: 'POST: referral-approval', query })
 
-        //TODO: move to module and pass crm link to referral card
+        //TODO: move to module and pass crm link to referral card. Add validation if not exist
         await approvalReferralById({
             referral_id,
             referrer_phone,

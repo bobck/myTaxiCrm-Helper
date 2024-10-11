@@ -1,109 +1,121 @@
+import { DateTime } from "luxon";
 import { getActiveRefferals } from "../bitrix.queries.mjs";
 import {
     createPayment,
     addCommentToEntity
 } from "../bitrix.utils.mjs";
-import { getDriverRidesCountByWeek } from "../../web.api/web.api.utlites.mjs";
+import { getDriverTripsCountByPeriod } from "../../web.api/web.api.utlites.mjs";
+import {
+    referralTypeId,
+    paymentsStageId,
+    paymentsTypeId,
+    cityTextRecruitToPayments,
+    positionTextReferralsToPayments
+} from "../bitrix.constants.mjs";
 
-import { DateTime } from "luxon";
+const param = process.argv.find(arg => arg.startsWith('--manual_date='));
+const manualDate = param ? param.split('=')[1] : null;
 
-const paymentsStageId = 'DT1102_44:NEW'
-export const referralTypeId = '1098'
+function findPeriodStartAndEnd({ created_date, days_passed }) {
+    const createdAtDate = DateTime.fromFormat(created_date, 'yyyy-MM-dd');
+    const periodEndDate = createdAtDate.plus({ days: days_passed - 1 }).toFormat('yyyy-MM-dd');
 
-// const positionCodes = {
-//     payments: {
-//         driver: '2684',
-//         cm: '2686',
-//         dm: '2688',
-//         qm: '2690'
-//     },
-//     referrals: {
-//         driver: '2676',
-//         cm: '2678',
-//         dm: '2680',
-//         qm: '2682'
-//     }
-// }
+    if (days_passed == 3) {
+        return {
+            periodStartDate: createdAtDate.toFormat('yyyy-MM-dd'),
+            periodEndDate,
+            periodTarget: 50
+        }
+    }
 
-// const positionCodesReferralsToPayments = {
-//     '2676': '2684',
-//     '2678': '2686',
-//     '2680': '2688',
-//     '2682': '2690'
-// }
+    if ([10, 17, 24, 31].includes(days_passed)) {
+        const periodStartDate = createdAtDate.plus({ days: days_passed }).minus({ days: 7 }).toFormat('yyyy-MM-dd');
+        return {
+            periodStartDate,
+            periodEndDate,
+            periodTarget: 120
+        }
+    }
 
-const positionTextReferralsToPayments = {
-    'водитель': '2684',
-    'кеш менеджер': '2686',
-    'драйвер менеджер': '2688',
-    'кволити менеджер': '2690'
+    return {
+        periodStartDate: null,
+        periodEndDate: null,
+        periodTarget: null
+    }
 }
 
-const cityTextRecruitToPayments = {
-    'Київ': '2880',
-    'Харків': '2882',
-    'Одеса': '2884',
-    'Дніпро': '2886',
-    'Львів': '2888',
-    'Запоріжжя': '2890',
-    'Вінниця': '2892',
-    'Чернігів': '2894',
-    'Полтава': '2896',
-    'Івано-Франківськ': '2898',
-    'Миколаїв': '2900',
-    'Кривий Ріг': '2902',
-    'Хмельницький': '2904',
-    'Житомир': '2906',
-    'Рівне': '2908',
-    'Чернівці': '2910',
-    'Тернопіль': '2912',
-    'Херсон': '2914',
-    'Луцьк': '2916',
-    'Кропивницький': '2918',
-    'Ужгород': '2920',
-    'Біла Церква': '2922',
-    'Кременчуг': '2926',
-    'Черкаси': '2928',
-    'Каменець - Подільский': '2930',
-    'Маріуполь': '2932',
-    'Інше Місто': '2934',
-    'Дрогобич': '2936',
-    'Мукачево': '2938',
-    'Умань': '2940',
-    'Warsaw': '2942',
-    'Krakow': '2944',
-    'Gdańsk': '2946',
-    'Wrocław': '2948',
-    'Toruń': '2950',
-    'Katowice': '2952',
-    'Chorzów': '2954',
-    'Dąbrowa Górnicza': '2956',
-    'Sosnowiec': '2958',
-    'Poznań': '2960',
-    'Łódź': '2962',
-    'Gorzów Wielkopolski': '2964',
-    'Dubai': '2966'
+function getRefferalsForPay({ activeRefferals }) {
+    const refferalsForPay = activeRefferals.map(refferal => {
+
+        const {
+            created_date,
+            days_passed
+        } = refferal;
+
+        const {
+            periodStartDate,
+            periodEndDate,
+            periodTarget
+        } = findPeriodStartAndEnd({
+            created_date,
+            days_passed
+        });
+
+        return {
+            ...refferal,
+            periodStartDate,
+            periodEndDate,
+            periodTarget
+        };
+    }).filter(refferal => refferal.periodTarget);
+
+    return { refferalsForPay }
 }
 
-const assignedByMailToId = {
-    'vubir2020@gmail.com': '51212',
-    'minaieva.ii@gmail.com': '14150'
+async function getTripsForRefferals(refferalsForPay) {
+    const refferalsWithTrips = [];
+
+    for (let refferal of refferalsForPay) {
+        const { driver_id, auto_park_id, periodStartDate, periodEndDate } = refferal;
+
+        const { trips } = await getDriverTripsCountByPeriod({driver_id, auto_park_id, periodStartDate, periodEndDate});
+        refferalsWithTrips.push({ ...refferal, trips });
+    }
+
+    return { refferalsWithTrips };
 }
 
 export async function createRefferalPayment() {
-    const { activeRefferals } = await getActiveRefferals();
+
+    const date = manualDate || DateTime.now().setZone('Europe/Kyiv').toFormat('yyyy-MM-dd');
+
+    const { activeRefferals } = await getActiveRefferals({ date });
 
     if (activeRefferals.length == 0) {
         return
     }
 
-    const dateTime = DateTime.now().setZone('Europe/Kyiv').minus({ weeks: 1 })
-    const { weekNumber, year } = dateTime
+    const { refferalsForPay } = getRefferalsForPay({ activeRefferals });
 
-    console.log({ time: new Date(), message: 'createRefferalPayment', weekNumber, year, activeRefferals: activeRefferals.length });
+    console.log({
+        time: new Date(),
+        message: 'createRefferalPayment',
+        date,
+        activeRefferals: activeRefferals.length,
+        refferalsForPay: refferalsForPay.length
+    });
 
-    for (let refferal of activeRefferals) {
-        let bonusTarget = 120;
+    if (refferalsForPay.length == 0) {
+        return
+    }
+
+    const { refferalsWithTrips } = await getTripsForRefferals(refferalsForPay);
+
+    const refferalsReadyForPay = refferalsWithTrips.filter(refferal => refferal.trips >= refferal.periodTarget);
+    const refferalsNotEligible = refferalsWithTrips.filter(refferal => refferal.trips < refferal.periodTarget);
+
+
+    for (let refferal of refferalsReadyForPay) {
 
         const {
             driver_id,
@@ -112,45 +124,25 @@ export async function createRefferalPayment() {
             first_name,
             last_name,
             contact_id,
-            created_at,
             referrer_phone,
             referrer_name,
             referrer_position,
             city_id,
-            assigned_by_id
+            days_passed,
+            created_date,
+            periodStartDate,
+            periodEndDate,
+            periodTarget,
+            trips
         } = refferal
 
-        const createdAtDateTime = DateTime.fromFormat(created_at, 'yyyy-MM-dd HH:mm:ss');
+        console.log({ referral: 'refferalsReadyForPay', referral_id, trips, periodTarget, created_date, days_passed, periodStartDate, periodEndDate });
 
-        const {
-            year: createdAtYear,
-            weekNumber: createdAtWeek
-        } = createdAtDateTime
-
-
-        if (createdAtWeek == weekNumber) {
-            bonusTarget = 50;
-        }
-
-        const { rides_count } = await getDriverRidesCountByWeek({ auto_park_id, driver_id, year, weekNumber })
-
-        if (rides_count < bonusTarget) {
-
-            const comment = `Недостатньо поїздок для виплати бонусу за ${weekNumber} тиждень\n\nЦіль поїздок: ${bonusTarget}\nВиконано поїздок: ${rides_count}`
-            await addCommentToEntity({
-                entityId: referral_id,
-                typeId: referralTypeId,
-                comment
-            });
-
-            continue
-        }
-
-        const title = `${first_name} ${last_name} | Виплата 300 грн. | Тиждень ${weekNumber}`
+        const title = `${first_name} ${last_name} виплата 300 грн.`
         const contactId = contact_id
 
-        const city = cityTextRecruitToPayments[city_id]
-        const assignedBy = assignedByMailToId[assigned_by_id]
+        const city = cityTextRecruitToPayments[city_id]?.id
+        const assignedBy = cityTextRecruitToPayments[city_id]?.assigned_by_id
         const referrerPhone = referrer_phone
         const referrerName = referrer_name
         const referrerPosition = positionTextReferralsToPayments[referrer_position]
@@ -166,8 +158,38 @@ export async function createRefferalPayment() {
             referrerPosition
         })
 
-        const comment = `Додано виплату за ${weekNumber} тиждень\nЦіль поїздок: ${bonusTarget}\nВиконано поїздок: ${rides_count}\n\nПосилання на виплату:\nhttps://taxify.bitrix24.eu/page/referal/viplati/type/1102/details/${itemId}/`
+        const referralComment = `Додано виплату за період з ${periodStartDate} по ${periodEndDate}\nЦіль поїздок: ${periodTarget}\nВиконано поїздок: ${trips}\n\nПосилання на виплату:\nhttps://taxify.bitrix24.eu/page/referal/viplati/type/1102/details/${itemId}/`
 
+        await addCommentToEntity({
+            entityId: referral_id,
+            typeId: referralTypeId,
+            comment: referralComment
+        });
+
+        const paymentComment = `Нарахована винагорода для ${referrerName}, тел. ${referrerPhone}, у розмірі 300 грн., за реферала ${first_name} ${last_name}. В період з ${periodStartDate} по ${periodEndDate} зроблено ${trips} поїздок\n\nПосилання на картку реферала у MyTaxiCRM:\nhttps://fleets.mytaxicrm.com/${auto_park_id}/drivers/${driver_id}`
+
+        await addCommentToEntity({
+            entityId: itemId,
+            typeId: paymentsTypeId,
+            comment: paymentComment
+        });
+    }
+
+    for (let refferal of refferalsNotEligible) {
+
+        const {
+            referral_id,
+            days_passed,
+            created_date,
+            periodStartDate,
+            periodEndDate,
+            periodTarget,
+            trips
+        } = refferal
+
+        console.log({ referral: 'refferalsNotEligible', referral_id, trips, periodTarget, created_date, days_passed, periodStartDate, periodEndDate });
+
+        const comment = `Недостатньо поїздок для виплати бонусу за період з ${periodStartDate} по ${periodEndDate}\n\nЦіль поїздок: ${periodTarget}\nВиконано поїздок: ${trips}`
         await addCommentToEntity({
             entityId: referral_id,
             typeId: referralTypeId,

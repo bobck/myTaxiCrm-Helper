@@ -242,7 +242,7 @@ export async function approvalReferralById({
     )
 }
 
-export async function getActiveRefferals() {
+export async function getActiveRefferals({ date }) {
     const sql = `SELECT 
                     driver_id,
                     auto_park_id,
@@ -250,16 +250,17 @@ export async function getActiveRefferals() {
                     contact_id,
                     first_name,
                     last_name,
-                    created_at,
+                    date(created_at) as created_date,
+                    JULIANDAY('${date}')-JULIANDAY(date(created_at)) as days_passed,
                     referrer_phone,
                     referrer_name,
                     referrer_position,
-                    city_id,
-                    assigned_by_id 
+                    city_id
                 FROM referral 
-                WHERE expiry_after > CURRENT_TIMESTAMP 
+                WHERE date(expiry_after) >= '${date}'
                 AND referral_id is not null 
                 AND is_approved is TRUE`;
+    // console.log({ sql })
     const activeRefferals = await db.all(sql)
     return { activeRefferals }
 }

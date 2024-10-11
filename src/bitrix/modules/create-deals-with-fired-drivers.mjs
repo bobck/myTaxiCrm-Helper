@@ -1,9 +1,10 @@
 import {
     getFreshFiredDrivers,
-    cityListWithAssignedBy,
     createDeal,
     findContactByPhone
 } from "../bitrix.utils.mjs";
+
+import { cityListWithAssignedBy } from "../bitrix.constants.mjs";
 
 import { getLastUnixCreatedAt, saveLastUnixCreatedAt } from "../bitrix.queries.mjs";
 

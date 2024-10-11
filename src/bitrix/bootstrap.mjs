@@ -8,9 +8,9 @@ import { getAndSaveDealsByClosedDateJob } from "./jobs/get-and-save-deals-by-clo
 import { getAndSaveDealsRescheduledJob } from "./jobs/get-and-save-deals-rescheduled-job.mjs";
 import { getAndUpdateManifoldDealsJob } from "./jobs/get-and-update-manifold-deals-job.mjs";
 import { refreshManifoldDealsJob } from "./jobs/save-manifold-deals-job.mjs";
+import { createRefferalPaymentJob } from "./jobs/create-refferal-payment-job.mjs";
 
 export function bitrixJobs() {
-    console.log('bitrixJobs...')
     try {
         createDealsWithFiredDriversJob.start();
         contactsForDriversWithRevenueJob.start();
@@ -22,10 +22,16 @@ export function bitrixJobs() {
         getAndSaveDealsRescheduledJob.start();
         getAndUpdateManifoldDealsJob.start();
         refreshManifoldDealsJob.start();
+        createRefferalPaymentJob.start();
+        
+        console.log('Bitrix Jobs has been started')
     } catch (error) {
-        console.error('sync error, app down...')
-        console.error({ time: new Date(), error });
-        console.error('Trying to restart...')
+        
+        console.error({
+            message: 'Bitrix Jobs Sync error, app down...',
+            time: new Date(),
+            error
+        });
 
         createDealsWithFiredDriversJob.stop();
         contactsForDriversWithRevenueJob.stop();
@@ -37,6 +43,7 @@ export function bitrixJobs() {
         getAndSaveDealsRescheduledJob.stop();
         getAndUpdateManifoldDealsJob.stop();
         refreshManifoldDealsJob.stop();
+        createRefferalPaymentJob.stop();
 
         bitrixJobs();
     }
