@@ -260,7 +260,18 @@ export async function getActiveRefferals({ date }) {
                 WHERE date(expiry_after) >= '${date}'
                 AND referral_id is not null 
                 AND is_approved is TRUE`;
-    // console.log({ sql })
+
     const activeRefferals = await db.all(sql)
     return { activeRefferals }
+}
+
+export async function getFinishedRefferals() {
+    const sql = `SELECT 
+                    referral_id
+                FROM referral 
+                WHERE date(expiry_after) < current_date
+                AND referral_id is not null`;
+
+    const finishedRefferals = await db.all(sql)
+    return { finishedRefferals }
 }

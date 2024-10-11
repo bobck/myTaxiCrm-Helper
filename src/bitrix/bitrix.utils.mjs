@@ -327,3 +327,17 @@ export async function addCommentToEntity({ entityId, typeId, comment }) {
     const { result } = response
     return { result }
 }
+
+export async function changeItemStage({
+    referralTypeId,
+    id,
+    stageId
+}) {
+
+    await bitrix.call('crm.item.update', {
+        'entityTypeId': referralTypeId,
+        'id': id,
+        'fields[STAGE_ID]': stageId
+    });
+
+}
