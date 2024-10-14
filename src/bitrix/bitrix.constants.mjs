@@ -93,7 +93,7 @@ export const cityTextRecruitToPayments = {
         assigned_by_id: '6587'
     },
     'Суми': {
-        id: '3150',
+        id: '3148',
         assigned_by_id: '51126'
     },
     'Рівне': {

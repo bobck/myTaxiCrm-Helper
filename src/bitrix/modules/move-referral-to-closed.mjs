@@ -18,3 +18,8 @@ export async function moveReferralToClosed() {
     }
 
 }
+
+
+if (process.env.ENV == "TEST") {
+    await moveReferralToClosed();
+}
