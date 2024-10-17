@@ -13,6 +13,10 @@ function transliterate(text) {
     return text.split('').map(char => cyrillicToLatinMap[char] || char).join('');
 }
 
+function trimAndReplace(text) {
+    return text.replace(/\s+/g, '');
+}
+
 export async function referralValidadion(params) {
     const { task_id, doc_id, first_name, last_name, contract, deal_id, contact_id } = params;
 
@@ -53,14 +57,14 @@ export async function referralValidadion(params) {
         id
     } = driver
 
-    if (last_name != crm_last_name || first_name != crm_first_name) {
+    if (trimAndReplace(last_name) != trimAndReplace(crm_last_name) || trimAndReplace(first_name) != trimAndReplace(crm_first_name)) {
         console.log({ task_id, message: 'delete by wrong name' })
         await addCommentToDeal({ deal_id, comment: `Відмовлено у рефелальній програмі. ПІБ не співпадає з MyTaxiCRM` });
         await deleteBitrixTaskById({ task_id });
         return false
     }
 
-    if (transliterate(doc_id.replace(/\s+/g, '')) != transliterate(driver_license_number)) {
+    if (transliterate(trimAndReplace(doc_id)) != transliterate(driver_license_number)) {
         console.log({ task_id, message: 'delete by wrong doc_id' })
         await addCommentToDeal({ deal_id, comment: `Відмовлено у рефелальній програмі. Серія та номер прав не співпадає з MyTaxiCRM` });
         await deleteBitrixTaskById({ task_id });
