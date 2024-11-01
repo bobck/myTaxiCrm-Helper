@@ -275,3 +275,35 @@ export async function getFinishedRefferals() {
     const finishedRefferals = await db.all(sql)
     return { finishedRefferals }
 }
+
+export async function insertNewWorkingDriver({
+    id,
+    auto_park_id,
+    first_name,
+    last_name,
+    phone,
+    created_at,
+    item_id }) {
+
+    await db.run('INSERT INTO working_drivers (driver_id, auto_park_id, first_name, last_name, phone, registrated_at,item_id) VALUES (?,?,?,?,?,?,?)',
+        id,
+        auto_park_id,
+        first_name,
+        last_name,
+        phone,
+        created_at,
+        item_id);
+}
+
+export async function getNewWorkingDriverWorked7Days({ date }) {
+    const sql = `SELECT 
+                    driver_id,
+                    auto_park_id,
+                    item_id,
+                    registrated_at
+                FROM working_drivers 
+                WHERE JULIANDAY('${date}')-JULIANDAY(date(registrated_at)) = 7`;
+
+    const newWorkingDriverWorked7Days = await db.all(sql)
+    return { newWorkingDriverWorked7Days }
+}

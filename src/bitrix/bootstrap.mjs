@@ -10,6 +10,8 @@ import { getAndUpdateManifoldDealsJob } from "./jobs/get-and-update-manifold-dea
 import { refreshManifoldDealsJob } from "./jobs/save-manifold-deals-job.mjs";
 import { createRefferalPaymentJob } from "./jobs/create-refferal-payment-job.mjs";
 import { moveReferralToClosedJob } from "./jobs/move-referral-to-closed-job.mjs";
+import { saveNewWorkingDriversJob } from "./jobs/create-new-working-drivers-job.mjs";
+import { moveNewWorkingDriversJob } from "./jobs/move-working-drivers-job.mjs";
 
 export function bitrixJobs() {
     try {
@@ -25,6 +27,8 @@ export function bitrixJobs() {
         refreshManifoldDealsJob.start();
         createRefferalPaymentJob.start();
         moveReferralToClosedJob.start();
+        saveNewWorkingDriversJob.start();
+        moveNewWorkingDriversJob.start();
         console.log('Bitrix Jobs has been started')
     } catch (error) {
         
@@ -46,6 +50,8 @@ export function bitrixJobs() {
         refreshManifoldDealsJob.stop();
         createRefferalPaymentJob.stop();
         moveReferralToClosedJob.stop();
+        saveNewWorkingDriversJob.stop();
+        moveNewWorkingDriversJob.stop();
         bitrixJobs();
     }
 }

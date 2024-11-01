@@ -38,7 +38,8 @@
     "ctac": "ENV=TEST node -r dotenv/config src/web.api/inflow-outflow-drivers-report/modules/save-car-transfer-acceptance-company.mjs",
     "iomanualsync": "node -r dotenv/config src/web.api/inflow-outflow-drivers-report/modules/manual-sync.mjs",
     "createrefferalpayment": "ENV=TEST node -r dotenv/config src/bitrix/modules/create-refferal-payment.mjs",
-    "repairandaccidentreport": "ENV=TEST node -r dotenv/config src/web.api/modules/save-repair-and-accident-cars.mjs"
+    "repairandaccidentreport": "ENV=TEST node -r dotenv/config src/web.api/modules/save-repair-and-accident-cars.mjs",
+    "newworkingdrivers": "ENV=TEST node -r dotenv/config src/bitrix/modules/new-working-drivers.mjs"
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",

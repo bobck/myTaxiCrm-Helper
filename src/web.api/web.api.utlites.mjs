@@ -460,3 +460,17 @@ export async function getRepairAndAccidentCarsByDate({ date }) {
     const { rows, rowCount } = result
     return { rows }
 }
+
+export async function getNewWorkingDriversByDate({ date }) {
+    const sql = fs.readFileSync('src/sql/new_drivers_by_date.sql').toString();
+    const result = await pool.query(sql, [date])
+    const { rows, rowCount } = result
+    return { rows }
+}
+
+export async function getWorkingDriversById({ driversIds }) {
+    const sql = fs.readFileSync('src/sql/working_drivers_by_id.sql').toString();
+    const result = await pool.query(sql, [driversIds])
+    const { rows, rowCount } = result
+    return { rows }
+}

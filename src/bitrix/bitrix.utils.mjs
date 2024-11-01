@@ -313,7 +313,6 @@ export async function createPayment({
     const { item } = result
     const { id } = item
     return { id }
-
 }
 
 export async function addCommentToEntity({ entityId, typeId, comment }) {
@@ -340,4 +339,25 @@ export async function changeItemStage({
         'fields[STAGE_ID]': stageId
     });
 
+}
+
+export async function createNewWorkingDriverItem({
+    name,
+    stageId,
+    city,
+    phone
+}) {
+
+    const response = await bitrix.call('crm.item.add', {
+        'entityTypeId': '1110',
+        'fields[title]': name,
+        'fields[STAGE_ID]': stageId,
+        'fields[ufCrm42_1728470444]': name,
+        'fields[ufCrm42_1728470511]': phone,
+        'fields[ufCrm42_1728470573]': city
+    });
+    const { result } = response
+    const { item } = result
+    const { id } = item
+    return { id }
 }
