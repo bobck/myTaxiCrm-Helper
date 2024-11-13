@@ -132,6 +132,20 @@ export const cityTextRecruitToPayments = {
     },
 }
 
+export const procentageRewardAutoParkIds = [
+    '2964e082-0e86-4695-b5f5-98915d190518',
+    '052da49c-2175-4033-8010-c8e1f9a755ab',
+    '03328f6b-1336-4ee3-8407-bf5520411136',
+    '2bfb0c23-33d8-4bc3-ab03-442d6ba13712',
+    '2d3e566e-01a2-486f-ac7f-446d13f96f27',
+    '45dcaa21-bceb-45f2-bba9-5c72bbac441f',
+    'd78cf363-5b82-41b2-8a53-79bb74969ba7',
+    '6897e6f0-b33d-405a-b110-8c623c864cfc',
+    '4dd93df2-c172-488c-846f-d81452ddba70',
+    'eef0dbe4-38f8-4299-95e2-25586bb02a38',
+    'd34e7c17-ccf3-49d1-875c-67e4378c4562',
+    'ee12f8cd-570e-4eab-8ec8-1ead1c619bb7'
+];
 
 const positionCodes = {
     payments: {
@@ -159,3 +173,4 @@ const assignedByMailToId = {
     'vubir2020@gmail.com': '51212',
     'minaieva.ii@gmail.com': '14150'
 }
+

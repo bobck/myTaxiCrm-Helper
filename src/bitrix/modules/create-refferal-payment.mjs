@@ -10,7 +10,8 @@ import {
     paymentsStageId,
     paymentsTypeId,
     cityTextRecruitToPayments,
-    positionTextReferralsToPayments
+    positionTextReferralsToPayments,
+    procentageRewardAutoParkIds
 } from "../bitrix.constants.mjs";
 
 const param = process.argv.find(arg => arg.startsWith('--manual_date='));
@@ -78,7 +79,7 @@ async function getTripsForRefferals(refferalsForPay) {
     for (let refferal of refferalsForPay) {
         const { driver_id, auto_park_id, periodStartDate, periodEndDate } = refferal;
 
-        const { trips } = await getDriverTripsCountByPeriod({driver_id, auto_park_id, periodStartDate, periodEndDate});
+        const { trips } = await getDriverTripsCountByPeriod({ driver_id, auto_park_id, periodStartDate, periodEndDate });
         refferalsWithTrips.push({ ...refferal, trips });
     }
 
@@ -137,6 +138,17 @@ export async function createRefferalPayment() {
         } = refferal
 
         console.log({ referral: 'refferalsReadyForPay', referral_id, trips, periodTarget, created_date, days_passed, periodStartDate, periodEndDate });
+
+        if (procentageRewardAutoParkIds.includes(auto_park_id)) {
+
+            await addCommentToEntity({
+                entityId: referral_id,
+                typeId: referralTypeId,
+                comment: 'Заблоковано виплату по старій системі розрахунку'
+            });
+
+            continue;
+        }
 
         const title = `${first_name} ${last_name} виплата 300 грн.`
         const contactId = contact_id
