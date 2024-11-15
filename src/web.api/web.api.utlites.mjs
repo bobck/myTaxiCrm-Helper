@@ -454,6 +454,13 @@ export async function getDriverTripsCountByPeriod({ driver_id, auto_park_id, per
     return { trips }
 }
 
+export async function getRevenueDetailsForRefferalsProcentageReward({ activeRefferalsIds, week, year }) {
+    const sql = fs.readFileSync('src/sql/get_revenue_details_for_refferals_procentage_reward.sql').toString();
+    const result = await pool.query(sql, [activeRefferalsIds, week, year])
+    const { rows, rowCount } = result
+    return { rows }
+}
+
 export async function getRepairAndAccidentCarsByDate({ date }) {
     const sql = fs.readFileSync('src/sql/repair-accident-report.sql').toString();
     const result = await pool.query(sql, [date])

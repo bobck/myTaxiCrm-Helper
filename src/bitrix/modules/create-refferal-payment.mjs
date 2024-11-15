@@ -90,7 +90,7 @@ export async function createRefferalPayment() {
 
     const date = manualDate || DateTime.now().setZone('Europe/Kyiv').toFormat('yyyy-MM-dd');
 
-    const { activeRefferals } = await getActiveRefferals({ date });
+    const { activeRefferals } = await getActiveRefferals({ date, procentageRewardAutoParkIds });
 
     if (activeRefferals.length == 0) {
         return
@@ -139,17 +139,6 @@ export async function createRefferalPayment() {
 
         console.log({ referral: 'refferalsReadyForPay', referral_id, trips, periodTarget, created_date, days_passed, periodStartDate, periodEndDate });
 
-        if (procentageRewardAutoParkIds.includes(auto_park_id)) {
-
-            await addCommentToEntity({
-                entityId: referral_id,
-                typeId: referralTypeId,
-                comment: 'Заблоковано виплату по старій системі розрахунку'
-            });
-
-            continue;
-        }
-
         const title = `${first_name} ${last_name} виплата 300 грн.`
         const contactId = contact_id
 
@@ -170,7 +159,7 @@ export async function createRefferalPayment() {
             referrerPosition
         })
 
-        const referralComment = `Додано виплату за період з ${periodStartDate} по ${periodEndDate}\nЦіль поїздок: ${periodTarget}\nВиконано поїздок: ${trips}\n\nПосилання на виплату:\nhttps://taxify.bitrix24.eu/page/referal/viplati/type/1102/details/${itemId}/`
+        const referralComment = `Реферальна програма: Кількість поїздок\nДодано виплату за період з ${periodStartDate} по ${periodEndDate}\nЦіль поїздок: ${periodTarget}\nВиконано поїздок: ${trips}\n\nПосилання на виплату:\nhttps://taxify.bitrix24.eu/page/referal/viplati/type/1102/details/${itemId}/`
 
         await addCommentToEntity({
             entityId: referral_id,
@@ -201,7 +190,7 @@ export async function createRefferalPayment() {
 
         console.log({ referral: 'refferalsNotEligible', referral_id, trips, periodTarget, created_date, days_passed, periodStartDate, periodEndDate });
 
-        const comment = `Недостатньо поїздок для виплати бонусу за період з ${periodStartDate} по ${periodEndDate}\n\nЦіль поїздок: ${periodTarget}\nВиконано поїздок: ${trips}`
+        const comment = `Реферальна програма: Кількість поїздок\nНедостатньо поїздок для виплати бонусу за період з ${periodStartDate} по ${periodEndDate}\n\nЦіль поїздок: ${periodTarget}\nВиконано поїздок: ${trips}`
         await addCommentToEntity({
             entityId: referral_id,
             typeId: referralTypeId,

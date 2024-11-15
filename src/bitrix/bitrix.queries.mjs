@@ -183,11 +183,13 @@ export async function saveRecruitDeal({
     auto_park_id,
     driver_id,
     expiry_after,
+    procent_reward_expiry_after,
     contact_id,
     assigned_by_id,
     city_id }) {
 
-    const sql = `INSERT INTO referral(driver_id,auto_park_id,deal_id,task_id,contract,doc_id,first_name,last_name,expiry_after,contact_id,assigned_by_id,city_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`
+    const sql = `INSERT INTO referral(driver_id,auto_park_id,deal_id,task_id,contract,doc_id,first_name,last_name,expiry_after,contact_id,assigned_by_id,city_id,procent_reward_expiry_after) 
+                    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)`
 
     await db.run(
         sql,
@@ -202,7 +204,8 @@ export async function saveRecruitDeal({
         expiry_after,
         contact_id,
         assigned_by_id,
-        city_id
+        city_id,
+        procent_reward_expiry_after
     )
 }
 
@@ -242,7 +245,11 @@ export async function approvalReferralById({
     )
 }
 
-export async function getActiveRefferals({ date }) {
+export async function getActiveRefferals({ date, procentageRewardAutoParkIds }) {
+    const autoParkFilter = procentageRewardAutoParkIds && procentageRewardAutoParkIds.length > 0
+        ? `AND auto_park_id NOT IN (${procentageRewardAutoParkIds.map(id => `'${id}'`).join(', ')})`
+        : '';
+
     const sql = `SELECT 
                     driver_id,
                     auto_park_id,
@@ -259,7 +266,36 @@ export async function getActiveRefferals({ date }) {
                 FROM referral 
                 WHERE date(expiry_after) >= '${date}'
                 AND referral_id is not null 
-                AND is_approved is TRUE`;
+                AND is_approved is TRUE
+                ${autoParkFilter}`;
+
+    const activeRefferals = await db.all(sql)
+    return { activeRefferals }
+}
+
+export async function getActiveRefferalsProcentageReward({ date, procentageRewardAutoParkIds }) {
+    const autoParkFilter = procentageRewardAutoParkIds && procentageRewardAutoParkIds.length > 0
+        ? `AND auto_park_id IN (${procentageRewardAutoParkIds.map(id => `'${id}'`).join(', ')})`
+        : '';
+
+    const sql = `SELECT 
+                    driver_id,
+                    auto_park_id,
+                    referral_id,
+                    contact_id,
+                    first_name,
+                    last_name,
+                    date(created_at) as created_date,
+                    JULIANDAY('${date}')-JULIANDAY(date(created_at)) as days_passed,
+                    referrer_phone,
+                    referrer_name,
+                    referrer_position,
+                    city_id
+                FROM referral 
+                WHERE date(expiry_after) >= '${date}'
+                AND referral_id is not null 
+                AND is_approved is TRUE
+                ${autoParkFilter}`;
 
     const activeRefferals = await db.all(sql)
     return { activeRefferals }

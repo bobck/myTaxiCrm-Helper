@@ -12,6 +12,7 @@ import { createRefferalPaymentJob } from "./jobs/create-refferal-payment-job.mjs
 import { moveReferralToClosedJob } from "./jobs/move-referral-to-closed-job.mjs";
 import { saveNewWorkingDriversJob } from "./jobs/create-new-working-drivers-job.mjs";
 import { moveNewWorkingDriversJob } from "./jobs/move-working-drivers-job.mjs";
+import { createRefferalPaymentProcentageRewardJob } from "./jobs/create-refferal-payment-procentage-reward-job.mjs";
 
 export function bitrixJobs() {
     try {
@@ -29,6 +30,7 @@ export function bitrixJobs() {
         moveReferralToClosedJob.start();
         saveNewWorkingDriversJob.start();
         moveNewWorkingDriversJob.start();
+        createRefferalPaymentProcentageRewardJob.start()
         console.log('Bitrix Jobs has been started')
     } catch (error) {
         
@@ -52,6 +54,7 @@ export function bitrixJobs() {
         moveReferralToClosedJob.stop();
         saveNewWorkingDriversJob.stop();
         moveNewWorkingDriversJob.stop();
+        createRefferalPaymentProcentageRewardJob.stop();
         bitrixJobs();
     }
 }

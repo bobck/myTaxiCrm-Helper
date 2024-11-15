@@ -72,7 +72,8 @@ export async function initApi({ pool }) {
 
         const { auto_park_id, id } = isValid
         try {
-            const expiryAfter = DateTime.now().plus({ days: 31 }).toFormat("yyyy-MM-dd HH:mm:ss");
+            const expiryAfter7DaysPeriod = DateTime.now().plus({ days: 31 }).toFormat("yyyy-MM-dd HH:mm:ss");
+            const expiryAfterprocentageReward = DateTime.now().plus({ weeks: 5 }).toFormat("yyyy-MM-dd HH:mm:ss");
 
             await saveRecruitDeal({
                 task_id,
@@ -83,7 +84,8 @@ export async function initApi({ pool }) {
                 deal_id,
                 auto_park_id,
                 driver_id: id,
-                expiry_after: expiryAfter,
+                expiry_after: expiryAfter7DaysPeriod,
+                procent_reward_expiry_after: expiryAfterprocentageReward,
                 contact_id,
                 assigned_by_id,
                 city_id

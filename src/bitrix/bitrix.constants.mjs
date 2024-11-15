@@ -144,7 +144,8 @@ export const procentageRewardAutoParkIds = [
     '4dd93df2-c172-488c-846f-d81452ddba70',
     'eef0dbe4-38f8-4299-95e2-25586bb02a38',
     'd34e7c17-ccf3-49d1-875c-67e4378c4562',
-    'ee12f8cd-570e-4eab-8ec8-1ead1c619bb7'
+    'ee12f8cd-570e-4eab-8ec8-1ead1c619bb7',
+    '34a2020d-d412-461c-ba0a-86e45f9afc78'
 ];
 
 const positionCodes = {
