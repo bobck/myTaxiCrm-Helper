@@ -361,3 +361,60 @@ export async function createNewWorkingDriverItem({
     const { id } = item
     return { id }
 }
+
+export async function getDtpDebtTransactions({ createdAt }) {
+    const sql = fs.readFileSync('./src/sql/dtp_debt_transactions.sql').toString();
+
+    const result = await pool.query(sql, [createdAt])
+    const { rows, rowCount } = result
+    return { rows }
+}
+
+export async function getDtpDealById({ id }) {
+    const response = await bitrix.deals.list({
+        filter: {
+            'ID': id,
+            'CATEGORY_ID': `19`
+        },
+        select: ['ID', 'UF_CRM_1654076033','UF_CRM_1654075624','UF_CRM_1654075693']
+    });
+
+    const { result, total } = response
+    return { result, total }
+}
+
+export async function addCommentToDtpDeal({ id, comment }) {
+
+    const response = await bitrix.call('crm.timeline.comment.add', {
+        'fields[ENTITY_ID]': id,
+        'fields[ENTITY_TYPE]': `DEAL`,
+        'fields[COMMENT]': comment
+    });
+
+    const { result } = response
+    return { result }
+}
+
+export async function updateDealDebt({ id, debt }) {
+
+    const response = await bitrix.call('crm.deal.update', {
+        'id': id,
+        'fields[UF_CRM_1654076033]': debt
+    });
+
+    const { result } = response
+    return { result }
+}
+
+export async function updateDealPayOff({ id, ufCrmField, amount }) {
+
+    const key = `fields[${ufCrmField}]`
+
+    const response = await bitrix.call('crm.deal.update', {
+        'id': id,
+        [key]: amount
+    });
+
+    const { result } = response
+    return { result }
+}

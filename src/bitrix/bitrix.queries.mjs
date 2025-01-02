@@ -343,3 +343,69 @@ export async function getNewWorkingDriverWorked7Days({ date }) {
     const newWorkingDriverWorked7Days = await db.all(sql)
     return { newWorkingDriverWorked7Days }
 }
+
+export async function saveDtpDebtTransactions(dtpDebtTopUps) {
+    await db.exec('BEGIN TRANSACTION');
+    try {
+        for (const transaction of dtpDebtTopUps) {
+            const { auto_park_id, driver_id, human_id, purpose, sum, added_by_user_name, dtp_deal_id, created_at } = transaction
+            await db.run(`INSERT INTO 
+                dtp_debt_transactions (auto_park_id,driver_id,human_id,purpose,sum,added_by_user_name,dtp_deal_id,created_at) 
+                VALUES (?,?,?,?,?,?,?,?)`, auto_park_id, driver_id, human_id, purpose, sum, added_by_user_name, dtp_deal_id, created_at);
+        }
+        await db.exec('COMMIT');
+    } catch (error) {
+        await db.exec('ROLLBACK');
+        console.error('Ошибка при вставке данных:', error);
+    }
+}
+
+export async function lastsaveDtpDebtTransactionDate() {
+    const lastDtpDebtTopUp = await db.get(`SELECT max(created_at) as created_at from dtp_debt_transactions`)
+    return lastDtpDebtTopUp
+}
+
+export async function getDtpDebtTransactionsForValidation() {
+    const sql = `SELECT dtp_deal_id from dtp_debt_transactions where is_valid is null`
+    const dtpDebtTransactionsForValidation = await db.all(sql)
+    return { dtpDebtTransactionsForValidation }
+}
+
+export async function markDtpDebtTransactionsIsValid({ id }) {
+    const sql = `UPDATE dtp_debt_transactions SET is_valid = true WHERE dtp_deal_id = ?`
+    await db.run(
+        sql,
+        id
+    )
+}
+
+export async function markDtpDebtTransactionsIsNotValid({ id }) {
+    const sql = `UPDATE dtp_debt_transactions SET is_valid = false WHERE dtp_deal_id = ?`
+    await db.run(
+        sql,
+        id
+    )
+}
+
+export async function getDtpAccrueDebtTransactions() {
+    const sql = `SELECT auto_park_id,
+                        driver_id,
+                        human_id,
+                        purpose,
+                        added_by_user_name,
+                        dtp_deal_id,
+                        sum
+                    from dtp_debt_transactions 
+                where is_valid is true
+                and is_synchronised is false`
+    const dtpAccrueDebtTransactions = await db.all(sql)
+    return { dtpAccrueDebtTransactions }
+}
+
+export async function markDtpDebtTransactionsAsSync({ human_id }) {
+    const sql = `UPDATE dtp_debt_transactions SET is_synchronised = true WHERE human_id = ?`
+    await db.run(
+        sql,
+        human_id
+    )
+}

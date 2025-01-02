@@ -13,6 +13,9 @@ import { moveReferralToClosedJob } from "./jobs/move-referral-to-closed-job.mjs"
 import { saveNewWorkingDriversJob } from "./jobs/create-new-working-drivers-job.mjs";
 import { moveNewWorkingDriversJob } from "./jobs/move-working-drivers-job.mjs";
 import { createRefferalPaymentProcentageRewardJob } from "./jobs/create-refferal-payment-procentage-reward-job.mjs";
+import { getAndSaveDtpDebtTransactionsJob } from "./jobs/get-and-save-dtp-debt-transactions-job.mjs";
+import { checkDtpDealIdIsValidJob } from "./jobs/check-dtp-deal-is-id-valid-job.mjs";
+import { accrueDebtToDealJob } from "./jobs/accrue-debt-to-deal-job.mjs";
 
 export function bitrixJobs() {
     try {
@@ -30,10 +33,13 @@ export function bitrixJobs() {
         moveReferralToClosedJob.start();
         saveNewWorkingDriversJob.start();
         moveNewWorkingDriversJob.start();
-        createRefferalPaymentProcentageRewardJob.start()
+        createRefferalPaymentProcentageRewardJob.start();
+        getAndSaveDtpDebtTransactionsJob.start();
+        checkDtpDealIdIsValidJob.start();
+        accrueDebtToDealJob.start();
         console.log('Bitrix Jobs has been started')
     } catch (error) {
-        
+
         console.error({
             message: 'Bitrix Jobs Sync error, app down...',
             time: new Date(),
@@ -55,6 +61,9 @@ export function bitrixJobs() {
         saveNewWorkingDriversJob.stop();
         moveNewWorkingDriversJob.stop();
         createRefferalPaymentProcentageRewardJob.stop();
+        getAndSaveDtpDebtTransactionsJob.stop();
+        checkDtpDealIdIsValidJob.stop();
+        accrueDebtToDealJob.stop();
         bitrixJobs();
     }
 }
