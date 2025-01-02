@@ -1,5 +1,8 @@
 import { CronJob } from 'cron';
-import { moveReferralToClosed } from '../modules/move-referral-to-closed.mjs';
+import {
+    moveReferralToClosed,
+    moveReferralProcentageRewardToClosed
+} from '../modules/move-referral-to-closed.mjs';
 
 const cronTime = '10 10 * * *';
 
@@ -11,6 +14,7 @@ const job = CronJob.from({
     onTick: async () => {
         try {
             await moveReferralToClosed();
+            await moveReferralProcentageRewardToClosed();
         } catch (error) {
             console.error('Error occurred in onTick on moveReferralToClosed');
             console.error({ time: new Date(), error });

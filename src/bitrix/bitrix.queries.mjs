@@ -301,15 +301,38 @@ export async function getActiveRefferalsProcentageReward({ date, procentageRewar
     return { activeRefferals }
 }
 
-export async function getFinishedRefferals() {
+export async function getFinishedRefferals({ procentageRewardAutoParkIds }) {
+
+    const autoParkFilter = procentageRewardAutoParkIds && procentageRewardAutoParkIds.length > 0
+        ? `AND auto_park_id NOT IN (${procentageRewardAutoParkIds.map(id => `'${id}'`).join(', ')})`
+        : '';
+
     const sql = `SELECT 
                     referral_id
                 FROM referral 
                 WHERE date(expiry_after) < current_date
-                AND referral_id is not null`;
+                AND referral_id is not null
+                ${autoParkFilter}`;
 
     const finishedRefferals = await db.all(sql)
     return { finishedRefferals }
+}
+
+export async function getFinishedRefferalsProcentageReward({ procentageRewardAutoParkIds }) {
+
+    const autoParkFilter = procentageRewardAutoParkIds && procentageRewardAutoParkIds.length > 0
+        ? `AND auto_park_id IN (${procentageRewardAutoParkIds.map(id => `'${id}'`).join(', ')})`
+        : '';
+
+    const sql = `SELECT 
+                    referral_id
+                FROM referral 
+                WHERE date(procent_reward_expiry_after) < current_date
+                AND referral_id is not null
+                ${autoParkFilter}`;
+
+    const finishedRefferalsProcentageReward = await db.all(sql)
+    return { finishedRefferalsProcentageReward }
 }
 
 export async function insertNewWorkingDriver({
