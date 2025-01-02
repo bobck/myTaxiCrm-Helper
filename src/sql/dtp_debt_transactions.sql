@@ -20,7 +20,7 @@ WITH
       cashbox_transactions ct
       LEFT JOIN users u ON u.id = ct.added_by_user_id
     WHERE
-      ct.company_id = '1396dfab-9ba0-414d-a2a2-9e756184650c'
+      ct.company_id = '4ea03592-9278-4ede-adf8-f7345a856893'
 		AND ct.purpose in ('TOP_UP_DEBT','FORCED_PAY_OFF_DEBT','VOLUNTARY_PAY_OFF_DEBT','PAY_OFF_DEBT_DEPOSIT_ACCOUNT')
       AND ct.created_at > $1
   )
