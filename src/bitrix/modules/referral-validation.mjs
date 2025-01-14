@@ -64,6 +64,13 @@ export async function referralValidadion(params) {
         return false
     }
 
+    if (!driver_license_number) {
+        console.log({ task_id, message: 'delete by missing doc_id in mytaxicrm' })
+        await addCommentToDeal({ deal_id, comment: `Відмовлено у рефелальній програмі. Серія та номер прав не вказано у MyTaxiCRM` });
+        await deleteBitrixTaskById({ task_id });
+        return false
+    }
+
     if (transliterate(trimAndReplace(doc_id)) != transliterate(driver_license_number)) {
         console.log({ task_id, message: 'delete by wrong doc_id' })
         await addCommentToDeal({ deal_id, comment: `Відмовлено у рефелальній програмі. Серія та номер прав не співпадає з MyTaxiCRM` });
