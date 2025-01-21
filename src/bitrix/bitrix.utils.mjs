@@ -193,7 +193,7 @@ export async function getManifoldDeals() {
         filter: {
             'CATEGORY_ID': '42'
         },
-        select: ['*']
+        select: ['*','UF_CRM_1527615815']
     });
 
     const { result } = response

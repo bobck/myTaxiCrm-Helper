@@ -168,7 +168,10 @@ export const manifoldDealsTableSchema = [
     { name: 'contact_id', type: 'STRING' },
     { name: 'contact_phone', type: 'STRING' },
     { name: 'deal_created_at', type: 'TIMESTAMP', mode: 'REQUIRED' },
-    { name: 'stage_id', type: 'STRING', mode: 'REQUIRED' }
+    { name: 'stage_id', type: 'STRING', mode: 'REQUIRED' },
+    { name: 'city_name', type: 'STRING', mode: 'REQUIRED' },
+    { name: 'assigned_by_id', type: 'INTEGER', mode: 'REQUIRED' },
+    { name: 'title', type: 'STRING', mode: 'REQUIRED' }
 ]
 
 export const carTransferAcceptanceListTableSchema = [

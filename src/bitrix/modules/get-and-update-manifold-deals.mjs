@@ -16,6 +16,8 @@ import {
     updateManifoldDealsPhone
 } from '../bitrix.queries.mjs';
 
+import { cityListWithAssignedBy } from "../bitrix.constants.mjs";
+
 export async function saveNewManifoldDeals() {
 
     console.log({ time: new Date(), message: 'saveNewManifoldDeals' });
@@ -34,16 +36,29 @@ export async function saveNewManifoldDeals() {
     const jsonData = []
 
     for (let row of result) {
-        const { ID, DATE_CREATE, STAGE_ID } = row
+
+
+        const { ID,
+            DATE_CREATE,
+            STAGE_ID,
+            UF_CRM_1527615815: city_id,
+            ASSIGNED_BY_ID,
+            TITLE
+        } = row
         //TODO create separate updating process for STAGE_ID only
         // if (manifoldDealsIdsArray.includes(ID)) {
         //     continue
         // }
 
+        const matchingCity = cityListWithAssignedBy.find(city => city.cityId === city_id);
+
         jsonData.push({
             id: ID,
             deal_created_at: DATE_CREATE,
-            stage_id: STAGE_ID
+            stage_id: STAGE_ID,
+            city_name: matchingCity?.cityName || '?',
+            assigned_by_id: ASSIGNED_BY_ID || '?',
+            title: TITLE
         })
     }
 
