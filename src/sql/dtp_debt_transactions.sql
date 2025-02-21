@@ -9,11 +9,13 @@ WITH
       ct.human_id,
       CONCAT(u.first_name, ' ', u.last_name) added_by_user_name,
       CASE
-        WHEN ct."comment" LIKE '%https://taxify.bitrix24.eu/crm/deal/details/%' THEN SUBSTRING(
-          ct."comment"
-          FROM
-            '\d{4,6}'
+        WHEN ct."comment" LIKE '%https://taxify.bitrix24.eu/crm/deal/details/%' THEN (
+        SELECT regexp_replace(
+            substring(ct."comment" from '/details/([0-9]+)/'),
+            '/details/',
+            ''
         )
+    )
         ELSE NULL
       END AS dtp_deal_id
     FROM
