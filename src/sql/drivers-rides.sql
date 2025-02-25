@@ -1,0 +1,1 @@
+SELECT * from analytics.driver_report_cards;
