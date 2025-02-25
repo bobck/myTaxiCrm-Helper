@@ -36,7 +36,8 @@ export const openSShTunel = new Promise((resolve, reject) => {
         host: process.env.SSH_HOST,
         port: 22,
         username: process.env.SSH_USER,
-        privateKey
+        privateKey,
+        passphrase:process.env.SSH_PASSPHRASE,
     });
 
     c.on('ready', async function () {
