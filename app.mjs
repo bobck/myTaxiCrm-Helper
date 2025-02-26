@@ -9,6 +9,7 @@ import { driversCustomTariffJobs } from './src/web.api/bootstrap.mjs';
 import {getPoolState, pool} from './src/api/pool.mjs';
 import { bitrixJobs } from './src/bitrix/bootstrap.mjs';
 import {getDriversRides} from "./src/web.api/web.api.utlites.mjs";
+import {getDriverReportCards} from "./src/bitrix/modules/get-driver-report-cards.mjs";
 
 await openSShTunel;
 
@@ -21,6 +22,8 @@ await initApi({ pool });
 await remonlineTokenToEnv();
 remonlineJobs();
 
-console.log(JSON.stringify(await getDriversRides()));
+
+
+await getDriverReportCards();
 driversCustomTariffJobs();
 bitrixJobs();
