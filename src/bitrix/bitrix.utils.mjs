@@ -419,20 +419,23 @@ export async function updateDealPayOff({ id, ufCrmField, amount }) {
     return { result }
 }
 
-export async function createNewDriverReportCardItem({
-                                                     name,
-                                                     stageId,
-                                                     city,
-                                                     phone
-                                                 }) {
+export async function createDriverBrandingCardItem() {
 
     const response = await bitrix.call('crm.item.add', {
-        'entityTypeId': '1110',
-        'fields[title]': name,
-        'fields[STAGE_ID]': stageId,
-        'fields[ufCrm42_1728470444]': name,
-        'fields[ufCrm42_1728470511]': phone,
-        'fields[ufCrm42_1728470573]': city
+        /*
+        * ФИО ->                                        UF_CRM_54_1738757291
+Город ->                                    UF_CRM_54_1738757436
+Номер телефону ->              UF_CRM_54_1738757552
+Ссылка на MyTaxiCRM ->   UF_CRM_54_1738757612
+Количество поездок ->      UF_CRM_54_1738757712
+Номер недели ->                  UF_CRM_54_1738757784
+Год недели ->                         UF_CRM_54_1738757867*/
+        'entityTypeId': '1138',
+        'fields[title]': "test test",
+        'fields[STAGE_ID]': "dt1138_62:new",
+        'fields[ufCrm54_1738757291]': "jjj suu",
+
+
     });
     const { result } = response
     const { item } = result

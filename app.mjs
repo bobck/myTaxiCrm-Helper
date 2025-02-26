@@ -9,7 +9,8 @@ import { driversCustomTariffJobs } from './src/web.api/bootstrap.mjs';
 import {getPoolState, pool} from './src/api/pool.mjs';
 import { bitrixJobs } from './src/bitrix/bootstrap.mjs';
 import {getDriversRides} from "./src/web.api/web.api.utlites.mjs";
-import {getDriverReportCards} from "./src/bitrix/modules/get-driver-report-cards.mjs";
+import {createDriverBrandingCards} from "./src/bitrix/modules/create-driver-branding-cards.mjs";
+import {createDriverBrandingCardItem} from "./src/bitrix/bitrix.utils.mjs";
 
 await openSShTunel;
 
@@ -19,11 +20,12 @@ await initApi({ pool });
 // bqJobs();
 // pool.getPoolState();
 // getPoolState();
-await remonlineTokenToEnv();
-remonlineJobs();
+// await remonlineTokenToEnv();
+// remonlineJobs();
 
 
 
-await getDriverReportCards();
-driversCustomTariffJobs();
-bitrixJobs();
+await createDriverBrandingCards();
+await createDriverBrandingCardItem();
+// driversCustomTariffJobs();
+// bitrixJobs();

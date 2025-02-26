@@ -1,12 +1,11 @@
 import {getDriversRides} from "../../web.api/web.api.utlites.mjs";
 import {DateTime} from "luxon";
 
-export async function getDriverReportCards() {
+export async function createDriverBrandingCards() {
     const {rows} = await getDriversRides();
     console.log('Rows have been created');
     const cards = new Map();
-    const currentWeek = DateTime.now().weekNumber;
-    const currentYaer = DateTime.now().year;
+
     const handledCards=[];
 
     if(rows instanceof Array) {
@@ -48,6 +47,8 @@ export async function getDriverReportCards() {
 
             // const lastTiming=DateTime.fromISO(data.period_to.replace(' ', 'T'));
             const props={
+
+                //'fields[ufCrm42_1728470444]'
                 "UF_CRM_54_1738757291":data.driver_name,
                 "UF_CRM_54_1738757436":data.city,
                 "UF_CRM_54_1738757552":data.phone,
@@ -60,7 +61,7 @@ export async function getDriverReportCards() {
         }
 
     }
-    // console.log(handledCards);
+    console.log(handledCards);
     return handledCards;
 
 }

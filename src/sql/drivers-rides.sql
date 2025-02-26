@@ -20,4 +20,4 @@ WHERE drc.period_from >= (
     )
   AND drc.period_from <= (current_date - INTERVAL '1 day')
   AND d.company_id = '4ea03592-9278-4ede-adf8-f7345a856893'
-  AND drc.total_trips <> 0;
+  AND drc.total_trips > 0;
