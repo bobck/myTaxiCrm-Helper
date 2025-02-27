@@ -5,6 +5,26 @@ const db = await open({
     filename: process.env.DEV_DB,
     driver: sqlite3.Database
 })
+export async function insertBrandingCard({ driver_id, crmItemId, total_trips }) {
+    const sql = `
+        INSERT INTO BrandingCards (driver_id, crm_card_id, total_trips)
+        SELECT ?, ?, ?
+            WHERE NOT EXISTS (
+      SELECT 1 FROM BrandingCards WHERE driver_id = ?
+    )
+    `;
+    return db.run(sql, driver_id, crmItemId, total_trips, driver_id);
+}
+
+export async function getCrmBrandingItem({ driver_id }) {
+    const sql = `
+        SELECT *
+        FROM BrandingCards
+        WHERE driver_id = ?
+    `;
+    return db.get(sql, driver_id);
+}
+
 
 export async function getLastUnixCreatedAt({ categoryId }) {
     const sql = `SELECT unix_created_at FROM last_fired_driver WHERE category_id = ?`

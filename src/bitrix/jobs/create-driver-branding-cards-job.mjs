@@ -6,12 +6,22 @@ import {
     updateDriverBrandingCardItem
 } from "../bitrix.utils.mjs";
 import {list_188} from "../bitrix.constants.mjs";
+import {
+    getCrmBrandingItem,
+
+
+
+    insertBrandingCard
+} from "../bitrix.queries.mjs";
+
 
 export const createDriverBrandingCardsJob= async () => {
     try {
-        const cards2Upload=2;
+
+        const cards2Upload=20;
         const cards= await createDriverBrandingCards();
-        const cardIds=[];
+
+
         //coincidence check by city name mistakes
         const set= new Set();
         cards.forEach((card) => {if(!list_188.some((obj)=>card.city===obj.city)) set.add(card.city)});
@@ -20,14 +30,22 @@ export const createDriverBrandingCardsJob= async () => {
 
         for (let i=0; i<cards2Upload; i++){
 
-            cardIds.push(await createDriverBrandingCardItem(cards[i]));
+            let dbcard=await getCrmBrandingItem(cards[i]);
+            console.log(dbcard?`crmBrandingItem${dbcard.driver_id} already exists`:`crmBrandingItem${cards[i].driver_id}doesnt exist`);
+            if(!dbcard){
+                await insertBrandingCard(await createDriverBrandingCardItem(cards[i]));
+                dbcard=await getCrmBrandingItem(cards[i]);
+            }
+            if(dbcard){
+                // const resp= await updateDriverBrandingCardItem(dbcard.crm_card_id,{...cards[i],driver_name: "upd sss"});
+                const resp= await updateDriverBrandingCardItem(dbcard.crm_card_id,{...cards[i]});
 
+            }
+
+            console.log(dbcard);
         }
-        console.log(cardIds);
-        // await updateDriverBrandingCardItem();
-        // const responce=await getCrmItemFields(1138);
-        // console.log(responce.result.fields.stageId);
-        // const resp2=await getListElementsByIblockId(188);
+
+
 
     } catch (error) {
         console.error('Error occurred in onTick on moveReferralToClosed');
