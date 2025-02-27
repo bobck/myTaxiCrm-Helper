@@ -17,7 +17,9 @@ WHERE drc.period_from >= (
                  ELSE EXTRACT(DOW FROM current_date)::int
                 END)
     )
+  AND ap.country_code='UA'
   AND drc.period_from <= (current_date - INTERVAL '1 day')
   AND d.company_id = '4ea03592-9278-4ede-adf8-f7345a856893'
   AND drc.total_trips > 0
+
 GROUP BY d.id, d.full_name, d.phone, ap.name, ap.id;
