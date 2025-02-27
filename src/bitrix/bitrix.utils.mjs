@@ -447,7 +447,8 @@ export async function createDriverBrandingCardItem({driver_id,driver_name,phone,
     const props={
         'entityTypeId': '1138',
         'fields[title]': driver_name,
-        'fields[STAGE_ID]': stage_id,
+        'fields[STAGE_ID]': 'DT1138_62:SUCCESS'||stage_id,
+        // 'fields[OPENED]':'Y',
         'fields[ufCrm54_1738757291]': driver_name,
         'fields[ufCrm54_1738757552]':phone,
         'fields[ufCrm54_1738757612]':myTaxiDriverUrl ,
@@ -463,7 +464,7 @@ export async function createDriverBrandingCardItem({driver_id,driver_name,phone,
     }
     // console.log(props)
     const response = await bitrix.call('crm.item.add', props)
-    console.log(response);
+    // console.log(response);
 //ФИО ->                 UF_CRM_54_1738757291
 // Город ->              UF_CRM_54_1738757436
 // Номер телефону ->     UF_CRM_54_1738757552
@@ -475,5 +476,16 @@ export async function createDriverBrandingCardItem({driver_id,driver_name,phone,
     const { result } = response
     const { item } = result
     const { id } = item
-    return { id }
+    return {'crmItemId':id,driver_id}
+}
+export async function updateDriverBrandingCardItem({id,entityTypeId, ...payload}) {
+    const response = await bitrix.call('crm.item.update', {
+        id,
+        entityTypeId,
+        ...payload
+
+    })
+
+    // console.log(response);
+    return response;
 }
