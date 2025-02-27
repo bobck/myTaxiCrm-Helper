@@ -1,6 +1,8 @@
 import { Bitrix, Method } from '@2bad/bitrix'
 import fs from 'fs'
 import { pool } from './../api/pool.mjs'
+import {cityListWithAssignedBy, list_188} from "./bitrix.constants.mjs";
+import {DateTime} from "luxon";
 
 const bitrix = Bitrix(`https://${process.env.BITRIX_PORTAL_HOST}/rest/${process.env.BITRIX_USER_ID}/${process.env.BITRIX_API_KEY}/`)
 
@@ -419,24 +421,57 @@ export async function updateDealPayOff({ id, ufCrmField, amount }) {
     return { result }
 }
 
-export async function createDriverBrandingCardItem() {
+export async function getCrmItemFields(entityTypeId){
+    const responce=bitrix.call('crm.item.fields', { entityTypeId});
+    return responce;
+}
+export async function getListElementsByIblockId(IblockId){
+    return await bitrix.call('lists.element.get', {  IBLOCK_TYPE_ID: "lists", IBLOCK_ID: IblockId });
+}
 
-    const response = await bitrix.call('crm.item.add', {
-        /*
-        * ФИО ->                                        UF_CRM_54_1738757291
-Город ->                                    UF_CRM_54_1738757436
-Номер телефону ->              UF_CRM_54_1738757552
-Ссылка на MyTaxiCRM ->   UF_CRM_54_1738757612
-Количество поездок ->      UF_CRM_54_1738757712
-Номер недели ->                  UF_CRM_54_1738757784
-Год недели ->                         UF_CRM_54_1738757867*/
+export async function createDriverBrandingCardItem({driver_id,driver_name,phone,city,period_from,period_to,total_trips, auto_park_id}) {
+    const myTaxiDriverUrl=`https://fleets.mytaxicrm.com/${auto_park_id}/drivers/${driver_id}`
+    const lastTiming = DateTime.fromJSDate(period_to);
+    let stage_id='';
+    let trips=Number(total_trips);
+    if(isNaN(trips)) throw new Error('Trips must be a number');
+    if(trips>=90){
+        stage_id='DT1138_62:PREPARATION';
+    }
+    else if(trips<30){
+        stage_id='DT1138_62:CLIENT';
+    }
+    else {
+        stage_id='DT1138_62:NEW';
+    }
+    const props={
         'entityTypeId': '1138',
-        'fields[title]': "test test",
-        'fields[STAGE_ID]': "dt1138_62:new",
-        'fields[ufCrm54_1738757291]': "jjj suu",
+        'fields[title]': driver_name,
+        'fields[STAGE_ID]': stage_id,
+        'fields[ufCrm54_1738757291]': driver_name,
+        'fields[ufCrm54_1738757552]':phone,
+        'fields[ufCrm54_1738757612]':myTaxiDriverUrl ,
+        'fields[ufCrm54_1738757712]':total_trips ,
+        'fields[ufCrm54_1738757784]': lastTiming.weekNumber,
+        'fields[ufCrm54_1738757867]': lastTiming.year,
 
+    }
 
-    });
+    // console.log(city)
+    if(list_188 instanceof Array) {
+        props['fields[ufCrm54_1738757436]']= list_188.find((obj)=>obj.city===city).id;
+    }
+    // console.log(props)
+    const response = await bitrix.call('crm.item.add', props)
+    console.log(response);
+//ФИО ->                 UF_CRM_54_1738757291
+// Город ->              UF_CRM_54_1738757436
+// Номер телефону ->     UF_CRM_54_1738757552
+// Ссылка на MyTaxiCRM ->UF_CRM_54_1738757612
+// Количество поездок -> UF_CRM_54_1738757712
+// Номер недели ->       UF_CRM_54_1738757784
+// Год недели ->         UF_CRM_54_1738757867
+
     const { result } = response
     const { item } = result
     const { id } = item

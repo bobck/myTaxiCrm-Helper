@@ -11,6 +11,7 @@ import { bitrixJobs } from './src/bitrix/bootstrap.mjs';
 import {getDriversRides} from "./src/web.api/web.api.utlites.mjs";
 import {createDriverBrandingCards} from "./src/bitrix/modules/create-driver-branding-cards.mjs";
 import {createDriverBrandingCardItem} from "./src/bitrix/bitrix.utils.mjs";
+import {createDriverBrandingCardsJob} from "./src/bitrix/jobs/create-driver-branding-cards-job.mjs";
 
 await openSShTunel;
 
@@ -24,8 +25,7 @@ await initApi({ pool });
 // remonlineJobs();
 
 
-
-await createDriverBrandingCards();
-await createDriverBrandingCardItem();
+await createDriverBrandingCardsJob();
+// await createDriverBrandingCardItem();
 // driversCustomTariffJobs();
 // bitrixJobs();
