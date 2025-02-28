@@ -25,7 +25,6 @@ await initApi({ pool });
 // remonlineJobs();
 
 
-await createDriverBrandingCardsJob();
 // await createDriverBrandingCardItem();
 // driversCustomTariffJobs();
-// bitrixJobs();
+bitrixJobs();

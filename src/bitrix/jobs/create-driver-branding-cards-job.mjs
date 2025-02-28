@@ -4,10 +4,10 @@ import { CronJob } from 'cron';
 
 const timeZone = 'Europe/Kiev';
 
-// Cron expression for every Friday at 7:00
-// Day-of-week: 5
-const fridayJob = CronJob.from({
-    cronTime: '0 7 * * 5',
+// Cron expression for every Monday at 7:30
+// Day-of-week: 1
+const resetBrandingCardJob = CronJob.from({
+    cronTime: '30 7 * * 1',
     timeZone,
     onTick: async () => {
         const isNeededToFinish = true;
@@ -20,10 +20,10 @@ const fridayJob = CronJob.from({
     }
 });
 
-// Cron expression for every Saturday, Sunday, and Monday at 7:00
-// Day-of-week: 6 (Saturday), 0 (Sunday), 1 (Monday)
-const weekendJob = CronJob.from({
-    cronTime: '0 7 * * 6,0,1',
+// Cron expression for every day but Monday at 7:30
+// Day-of-week: 2-7 (Tuesday - Sunday)
+const updateBrandingCardJob = CronJob.from({
+    cronTime: '30 7 * * 2-7',
     timeZone,
     onTick: async () => {
         const isNeededToFinish = false;
@@ -37,4 +37,4 @@ const weekendJob = CronJob.from({
 });
 
 // Optionally export or start the jobs:
-export { fridayJob, weekendJob };
+export { resetBrandingCardJob, updateBrandingCardJob };
