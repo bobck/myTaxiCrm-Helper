@@ -428,9 +428,15 @@ export async function getCrmItemFields(entityTypeId){
 export async function getListElementsByIblockId(IblockId){
     return await bitrix.call('lists.element.get', {  IBLOCK_TYPE_ID: "lists", IBLOCK_ID: IblockId });
 }
-function computeDriverBraningCardItemStage(total_trips){
+function computeDriverBraningCardItemStage(total_trips,isNeededToFinish){
     let trips=Number(total_trips);
     if(isNaN(trips)) throw new Error('Trips must be a number');
+    if(isNeededToFinish){
+        if(trips>=90){
+            return 'DT1138_62:SUCCESS';
+        }
+        return 'DT1138_62:FAIL';
+    }
     if(trips>=90){
         return 'DT1138_62:PREPARATION';
     }
@@ -441,10 +447,10 @@ function computeDriverBraningCardItemStage(total_trips){
         return 'DT1138_62:NEW';
     }
 }
-function computeDriverBraningCardItemProps({driver_id,driver_name,phone,city,period_from,period_to,total_trips, auto_park_id}){
+function computeDriverBraningCardItemProps({driver_id,driver_name,phone,city,period_from,period_to,total_trips, auto_park_id},isNeededToFinish){
     const myTaxiDriverUrl=`https://fleets.mytaxicrm.com/${auto_park_id}/drivers/${driver_id}`
     const lastTiming = DateTime.fromJSDate(period_to);
-    const stage_id=computeDriverBraningCardItemStage(total_trips);
+    const stage_id=computeDriverBraningCardItemStage(total_trips,isNeededToFinish);
     const props={
         'entityTypeId': '1138',
         'fields[title]': driver_name,
@@ -484,9 +490,9 @@ export async function createDriverBrandingCardItem(card) {
     const { id } = item
     return {'crmItemId':id,driver_id,total_trips};
 }
-export async function updateDriverBrandingCardItem(crm_card_id,card) {
-    const props=computeDriverBraningCardItemProps(card);
-    console.log(card);
+export async function updateDriverBrandingCardItem(crm_card_id,card,isNeededToFinish) {
+    const props=computeDriverBraningCardItemProps(card,isNeededToFinish);
+
     const response = await bitrix.call('crm.item.update', {
         id:crm_card_id,
         ...props

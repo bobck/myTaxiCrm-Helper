@@ -24,6 +24,10 @@ export async function getCrmBrandingItem({ driver_id }) {
     `;
     return db.get(sql, driver_id);
 }
+export async function cleanUpBrandingCards() {
+    const sql = `DELETE FROM BrandingCards`;
+    return db.run(sql);
+}
 
 
 export async function getLastUnixCreatedAt({ categoryId }) {
