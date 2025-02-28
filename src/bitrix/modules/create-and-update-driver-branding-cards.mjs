@@ -4,7 +4,7 @@ import {list_188} from "../bitrix.constants.mjs";
 import {cleanUpBrandingCards, getCrmBrandingItem, insertBrandingCard} from "../bitrix.queries.mjs";
 import {createDriverBrandingCardItem, updateDriverBrandingCardItem} from "../bitrix.utils.mjs";
 
-export async function createAndUpdateDriverBrandingCards(rows2Upload, isNeededToFinish) {
+export async function createAndUpdateDriverBrandingCards(isNeededToFinish) {
     const {rows} = await getDriversRides();
     // console.log(rows);
 
@@ -17,7 +17,7 @@ export async function createAndUpdateDriverBrandingCards(rows2Upload, isNeededTo
         if(set.size)
             throw new Error(`some cities hasn't assigned ids such as : ${Array.from(set).reduce((acc,curr) =>`"${curr}" ${acc}`,'')}`);
 
-        for(let i=0; i<rows2Upload; i++){
+        for(let i=0; i<rows.length; i++){
 
             let dbcard=await getCrmBrandingItem(rows[i]);
             console.log(dbcard?`crmBrandingItem${dbcard.driver_id} already exists`:`crmBrandingItem${rows[i].driver_id} doesnt exist`);

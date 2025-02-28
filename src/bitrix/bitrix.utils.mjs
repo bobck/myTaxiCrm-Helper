@@ -428,7 +428,7 @@ export async function getCrmItemFields(entityTypeId){
 export async function getListElementsByIblockId(IblockId){
     return await bitrix.call('lists.element.get', {  IBLOCK_TYPE_ID: "lists", IBLOCK_ID: IblockId });
 }
-function computeDriverBraningCardItemStage(total_trips,isNeededToFinish){
+function computeDriverBrandingCardItemStage(total_trips,isNeededToFinish){
     let trips=Number(total_trips);
     if(isNaN(trips)) throw new Error('Trips must be a number');
     if(isNeededToFinish){
@@ -447,10 +447,10 @@ function computeDriverBraningCardItemStage(total_trips,isNeededToFinish){
         return 'DT1138_62:NEW';
     }
 }
-function computeDriverBraningCardItemProps({driver_id,driver_name,phone,city,period_from,period_to,total_trips, auto_park_id},isNeededToFinish){
+function computeDriverBrandingCardItemProps({driver_id,driver_name,phone,city,period_from,period_to,total_trips, auto_park_id},isNeededToFinish){
     const myTaxiDriverUrl=`https://fleets.mytaxicrm.com/${auto_park_id}/drivers/${driver_id}`
     const lastTiming = DateTime.fromJSDate(period_to);
-    const stage_id=computeDriverBraningCardItemStage(total_trips,isNeededToFinish);
+    const stage_id=computeDriverBrandingCardItemStage(total_trips,isNeededToFinish);
     const props={
         'entityTypeId': '1138',
         'fields[title]': driver_name,
@@ -480,7 +480,7 @@ function computeDriverBraningCardItemProps({driver_id,driver_name,phone,city,per
 }
 export async function createDriverBrandingCardItem(card) {
 
-    const props=computeDriverBraningCardItemProps(card);
+    const props=computeDriverBrandingCardItemProps(card);
     const response = await bitrix.call('crm.item.add', props)
     // console.log(response);
 
@@ -491,7 +491,7 @@ export async function createDriverBrandingCardItem(card) {
     return {'crmItemId':id,driver_id,total_trips};
 }
 export async function updateDriverBrandingCardItem(crm_card_id,card,isNeededToFinish) {
-    const props=computeDriverBraningCardItemProps(card,isNeededToFinish);
+    const props=computeDriverBrandingCardItemProps(card,isNeededToFinish);
 
     const response = await bitrix.call('crm.item.update', {
         id:crm_card_id,
