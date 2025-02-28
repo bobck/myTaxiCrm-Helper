@@ -1,13 +1,35 @@
 import {getDriversRides} from "../../web.api/web.api.utlites.mjs";
 
 import {list_188} from "../bitrix.constants.mjs";
-import {cleanUpBrandingCards, getCrmBrandingItem, insertBrandingCard} from "../bitrix.queries.mjs";
+import {
+    cleanUpBrandingCards,
+    getAllCrmBrandingItems,
+    getCrmBrandingItemByDriverId,
+    insertBrandingCard
+} from "../bitrix.queries.mjs";
 import {createDriverBrandingCardItem, updateDriverBrandingCardItem} from "../bitrix.utils.mjs";
 
 export async function createAndUpdateDriverBrandingCards(isNeededToFinish,cardsCount) {
+    if(isNeededToFinish) {
+        const dbcards=await getAllCrmBrandingItems();
+
+        // if(!rows.length) throw new Error(`There isn't any existing card`);
+        if(dbcards.length) {
+            for(let i=0; i<(cardsCount||dbcards.length); i++){
+                const {crm_card_id,...rest}=dbcards[i];
+                const resp= await updateDriverBrandingCardItem(crm_card_id, {...rest},isNeededToFinish);
+                // console.log(resp.crmItemId, 'has been updated');
+            }
+            await cleanUpBrandingCards();
+            // console.log('Branding cards table has been cleaned up.');
+
+        }
+
+
+
+    }
     const {rows} = await getDriversRides();
     // console.log(rows);
-
     if(rows instanceof Array){
 
 
@@ -17,13 +39,13 @@ export async function createAndUpdateDriverBrandingCards(isNeededToFinish,cardsC
         if(set.size)
             throw new Error(`some cities hasn't assigned ids such as : ${Array.from(set).reduce((acc,curr) =>`"${curr}" ${acc}`,'')}`);
 
-        for(let i=0; i<cardsCount||rows.length; i++){
+        for(let i=0; i<(cardsCount||rows.length); i++){
 
-            let dbcard=await getCrmBrandingItem(rows[i]);
+            let dbcard=await getCrmBrandingItemByDriverId(rows[i]);
             console.log(dbcard?`crmBrandingItem${dbcard.driver_id} already exists`:`crmBrandingItem${rows[i].driver_id} doesnt exist`);
             if(!dbcard){
                 await insertBrandingCard(await createDriverBrandingCardItem(rows[i]));
-                dbcard=await getCrmBrandingItem(rows[i]);
+                dbcard=await getCrmBrandingItemByDriverId(rows[i]);
             }
             else{
                 // const resp= await updateDriverBrandingCardItem(dbcard.crm_card_id,{...rows[i],driver_name: "upd sss"});
@@ -33,10 +55,7 @@ export async function createAndUpdateDriverBrandingCards(isNeededToFinish,cardsC
 
 
         }
-        if(isNeededToFinish) {
-            await cleanUpBrandingCards();
-            console.log('Branding cards table has been cleaned up.');
-        };
+
     }
 
 }

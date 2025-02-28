@@ -448,9 +448,18 @@ function computeDriverBrandingCardItemStage(total_trips,isNeededToFinish){
     }
 }
 function computeDriverBrandingCardItemProps({driver_id,driver_name,phone,city,period_from,period_to,total_trips, auto_park_id},isNeededToFinish){
+    if(isNeededToFinish){
+
+        const stage_id=computeDriverBrandingCardItemStage(total_trips,isNeededToFinish);
+        const props={
+            'entityTypeId': '1138',
+            'fields[STAGE_ID]':stage_id,
+        }
+        return props;
+    }
     const myTaxiDriverUrl=`https://fleets.mytaxicrm.com/${auto_park_id}/drivers/${driver_id}`
     const lastTiming = DateTime.fromJSDate(period_to);
-    const stage_id=computeDriverBrandingCardItemStage(total_trips,isNeededToFinish);
+    const stage_id=computeDriverBrandingCardItemStage(total_trips);
     const props={
         'entityTypeId': '1138',
         'fields[title]': driver_name,
@@ -473,7 +482,7 @@ function computeDriverBrandingCardItemProps({driver_id,driver_name,phone,city,pe
     // Год недели ->         UF_CRM_54_1738757867
 
     // console.log(city)
-    if(list_188 instanceof Array) {
+    if(list_188 instanceof Array ) {
         props['fields[ufCrm54_1738757436]']= list_188.find((obj)=>obj.city===city).id;
     }
     return props;

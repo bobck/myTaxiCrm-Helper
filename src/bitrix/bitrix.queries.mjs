@@ -16,7 +16,7 @@ export async function insertBrandingCard({ driver_id, crmItemId, total_trips }) 
     return db.run(sql, driver_id, crmItemId, total_trips, driver_id);
 }
 
-export async function getCrmBrandingItem({ driver_id }) {
+export async function getCrmBrandingItemByDriverId({ driver_id }) {
     const sql = `
         SELECT *
         FROM BrandingCards
@@ -24,6 +24,14 @@ export async function getCrmBrandingItem({ driver_id }) {
     `;
     return db.get(sql, driver_id);
 }
+export async function getAllCrmBrandingItems() {
+    const sql = `
+        SELECT *
+        FROM BrandingCards 
+    `;
+    return db.all(sql);
+}
+
 export async function cleanUpBrandingCards() {
     const sql = `DELETE FROM BrandingCards`;
     return db.run(sql);

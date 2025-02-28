@@ -11,7 +11,10 @@ import { bitrixJobs } from './src/bitrix/bootstrap.mjs';
 import {getDriversRides} from "./src/web.api/web.api.utlites.mjs";
 import {createAndUpdateDriverBrandingCards} from "./src/bitrix/modules/create-and-update-driver-branding-cards.mjs";
 import {createDriverBrandingCardItem} from "./src/bitrix/bitrix.utils.mjs";
-import {createDriverBrandingCardsJob} from "./src/bitrix/jobs/reset-driver-branding-cards-job.mjs";
+import {
+    resetBrandingCardJob
+} from "./src/bitrix/jobs/reset-driver-branding-cards-job.mjs";
+import {cleanUpBrandingCards} from "./src/bitrix/bitrix.queries.mjs";
 
 await openSShTunel;
 
