@@ -8,36 +8,36 @@ import {
     insertBrandingCard
 } from "../bitrix.queries.mjs";
 import {createDriverBrandingCardItem, updateDriverBrandingCardItem} from "../bitrix.utils.mjs";
+async function resetCrmBrandingCards() {
+    const dbcards = await getAllCrmBrandingItems();
 
-export async function createAndUpdateDriverBrandingCards(isNeededToFinish,cardsCount) {
-    if(isNeededToFinish) {
-        const dbcards=await getAllCrmBrandingItems();
-
-        // if(!rows.length) throw new Error(`There isn't any existing card`);
-        if(dbcards.length) {
-            for(let i=0; i<(cardsCount||dbcards.length); i++){
-                const {crm_card_id,...rest}=dbcards[i];
-                const resp= await updateDriverBrandingCardItem(crm_card_id, {...rest},isNeededToFinish);
-                // console.log(resp.crmItemId, 'has been updated');
-            }
-            await cleanUpBrandingCards();
-            // console.log('Branding cards table has been cleaned up.');
-
+    // if(!rows.length) throw new Error(`There isn't any existing card`);
+    if (dbcards.length) {
+        for (let i = 0; i < (cardsCount || dbcards.length); i++) {
+            const {crm_card_id, ...rest} = dbcards[i];
+            const resp = await updateDriverBrandingCardItem(crm_card_id, {...rest}, isNeededToFinish);
+            // console.log(resp.crmItemId, 'has been updated');
         }
-
-
+        await cleanUpBrandingCards();
+        // console.log('Branding cards table has been cleaned up.');
 
     }
+}
+function coincidenceCheck(cards){
+    //coincidence check by city name mistakes
+    const set= new Set();
+    cards.forEach((card) => {if(!list_188.some((obj)=>card.city===obj.city)) set.add(card.city)});
+    if(set.size)
+        throw new Error(`some cities hasn't assigned ids such as : ${Array.from(set).reduce((acc,curr) =>`"${curr}" ${acc}`,'')}`);
+
+}
+export async function createAndUpdateDriverBrandingCards(isNeededToFinish,cardsCount) {
+    if(isNeededToFinish) resetCrmBrandingCards();
     const {rows} = await getDriversRides();
     // console.log(rows);
     if(rows instanceof Array){
 
-
-        //coincidence check by city name mistakes
-        const set= new Set();
-        rows.forEach((card) => {if(!list_188.some((obj)=>card.city===obj.city)) set.add(card.city)});
-        if(set.size)
-            throw new Error(`some cities hasn't assigned ids such as : ${Array.from(set).reduce((acc,curr) =>`"${curr}" ${acc}`,'')}`);
+        coincidenceCheck(rows);
 
         for(let i=0; i<(cardsCount||rows.length); i++){
 
