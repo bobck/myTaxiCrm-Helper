@@ -473,15 +473,7 @@ function computeDriverBrandingCardItemProps({driver_id,driver_name,phone,city,pe
         'fields[ufCrm54_1738757867]': lastTiming.year,
 
     }
-    //ФИО ->                 UF_CRM_54_1738757291
-    // Город ->              UF_CRM_54_1738757436
-    // Номер телефону ->     UF_CRM_54_1738757552
-    // Ссылка на MyTaxiCRM ->UF_CRM_54_1738757612
-    // Количество поездок -> UF_CRM_54_1738757712
-    // Номер недели ->       UF_CRM_54_1738757784
-    // Год недели ->         UF_CRM_54_1738757867
 
-    // console.log(city)
     if(list_188 instanceof Array ) {
         props['fields[ufCrm54_1738757436]']= list_188.find((obj)=>obj.city===city).id;
     }

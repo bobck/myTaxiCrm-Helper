@@ -483,9 +483,9 @@ export async function getWorkingDriversById({ driversIds }) {
 }
 
 
-export async function getDriversRides() {
-    const sql = fs.readFileSync('src/sql/drivers-rides.sql').toString();
-    const result = await pool.query(sql, [])
+export async function getBrandingCardsInfo({lowerBound, upperBound}) {
+    const sql = fs.readFileSync('src/sql/get-branding-cards-info.sql').toString();
+    const result = await pool.query(sql, [lowerBound, upperBound])
     const { rows, rowCount } = result
     return { rows }
 }
