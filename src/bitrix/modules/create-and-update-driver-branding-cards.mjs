@@ -54,24 +54,8 @@ export function computePeriodBounds() {
         upperBound
     };
 }
-function computeDriverBrandingCardItemStage(total_trips,isNeededToFinish){
-    let trips=Number(total_trips);
-    if(isNaN(trips)) throw new Error('Trips must be a number');
-    if(isNeededToFinish){
-        if(trips>=90){
-            return 'DT1138_62:SUCCESS';
-        }
-        return 'DT1138_62:FAIL';
-    }
-    if(trips>=90){
-        return 'DT1138_62:PREPARATION';
-    }
-    else if(trips<30){
-        return 'DT1138_62:CLIENT';
-    }
-    else {
-        return 'DT1138_62:NEW';
-    }
+function computeDriverBrandingCardItemStage(stage){
+   return `DT1138_62:${stage}`
 }
 export async function createAndUpdateDriverBrandingCards(isNeededToFinish,cardsCount) {
     if(isNeededToFinish) resetCrmBrandingCards();
