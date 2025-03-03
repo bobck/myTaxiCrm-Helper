@@ -14,7 +14,6 @@ const db = await open({
  * @returns {Promise<number>} - Resolves with the last inserted row ID.
  */
 export async function insertBrandingCard(card) {
-    // Destructure the card properties inside the function body
     const {
         driver_id,
         crm_card_id,
@@ -24,86 +23,77 @@ export async function insertBrandingCard(card) {
         period_from,
         period_to
     } = card;
-    const created_at = (new Date()).toISOString();
-    const updated_at = (new Date()).toISOString();
+    const created_at = new Date().toISOString();
+    const updated_at = new Date().toISOString();
     const sql = `
-    INSERT INTO branding_cards 
-      (driver_id, crm_card_id, total_trips, weekNumber, year, period_from, period_to, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `;
-    const params = [
+        INSERT INTO branding_cards
+        (driver_id, crm_card_id, total_trips, weekNumber, year, period_from, period_to, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+    return db.run(
+        sql,
         driver_id,
         crm_card_id,
         total_trips,
         weekNumber,
         year,
-        period_from,
-        period_to,
+        period_from.toISOString(),
+        period_to.toISOString(),
         created_at,
         updated_at
-    ];
-
-    return new Promise((resolve, reject) => {
-        db.run(sql, params, function (err) {
-            if (err) return reject(err);
-            resolve(this.lastID);
-        });
-    });
+    );
 }
 
 /**
  * Retrieves a branding card record by its driver_id.
- * @param {string} driverId - The driver_id to search for.
+ * @param {Object} param0 - Object containing the driver_id.
  * @returns {Promise<Object>} - Resolves with the matching row (or undefined if not found).
  */
-export async function getCrmBrandingCardByDriverId(driverId) {
-    const sql = `SELECT * FROM branding_cards WHERE driver_id = ?`;
-    return new Promise((resolve, reject) => {
-        db.get(sql, [driverId], (err, row) => {
-            if (err) return reject(err);
-            resolve(row);
-        });
-    });
+export async function getCrmBrandingCardByDriverId({ driver_id ,weekNumber}) {
+    const sql = `
+        SELECT *
+        FROM branding_cards
+        WHERE driver_id = ? AND weekNumber=?
+    `;
+    return db.get(sql, driver_id, weekNumber);
 }
 
 /**
  * Retrieves all branding card records.
  * @returns {Promise<Array>} - Resolves with an array of all rows.
  */
-export async function getAllCrmBrandingCard() {
-    const sql = `SELECT * FROM branding_cards`;
-    return new Promise((resolve, reject) => {
-        db.all(sql, [], (err, rows) => {
-            if (err) return reject(err);
-            resolve(rows);
-        });
-    });
+export async function getAllCrmBrandingCard(weekNumber) {
+    const sql = `
+        SELECT *
+        FROM branding_cards
+        WHERE weekNumber=?
+    `;
+    return db.all(sql, weekNumber);
 }
 
 /**
  * Updates a branding card record for a given driver_id.
  * Dynamically builds the update statement based on updatedFields.
+ * Automatically updates the updated_at field.
  * @param {string} driverId - The driver_id identifying the record.
  * @param {Object} updatedFields - Object with keys as column names and new values.
  * @returns {Promise<number>} - Resolves with the number of rows updated.
  */
-export async function updateCrmBrandingCardByDriverId(driverId, updatedFields) {
-    updatedFields.updated_at=(new Date()).toISOString();
-    const keys = Object.keys(updatedFields);
-    if (keys.length === 0) {
-        // Nothing to update; resolve with 0 changes.
-        return 0;
-    }
-    const setClause = keys.map(key => `${key} = ?`).join(', ');
-    const values = keys.map(key => updatedFields[key]);
-    const sql = `UPDATE branding_cards SET ${setClause} WHERE driver_id = ?`;
-    return new Promise((resolve, reject) => {
-        db.run(sql, [...values, driverId], function (err) {
-            if (err) return reject(err);
-            resolve(this.changes);
-        });
-    });
+export async function updateBrandingCardByDriverId({driver_id, weekNumber,total_trips }) {
+    const updated_at = new Date().toISOString();
+    const sql = `UPDATE branding_cards SET total_trips = ?, updated_at=? WHERE driver_id = ? AND weekNumber = ?`;
+    return db.run(sql,total_trips,updated_at, driver_id, weekNumber);
 }
+
+/**
+ * Cleans up the branding_cards table by deleting all rows.
+ * @returns {Promise<number>} - Resolves with the number of rows deleted.
+ */
+export async function cleanUpBrandingCards() {
+    const sql = `DELETE FROM branding_cards`;
+    return db.run(sql);
+}
+
 export const testBrandingCards = async () => {
     try {
         // Sample branding card data (without created_at and updated_at)

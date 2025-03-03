@@ -1,7 +1,7 @@
 import { Bitrix, Method } from '@2bad/bitrix'
 import fs from 'fs'
 import { pool } from './../api/pool.mjs'
-import {cityListWithAssignedBy, list_188} from "./bitrix.constants.mjs";
+import {cityListWithAssignedBy as cityList}  from "./bitrix.constants.mjs";
 import {DateTime} from "luxon";
 
 const bitrix = Bitrix(`https://${process.env.BITRIX_PORTAL_HOST}/rest/${process.env.BITRIX_USER_ID}/${process.env.BITRIX_API_KEY}/`)
@@ -428,81 +428,68 @@ export async function getCrmItemFields(entityTypeId){
 export async function getListElementsByIblockId(IblockId){
     return await bitrix.call('lists.element.get', {  IBLOCK_TYPE_ID: "lists", IBLOCK_ID: IblockId });
 }
-function computeDriverBrandingCardItemStage(total_trips,isNeededToFinish){
-    let trips=Number(total_trips);
-    if(isNaN(trips)) throw new Error('Trips must be a number');
-    if(isNeededToFinish){
-        if(trips>=90){
-            return 'DT1138_62:SUCCESS';
-        }
-        return 'DT1138_62:FAIL';
-    }
-    if(trips>=90){
-        return 'DT1138_62:PREPARATION';
-    }
-    else if(trips<30){
-        return 'DT1138_62:CLIENT';
-    }
-    else {
-        return 'DT1138_62:NEW';
-    }
-}
-function computeDriverBrandingCardItemProps({driver_id,driver_name,phone,city,period_from,period_to,total_trips, auto_park_id},isNeededToFinish){
-    if(isNeededToFinish){
 
-        const stage_id=computeDriverBrandingCardItemStage(total_trips,isNeededToFinish);
-        const props={
-            'entityTypeId': '1138',
-            'fields[STAGE_ID]':stage_id,
-        }
-        return props;
-    }
+function computeDriverBrandingCardItemProps({driver_id,driver_name,phone,stage,weekNumber,year,total_trips, auto_park_id}){
     const myTaxiDriverUrl=`https://fleets.mytaxicrm.com/${auto_park_id}/drivers/${driver_id}`
-    const lastTiming = DateTime.fromJSDate(period_to);
-    const stage_id=computeDriverBrandingCardItemStage(total_trips);
+    const stage_id=`DT1138_62:${stage}`
     const props={
         'entityTypeId': '1138',
         'fields[title]': driver_name,
         'fields[STAGE_ID]':stage_id,
-        // 'fields[OPENED]':'Y',
         'fields[ufCrm54_1738757291]': driver_name,
         'fields[ufCrm54_1738757552]':phone,
         'fields[ufCrm54_1738757612]':myTaxiDriverUrl ,
         'fields[ufCrm54_1738757712]':total_trips ,
-        'fields[ufCrm54_1738757784]': lastTiming.weekNumber,
-        'fields[ufCrm54_1738757867]': lastTiming.year,
+        'fields[ufCrm54_1738757784]': weekNumber,
+        'fields[ufCrm54_1738757867]': year,
 
     }
 
-    if(list_188 instanceof Array ) {
-        props['fields[ufCrm54_1738757436]']= list_188.find((obj)=>obj.city===city).id;
+    if(cityList instanceof Array ) {
+        props['fields[ufCrm54_1738757436]']= cityList.find((obj)=>obj.auto_park_id===auto_park_id).brandingId;
     }
     return props;
 }
 export async function createDriverBrandingCardItem(card) {
-
+    const {driver_id,period_from,period_to,weekNumber,year,total_trips}=card;
     const props=computeDriverBrandingCardItemProps(card);
     const response = await bitrix.call('crm.item.add', props)
-    // console.log(response);
 
-    const {driver_id,total_trips}=card;
     const { result } = response
     const { item } = result
     const { id } = item
-    return {'crmItemId':id,driver_id,total_trips};
+
+    return {
+        'crm_card_id':id,
+        driver_id,
+        total_trips,
+        weekNumber,
+        year,
+        period_from,
+        period_to
+    };
 }
-export async function updateDriverBrandingCardItem(crm_card_id,card,isNeededToFinish) {
-    const props=computeDriverBrandingCardItemProps(card,isNeededToFinish);
+export async function updateDriverBrandingCardItem({crm_card_id, ...card}) {
+
+    const props=computeDriverBrandingCardItemProps(card);
 
     const response = await bitrix.call('crm.item.update', {
         id:crm_card_id,
         ...props
     })
-    // console.log(response);
 
-    const {driver_id,total_trips}=card;
+
+    const {driver_id,period_from,period_to,weekNumber,year,total_trips}=card;
     const { result } = response
     const { item } = result
     const { id } = item
-    return {'crmItemId':id,driver_id,total_trips};
+    return {
+        'crm_card_id':id,
+        driver_id,
+        total_trips,
+        weekNumber,
+        year,
+        period_from,
+        period_to
+    };
 }

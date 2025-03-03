@@ -16,8 +16,9 @@ import { createRefferalPaymentProcentageRewardJob } from "./jobs/create-refferal
 import { getAndSaveDtpDebtTransactionsJob } from "./jobs/get-and-save-dtp-debt-transactions-job.mjs";
 import { checkDtpDealIdIsValidJob } from "./jobs/check-dtp-deal-is-id-valid-job.mjs";
 import { accrueDebtToDealJob } from "./jobs/accrue-debt-to-deal-job.mjs";
-import {resetBrandingCardJob} from "./jobs/reset-driver-branding-cards-job.mjs";
-import {updateBrandingCardJob} from "./jobs/update-driver-branding-cards-job.mjs";
+import {createBrandingCardsJob} from "./jobs/create-driver-branding-cards-job.mjs";
+import {updateBrandingCardsJob} from "./jobs/update-driver-branding-cards-job.mjs";
+import {moveBrandingCardsJob} from "./jobs/move-driver-branding-cards-job.mjs";
 
 export function bitrixJobs() {
     try {
@@ -39,8 +40,9 @@ export function bitrixJobs() {
         getAndSaveDtpDebtTransactionsJob.start();
         checkDtpDealIdIsValidJob.start();
         accrueDebtToDealJob.start();
-        resetBrandingCardJob.start();
-        updateBrandingCardJob.start();
+        moveBrandingCardsJob.start();
+        createBrandingCardsJob.start();
+        updateBrandingCardsJob.start();
 
         console.log('Bitrix Jobs has been started')
     } catch (error) {
@@ -69,6 +71,9 @@ export function bitrixJobs() {
         getAndSaveDtpDebtTransactionsJob.stop();
         checkDtpDealIdIsValidJob.stop();
         accrueDebtToDealJob.stop();
+        moveBrandingCardsJob.stop();
+        createBrandingCardsJob.stop();
+        updateBrandingCardsJob.stop();
         bitrixJobs();
     }
 }

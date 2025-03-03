@@ -1,51 +1,25 @@
 import {getBrandingCardsInfo} from "../../web.api/web.api.utlites.mjs";
 import { DateTime } from 'luxon';
-import {list_188} from "../bitrix.constants.mjs";
+
 import {
-    cleanUpBrandingCards,
-    getAllCrmBrandingItems,
-    getCrmBrandingItemByDriverId,
-    insertBrandingCard
+    getCrmBrandingCardByDriverId,
+
+    insertBrandingCard, updateBrandingCardByDriverId
 } from "../bitrix.queries.mjs";
 import {createDriverBrandingCardItem, updateDriverBrandingCardItem} from "../bitrix.utils.mjs";
-async function resetCrmBrandingCards() {
-    const dbcards = await getAllCrmBrandingItems();
-
-    // if(!rows.length) throw new Error(`There isn't any existing card`);
-    if (dbcards.length) {
-        for (let i = 0; i < (cardsCount || dbcards.length); i++) {
-            const {crm_card_id, ...rest} = dbcards[i];
-            const resp = await updateDriverBrandingCardItem(crm_card_id, {...rest}, isNeededToFinish);
-            // console.log(resp.crmItemId, 'has been updated');
-        }
-        await cleanUpBrandingCards();
-        // console.log('Branding cards table has been cleaned up.');
-
-    }
-}
-function coincidenceCheck(cards){
-    //coincidence check by city name mistakes
-    const set= new Set();
-    cards.forEach((card) => {if(!list_188.some((obj)=>card.city===obj.city)) set.add(card.city)});
-    if(set.size)
-        throw new Error(`some cities hasn't assigned ids such as : ${Array.from(set).reduce((acc,curr) =>`"${curr}" ${acc}`,'')}`);
-
-}
 
 
-export function computePeriodBounds() {
 
-
+function computePeriodBounds() {
     const today = DateTime.local().startOf('day');
+    if(today.weekday===1) return {
+            lowerBound:today.minus({days:8}).toISODate(),
+            upperBound:today.minus({days:1}).toISODate()
+        }
 
-    if(today.weekday===1)  return {
-        lowerBound:'2025-03-01',
-        upperBound:'2025-03-03'
-    };
-    const daysSinceSunday = today.weekday ; // This yields 0 when today is Sunday
 
-    // Last Sunday is the current date minus the number of days since Sunday.
-    const lowerBound = today.minus({ days: daysSinceSunday }).toISODate();
+    const lowerBound = today.minus({ days: today.weekday }).toISODate();
+
     const upperBound = today.toISODate();
 
     // Return the dates formatted as ISO strings (YYYY-MM-DD) for PostgreSQL
@@ -54,34 +28,97 @@ export function computePeriodBounds() {
         upperBound
     };
 }
-function computeDriverBrandingCardItemStage(stage){
-   return `DT1138_62:${stage}`
+
+
+function computeBrandingCardStage(total_trips,isNeededToFinish){
+    let trips=Number(total_trips);
+    if(isNaN(trips)) throw new Error('Trips must be a number');
+    if(isNeededToFinish){
+        if(trips>=90){
+            return 'SUCCESS';
+        }
+        return 'FAIL';
+    }
+    if(trips>=90){
+        return 'PREPARATION';
+    }
+    else if(trips<30){
+        return 'CLIENT';
+    }
+    else {
+        return 'NEW';
+    }
 }
-export async function createAndUpdateDriverBrandingCards(isNeededToFinish,cardsCount) {
-    if(isNeededToFinish) resetCrmBrandingCards();
+
+
+export async function createDriverBrandingCards(cardsCount) {
+
     const bounds=computePeriodBounds();
-    console.log("bounds:",bounds);
+
     const {rows} = await getBrandingCardsInfo(bounds);
-    console.log(rows);
-    // console.log(rows);
-    if(!(rows instanceof Array)){
 
-        coincidenceCheck(rows);
-
+    if(rows instanceof Array){
         for(let i=0; i<(cardsCount||rows.length); i++){
-
-            let dbcard=await getCrmBrandingItemByDriverId(rows[i]);
-            console.log(dbcard?`crmBrandingItem${dbcard.driver_id} already exists`:`crmBrandingItem${rows[i].driver_id} doesnt exist`);
+            const {weekNumber,year} = DateTime.local().startOf('day');
+            const dbcard= await getCrmBrandingCardByDriverId({...rows[i],weekNumber});
             if(!dbcard){
-                await insertBrandingCard(await createDriverBrandingCardItem(rows[i]));
-                dbcard=await getCrmBrandingItemByDriverId(rows[i]);
+
+                const total_trips = '0';
+                const stage=computeBrandingCardStage(total_trips);
+
+                const card={
+                    ...rows[i],
+                    total_trips,
+                    stage,
+                    weekNumber,
+                    year,
+                }
+                const bitrixResp=await createDriverBrandingCardItem(card);
+
+                await insertBrandingCard(bitrixResp);
             }
-            else{
-                // const resp= await updateDriverBrandingCardItem(dbcard.crm_card_id,{...rows[i],driver_name: "upd sss"});
-                const resp= await updateDriverBrandingCardItem(dbcard.crm_card_id,{...rows[i]},isNeededToFinish);
+            else throw new Error(`Present driver card while creating driver_id: ${rows[i].driver_id}`);
+
+        }
+
+    }
+
+}
+
+
+export async function updateDriverBrandingCards(isNeededToFinish,cardsCount) {
+
+    const bounds=computePeriodBounds();
+
+    const {rows} = await getBrandingCardsInfo(bounds);
+
+    if(rows instanceof Array){
+        for(let i=0; i<(cardsCount||rows.length); i++){
+            const {weekNumber,year} = DateTime.local().startOf('day');
+
+            const dbcard= await getCrmBrandingCardByDriverId({...rows[i],weekNumber});
+            if(dbcard){
+                if(Number(dbcard.total_trips)<Number(rows[i].total_trips)||isNeededToFinish){
+                    const stage=computeBrandingCardStage(rows[i].total_trips, isNeededToFinish);
+
+                    const card={
+                        ...rows[i],
+                        crm_card_id:dbcard.crm_card_id,
+                        stage,
+                        weekNumber,
+                        year,
+                    }
+                    console.log(card)
+                    const bitrixResp=await updateDriverBrandingCardItem(card);
+
+
+                    const dbupdate=await updateBrandingCardByDriverId(bitrixResp);
+
+
+                }
 
             }
-
+            else throw new Error(`Absent driver card while updating driver_id: ${rows[i].driver_id}`);
 
         }
 
