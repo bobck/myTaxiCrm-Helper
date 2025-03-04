@@ -9,6 +9,7 @@ import { driversCustomTariffJobs } from "./src/web.api/bootstrap.mjs";
 import { pool } from "./src/api/pool.mjs";
 import { bitrixJobs } from "./src/bitrix/bootstrap.mjs";
 import { createBoltDriversToBan } from "./src/bitrix/modules/create-bolt-drivers-to-ban.mjs";
+import { createBanBoltDriverCardItem } from "./src/bitrix/bitrix.utils.mjs";
 
 await openSShTunel;
 
@@ -22,4 +23,7 @@ await initApi({ pool });
 //
 // driversCustomTariffJobs();
 // bitrixJobs();
-await createBoltDriversToBan();
+
+// await createBoltDriversToBan();
+
+await createBanBoltDriverCardItem();
