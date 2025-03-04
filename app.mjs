@@ -8,20 +8,17 @@ import { bqJobs } from "./src/bq/bootstrap.mjs";
 import { driversCustomTariffJobs } from "./src/web.api/bootstrap.mjs";
 import { pool } from "./src/api/pool.mjs";
 import { bitrixJobs } from "./src/bitrix/bootstrap.mjs";
-import { testBrandingCards } from "./src/bitrix/bitrix.queries.mjs";
 
-// await openSShTunnel;
+await openSShTunnel;
 
-// await initApi({ pool });
+await initApi({ pool });
 
-// telegramJobs();
-// sheetJobs();
-// bqJobs();
+telegramJobs();
+sheetJobs();
+bqJobs();
 
-// await remonlineTokenToEnv();
-// remonlineJobs();
+await remonlineTokenToEnv();
+remonlineJobs();
 
-// driversCustomTariffJobs();
-// bitrixJobs();
-
-await testBrandingCards();
+driversCustomTariffJobs();
+bitrixJobs();

@@ -16,19 +16,13 @@ export const openSShTunnel = new Promise((resolve, reject) => {
             return sock.destroy();
         }
 
-        c.forwardOut(
-            sock.remoteAddress,
-            sock.remotePort,
-            process.env.PG_HOST,
-            process.env.PG_PORT,
-            function (err, stream) {
-                if (err) {
-                    return sock.destroy();
-                }
-                sock.pipe(stream);
-                stream.pipe(sock);
+        c.forwardOut(sock.remoteAddress, sock.remotePort, process.env.PG_HOST, process.env.PG_PORT, function (err, stream) {
+            if (err) {
+                return sock.destroy();
             }
-        );
+            sock.pipe(stream);
+            stream.pipe(sock);
+        });
     });
 
     proxy.listen(process.env.PROXY_PORT, process.env.PROXY_HOST);
