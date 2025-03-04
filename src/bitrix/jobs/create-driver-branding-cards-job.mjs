@@ -1,19 +1,20 @@
-import { CronJob } from 'cron';
-import {createDriverBrandingCards} from "../modules/create-and-update-driver-branding-cards.mjs";
+import { CronJob } from "cron";
+import { createDriverBrandingCards } from "../modules/create-and-update-driver-branding-cards.mjs";
 
 // Cron expression for every Monday at 7:30
-// Day-of-week: 1
+// Day-of-week: 5 Friday
+const cronTime = "30 7 * * 5";
+const timeZone = "Europe/Kiev";
 const createBrandingCardsJob = CronJob.from({
-    cronTime: '30 7 * * 1',
-    timeZone:'Europe/Kiev',
+    cronTime,
+    timeZone,
     onTick: async () => {
-
         try {
             await createDriverBrandingCards();
         } catch (error) {
-            console.error('Error occurred in monday branding job:', { time: new Date(), error });
+            console.error("Error occurred in monday branding job:", { time: new Date(), error });
         }
-    }
+    },
 });
 
 // Optionally export or start the jobs:
