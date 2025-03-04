@@ -5,8 +5,8 @@ import net from 'net'
 //https://github.com/mscdex/ssh2/issues/67
 const { Client } = ssh2;
 
-export const openSShTunel = new Promise((resolve, reject) => {
-    console.log('openSShTunel...')
+export const openSShTunnel = new Promise((resolve, reject) => {
+    console.log('openSShTunnel...')
     const c = new Client();
 
     let ready = false;
@@ -38,9 +38,9 @@ export const openSShTunel = new Promise((resolve, reject) => {
         username: process.env.SSH_USER,
         privateKey,
     }
-    if(process.env.SSH_PASSPHRASE)
+    if(process.env.SSH_PASSPHRASE){
             sshConfig.passphrase=process.env.SSH_PASSPHRASE
-
+}
     c.connect(sshConfig);
 
     c.on('ready', async function () {

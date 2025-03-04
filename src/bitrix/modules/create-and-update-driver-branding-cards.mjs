@@ -64,12 +64,13 @@ export async function createDriverBrandingCards(cardsCount) {
             if(!dbcard){
 
                 const total_trips = '0';
-                const stage=computeBrandingCardStage(total_trips);
+                const stage_id=`DT1138_62:${computeBrandingCardStage(total_trips)}`;
+                const myTaxiDriverUrl=`https://fleets.mytaxicrm.com/${auto_park_id}/drivers/${driver_id}`
 
                 const card={
                     ...rows[i],
                     total_trips,
-                    stage,
+                    stage: stage_id,
                     weekNumber,
                     year,
                 }

@@ -27,7 +27,7 @@ export async function insertBrandingCard(card) {
     const updated_at = new Date().toISOString();
     const sql = `
         INSERT INTO branding_cards
-        (driver_id, crm_card_id, total_trips, weekNumber, year, period_from, period_to, created_at, updated_at)
+        (driver_id, crm_card_id, total_trips, weekNumber, year, created_at, updated_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     return db.run(
@@ -37,8 +37,6 @@ export async function insertBrandingCard(card) {
         total_trips,
         weekNumber,
         year,
-        period_from.toISOString(),
-        period_to.toISOString(),
         created_at,
         updated_at
     );
@@ -103,8 +101,6 @@ export const testBrandingCards = async () => {
             total_trips: '15',
             weekNumber: 34,
             year: 2025,
-            period_from: '2025-08-01 00:00:00',
-            period_to: '2025-08-07 23:59:59'
         };
 
         const lastID = await insertBrandingCard(sampleCard);

@@ -18,8 +18,6 @@ exports.up = function(db, callback) {
                                   total_trips TEXT,
                                   weekNumber INTEGER,
                                   year INTEGER,
-                                  period_from DATETIME,
-                                  period_to DATETIME,
                                   created_at DATETIME,
                                   updated_at DATETIME
     )

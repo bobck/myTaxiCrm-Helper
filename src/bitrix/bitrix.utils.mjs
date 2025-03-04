@@ -430,8 +430,7 @@ export async function getListElementsByIblockId(IblockId){
 }
 
 function computeDriverBrandingCardItemProps({driver_id,driver_name,phone,stage,weekNumber,year,total_trips, auto_park_id}){
-    const myTaxiDriverUrl=`https://fleets.mytaxicrm.com/${auto_park_id}/drivers/${driver_id}`
-    const stage_id=`DT1138_62:${stage}`
+
     const props={
         'entityTypeId': '1138',
         'fields[title]': driver_name,
