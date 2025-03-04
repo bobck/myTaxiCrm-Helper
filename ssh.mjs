@@ -32,13 +32,25 @@ export const openSShTunel = new Promise((resolve, reject) => {
     proxy.listen(process.env.PROXY_PORT, process.env.PROXY_HOST);
 
     const privateKey = fs.readFileSync(process.env.SSH_PRIVATE_KEY_PATH);
-    c.connect({
-        host: process.env.SSH_HOST,
-        port: 22,
-        username: process.env.SSH_USER,
-        privateKey,
-        passphrase:process.env.SSH_PASSPHRASE,
-    });
+    if(process.env.SSH_PASSPHRASE){
+        c.connect({
+            host: process.env.SSH_HOST,
+            port: 22,
+            username: process.env.SSH_USER,
+            privateKey,
+            passphrase:process.env.SSH_PASSPHRASE,
+        });
+
+    }
+    else{
+        console.log('SSH_PASSPHRASE environment variable missing');
+        c.connect({
+            host: process.env.SSH_HOST,
+            port: 22,
+            username: process.env.SSH_USER,
+            privateKey,
+        });
+    }
 
     c.on('ready', async function () {
         ready = true;
