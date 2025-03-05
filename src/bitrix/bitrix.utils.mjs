@@ -10,7 +10,6 @@ export async function getFreshFiredDrivers({ unixCreatedAt }) {
     const { rows, rowCount } = result
     return { rows }
 }
-
 export async function createDeal({ title, name, phone, cityId, firedReason, ridesCount, assignedBy, workedDays, contactId }) {
 
     const response = await bitrix.deals.create({
