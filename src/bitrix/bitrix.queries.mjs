@@ -6,6 +6,90 @@ const db = await open({
     driver: sqlite3.Database
 })
 
+
+/**
+ * Inserts a new branding card record.
+ * Destructures the card object inside the function body.
+ * @param {Object} card - An object with keys matching the table columns.
+ * @returns {Promise<number>} - Resolves with the last inserted row ID.
+ */
+export async function insertBrandingCard(card) {
+    const {
+        driver_id,
+        bitrix_card_id,
+        total_trips,
+        weekNumber,
+        year,
+    } = card;
+    const sql = `
+        INSERT INTO branding_cards
+        (driver_id, bitrix_card_id, total_trips, weekNumber, year, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    `;
+    return db.run(
+        sql,
+        driver_id,
+        bitrix_card_id,
+        total_trips,
+        weekNumber,
+        year
+    );
+}
+
+/**
+ * Retrieves a branding card record by its driver_id.
+ * @param {Object} param0 - Object containing the driver_id.
+ * @returns {Promise<Object>} - Resolves with the matching row (or undefined if not found).
+ */
+export async function getCrmBrandingCardByDriverId({ driver_id ,weekNumber}) {
+    const sql = `
+        SELECT *
+        FROM branding_cards
+        WHERE driver_id = ? AND weekNumber=?
+    `;
+    return db.get(sql, driver_id, weekNumber);
+}
+
+/**
+ * Retrieves all branding card records.
+ * @returns {Promise<Array>} - Resolves with an array of all rows.
+ */
+export async function getAllCrmBrandingCard(weekNumber) {
+    const sql = `
+        SELECT *
+        FROM branding_cards
+        WHERE weekNumber=?
+    `;
+    return db.all(sql, weekNumber);
+}
+
+/**
+ * Updates a branding card record for a given driver_id.
+ * Dynamically builds the update statement based on updatedFields.
+ * Automatically updates the updated_at field.
+ * @param {string} driverId - The driver_id identifying the record.
+ * @param {Object} updatedFields - Object with keys as column names and new values.
+ * @returns {Promise<number>} - Resolves with the number of rows updated.
+ */
+export async function updateBrandingCardByDriverId({driver_id, weekNumber,total_trips }) {
+
+    const sql = `UPDATE branding_cards SET total_trips = ?, updated_at=CURRENT_TIMESTAMP WHERE driver_id = ? AND weekNumber = ?`;
+    return db.run(sql,total_trips, driver_id, weekNumber);
+}
+
+/**
+ * Cleans up the branding_cards table by deleting all rows.
+ * @returns {Promise<number>} - Resolves with the number of rows deleted.
+ */
+export async function cleanUpBrandingCards() {
+    const sql = `DELETE FROM branding_cards`;
+    return db.run(sql);
+}
+
+
+
+
+
 export async function getLastUnixCreatedAt({ categoryId }) {
     const sql = `SELECT unix_created_at FROM last_fired_driver WHERE category_id = ?`
     return db.get(sql, categoryId)

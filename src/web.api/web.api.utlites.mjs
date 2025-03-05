@@ -481,3 +481,11 @@ export async function getWorkingDriversById({ driversIds }) {
     const { rows, rowCount } = result
     return { rows }
 }
+
+
+export async function getBrandingCardsInfo({lowerBound, upperBound}) {
+    const sql = fs.readFileSync('src/sql/get-branding-cards-info.sql').toString();
+    const result = await pool.query(sql, [lowerBound, upperBound])
+    const { rows, rowCount } = result
+    return { rows }
+}

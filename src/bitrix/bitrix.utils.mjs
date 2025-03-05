@@ -1,7 +1,6 @@
 import { Bitrix, Method } from '@2bad/bitrix'
 import fs from 'fs'
 import { pool } from './../api/pool.mjs'
-
 const bitrix = Bitrix(`https://${process.env.BITRIX_PORTAL_HOST}/rest/${process.env.BITRIX_USER_ID}/${process.env.BITRIX_API_KEY}/`)
 
 export async function getFreshFiredDrivers({ unixCreatedAt }) {
@@ -11,7 +10,6 @@ export async function getFreshFiredDrivers({ unixCreatedAt }) {
     const { rows, rowCount } = result
     return { rows }
 }
-
 export async function createDeal({ title, name, phone, cityId, firedReason, ridesCount, assignedBy, workedDays, contactId }) {
 
     const response = await bitrix.deals.create({
@@ -417,4 +415,61 @@ export async function updateDealPayOff({ id, ufCrmField, amount }) {
 
     const { result } = response
     return { result }
+}
+
+
+
+function computeDriverBrandingCardItemProps(card) {
+    const { driver_id, driver_name, myTaxiDriverUrl, phone, stage_id, cityBrandingId, weekNumber, year, total_trips } = card;
+    const props = {
+        entityTypeId: "1138",
+        "fields[title]": driver_name,
+        "fields[STAGE_ID]": stage_id,
+        "fields[ufCrm54_1738757291]": driver_name,
+        "fields[ufCrm54_1738757552]": phone,
+        "fields[ufCrm54_1738757612]": myTaxiDriverUrl,
+        "fields[ufCrm54_1738757712]": total_trips,
+        "fields[ufCrm54_1738757784]": weekNumber,
+        "fields[ufCrm54_1738757867]": year,
+        "fields[ufCrm54_1738757436]": cityBrandingId,
+    };
+
+    return props;
+}
+export async function createDriverBrandingCardItem(card) {
+    const { driver_id, weekNumber, year, total_trips } = card;
+    const props = computeDriverBrandingCardItemProps(card);
+    const response = await bitrix.call("crm.item.add", props);
+
+    const { result } = response;
+    const { item } = result;
+    const { id } = item;
+
+    return {
+        bitrix_card_id: id,
+        driver_id,
+        total_trips,
+        weekNumber,
+        year,
+    };
+}
+export async function updateDriverBrandingCardItem({ bitrix_card_id, ...card }) {
+    const props = computeDriverBrandingCardItemProps(card);
+
+    const response = await bitrix.call("crm.item.update", {
+        id: bitrix_card_id,
+        ...props,
+    });
+
+    const { driver_id, weekNumber, year, total_trips } = card;
+    const { result } = response;
+    const { item } = result;
+    const { id } = item;
+    return {
+        bitrix_card_id: id,
+        driver_id,
+        total_trips,
+        weekNumber,
+        year,
+    };
 }
