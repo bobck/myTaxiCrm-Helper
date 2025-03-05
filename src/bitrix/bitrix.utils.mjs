@@ -374,31 +374,26 @@ export async function updateDealPayOff({ id, ufCrmField, amount }) {
     const { result } = response;
     return { result };
 }
-export async function createBanBoltDriverCardItem() {
-    // const { driver_id, weekNumber, year, total_trips } = card;
+export async function createBanBoltDriverCardItem(card) {
+    const {driver_id, full_name, cityId, numberPlate,bolt_id} = card;
     const props = {
         entityTypeId: "1132",
-        "fields[title]": "testcard_might_be_carnumber",
+        "fields[title]": numberPlate||"testcard_might_be_carnumber",
         "fields[STAGE_ID]": "DT1132_60:NEW",
-        "fields[ufCrm52_1738324741]": "ivanov ivan",
-        "fields[ufCrm52_1738324675]": "some_bolt_id",
-        "fields[ufCrm52_UF_CRM_52_1738324546]": 3430,
+        "fields[ufCrm52_1738324741]": full_name,
+        "fields[ufCrm52_1738324675]": bolt_id,
+        "fields[ufCrm52_1738324546]": 3430,
         "fields[ufCrm52_1738739843]": 3436,
         "fields[ufCrm52_1738837120]": 0,
-        "fields[ufCrm52_1738326821]": "3780",
+        "fields[ufCrm52_1738326821]": cityId,
     };
-    //BOLT ID - UF_CRM_52_1738324675
-    // Оставшаяся часть долга - UF_CRM_52_1738837120
-    // Город - UF_CRM_52_1738326821
-    // ФИО - UF_CRM_52_1738324741
-    // Тип письма - UF_CRM_52_1738324546 с текстом "7 дней без заказов"
-    // "Статус водія"с типом список "боржник"/"не боржник" -  UF_CRM_52_1738739843
+
     const response = await bitrix.call("crm.item.add", props);
 
     const { result } = response;
     const { item } = result;
     const { id } = item;
-    //"fields[ufCrm42_1728470573]"
+
     return {
         crm_card_id: id,
     };

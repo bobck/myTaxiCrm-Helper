@@ -24,6 +24,6 @@ await initApi({ pool });
 // driversCustomTariffJobs();
 // bitrixJobs();
 
-// await createBoltDriversToBan();
+await createBoltDriversToBan(1);
 
-await createBanBoltDriverCardItem();
+// await createBanBoltDriverCardItem();

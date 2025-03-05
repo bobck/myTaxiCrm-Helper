@@ -1,5 +1,6 @@
 SELECT
-    d.id,
+    d.id as driver_id,
+    d.auto_park_id as auto_park_id,
     d.full_name,
     max(dti.external_id) AS bolt_id,
     SUM(drc.total_trips)as total_trips,
@@ -12,16 +13,14 @@ FROM
     ON d.id = dti.driver_id
         AND dti.integration_type = 'BOLT'
         AND d.inner_status = 'WORKING'
-        JOIN
-    driver_report_cards drc
+        JOIN driver_report_cards drc
     ON drc.driver_id = d.id
         AND drc.period_from >= NOW() - INTERVAL '8 days'
-        JOIN auto_parks AS ap
-             ON d.auto_park_id = ap.id
-                 AND ap.country_code = 'UA'
-
+    JOIN auto_parks AS ap
+        ON d.auto_park_id = ap.id
+        AND ap.country_code = 'UA'
 GROUP BY
-    d.id, d.full_name,dti.integration_id
+    d.id, d.full_name,dti.integration_id, d.auto_park_id
 HAVING SUM(drc.total_trips)=0
    AND count(*)>=7
 
