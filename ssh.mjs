@@ -32,13 +32,16 @@ export const openSShTunel = new Promise((resolve, reject) => {
     proxy.listen(process.env.PROXY_PORT, process.env.PROXY_HOST);
 
     const privateKey = fs.readFileSync(process.env.SSH_PRIVATE_KEY_PATH);
-    c.connect({
+    const sshConfig = {
         host: process.env.SSH_HOST,
         port: 22,
         username: process.env.SSH_USER,
-        privateKey
-    });
-
+        privateKey,
+    };
+    if (process.env.SSH_PASSPHRASE) {
+        sshConfig.passphrase = process.env.SSH_PASSPHRASE;
+    }
+    c.connect(sshConfig);
     c.on('ready', async function () {
         ready = true;
         resolve("ready");
