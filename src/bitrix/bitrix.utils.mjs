@@ -417,13 +417,7 @@ export async function updateDealPayOff({ id, ufCrmField, amount }) {
     return { result }
 }
 
-export async function getCrmItemFields(entityTypeId){
-    const responce=bitrix.call('crm.item.fields', { entityTypeId});
-    return responce;
-}
-export async function getListElementsByIblockId(IblockId){
-    return await bitrix.call('lists.element.get', {  IBLOCK_TYPE_ID: "lists", IBLOCK_ID: IblockId });
-}
+
 
 function computeDriverBrandingCardItemProps(card) {
     const { driver_id, driver_name, myTaxiDriverUrl, phone, stage_id, cityBrandingId, weekNumber, year, total_trips } = card;
@@ -452,18 +446,18 @@ export async function createDriverBrandingCardItem(card) {
     const { id } = item;
 
     return {
-        crm_card_id: id,
+        bitrix_card_id: id,
         driver_id,
         total_trips,
         weekNumber,
         year,
     };
 }
-export async function updateDriverBrandingCardItem({ crm_card_id, ...card }) {
+export async function updateDriverBrandingCardItem({ bitrix_card_id, ...card }) {
     const props = computeDriverBrandingCardItemProps(card);
 
     const response = await bitrix.call("crm.item.update", {
-        id: crm_card_id,
+        id: bitrix_card_id,
         ...props,
     });
 
@@ -472,7 +466,7 @@ export async function updateDriverBrandingCardItem({ crm_card_id, ...card }) {
     const { item } = result;
     const { id } = item;
     return {
-        crm_card_id: id,
+        bitrix_card_id: id,
         driver_id,
         total_trips,
         weekNumber,

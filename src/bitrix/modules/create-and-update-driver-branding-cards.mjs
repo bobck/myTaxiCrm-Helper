@@ -105,7 +105,7 @@ export async function updateDriverBrandingCards(isNeededToFinish, cardsCount) {
                     const cityBrandingId = getCityBrandingId(row.auto_park_id);
                     const card = {
                         ...row,
-                        crm_card_id: dbcard.crm_card_id,
+                        bitrix_card_id: dbcard.bitrix_card_id,
                         myTaxiDriverUrl,
                         cityBrandingId,
                         stage_id,

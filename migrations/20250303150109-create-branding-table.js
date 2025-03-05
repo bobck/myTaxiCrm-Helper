@@ -14,7 +14,7 @@ exports.up = function(db, callback) {
   const sql = `
     CREATE TABLE branding_cards (
                                   driver_id TEXT,
-                                  crm_card_id INTEGER PRIMARY KEY,
+                                  bitrix_card_id INTEGER PRIMARY KEY,
                                   total_trips TEXT,
                                   weekNumber INTEGER,
                                   year INTEGER,

@@ -16,29 +16,23 @@ const db = await open({
 export async function insertBrandingCard(card) {
     const {
         driver_id,
-        crm_card_id,
+        bitrix_card_id,
         total_trips,
         weekNumber,
         year,
-        period_from,
-        period_to
     } = card;
-    const created_at = new Date().toISOString();
-    const updated_at = new Date().toISOString();
     const sql = `
         INSERT INTO branding_cards
-        (driver_id, crm_card_id, total_trips, weekNumber, year, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?,)
+        (driver_id, bitrix_card_id, total_trips, weekNumber, year, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     `;
     return db.run(
         sql,
         driver_id,
-        crm_card_id,
+        bitrix_card_id,
         total_trips,
         weekNumber,
-        year,
-        created_at,
-        updated_at
+        year
     );
 }
 
@@ -78,9 +72,9 @@ export async function getAllCrmBrandingCard(weekNumber) {
  * @returns {Promise<number>} - Resolves with the number of rows updated.
  */
 export async function updateBrandingCardByDriverId({driver_id, weekNumber,total_trips }) {
-    const updated_at = new Date().toISOString();
-    const sql = `UPDATE branding_cards SET total_trips = ?, updated_at=? WHERE driver_id = ? AND weekNumber = ?`;
-    return db.run(sql,total_trips,updated_at, driver_id, weekNumber);
+
+    const sql = `UPDATE branding_cards SET total_trips = ?, updated_at=CURRENT_TIMESTAMP WHERE driver_id = ? AND weekNumber = ?`;
+    return db.run(sql,total_trips, driver_id, weekNumber);
 }
 
 /**
