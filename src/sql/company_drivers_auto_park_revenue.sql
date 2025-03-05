@@ -3,7 +3,7 @@ SELECT
 	cs.auto_park_id,
 	cs.driver_id,
 	d.phone,
-	sum(cs.auto_park_revenue-cs.total_debt+(CASE WHEN cs.week = EXTRACT(week FROM current_date at TIME zone 'europe/kyiv') AND  cs.YEAR = EXTRACT(year FROM current_date at TIME zone 'europe/kyiv') AND balance < 0 THEN balance ELSE 0 END )) AS auto_park_revenue,
+	sum(cs.auto_park_revenue-(CASE WHEN cs.week = EXTRACT(week FROM current_date AT TIME ZONE 'europe/kyiv') AND cs.YEAR = EXTRACT(YEAR FROM current_date AT TIME ZONE 'europe/kyiv') AND cs.total_debt > 0 THEN cs.total_debt ELSE 0 END )) AS auto_park_revenue,
 	sum(cs.rides_count) AS rides_count
 FROM
 	calculated_statements cs

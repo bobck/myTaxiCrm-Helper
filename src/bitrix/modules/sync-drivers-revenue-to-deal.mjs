@@ -46,7 +46,7 @@ export async function syncRevenueToDeals() {
             console.log(`chunk done in: ${Math.round((end - start) / 1000)} sec. maxOperating: ${maxOperating}`);
 
         } catch (error) {
-            console.error({ message: 'Failed updateDealsOpportunity', error })
+            console.error({ message: 'Failed updateDealsOpportunity', error, chunk })
         }
     }
 
