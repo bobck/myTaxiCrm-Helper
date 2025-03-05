@@ -28,29 +28,22 @@ export async function saveSidRow({ id,
 }
 
 export async function getOrders(
-    { idLabels, ids },
+    filters = {},
     _page = 1,
     _orders = []
 ) {
+    const { idLabels = [], ids = [], statuses = [] } = filters;
 
-    let idLabelsUrl = ''
-    if (idLabels) {
-        for (let idLabel of idLabels) {
-            idLabelsUrl += `&id_labels[]=${idLabel}`
-        }
-    }
-    let idUrl = ''
+    // Build query parameters
+    const idLabelsQuery = idLabels.map(label => `id_labels[]=${encodeURIComponent(label)}`).join('&');
+    const idsQuery = ids.map(id => `ids[]=${encodeURIComponent(id)}`).join('&');
+    const statusesQuery = statuses.map(statuses => `statuses[]=${encodeURIComponent(statuses)}`).join('&');
+    const queryParams = [`page=${_page}`, idLabelsQuery, idsQuery, statusesQuery].filter(Boolean).join('&');
+    const apiUrl = `${process.env.REMONLINE_API}/order/?token=${process.env.REMONLINE_API_TOKEN}&${queryParams}`;
 
-    if (ids) {
-        for (let id of ids) {
-            idUrl += `&ids[]=${id}`
-        }
-    }
+    const response = await fetch(apiUrl);
 
-
-    const response = await fetch(`${process.env.REMONLINE_API}/order/?token=${process.env.REMONLINE_API_TOKEN}&page=${_page}${idLabelsUrl}${idUrl}`);
-
-    if (response.status == 414 || response.status == 503 || response.status == 502 || response.status == 504) {
+    if ([414, 503, 502, 504].includes(response.status)) {
         throw await response.text()
     }
 
@@ -67,7 +60,7 @@ export async function getOrders(
         if (response.status == 403 && code == 101) {
             console.info({ function: 'getOrders', message: 'Get new Auth' })
             await remonlineTokenToEnv(true);
-            return await getOrders({ idLabels, ids }, _page, _orders);
+            return await getOrders(filters, _page, _orders);
         }
 
         console.error({ function: 'getOrders', message, validation, status: response.status })
@@ -85,7 +78,7 @@ export async function getOrders(
     // console.log({ count, page, doneOnPrevPage, leftTofinish })
 
     if (leftTofinish > 0) {
-        return await getOrders({ idLabels, ids }, parseInt(page) + 1, _orders);
+        return await getOrders(filters, parseInt(page) + 1, _orders);
     }
 
     return { orders: _orders }
