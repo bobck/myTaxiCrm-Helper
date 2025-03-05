@@ -28,7 +28,7 @@ export async function insertBrandingCard(card) {
     const sql = `
         INSERT INTO branding_cards
         (driver_id, crm_card_id, total_trips, weekNumber, year, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?,)
     `;
     return db.run(
         sql,
@@ -92,35 +92,7 @@ export async function cleanUpBrandingCards() {
     return db.run(sql);
 }
 
-export const testBrandingCards = async () => {
-    try {
-        // Sample branding card data (without created_at and updated_at)
-        const sampleCard = {
-            driver_id: 'driver123',
-            crm_card_id: 101,
-            total_trips: '15',
-            weekNumber: 34,
-            year: 2025,
-        };
 
-        const lastID = await insertBrandingCard(sampleCard);
-        console.log('Branding card inserted with row id:', lastID);
-
-        const card = await getCrmBrandingCardByDriverId(sampleCard.driver_id);
-        console.log('Fetched branding card:', card);
-
-        const changes = await updateCrmBrandingCardByDriverId(sampleCard.driver_id, {
-            total_trips: '20',
-            updated_at: new Date().toISOString()
-        });
-        console.log('Number of rows updated:', changes);
-
-        const allCards = await getAllCrmBrandingCard();
-        console.log('All branding cards:', allCards);
-    } catch (error) {
-        console.error('Error:', error);
-    }
-}
 
 
 
