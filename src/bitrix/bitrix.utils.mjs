@@ -295,7 +295,7 @@ export async function createPayment({
     referrerPhone,
     referrerName,
     referrerPosition
-    }) {
+}) {
 
     const response = await bitrix.call('crm.item.add', {
         'entityTypeId': '1102',
@@ -330,7 +330,7 @@ export async function changeItemStage({
     referralTypeId,
     id,
     stageId
-    }) {
+}) {
 
     await bitrix.call('crm.item.update', {
         'entityTypeId': referralTypeId,
@@ -345,7 +345,7 @@ export async function createNewWorkingDriverItem({
     stageId,
     city,
     phone
-    }) {
+}) {
 
     const response = await bitrix.call('crm.item.add', {
         'entityTypeId': '1110',
