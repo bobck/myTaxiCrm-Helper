@@ -2,7 +2,7 @@
 import pg from 'pg';
 
 const connectionString = `postgres://${process.env.PG_USER}:${process.env.PG_PASSWORD}@${process.env.PROXY_HOST}:${process.env.PROXY_PORT}/${process.env.PG_DB}`;
-console.log(connectionString);
+
 export const pool = new pg.Pool({
     connectionString
 });
@@ -36,7 +36,7 @@ process.on('uncaughtException', async (error) => {
     process.exit();
 });
 
-export function getPoolState() {
+function getPoolState() {
     console.log({
         pool
     })

@@ -1,9 +1,6 @@
 import { Bitrix, Method } from '@2bad/bitrix'
 import fs from 'fs'
 import { pool } from './../api/pool.mjs'
-import {cityListWithAssignedBy as cityList}  from "./bitrix.constants.mjs";
-import {DateTime} from "luxon";
-
 const bitrix = Bitrix(`https://${process.env.BITRIX_PORTAL_HOST}/rest/${process.env.BITRIX_USER_ID}/${process.env.BITRIX_API_KEY}/`)
 
 export async function getFreshFiredDrivers({ unixCreatedAt }) {

@@ -19,7 +19,6 @@ async function _getNewToken() {
     // console.log(response.status, params, `${process.env.REMONLINE_API}/token/new`)
     const data = await response.json();
     const { token } = data;
-    // console.log(token);
     await saveRemonlineToken({ token, validTo })
     return { token }
 }
