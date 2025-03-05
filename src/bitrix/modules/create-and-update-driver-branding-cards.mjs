@@ -1,6 +1,6 @@
 import { getBrandingCardsInfo } from "../../web.api/web.api.utlites.mjs";
 import { DateTime } from "luxon";
-import { getCrmBrandingCardByDriverId, insertBrandingCard, updateBrandingCardsByDriverId } from "../bitrix.queries.mjs";
+import { getCrmBrandingCardByDriverId, insertBrandingCard, updateBrandingCardByDriverId } from "../bitrix.queries.mjs";
 import { createDriverBrandingCardItem, updateDriverBrandingCardItem } from "../bitrix.utils.mjs";
 import { cityListWithAssignedBy as cityList } from "../bitrix.constants.mjs";
 
@@ -124,7 +124,7 @@ export async function updateDriverBrandingCards(isNeededToFinish, cardsCount) {
 
             const bitrixResp = await updateDriverBrandingCardItem(card);
 
-            const dbupdate = await updateBrandingCardsByDriverId(bitrixResp);
+            const dbupdate = await updateBrandingCardByDriverId(bitrixResp);
         }
     }
 }
