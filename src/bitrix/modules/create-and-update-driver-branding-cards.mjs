@@ -49,36 +49,39 @@ export async function createDriverBrandingCards(cardsCount) {
 
     const { rows } = await getBrandingCardsInfo(bounds);
 
-    if (rows instanceof Array) {
-        for (const [index, row] of rows.entries()) {
-            if (cardsCount && index === cardsCount) {
-                return;
-            }
-
-            const { weekNumber, year } = DateTime.local().startOf("day");
-            const dbcard = await getCrmBrandingCardByDriverId({
-                ...row,
-                weekNumber,
-            });
-            if (!dbcard) {
-                const total_trips = "0";
-                const stage_id = `DT1138_62:${computeBrandingCardStage(total_trips)}`;
-                const myTaxiDriverUrl = `https://fleets.mytaxicrm.com/${row.auto_park_id}/drivers/${row.driver_id}`;
-                const cityBrandingId = getCityBrandingId(row.auto_park_id);
-                const card = {
-                    ...row,
-                    total_trips,
-                    stage_id,
-                    myTaxiDriverUrl,
-                    cityBrandingId,
-                    weekNumber,
-                    year,
-                };
-                const bitrixResp = await createDriverBrandingCardItem(card);
-
-                await insertBrandingCard(bitrixResp);
-            } else throw new Error(`Present driver card while creating driver_id: ${row.driver_id}`);
+    if (!(rows instanceof Array)) {
+        console.error("No rows found for branding cards found.");
+        return;
+    }
+    for (const [index, row] of rows.entries()) {
+        if (cardsCount && index === cardsCount) {
+            return;
         }
+
+        const { weekNumber, year } = DateTime.local().startOf("day");
+        const dbcard = await getCrmBrandingCardByDriverId({
+            ...row,
+            weekNumber,
+        });
+        if (dbcard) {
+            throw new Error(`Present driver card while creating driver_id: ${row.driver_id}`);
+        }
+        const total_trips = "0";
+        const stage_id = `DT1138_62:${computeBrandingCardStage(total_trips)}`;
+        const myTaxiDriverUrl = `https://fleets.mytaxicrm.com/${row.auto_park_id}/drivers/${row.driver_id}`;
+        const cityBrandingId = getCityBrandingId(row.auto_park_id);
+        const card = {
+            ...row,
+            total_trips,
+            stage_id,
+            myTaxiDriverUrl,
+            cityBrandingId,
+            weekNumber,
+            year,
+        };
+        const bitrixResp = await createDriverBrandingCardItem(card);
+
+        await insertBrandingCard(bitrixResp);
     }
 }
 
@@ -87,37 +90,41 @@ export async function updateDriverBrandingCards(isNeededToFinish, cardsCount) {
 
     const { rows } = await getBrandingCardsInfo(bounds);
 
-    if (rows instanceof Array) {
-        for (const [index, row] of rows.entries()) {
-            if (cardsCount && index === cardsCount) {
-                return;
-            }
-            const { weekNumber, year } = DateTime.local().startOf("day");
+    if (!(rows instanceof Array)) {
+        console.error("No rows found for branding cards found.");
+        return;
+    }
+    for (const [index, row] of rows.entries()) {
+        if (cardsCount && index === cardsCount) {
+            return;
+        }
 
-            const dbcard = await getCrmBrandingCardByDriverId({
+        const dbcard = await getCrmBrandingCardByDriverId({
+            ...row,
+            weekNumber,
+        });
+        if (!dbcard) {
+            throw new Error(`Absent driver card while updating driver_id: ${row.driver_id}`);
+        }
+        const { weekNumber, year } = DateTime.local().startOf("day");
+
+        if (Number(dbcard.total_trips) < Number(row.total_trips) || isNeededToFinish) {
+            const stage_id = `DT1138_62:${computeBrandingCardStage(row.total_trips, isNeededToFinish)}`;
+            const myTaxiDriverUrl = `https://fleets.mytaxicrm.com/${row.auto_park_id}/drivers/${row.driver_id}`;
+            const cityBrandingId = getCityBrandingId(row.auto_park_id);
+            const card = {
                 ...row,
+                bitrix_card_id: dbcard.bitrix_card_id,
+                myTaxiDriverUrl,
+                cityBrandingId,
+                stage_id,
                 weekNumber,
-            });
-            if (dbcard) {
-                if (Number(dbcard.total_trips) < Number(row.total_trips) || isNeededToFinish) {
-                    const stage_id = `DT1138_62:${computeBrandingCardStage(row.total_trips, isNeededToFinish)}`;
-                    const myTaxiDriverUrl = `https://fleets.mytaxicrm.com/${row.auto_park_id}/drivers/${row.driver_id}`;
-                    const cityBrandingId = getCityBrandingId(row.auto_park_id);
-                    const card = {
-                        ...row,
-                        bitrix_card_id: dbcard.bitrix_card_id,
-                        myTaxiDriverUrl,
-                        cityBrandingId,
-                        stage_id,
-                        weekNumber,
-                        year,
-                    };
+                year,
+            };
 
-                    const bitrixResp = await updateDriverBrandingCardItem(card);
+            const bitrixResp = await updateDriverBrandingCardItem(card);
 
-                    const dbupdate = await updateBrandingCardsByDriverId(bitrixResp);
-                }
-            } else throw new Error(`Absent driver card while updating driver_id: ${row.driver_id}`);
+            const dbupdate = await updateBrandingCardsByDriverId(bitrixResp);
         }
     }
 }
