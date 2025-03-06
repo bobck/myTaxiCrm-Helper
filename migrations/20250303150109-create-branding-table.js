@@ -13,13 +13,13 @@ exports.setup = function(options, seedLink) {
 exports.up = function(db, callback) {
   const sql = `
     CREATE TABLE branding_cards (
-                                  driver_id TEXT,
-                                  bitrix_card_id INTEGER PRIMARY KEY,
+                                  driver_id TEXT UNIQUE NOT NULL,
+                                  bitrix_card_id INTEGER UNIQUE PRIMARY KEY,
                                   total_trips TEXT,
-                                  weekNumber INTEGER,
-                                  year INTEGER,
-                                  created_at DATETIME,
-                                  updated_at DATETIME
+                                  branding_process_id TEXT,
+                                  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                                  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                                  FOREIGN KEY (branding_process_id) REFERENCES branding_processes(id) ON DELETE CASCADE
     )
   `;
   db.runSql(sql, callback);

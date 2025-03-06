@@ -426,8 +426,10 @@ export async function getListElementsByIblockId(IblockId){
 
 
 
-function computeDriverBrandingCardItemProps(card) {
+
+export async function createDriverBrandingCardItem(card) {
     const { driver_id, driver_name, myTaxiDriverUrl, phone, stage_id, cityBrandingId, weekNumber, year, total_trips } = card;
+    console.log("creating driver branding in bitrix", driver_id);
     const props = {
         entityTypeId: "1138",
         "fields[title]": driver_name,
@@ -440,12 +442,6 @@ function computeDriverBrandingCardItemProps(card) {
         "fields[ufCrm54_1738757867]": year,
         "fields[ufCrm54_1738757436]": cityBrandingId,
     };
-
-    return props;
-}
-export async function createDriverBrandingCardItem(card) {
-    const { driver_id, weekNumber, year, total_trips } = card;
-    const props = computeDriverBrandingCardItemProps(card);
     const response = await bitrix.call("crm.item.add", props);
 
     const { result } = response;
@@ -456,8 +452,6 @@ export async function createDriverBrandingCardItem(card) {
         bitrix_card_id: id,
         driver_id,
         total_trips,
-        weekNumber,
-        year,
     };
 }
 export async function updateDriverBrandingCardItem({ bitrix_card_id, ...card }) {

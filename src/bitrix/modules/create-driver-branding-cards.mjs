@@ -1,20 +1,23 @@
 import { getBrandingCardsInfo } from "../../web.api/web.api.utlites.mjs";
 import { DateTime } from "luxon";
-import { getCrmBrandingCardByDriverId, insertBrandingCard, updateBrandingCardByDriverId } from "../bitrix.queries.mjs";
+import {
+    createBrandingProcess,
+    getCrmBrandingCardByDriverId,
+    insertBrandingCard,
+    updateBrandingCardByDriverId,
+} from "../bitrix.queries.mjs";
 import { createDriverBrandingCardItem, updateDriverBrandingCardItem } from "../bitrix.utils.mjs";
 import { cityListWithAssignedBy as cityList } from "../bitrix.constants.mjs";
+import { openSShTunnel } from "../../../ssh.mjs";
+import { initApi } from "../../api/endpoints.mjs";
+import { pool } from "../../api/pool.mjs";
 
 export function computePeriodBounds() {
     const today = DateTime.local().startOf("day");
-    if (today.weekday === 1)
-        return {
-            lowerBound: today.minus({ days: 8 }).toISODate(),
-            upperBound: today.toISODate(),
-        };
 
-    const lowerBound = today.minus({ days: today.weekday }).toISODate();
+    const lowerBound = today.minus({ days: today.weekday });
 
-    const upperBound = today.toISODate();
+    const upperBound = lowerBound.plus({ days: 7 });
 
     // Return the dates formatted as ISO strings (YYYY-MM-DD) for PostgreSQL
     return {
@@ -42,8 +45,14 @@ function getCityBrandingId(auto_park_id) {
 
 export async function createDriverBrandingCards() {
     const bounds = computePeriodBounds();
-
-    const { rows } = await getBrandingCardsInfo(bounds);
+    const brandingProcess= await createBrandingProcess({
+        weekNumber:bounds.upperBound.weekNumber,
+        year:bounds.upperBound.year,
+        period_from:bounds.lowerBound.toISODate(),
+        period_to:bounds.upperBound.toISODate(),
+    });
+    const {period_from, period_to} = brandingProcess;
+    const { rows } = await getBrandingCardsInfo({period_from, period_to});
 
     if (rows.length === 0) {
         console.error("No rows found for branding cards found.");
@@ -54,34 +63,46 @@ export async function createDriverBrandingCards() {
             return;
         }
 
-        const { weekNumber, year } = DateTime.local().startOf("day");
+        const {driver_id,driver_name,phone,auto_park_id,total_trips}=row;
+        const { weekNumber, year } = bounds.upperBound;
+
         const dbcard = await getCrmBrandingCardByDriverId({
-            ...row,
-            weekNumber,
-        });
-        if (dbcard) {
-            console.error(`Present driver card while creating driver_id: ${row.driver_id}`);
-        }
-        const total_trips = "0";
-        const stage_id = `DT1138_62:${computeBrandingCardStage(total_trips)}`;
-        const myTaxiDriverUrl = `https://fleets.mytaxicrm.com/${row.auto_park_id}/drivers/${row.driver_id}`;
-        const cityBrandingId = getCityBrandingId(row.auto_park_id);
-        const card = {
-            ...row,
-            total_trips,
-            stage_id,
-            myTaxiDriverUrl,
-            cityBrandingId,
+            driver_id,
             weekNumber,
             year,
-        };
-        const bitrixResp = await createDriverBrandingCardItem(card);
+        });
+        if (dbcard) {
+            console.error(`Present driver card while creating driver_id:`, dbcard);
+        }
+        else{
+            const stage_id = `DT1138_62:${computeBrandingCardStage(total_trips)}`;
+            const myTaxiDriverUrl = `https://fleets.mytaxicrm.com/${row.auto_park_id}/drivers/${row.driver_id}`;
+            const cityBrandingId = getCityBrandingId(row.auto_park_id);
+            const card = {
+                driver_id,
+                driver_name,
+                stage_id,
+                phone,
+                myTaxiDriverUrl,
+                total_trips,
+                weekNumber,
+                year,
+                cityBrandingId,
+            };
+            const bitrixResp = await createDriverBrandingCardItem(card);
 
-        await insertBrandingCard(bitrixResp);
+            await insertBrandingCard({
+                ...bitrixResp,
+                branding_process_id:brandingProcess.id
+            });
+        }
+
     }
 }
 
 if(process.env.ENV==="TEST"){
-    console.log(`testing driver branding creation\ncards count :${process.env.BRANDING_CARDS_COUNT}`);
+    await openSShTunnel
+    await initApi({ pool });
     await createDriverBrandingCards();
+
 }
