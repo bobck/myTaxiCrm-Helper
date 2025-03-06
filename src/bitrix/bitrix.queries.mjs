@@ -77,19 +77,6 @@ export async function updateBrandingCardByDriverId({driver_id, weekNumber,total_
     return db.run(sql,total_trips, driver_id, weekNumber);
 }
 
-/**
- * Cleans up the branding_cards table by deleting all rows.
- * @returns {Promise<number>} - Resolves with the number of rows deleted.
- */
-export async function cleanUpBrandingCards() {
-    const sql = `DELETE FROM branding_cards`;
-    return db.run(sql);
-}
-
-
-
-
-
 export async function getLastUnixCreatedAt({ categoryId }) {
     const sql = `SELECT unix_created_at FROM last_fired_driver WHERE category_id = ?`
     return db.get(sql, categoryId)

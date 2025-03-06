@@ -44,17 +44,17 @@ function getCityBrandingId(auto_park_id) {
     return cityList.find((obj) => obj.auto_park_id === auto_park_id).brandingId;
 }
 
-export async function createDriverBrandingCards(cardsCount) {
+export async function createDriverBrandingCards() {
     const bounds = computePeriodBounds();
 
     const { rows } = await getBrandingCardsInfo(bounds);
 
-    if (!(rows instanceof Array)) {
+    if (rows.length === 0) {
         console.error("No rows found for branding cards found.");
         return;
     }
     for (const [index, row] of rows.entries()) {
-        if (cardsCount && index === cardsCount) {
+        if (process.env.ENV="TEST" && index === Nuber(process.env.BRANDING_CARDS_COUNT)) {
             return;
         }
 
@@ -90,15 +90,16 @@ export async function updateDriverBrandingCards(isNeededToFinish, cardsCount) {
 
     const { rows } = await getBrandingCardsInfo(bounds);
 
-    if (!(rows instanceof Array)) {
+    if (rows.length === 0) {
         console.error("No rows found for branding cards found.");
         return;
     }
     for (const [index, row] of rows.entries()) {
-        if (cardsCount && index === cardsCount) {
+        if (process.env.ENV="TEST" && index === Nuber(process.env.BRANDING_CARDS_COUNT)) {
             return;
         }
 
+        const { weekNumber, year } = DateTime.local().startOf("day");
         const dbcard = await getCrmBrandingCardByDriverId({
             ...row,
             weekNumber,
@@ -106,7 +107,6 @@ export async function updateDriverBrandingCards(isNeededToFinish, cardsCount) {
         if (!dbcard) {
             throw new Error(`Absent driver card while updating driver_id: ${row.driver_id}`);
         }
-        const { weekNumber, year } = DateTime.local().startOf("day");
 
         if (Number(dbcard.total_trips) < Number(row.total_trips) || isNeededToFinish) {
             const stage_id = `DT1138_62:${computeBrandingCardStage(row.total_trips, isNeededToFinish)}`;
