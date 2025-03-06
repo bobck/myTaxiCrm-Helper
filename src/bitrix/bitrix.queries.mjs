@@ -80,20 +80,6 @@ export async function getCrmBrandingCardByDriverId({ driver_id,weekNumber, year 
 }
 
 /**
- * Retrieves all branding card records, including weekNumber & year from branding_processes.
- * @returns {Promise<Array>} - Resolves with an array of all rows.
- */
-export async function getAllCrmBrandingCard() {
-    const sql = `
-        SELECT bc.*, bp.weekNumber, bp.year
-        FROM branding_cards bc
-        LEFT JOIN branding_processes bp ON bc.branding_process_id = bp.id;
-    `;
-
-    return db.all(sql);
-}
-
-/**
  * Updates total_trips for a branding card using driver_id and branding_process_id.
  * @param {string} driver_id - The driver ID.
  * @param {string} branding_process_id - The related branding process ID.

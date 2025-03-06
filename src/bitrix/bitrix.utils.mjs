@@ -416,14 +416,6 @@ export async function updateDealPayOff({ id, ufCrmField, amount }) {
     const { result } = response
     return { result }
 }
-export async function getCrmItemFields(entityTypeId){
-    const responce=bitrix.call('crm.item.fields', { entityTypeId});
-    return responce;
-}
-export async function getListElementsByIblockId(IblockId){
-    return await bitrix.call('lists.element.get', {  IBLOCK_TYPE_ID: "lists", IBLOCK_ID: IblockId });
-}
-
 
 
 
