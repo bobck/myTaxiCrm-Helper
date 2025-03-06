@@ -7,8 +7,6 @@ import {
 } from "../bitrix.queries.mjs";
 import { updateDriverBrandingCardItem } from "../bitrix.utils.mjs";
 import { openSShTunnel } from "../../../ssh.mjs";
-import { initApi } from "../../api/endpoints.mjs";
-import { pool } from "../../api/pool.mjs";
 
 
 function computeBrandingCardStage(total_trips) {
@@ -41,7 +39,7 @@ export async function moveDriverBrandingCards() {
     for (const [index, row] of rows.entries()) {
         if (process.env.ENV==="TEST" && index === Number(process.env.BRANDING_CARDS_COUNT)) {
             const resolveResp=await resolveBrandingProcessById(brandingProcess.id);
-            console.log(`resolving branding process #${brandingProcess.id}`,resolveResp);
+            console.log(`resolving branding process #${brandingProcess.id}`);
             return;
         }
         const {driver_id,total_trips}=row;
@@ -52,12 +50,13 @@ export async function moveDriverBrandingCards() {
             year
         });
         if (!dbcard) {
-            console.error(`Absent driver card while updating driver_id: ${row.driver_id}`);
+            console.error(`Absent driver card while updating driver_id: ${driver_id}, year:${year}, weekNumber:${weekNumber}`);
+            continue;
         }
-        else{
 
-            if (Number(dbcard.total_trips) <= Number(row.total_trips)) {
-                const stage_id = `DT1138_62:${computeBrandingCardStage(row.total_trips)}`;
+
+        if (Number(dbcard.total_trips) <= Number(total_trips)) {
+                const stage_id = `DT1138_62:${computeBrandingCardStage(total_trips)}`;
 
                 const card = {
                     driver_id,
@@ -73,16 +72,15 @@ export async function moveDriverBrandingCards() {
                     driver_id,
                     total_trips,
                 });
-            }
         }
+
 
     }
     const resolveResp=await resolveBrandingProcessById(brandingProcess.id);
-    console.log(`resolving branding process #${brandingProcess.id}`,resolveResp);
+    console.log(`resolving branding process #${brandingProcess.id}`);
 }
 if(process.env.ENV==="TEST"){
     console.log(`testing driver branding movement\ncards count :${process.env.BRANDING_CARDS_COUNT}`);
     await openSShTunnel
-    await initApi({ pool });
     await moveDriverBrandingCards();
 }

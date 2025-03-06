@@ -8,8 +8,6 @@ import {
 import { createDriverBrandingCardItem } from "../bitrix.utils.mjs";
 import { cityListWithAssignedBy as cityList } from "../bitrix.constants.mjs";
 import { openSShTunnel } from "../../../ssh.mjs";
-import { initApi } from "../../api/endpoints.mjs";
-import { pool } from "../../api/pool.mjs";
 
 export function computePeriodBounds() {
     const today = DateTime.local().startOf("day");
@@ -71,13 +69,14 @@ export async function createDriverBrandingCards() {
             year,
         });
         if (dbcard) {
-            console.error(`Present driver card while creating driver_id:${driver_id}`);
+            console.error(`Present driver card while creating driver_id:${driver_id}, year:${year}, weekNumber:${weekNumber}`);
+            continue;
         }
-        else{
-            const stage_id = `DT1138_62:${computeBrandingCardStage(total_trips)}`;
-            const myTaxiDriverUrl = `https://fleets.mytaxicrm.com/${auto_park_id}/drivers/${driver_id}`;
-            const cityBrandingId = getCityBrandingId(auto_park_id);
-            const card = {
+
+        const stage_id = `DT1138_62:${computeBrandingCardStage(total_trips)}`;
+        const myTaxiDriverUrl = `https://fleets.mytaxicrm.com/${auto_park_id}/drivers/${driver_id}`;
+        const cityBrandingId = getCityBrandingId(auto_park_id);
+        const card = {
                 driver_id,
                 driver_name,
                 stage_id,
@@ -87,14 +86,14 @@ export async function createDriverBrandingCards() {
                 weekNumber,
                 year,
                 cityBrandingId,
-            };
-            const bitrixResp = await createDriverBrandingCardItem(card);
+        };
+        const bitrixResp = await createDriverBrandingCardItem(card);
 
-            await insertBrandingCard({
+        await insertBrandingCard({
                 ...bitrixResp,
                 branding_process_id:brandingProcess.id
-            });
-        }
+        });
+
 
     }
 }
@@ -102,7 +101,6 @@ export async function createDriverBrandingCards() {
 if(process.env.ENV==="TEST"){
     console.log(`testing driver branding creation\ncards count :${process.env.BRANDING_CARDS_COUNT}`);
     await openSShTunnel
-    await initApi({ pool });
     await createDriverBrandingCards();
 
 }
