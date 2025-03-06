@@ -23,8 +23,8 @@ function computeBrandingCardStage(total_trips) {
 }
 
 export async function moveDriverBrandingCards() {
-    const today = DateTime.local().startOf("day");
-    const brandingProcess=await getBrandingProcessByWeekNumber({weekNumber:today.weekNumber, year:today.year});
+    const yesterday = DateTime.local().startOf("day").minus({days: 1});
+    const brandingProcess=await getBrandingProcessByWeekNumber({weekNumber:yesterday.weekNumber, year:yesterday.year});
     console.log(brandingProcess);
     const { rows } = await getBrandingCardsInfo({
         period_from:brandingProcess.period_from,
