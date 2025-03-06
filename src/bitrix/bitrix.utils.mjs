@@ -455,14 +455,18 @@ export async function createDriverBrandingCardItem(card) {
     };
 }
 export async function updateDriverBrandingCardItem({ bitrix_card_id, ...card }) {
-    const props = computeDriverBrandingCardItemProps(card);
-
+    const { driver_id, stage_id, total_trips } = card;
+    console.log("updating driver branding in bitrix", driver_id);
+    const props = {
+        entityTypeId: "1138",
+        "fields[STAGE_ID]": stage_id,
+        "fields[ufCrm54_1738757712]": total_trips,
+    };
     const response = await bitrix.call("crm.item.update", {
         id: bitrix_card_id,
         ...props,
     });
 
-    const { driver_id, weekNumber, year, total_trips } = card;
     const { result } = response;
     const { item } = result;
     const { id } = item;
@@ -470,7 +474,5 @@ export async function updateDriverBrandingCardItem({ bitrix_card_id, ...card }) 
         bitrix_card_id: id,
         driver_id,
         total_trips,
-        weekNumber,
-        year,
     };
 }

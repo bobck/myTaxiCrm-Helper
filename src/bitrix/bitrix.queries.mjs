@@ -24,7 +24,7 @@ export async function createBrandingProcess({ weekNumber, year, period_from, per
 /**
  * Get a branding process by weekNumber and year.
  */
-export async function getBrandingProcessByWeekNumber(weekNumber, year) {
+export async function getBrandingProcessByWeekNumber({ weekNumber, year }) {
     const sql = `SELECT * FROM branding_processes WHERE weekNumber = ? AND year = ?`;
 
     return db.get(sql, weekNumber, year);
@@ -97,7 +97,7 @@ export async function getAllCrmBrandingCard() {
  * Updates total_trips for a branding card using driver_id and branding_process_id.
  * @param {string} driver_id - The driver ID.
  * @param {string} branding_process_id - The related branding process ID.
- * @param {number} total_trips - The updated total trips count.
+ * @param {string} total_trips - The updated total trips count.
  * @returns {Promise<Object>} - Resolves with the updated row.
  */
 export async function updateBrandingCardByDriverId({ driver_id, branding_process_id, total_trips }) {

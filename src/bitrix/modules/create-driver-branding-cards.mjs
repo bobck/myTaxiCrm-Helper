@@ -4,9 +4,8 @@ import {
     createBrandingProcess,
     getCrmBrandingCardByDriverId,
     insertBrandingCard,
-    updateBrandingCardByDriverId,
 } from "../bitrix.queries.mjs";
-import { createDriverBrandingCardItem, updateDriverBrandingCardItem } from "../bitrix.utils.mjs";
+import { createDriverBrandingCardItem } from "../bitrix.utils.mjs";
 import { cityListWithAssignedBy as cityList } from "../bitrix.constants.mjs";
 import { openSShTunnel } from "../../../ssh.mjs";
 import { initApi } from "../../api/endpoints.mjs";
@@ -72,12 +71,12 @@ export async function createDriverBrandingCards() {
             year,
         });
         if (dbcard) {
-            console.error(`Present driver card while creating driver_id:`, dbcard);
+            console.error(`Present driver card while creating driver_id:${driver_id}`);
         }
         else{
             const stage_id = `DT1138_62:${computeBrandingCardStage(total_trips)}`;
-            const myTaxiDriverUrl = `https://fleets.mytaxicrm.com/${row.auto_park_id}/drivers/${row.driver_id}`;
-            const cityBrandingId = getCityBrandingId(row.auto_park_id);
+            const myTaxiDriverUrl = `https://fleets.mytaxicrm.com/${auto_park_id}/drivers/${driver_id}`;
+            const cityBrandingId = getCityBrandingId(auto_park_id);
             const card = {
                 driver_id,
                 driver_name,
@@ -101,6 +100,7 @@ export async function createDriverBrandingCards() {
 }
 
 if(process.env.ENV==="TEST"){
+    console.log(`testing driver branding creation\ncards count :${process.env.BRANDING_CARDS_COUNT}`);
     await openSShTunnel
     await initApi({ pool });
     await createDriverBrandingCards();
