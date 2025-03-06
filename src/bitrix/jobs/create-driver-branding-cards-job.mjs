@@ -1,5 +1,5 @@
 import { CronJob } from "cron";
-import { createDriverBrandingCards } from "../modules/create-and-update-driver-branding-cards.mjs";
+import { createDriverBrandingCards } from "../modules/create-driver-branding-cards.mjs";
 
 // Cron expression for every Monday at 7:30
 // Day-of-week: 5 Friday

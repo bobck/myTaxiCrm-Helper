@@ -1,5 +1,5 @@
 import { CronJob } from "cron";
-import { updateDriverBrandingCards } from "../modules/create-and-update-driver-branding-cards.mjs";
+import { moveDriverBrandingCards } from "../modules/move-driver-branding-cards.mjs";
 
 // Cron expression for every Monday at 7:20
 // Day-of-week: 1
@@ -10,7 +10,7 @@ const moveBrandingCardsJob = CronJob.from({
     timeZone,
     onTick: async () => {
         try {
-            await updateDriverBrandingCards(true);
+            await moveDriverBrandingCards();
         } catch (error) {
             console.error("Error occurred in monday branding job:", { time: new Date(), error });
         }

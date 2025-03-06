@@ -4,7 +4,7 @@ import { getCrmBrandingCardByDriverId, insertBrandingCard, updateBrandingCardByD
 import { createDriverBrandingCardItem, updateDriverBrandingCardItem } from "../bitrix.utils.mjs";
 import { cityListWithAssignedBy as cityList } from "../bitrix.constants.mjs";
 
-function computePeriodBounds() {
+export function computePeriodBounds() {
     const today = DateTime.local().startOf("day");
     if (today.weekday === 1)
         return {
@@ -23,14 +23,10 @@ function computePeriodBounds() {
     };
 }
 
-function computeBrandingCardStage(total_trips, isNeededToFinish) {
+function computeBrandingCardStage(total_trips) {
     let trips = Number(total_trips);
-    if (isNaN(trips)) throw new Error("Trips must be a number");
-    if (isNeededToFinish) {
-        if (trips >= 90) {
-            return "SUCCESS";
-        }
-        return "FAIL";
+    if (isNaN(trips)) {
+        console.error("Trips must be a number");
     }
     if (trips >= 90) {
         return "PREPARATION";
@@ -54,7 +50,7 @@ export async function createDriverBrandingCards() {
         return;
     }
     for (const [index, row] of rows.entries()) {
-        if (process.env.ENV="TEST" && index === Nuber(process.env.BRANDING_CARDS_COUNT)) {
+        if (process.env.ENV==="TEST" && index === Number(process.env.BRANDING_CARDS_COUNT)) {
             return;
         }
 
@@ -64,7 +60,7 @@ export async function createDriverBrandingCards() {
             weekNumber,
         });
         if (dbcard) {
-            throw new Error(`Present driver card while creating driver_id: ${row.driver_id}`);
+            console.error(`Present driver card while creating driver_id: ${row.driver_id}`);
         }
         const total_trips = "0";
         const stage_id = `DT1138_62:${computeBrandingCardStage(total_trips)}`;
@@ -85,46 +81,7 @@ export async function createDriverBrandingCards() {
     }
 }
 
-export async function updateDriverBrandingCards(isNeededToFinish, cardsCount) {
-    const bounds = computePeriodBounds();
-
-    const { rows } = await getBrandingCardsInfo(bounds);
-
-    if (rows.length === 0) {
-        console.error("No rows found for branding cards found.");
-        return;
-    }
-    for (const [index, row] of rows.entries()) {
-        if (process.env.ENV="TEST" && index === Nuber(process.env.BRANDING_CARDS_COUNT)) {
-            return;
-        }
-
-        const { weekNumber, year } = DateTime.local().startOf("day");
-        const dbcard = await getCrmBrandingCardByDriverId({
-            ...row,
-            weekNumber,
-        });
-        if (!dbcard) {
-            throw new Error(`Absent driver card while updating driver_id: ${row.driver_id}`);
-        }
-
-        if (Number(dbcard.total_trips) < Number(row.total_trips) || isNeededToFinish) {
-            const stage_id = `DT1138_62:${computeBrandingCardStage(row.total_trips, isNeededToFinish)}`;
-            const myTaxiDriverUrl = `https://fleets.mytaxicrm.com/${row.auto_park_id}/drivers/${row.driver_id}`;
-            const cityBrandingId = getCityBrandingId(row.auto_park_id);
-            const card = {
-                ...row,
-                bitrix_card_id: dbcard.bitrix_card_id,
-                myTaxiDriverUrl,
-                cityBrandingId,
-                stage_id,
-                weekNumber,
-                year,
-            };
-
-            const bitrixResp = await updateDriverBrandingCardItem(card);
-
-            const dbupdate = await updateBrandingCardByDriverId(bitrixResp);
-        }
-    }
+if(process.env.ENV==="TEST"){
+    console.log(`testing driver branding creation\ncards count :${process.env.BRANDING_CARDS_COUNT}`);
+    await createDriverBrandingCards();
 }
