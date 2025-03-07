@@ -52,7 +52,6 @@ export async function resolveBrandingProcessById(brandingProcessId) {
  */
 export async function insertBrandingCard(card) {
     const { driver_id, bitrix_card_id, total_trips, branding_process_id } = card;
-    console.log("inserting branding card",card);
     const sql = `
         INSERT INTO branding_cards
         (driver_id, bitrix_card_id, total_trips, branding_process_id, created_at, updated_at)
