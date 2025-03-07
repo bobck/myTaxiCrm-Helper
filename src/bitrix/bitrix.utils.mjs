@@ -375,7 +375,8 @@ export async function updateDealPayOff({ id, ufCrmField, amount }) {
     return { result };
 }
 export async function createBanBoltDriverCardItem(card) {
-    const {driver_id, full_name, cityId, bolt_id,isDebtor, total_balance} = card;
+    const {driver_id, full_name, cityId, bolt_id,isDebtor, debt} = card;
+
     const props = {
         entityTypeId: "1132",
         "fields[title]": full_name,
@@ -384,10 +385,9 @@ export async function createBanBoltDriverCardItem(card) {
         "fields[ufCrm52_1738324675]": bolt_id,
         "fields[ufCrm52_1738324546]": 3430,
         "fields[ufCrm52_1738739843]": isDebtor?3434:3436,
-        "fields[ufCrm52_1738837120]": isDebtor?total_balance:0,//debt
+        "fields[ufCrm52_1738837120]": debt,
         "fields[ufCrm52_1738326821]": cityId,
     };
-
     const response = await bitrix.call("crm.item.add", props);
 
     const { result } = response;

@@ -2,6 +2,7 @@ import { getBoltDriversToBan } from "../../web.api/web.api.utlites.mjs";
 import { nameKeyWords, cityListWithAssignedBy as cityList } from "../bitrix.constants.mjs";
 import { createBanBoltDriverCardItem } from "../bitrix.utils.mjs";
 import { openSShTunel } from "../../../ssh.mjs";
+import { DateTime } from "luxon";
 
 const nameCheck = (full_name) => {
     return full_name
@@ -12,9 +13,22 @@ const nameCheck = (full_name) => {
 function getCityBrandingId(auto_park_id) {
     return cityList.find((obj) => obj.auto_park_id === auto_park_id).brandingId;
 }
+function computeQueryParams() {
+    const today = DateTime.local().startOf("day");
 
+    const lowerBound = today.minus({ days: 8 });
+    // Return the dates formatted as ISO strings (YYYY-MM-DD) for PostgreSQL
+    return {
+        period_from:lowerBound.toISODate(),
+        weekNumber: today.weekNumber,
+        year: today.year,
+    };
+}
 export const createBoltDriversToBan = async () => {
-    const { rows } = await getBoltDriversToBan();
+
+    const queryParams = await computeQueryParams();
+    const { rows } = await getBoltDriversToBan(queryParams);
+    console.log(rows);
     if(rows.length === 0) {
         console.error("No any drivers to ban found.");
         return;
@@ -24,19 +38,22 @@ export const createBoltDriversToBan = async () => {
             console.log('testing has been ended')
             return ;
         }
-        const{driver_id,auto_park_id,full_name,bolt_id,total_balance}=row;
+        const{driver_id,auto_park_id,full_name,bolt_id,driver_balance}=row;
         const checkedName=nameCheck(full_name);
         const cityId=getCityBrandingId(auto_park_id);
+        const isDebtor=Number(driver_balance)<0;
+        const debt=isDebtor?String((-1)*driver_balance):"0";
         const card={
             driver_id,
             full_name:checkedName,
             bolt_id,
             cityId,
-            total_balance:total_balance||0,
-            isDebtor:!(total_balance===undefined||Number(total_balance)<0),
+            debt,
+            isDebtor,
         }
-        console.log(index ,card);
-        const crmItem= await createBanBoltDriverCardItem(card)
+        await createBanBoltDriverCardItem(card);
+
+
     }
 };
 
