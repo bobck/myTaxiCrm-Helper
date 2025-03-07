@@ -25,7 +25,6 @@ function computeBrandingCardStage(total_trips) {
 export async function moveDriverBrandingCards() {
     const yesterday = DateTime.local().startOf("day").minus({days: 1});
     const brandingProcess=await getBrandingProcessByWeekNumber({weekNumber:yesterday.weekNumber, year:yesterday.year});
-    console.log(brandingProcess);
     const { rows } = await getBrandingCardsInfo({
         period_from:brandingProcess.period_from,
         period_to:brandingProcess.period_to
@@ -39,7 +38,6 @@ export async function moveDriverBrandingCards() {
     for (const [index, row] of rows.entries()) {
         if (process.env.ENV==="TEST" && index === Number(process.env.BRANDING_CARDS_COUNT)) {
             const resolveResp=await resolveBrandingProcessById(brandingProcess.id);
-            console.log(`resolving branding process #${brandingProcess.id}`);
             return;
         }
         const {driver_id,total_trips}=row;
@@ -77,7 +75,6 @@ export async function moveDriverBrandingCards() {
 
     }
     const resolveResp=await resolveBrandingProcessById(brandingProcess.id);
-    console.log(`resolving branding process #${brandingProcess.id}`);
 }
 if(process.env.ENV==="TEST"){
     console.log(`testing driver branding movement\ncards count :${process.env.BRANDING_CARDS_COUNT}`);

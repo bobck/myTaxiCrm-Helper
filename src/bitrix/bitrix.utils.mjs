@@ -421,7 +421,7 @@ export async function updateDealPayOff({ id, ufCrmField, amount }) {
 
 export async function createDriverBrandingCardItem(card) {
     const { driver_id, driver_name, myTaxiDriverUrl, phone, stage_id, cityBrandingId, weekNumber, year, total_trips } = card;
-    console.log("creating driver branding in bitrix", driver_id);
+
     const props = {
         entityTypeId: "1138",
         "fields[title]": driver_name,
@@ -448,7 +448,6 @@ export async function createDriverBrandingCardItem(card) {
 }
 export async function updateDriverBrandingCardItem({ bitrix_card_id, ...card }) {
     const { driver_id, stage_id, total_trips } = card;
-    console.log("updating driver branding in bitrix", driver_id);
     const props = {
         entityTypeId: "1138",
         "fields[STAGE_ID]": stage_id,
