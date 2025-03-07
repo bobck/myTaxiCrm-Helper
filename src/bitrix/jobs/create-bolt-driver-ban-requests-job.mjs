@@ -5,7 +5,7 @@ const cronTime = '';
 
 const timeZone = 'Europe/Kiev';
 
-const job = CronJob.from({
+const createBoltDriverBanRequestsJob = CronJob.from({
     cronTime,
     timeZone,
     onTick: async () => {
@@ -18,5 +18,4 @@ const job = CronJob.from({
     }
 });
 
-export const createDealsWithFiredDriversJob = job;
-export const startcreateDealsWithFiredDriversJob = () => job.start();
+export { createBoltDriverBanRequestsJob };

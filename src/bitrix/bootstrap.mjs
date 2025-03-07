@@ -16,6 +16,7 @@ import { createRefferalPaymentProcentageRewardJob } from "./jobs/create-refferal
 import { getAndSaveDtpDebtTransactionsJob } from "./jobs/get-and-save-dtp-debt-transactions-job.mjs";
 import { checkDtpDealIdIsValidJob } from "./jobs/check-dtp-deal-is-id-valid-job.mjs";
 import { accrueDebtToDealJob } from "./jobs/accrue-debt-to-deal-job.mjs";
+import { createBoltDriverBanRequestsJob } from "./jobs/create-bolt-driver-ban-requests-job.mjs";
 
 export function bitrixJobs() {
     try {
@@ -37,6 +38,7 @@ export function bitrixJobs() {
         getAndSaveDtpDebtTransactionsJob.start();
         checkDtpDealIdIsValidJob.start();
         accrueDebtToDealJob.start();
+        createBoltDriverBanRequestsJob.start();
         console.log('Bitrix Jobs has been started')
     } catch (error) {
 
@@ -45,7 +47,7 @@ export function bitrixJobs() {
             time: new Date(),
             error
         });
-
+        createBoltDriverBanRequestsJob.stop();
         createDealsWithFiredDriversJob.stop();
         contactsForDriversWithRevenueJob.stop();
         dealForDriversWithRevenueJob.stop();
