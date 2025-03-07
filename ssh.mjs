@@ -5,7 +5,7 @@ import net from 'net'
 //https://github.com/mscdex/ssh2/issues/67
 const { Client } = ssh2;
 
-export const openSShTunel = new Promise((resolve, reject) => {
+export const openSShTunnel = new Promise((resolve, reject) => {
     console.log('openSShTunel...')
     const c = new Client();
 

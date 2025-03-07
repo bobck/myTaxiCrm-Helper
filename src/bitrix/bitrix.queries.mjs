@@ -1,10 +1,102 @@
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite'
 
+
 const db = await open({
     filename: process.env.DEV_DB,
     driver: sqlite3.Database
 })
+
+
+/**
+ * Create a branding process and return the whole record.
+ */
+export async function createBrandingProcess({ weekNumber, year, period_from, period_to }) {
+    const sql = `
+        INSERT INTO branding_processes (weekNumber, year, period_from, period_to, is_completed, created_at)
+        VALUES (?, ?, ?, ?, 0, CURRENT_TIMESTAMP)
+        RETURNING *;
+    `;
+
+    return db.get(sql, weekNumber, year, period_from, period_to);
+}
+
+/**
+ * Get a branding process by weekNumber and year.
+ */
+export async function getBrandingProcessByWeekNumber({ weekNumber, year }) {
+    const sql = `SELECT * FROM branding_processes WHERE weekNumber = ? AND year = ?`;
+
+    return db.get(sql, weekNumber, year);
+}
+
+/**
+ * Resolve a branding process (set is_completed = 1) and return the updated record.
+ */
+export async function resolveBrandingProcessById(brandingProcessId) {
+    const sql = `
+        UPDATE branding_processes
+        SET is_completed = 1
+        WHERE id = ?
+        RETURNING *;
+    `;
+
+    return db.get(sql, brandingProcessId);
+}
+
+
+/**
+ * Inserts a new branding card record linked to a branding process.
+ * @param {Object} card - An object with driver_id, bitrix_card_id, total_trips, and branding_process_id.
+ * @returns {Promise<Object>} - Resolves with the inserted record.
+ */
+export async function insertBrandingCard(card) {
+    const { driver_id, bitrix_card_id, total_trips, branding_process_id } = card;
+    console.log("inserting branding card",card);
+    const sql = `
+        INSERT INTO branding_cards
+        (driver_id, bitrix_card_id, total_trips, branding_process_id, created_at, updated_at)
+        VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        RETURNING *;
+    `;
+
+    return db.get(sql, driver_id, bitrix_card_id, total_trips, branding_process_id);
+}
+
+/**
+ * Retrieves a branding card by driver_id, joining branding_processes to get weekNumber & year.
+ * @param {string} driver_id - The driver ID.
+ * @returns {Promise<Object>} - Resolves with the matching row (or undefined if not found).
+ */
+export async function getCrmBrandingCardByDriverId({ driver_id,weekNumber, year }) {
+    const sql = `
+        SELECT bc.*, bp.weekNumber, bp.year
+        FROM branding_cards bc
+        LEFT JOIN branding_processes bp ON bc.branding_process_id = bp.id
+        WHERE bc.driver_id = ? AND bp.weekNumber = ? AND bp.year = ?;
+    `;
+
+    return db.get(sql, driver_id, weekNumber, year);
+}
+
+/**
+ * Updates total_trips for a branding card using driver_id and branding_process_id.
+ * @param {string} driver_id - The driver ID.
+ * @param {string} branding_process_id - The related branding process ID.
+ * @param {string} total_trips - The updated total trips count.
+ * @returns {Promise<Object>} - Resolves with the updated row.
+ */
+export async function updateBrandingCardByDriverId({ driver_id, branding_process_id, total_trips }) {
+    const sql = `
+        UPDATE branding_cards 
+        SET total_trips = ?, updated_at = CURRENT_TIMESTAMP 
+        WHERE driver_id = ? AND branding_process_id = ?
+        RETURNING *;
+    `;
+
+    return db.get(sql, total_trips, driver_id, branding_process_id);
+}
+
 
 export async function getLastUnixCreatedAt({ categoryId }) {
     const sql = `SELECT unix_created_at FROM last_fired_driver WHERE category_id = ?`
