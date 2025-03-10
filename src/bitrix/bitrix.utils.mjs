@@ -503,3 +503,33 @@ export async function updateDriverBrandingCardItem({ bitrix_card_id, ...card }) 
         total_trips,
     };
 }
+export async function updateBitrixDriverBrandingCards({ cards }) {
+
+    let batchArr =[]
+
+    for (let card of cards) {
+        const { driver_id, stage_id, total_trips } = card;
+        const params = {
+            entityTypeId: "1158",
+            "fields[STAGE_ID]": stage_id,
+            "fields[ufCrm54_1738757712]": total_trips,
+        };
+        batchArr.push({ method: "crm.item.update", params })
+    }
+
+    const { result:resp,time } = await bitrix.batch(batchArr)
+    const {result:itemArr}=resp;
+
+    const handledResponceArr=itemArr.reduce((acc, item) => {
+        const {id,ufCrm62_1741598807:phone}=item["item"];
+        const matchingCard=cards.find((c)=>c.phone===phone);
+        acc.push({
+            bitrix_card_id: id,
+            driver_id: matchingCard.driver_id,
+            total_trips: matchingCard.total_trips,
+        });
+        return acc;
+    },[]);
+
+    return handledResponceArr;
+}
