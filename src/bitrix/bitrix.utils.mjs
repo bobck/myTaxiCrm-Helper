@@ -425,16 +425,16 @@ export async function createBitrixDriverBrandingCards({ cards }) {
     for (let card of cards) {
         const { driver_id, driver_name, myTaxiDriverUrl, phone, stage_id, cityBrandingId, weekNumber, year, total_trips } = card;
         const params = {
-            entityTypeId: "1158",
+            entityTypeId: "1138",
             "fields[title]": driver_name,
             "fields[STAGE_ID]": stage_id,
-            "fields[ufCrm62_1741598777]": driver_name,
-            "fields[ufCrm62_1741598807]": phone,
-            "fields[ufCrm62_1741598822]": myTaxiDriverUrl,
-            "fields[ufCrm62_1741598828]": total_trips,
-            "fields[ufCrm62_1741598867]": weekNumber,
-            "fields[ufCrm62_1741598878]": year,
-            "fields[ufCrm62_1741598793]": cityBrandingId,
+            "fields[ufCrm54_1738757291]": driver_name,
+            "fields[ufCrm54_1738757552]": phone,
+            "fields[ufCrm54_1738757612]": myTaxiDriverUrl,
+            "fields[ufCrm54_1738757712]": total_trips,
+            "fields[ufCrm54_1738757784]": weekNumber,
+            "fields[ufCrm54_1738757867]": year,
+            "fields[ufCrm54_1738757436]": cityBrandingId,
         };
         batchArr.push({ method: "crm.item.add", params })
     }
@@ -504,13 +504,13 @@ export async function updateDriverBrandingCardItem({ bitrix_card_id, ...card }) 
     };
 }
 export async function updateBitrixDriverBrandingCards({ cards }) {
-
     let batchArr =[]
 
     for (let card of cards) {
-        const { driver_id, stage_id, total_trips } = card;
+        const { driver_id, stage_id, total_trips,bitrix_card_id } = card;
         const params = {
-            entityTypeId: "1158",
+            id:bitrix_card_id,
+            entityTypeId: "1138",
             "fields[STAGE_ID]": stage_id,
             "fields[ufCrm54_1738757712]": total_trips,
         };
@@ -520,9 +520,10 @@ export async function updateBitrixDriverBrandingCards({ cards }) {
     const { result:resp,time } = await bitrix.batch(batchArr)
     const {result:itemArr}=resp;
 
+
     const handledResponceArr=itemArr.reduce((acc, item) => {
-        const {id,ufCrm62_1741598807:phone}=item["item"];
-        const matchingCard=cards.find((c)=>c.phone===phone);
+        const {id}=item["item"];
+        const matchingCard=cards.find((c)=>c.bitrix_card_id===id);
         acc.push({
             bitrix_card_id: id,
             driver_id: matchingCard.driver_id,
@@ -531,5 +532,6 @@ export async function updateBitrixDriverBrandingCards({ cards }) {
         return acc;
     },[]);
 
+    //
     return handledResponceArr;
 }
