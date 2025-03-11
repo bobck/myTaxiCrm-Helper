@@ -99,14 +99,88 @@ export async function getLocations(){
     const { data } = await response.json();
     return data
 }
-export async function getTransfers({branch_id}){
-    const url = `${process.env.REMONLINE_API}/warehouse/moves/?branch_id=${branch_id}&token=${process.env.REMONLINE_API_TOKEN}`;
+/*
+export async function getOrders(
+    { idLabels, ids },
+    _page = 1,
+    _orders = []
+) {
+
+    let idLabelsUrl = ''
+    if (idLabels) {
+        for (let idLabel of idLabels) {
+            idLabelsUrl += `&id_labels[]=${idLabel}`
+        }
+    }
+    let idUrl = ''
+
+    if (ids) {
+        for (let id of ids) {
+            idUrl += `&ids[]=${id}`
+        }
+    }
+
+
+    const response = await fetch(`${process.env.REMONLINE_API}/order/?token=${process.env.REMONLINE_API_TOKEN}&page=${_page}${idLabelsUrl}${idUrl}`);
+
+    if (response.status == 414) {
+        throw await response.text()
+    }
+
+    const data = await response.json();
+    const { success } = data
+    if (!success) {
+        const { message, code } = data
+        const { validation } = message
+
+        if (response.status == 403 && code == 101) {
+            console.info({ function: 'getOrders', message: 'Get new Auth' })
+            await remonlineTokenToEnv(true);
+            return await getOrders({ idLabels, ids }, _page, _orders);
+        }
+
+        console.error({ function: 'getOrders', message, validation, status: response.status })
+        return
+    }
+
+    const { data: orders, count, page } = data
+
+    const doneOnPrevPage = (page - 1) * 50;
+
+    const leftTofinish = (count - doneOnPrevPage) - orders.length;
+
+    _orders.push(...orders);
+
+    // console.log({ count, page, doneOnPrevPage, leftTofinish })
+
+    if (leftTofinish > 0) {
+        return await getOrders({ idLabels, ids }, parseInt(page) + 1, _orders);
+    }
+
+    return { orders: _orders }
+}
+
+* */
+export async function getTransfers({branch_id},_page = 1,
+                                   _transfers = []){
+    const url = `${process.env.REMONLINE_API}/warehouse/moves/?page=${_page}&branch_id=${branch_id}&token=${process.env.REMONLINE_API_TOKEN}`;
 
     const options = {method: 'GET', headers: {accept: 'application/json'}};
 
     const response=await fetch(url, options);
-    const { data } = await response.json();
-    return data;
+    const { data:transfers,page,count } = await response.json();
+    const doneOnPrevPage = (page - 1) * 50;
+
+    const leftToFinish = (count - doneOnPrevPage) - transfers.length;
+
+    _transfers.push(...transfers.map(transfer=>{return {branch_id,...transfer}}));
+
+    // console.log({ count, page, doneOnPrevPage, leftToFinish })
+
+    if (leftToFinish > 0) {
+        return await getTransfers({branch_id }, parseInt(page) + 1, _transfers);
+    }
+    return { transfers:_transfers };
 }
 
 
