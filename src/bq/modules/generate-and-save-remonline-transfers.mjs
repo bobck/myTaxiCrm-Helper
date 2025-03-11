@@ -1,5 +1,6 @@
 import { getLocations, getTransfers } from "../../remonline/remonline.utils.mjs";
 import { remonlineTokenToEnv } from "../../remonline/remonline.api.mjs";
+import { insertRowsAsStream } from "../bq-utils.mjs";
 const splitTransfers=({_transfers})=>_transfers.reduce((acc, transfer)=>{
     const _transfer=structuredClone(transfer);
     const _products=structuredClone(_transfer.products).map(product=>{
@@ -41,8 +42,12 @@ export async function generateAndSaveTransfers(){
     console.log("...data fetched");
     const {transfers, products, uoms} = splitTransfers({ _transfers });
     console.log("products", products.length,"transfers", transfers.length,"uoms",uoms.length);
-    
-    
+
+
+    // await insertRowsAsStream({ rows: transfers, bqTableId: 'fleet_income_and_expenses' });
+    // await insertRowsAsStream({ rows: products, bqTableId: 'fleet_income_and_expenses' });
+    // await insertRowsAsStream({ rows: uoms, bqTableId: 'fleet_income_and_expenses' });
+
 }
 
 if(process.env.ENV==='TEST'){
