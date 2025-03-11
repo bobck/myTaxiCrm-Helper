@@ -432,3 +432,12 @@ export async function markDtpDebtTransactionsAsSync({ human_id }) {
         human_id
     )
 }
+export const getBoltDriverBanReqByDriverId = async function ({ driver_id }) {
+    const sql = `SELECT * FROM bolt_driver_ban_requests WHERE driver_id = ?`;
+    return db.get(sql, [driver_id]);
+};
+
+export const insertBoltDriverBanReq = async function ({ debt, bitrix_card_id, driver_id }) {
+    const sql = `INSERT INTO bolt_driver_ban_requests (debt, bitrix_card_id, driver_id) VALUES (?, ?, ?)`;
+    return db.run(sql, [debt, bitrix_card_id, driver_id]);
+};

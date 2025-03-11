@@ -395,6 +395,8 @@ export async function createBanBoltDriverCardItem(card) {
     const { id } = item;
 
     return {
-        crm_card_id: id,
+        bitrix_card_id: id,
+        driver_id,
+        debt
     };
 }
