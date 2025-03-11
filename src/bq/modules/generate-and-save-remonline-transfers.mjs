@@ -9,13 +9,14 @@ export async function generateAndSaveTransfers(){
         return;
     }
     console.log(branches);
+    const _transfers=[];
+    for (const [index,branch] of branches.entries()) {
 
-    for (const branch of branches) {
         const{id:branch_id}=branch;
-        const transfers =await getTransfers({ branch_id });
-        const handledTransfers=transfers.map(transfer=>{return {branch_id,...transfer}});
-        console.log(handledTransfers);
+        const { transfers } =await getTransfers({ branch_id });
+        _transfers.push(...transfers);
     }
+    console.log(_transfers.length);
     
     
 }
