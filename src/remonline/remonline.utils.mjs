@@ -90,6 +90,25 @@ export async function getOrders(
 
     return { orders: _orders }
 }
+export async function getLocations(){
+    // return await fetch(`${process.env.REMONLINE_API}/branches/?token=${process.env.REMONLINE_API_TOKEN}`);
+    const url = `${process.env.REMONLINE_API}/branches/?token=${process.env.REMONLINE_API_TOKEN}`;
+    const options = {method: 'GET', headers: {accept: 'application/json'}};
+
+    const response=await fetch(url, options);
+    const { data } = await response.json();
+    return data
+}
+export async function getTransfers({branch_id}){
+    const url = `${process.env.REMONLINE_API}/warehouse/moves/?branch_id=${branch_id}&token=${process.env.REMONLINE_API_TOKEN}`;
+
+    const options = {method: 'GET', headers: {accept: 'application/json'}};
+
+    const response=await fetch(url, options);
+    const { data } = await response.json();
+    return data;
+}
+
 
 export async function changeOrderStatus({
     id, statusId
