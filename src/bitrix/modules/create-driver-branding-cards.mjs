@@ -97,8 +97,17 @@ export async function createDriverBrandingCards() {
     const chunkedProcessedCards = chunkArray(processedCards,Number(process.env.CHUNK_SIZE)||7);
     for (const [index, chunk] of chunkedProcessedCards.entries()) {
         const bitrixRespArr=await createBitrixDriverBrandingCards({cards:chunk});
-        for (const respElement of bitrixRespArr) {
-            console.log(respElement);
+        const handledResponseArr=bitrixRespArr.reduce((acc, item) => {
+            const {id,ufCrm54_1738757552:phone}=item["item"];
+            const matchingCard=chunk.find((c)=>c.phone===phone);
+            acc.push({
+                bitrix_card_id: id,
+                driver_id: matchingCard.driver_id,
+                total_trips: matchingCard.total_trips,
+            });
+            return acc;
+        },[]);
+        for (const respElement of handledResponseArr) {
             const {driver_id,total_trips,bitrix_card_id}=respElement;
             await insertBrandingCard({
                 driver_id,
@@ -110,7 +119,7 @@ export async function createDriverBrandingCards() {
     }
 
 
-    console.log(`${process.env.BRANDING_CARDS_COUNT||rows.length} branding cards creation has been finished.`);
+    console.log(`${processedCards.length} branding cards creation has been finished.`);
 
 }
 

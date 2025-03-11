@@ -442,18 +442,8 @@ export async function createBitrixDriverBrandingCards({ cards }) {
     const { result:resp,time } = await bitrix.batch(batchArr)
     const {result:itemArr}=resp;
 
-    const handledResponceArr=itemArr.reduce((acc, item) => {
-        const {id,ufCrm62_1741598807:phone}=item["item"];
-        const matchingCard=cards.find((c)=>c.phone===phone);
-        acc.push({
-            bitrix_card_id: id,
-            driver_id: matchingCard.driver_id,
-            total_trips: matchingCard.total_trips,
-        });
-        return acc;
-    },[]);
 
-    return handledResponceArr;
+    return itemArr;
 }
 export async function createDriverBrandingCardItem(card) {
     const { driver_id, driver_name, myTaxiDriverUrl, phone, stage_id, cityBrandingId, weekNumber, year, total_trips } = card;
@@ -521,17 +511,7 @@ export async function updateBitrixDriverBrandingCards({ cards }) {
     const {result:itemArr}=resp;
 
 
-    const handledResponceArr=itemArr.reduce((acc, item) => {
-        const {id}=item["item"];
-        const matchingCard=cards.find((c)=>c.bitrix_card_id===id);
-        acc.push({
-            bitrix_card_id: id,
-            driver_id: matchingCard.driver_id,
-            total_trips: matchingCard.total_trips,
-        });
-        return acc;
-    },[]);
 
     //
-    return handledResponceArr;
+    return itemArr;
 }

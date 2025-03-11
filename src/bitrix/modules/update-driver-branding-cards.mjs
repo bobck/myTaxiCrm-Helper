@@ -70,8 +70,18 @@ export async function updateDriverBrandingCards() {
     for (const [index, chunk] of chunkedProcessedCards.entries()) {
 
         const bitrixRespArr=await updateBitrixDriverBrandingCards({cards:chunk});
+        const handledResponseArr=bitrixRespArr.reduce((acc, item) => {
+            const {id}=item["item"];
+            const matchingCard=chunk.find((c)=>c.bitrix_card_id===id);
+            acc.push({
+                bitrix_card_id: id,
+                driver_id: matchingCard.driver_id,
+                total_trips: matchingCard.total_trips,
+            });
+            return acc;
+        },[]);
 
-        for (const respElement of bitrixRespArr) {
+        for (const respElement of handledResponseArr) {
             const {driver_id,total_trips}=respElement;
 
             const dbupdate = await updateBrandingCardByDriverId({
@@ -83,7 +93,7 @@ export async function updateDriverBrandingCards() {
 
     }
 
-    console.log(`${rows.length} branding cards updating has been finished.`);
+    console.log(`${processedCards.length} branding cards updating has been finished.`);
 
 }
 if(process.env.ENV==="TEST"){
