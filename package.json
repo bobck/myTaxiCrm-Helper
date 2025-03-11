@@ -8,9 +8,7 @@
     "createBrandingCardsManual": "ENV=TEST BRANDING_CARDS_COUNT=4 node -r dotenv/config src/bitrix/modules/create-driver-branding-cards.mjs",
     "updateBrandingCardsManual": "ENV=TEST BRANDING_CARDS_COUNT=4 node -r dotenv/config src/bitrix/modules/update-driver-branding-cards.mjs",
     "moveBrandingCardsManual": "ENV=TEST BRANDING_CARDS_COUNT=4 node -r dotenv/config src/bitrix/modules/move-driver-branding-cards.mjs",
-    "remonlineTransfersToBQManual": "ENV=TEST BQ_DATASET_ID=RemOnline node -r dotenv/config src/bq/modules/generate-and-save-remonline-transfers.mjs",
-    "remonlineTransfersReset": "ENV=TEST_RESET BQ_DATASET_ID=RemOnline node -r dotenv/config src/bq/modules/generate-and-save-remonline-transfers.mjs",
-
+    "remonlineTransfersToBQManual": "ENV=TEST node -r dotenv/config src/bq/modules/generate-and-save-remonline-transfers.mjs",
     "update_plan": "ENV=TEST node -r dotenv/config src/sheets/modules/get-and-save-current-plan.mjs",
     "notification": "ENV=TEST node -r dotenv/config src/telegram/modules/rooms-notification.mjs",
     "savesid": "ENV=TEST node -r dotenv/config src/remonline/modules/save-sid-list.mjs",
