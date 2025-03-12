@@ -31,10 +31,10 @@ export async function remonlineTokenToEnv(forceUpdate) {
     if (forceUpdate) {
         const { token } = await _getNewToken();
         process.env.REMONLINE_API_TOKEN = token;
-        console.log({ forceUpdate, newRemonlineToken: process.env.REMONLINE_API_TOKEN })
+        // console.log({ forceUpdate, newRemonlineToken: process.env.REMONLINE_API_TOKEN })
         return
     }
     process.env.REMONLINE_API_TOKEN = token;
-    console.log({ forceUpdate, newRemonlineToken: process.env.REMONLINE_API_TOKEN })
+    // console.log({ forceUpdate, newRemonlineToken: process.env.REMONLINE_API_TOKEN })
     return
 }
