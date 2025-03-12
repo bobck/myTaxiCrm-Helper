@@ -100,8 +100,7 @@ export async function getLocations(){
     return data
 }
 
-export async function getTransfers({branch_id},_page = 1,
-                                   _transfers = []){
+export async function getTransfers({branch_id},_page = 1, _transfers = []){
     const url = `${process.env.REMONLINE_API}/warehouse/moves/?page=${_page}&branch_id=${branch_id}&token=${process.env.REMONLINE_API_TOKEN}`;
 
     const options = {method: 'GET', headers: {accept: 'application/json'}};
