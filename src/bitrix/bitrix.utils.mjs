@@ -288,15 +288,15 @@ export async function addCommentToDeal({ deal_id, comment }) {
 }
 
 export async function createPayment({
-                                        title,
-                                        stageId,
-                                        city,
-                                        contactId,
-                                        assignedBy,
-                                        referrerPhone,
-                                        referrerName,
-                                        referrerPosition
-                                    }) {
+    title,
+    stageId,
+    city,
+    contactId,
+    assignedBy,
+    referrerPhone,
+    referrerName,
+    referrerPosition
+    }) {
 
     const response = await bitrix.call('crm.item.add', {
         'entityTypeId': '1102',
@@ -328,10 +328,10 @@ export async function addCommentToEntity({ entityId, typeId, comment }) {
 }
 
 export async function changeItemStage({
-                                          referralTypeId,
-                                          id,
-                                          stageId
-                                      }) {
+    referralTypeId,
+     id,
+     stageId
+     }) {
 
     await bitrix.call('crm.item.update', {
         'entityTypeId': referralTypeId,
@@ -342,11 +342,11 @@ export async function changeItemStage({
 }
 
 export async function createNewWorkingDriverItem({
-                                                     name,
-                                                     stageId,
-                                                     city,
-                                                     phone
-                                                 }) {
+    name,
+    stageId,
+    city,
+    phone
+    }) {
 
     const response = await bitrix.call('crm.item.add', {
         'entityTypeId': '1110',
