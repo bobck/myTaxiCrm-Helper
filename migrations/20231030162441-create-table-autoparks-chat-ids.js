@@ -5,10 +5,10 @@ var type;
 var seed;
 
 /**
-  * We receive the dbmigrate dependency from dbmigrate initially.
-  * This enables us to not have to rely on NODE_PATH.
-  */
-exports.setup = function(options, seedLink) {
+ * We receive the dbmigrate dependency from dbmigrate initially.
+ * This enables us to not have to rely on NODE_PATH.
+ */
+exports.setup = function (options, seedLink) {
   dbm = options.dbmigrate;
   type = dbm.dataType;
   seed = seedLink;
@@ -21,22 +21,22 @@ exports.up = function (db, callback) {
     autopark_id STRING,
     spreadsheet_id STRING,
     sheet_name STRING
-    )`
-  
+    )`;
+
   db.runSql(data, function (err) {
     if (err) return console.log(err);
-    callback()
+    callback();
   });
 };
 
 exports.down = function (db, callback) {
-  const data = `DROP TABLE autoparks_chat`
+  const data = `DROP TABLE autoparks_chat`;
   db.runSql(data, function (err) {
     if (err) return console.log(err);
-    callback()
+    callback();
   });
 };
 
 exports._meta = {
-  "version": 1
+  version: 1,
 };

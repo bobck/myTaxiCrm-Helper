@@ -6,16 +6,19 @@ const cronTime = '01 0 * * *';
 const timeZone = 'Europe/Kiev';
 
 const job = CronJob.from({
-    cronTime,
-    timeZone,
-    onTick: async () => {
-        try {
-            await getAndSaveLeadsByCreatedDate();
-        } catch (error) {
-            console.error('Error occurred in onTick getAndSaveLeadsByCreatedDate');
-            console.error({ time: new Date(), error });
-        }
+  cronTime,
+  timeZone,
+  onTick: async () => {
+    try {
+      await getAndSaveLeadsByCreatedDate();
+    } catch (error) {
+      console.error('Error occurred in onTick getAndSaveLeadsByCreatedDate');
+      console.error({
+        time: new Date(),
+        error,
+      });
     }
+  },
 });
 
 export const getAndSaveLeadsByCreatedDateJob = job;
