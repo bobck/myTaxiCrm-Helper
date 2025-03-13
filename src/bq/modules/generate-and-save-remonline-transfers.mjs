@@ -4,7 +4,7 @@ import { createOrResetTableByName, createTableReportTable, insertRowsAsStream } 
 import { transferProductsTableSchema, transfersTableSchema } from "../schemas.mjs";
 
 
-const splitTransfers=({_transfers})=>_transfers.reduce((acc, transfer)=>{
+const splitTransfers=({transfersWithProducts})=>transfersWithProducts.reduce((acc, transfer)=>{
     const _transfer=structuredClone(transfer);
     const _products=structuredClone(_transfer.products).map(product=>{
         const _product={
@@ -36,7 +36,7 @@ export async function generateAndSaveTransfers(){
         console.error('No branches found.');
         return;
     }
-    const _transfers=[];
+    const transfersWithProducts=[];
     console.log("fetching transfers...\nwait please it could take few minutes...");
     for (const [index,branch] of branches.entries()) {
         if(process.env.ENV === "TEST"&&index!==branches.length-1){
@@ -44,10 +44,9 @@ export async function generateAndSaveTransfers(){
         }
         const{id:branch_id}=branch;
         const { transfers } =await getTransfers({ branch_id });
-        _transfers.push(...transfers);
+        transfersWithProducts.push(...transfers);
     }
-    console.log("...data fetched");
-    const {transfers, products} = splitTransfers({ _transfers });
+    const {transfers, products} = splitTransfers({ transfersWithProducts });
 
 
     try{
