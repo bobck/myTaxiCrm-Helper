@@ -28,13 +28,9 @@ export async function getAndSaveDealsByClosedDate(manualDate) {
 
   const bqTableId = 'deals_hr_closed';
 
-  const result = await getDealsByClosedDate({
-    date,
-  });
+  const result = await getDealsByClosedDate({ date });
 
-  console.log({
-    getDealsByClosedDate: result.length,
-  });
+  console.log({ getDealsByClosedDate: result.length });
 
   if (result.length == 0) {
     return;
@@ -53,10 +49,7 @@ export async function getAndSaveDealsByClosedDate(manualDate) {
     };
   });
 
-  await clearTableByDate({
-    bqTableId,
-    date,
-  });
+  await clearTableByDate({ bqTableId, date });
   const tempFilePath = path.join(os.tmpdir(), 'temp_data_deals_hr_closed.json');
   const jsonString = jsonData.map(JSON.stringify).join('\n');
   fs.writeFileSync(tempFilePath, jsonString);

@@ -24,10 +24,7 @@ const job = CronJob.from({
       console.error(
         'Error occurred in onTick createCRMApplicationsFromRemonlineTransaction'
       );
-      console.error({
-        time: new Date(),
-        error,
-      });
+      console.error({ time: new Date(), error });
     } finally {
       isFunctionRunning = false;
     }

@@ -72,9 +72,7 @@ export async function setDriversCustomBonus() {
       );
     }
   );
-  console.log({
-    driversForCustomTermsLength: driversForCustomTerms.length,
-  });
+  console.log({ driversForCustomTermsLength: driversForCustomTerms.length });
 
   const discountBonusesByAutoparksAndIntegrationsWithDriver = [];
 
@@ -83,9 +81,7 @@ export async function setDriversCustomBonus() {
     const autoparkBonusRows = discountBonusesByAutoparksAndIntegrations.filter(
       (r) => r.autoParkId == auto_park_id
     );
-    console.log({
-      autoparkBonusRows: autoparkBonusRows.length,
-    });
+    console.log({ autoparkBonusRows: autoparkBonusRows.length });
 
     for (let autoparkBonusRow of autoparkBonusRows) {
       const clonedObjectWithExtraProperty = {
@@ -113,9 +109,7 @@ export async function setDriversCustomBonus() {
     };
 
     try {
-      const response = await makeCRMRequestlimited({
-        body,
-      });
+      const response = await makeCRMRequestlimited({ body });
       const { data } = response;
 
       const { createDriverBonusRules } = data;
@@ -125,22 +119,10 @@ export async function setDriversCustomBonus() {
       const driverId = createDriverBonusRules.driverId;
       const bonusRuleId = bonusRules[0].id;
 
-      console.log({
-        autoParkId,
-        driverId,
-        bonusRuleId,
-      });
-      await saveCreatedDriverBonusRuleId({
-        autoParkId,
-        driverId,
-        bonusRuleId,
-      });
+      console.log({ autoParkId, driverId, bonusRuleId });
+      await saveCreatedDriverBonusRuleId({ autoParkId, driverId, bonusRuleId });
     } catch (errors) {
-      console.error({
-        date: new Date(),
-        createDriverBonusRulesInput,
-        errors,
-      });
+      console.error({ date: new Date(), createDriverBonusRulesInput, errors });
       continue;
     }
   }
@@ -158,19 +140,14 @@ export async function deleteDriversCustomBonus() {
     const body = {
       operationName: 'deleteDriverBonusRules',
       variables: {
-        deleteDriverBonusRulesInput: {
-          autoParkId,
-          bonusRuleId,
-        },
+        deleteDriverBonusRulesInput: { autoParkId, bonusRuleId },
       },
       query:
         'mutation deleteDriverBonusRules($deleteDriverBonusRulesInput: DeleteDriverBonusRulesInput!) {\n  deleteDriverBonusRules(\n    deleteDriverBonusRulesInput: $deleteDriverBonusRulesInput\n  ) {\n    success\n    __typename\n  }\n}\n',
     };
 
     try {
-      const response = await makeCRMRequestlimited({
-        body,
-      });
+      const response = await makeCRMRequestlimited({ body });
       const { data, bonus_not_found } = response;
       if (bonus_not_found) {
         await markDriverCustomBonusRulesAsNotFound({ bonusRuleId });
@@ -178,11 +155,7 @@ export async function deleteDriversCustomBonus() {
       }
       await markDriverCustomBonusRulesAsDeleted({ bonusRuleId });
     } catch (errors) {
-      console.error({
-        date: new Date(),
-        bonusRuleId,
-        errors,
-      });
+      console.error({ date: new Date(), bonusRuleId, errors });
       continue;
     }
   }

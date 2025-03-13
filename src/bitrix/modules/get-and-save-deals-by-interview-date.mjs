@@ -28,13 +28,9 @@ export async function getAndSaveDealsByInterviewDate(manualDate) {
 
   const bqTableId = 'deals_hr_interviewees';
 
-  const result = await getDealsByInterviewDate({
-    date,
-  });
+  const result = await getDealsByInterviewDate({ date });
 
-  console.log({
-    getDealsByInterviewDate: result.length,
-  });
+  console.log({ getDealsByInterviewDate: result.length });
 
   if (result.length == 0) {
     return;
@@ -53,10 +49,7 @@ export async function getAndSaveDealsByInterviewDate(manualDate) {
     };
   });
 
-  await clearTableByDate({
-    bqTableId,
-    date,
-  });
+  await clearTableByDate({ bqTableId, date });
   const tempFilePath = path.join(
     os.tmpdir(),
     'temp_data_deals_hr_interviewees.json'

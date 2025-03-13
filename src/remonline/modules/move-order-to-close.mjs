@@ -19,14 +19,8 @@ export async function moveOrdersToClose() {
 
   for (let sid of result) {
     const { sid_id: id } = sid;
-    await changeOrderStatus({
-      id,
-      statusId: process.env.CLOSED_STATUS_ID,
-    });
-    await markSidsAsClosed({
-      id,
-      statusId: process.env.CLOSED_STATUS_ID,
-    });
+    await changeOrderStatus({ id, statusId: process.env.CLOSED_STATUS_ID });
+    await markSidsAsClosed({ id, statusId: process.env.CLOSED_STATUS_ID });
   }
 }
 

@@ -13,10 +13,7 @@ const job = CronJob.from({
       await getAndSaveDealsByClosedDate();
     } catch (error) {
       console.error('Error occurred in onTick getAndSaveDealsByClosedDate');
-      console.error({
-        time: new Date(),
-        error,
-      });
+      console.error({ time: new Date(), error });
     }
   },
 });

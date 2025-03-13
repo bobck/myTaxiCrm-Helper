@@ -30,9 +30,7 @@ export async function getAndSaveDealsRescheduled(dateTime) {
 
   const result = await getDealsRescheduled();
 
-  console.log({
-    getDealsRescheduled: result.length,
-  });
+  console.log({ getDealsRescheduled: result.length });
 
   if (result.length == 0) {
     return;
@@ -49,11 +47,7 @@ export async function getAndSaveDealsRescheduled(dateTime) {
     };
   });
 
-  await clearTableByWeekAndYear({
-    bqTableId,
-    week,
-    year,
-  });
+  await clearTableByWeekAndYear({ bqTableId, week, year });
   const tempFilePath = path.join(
     os.tmpdir(),
     'temp_data_deals_hr_rescheduled.json'

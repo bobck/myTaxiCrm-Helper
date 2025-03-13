@@ -3,10 +3,7 @@ import { pool } from '../../api/pool.mjs';
 import { makeCRMRequestlimited } from '../web.api.utlites.mjs';
 
 async function getAndFireDrivers() {
-  console.log({
-    time: new Date(),
-    message: 'getAndFireDrivers',
-  });
+  console.log({ time: new Date(), message: 'getAndFireDrivers' });
 
   const sql = fs
     .readFileSync('./src/sql/drivers_with_no_status.sql')
@@ -21,10 +18,7 @@ async function getAndFireDrivers() {
   let doneCount = 0;
   for (let driver of rows) {
     const { auto_park_id: autoParkId, id: driverId } = driver;
-    console.log({
-      autoParkId,
-      driverId,
-    });
+    console.log({ autoParkId, driverId });
 
     const body = {
       operationName: 'FireOutDriver',
@@ -48,9 +42,7 @@ async function getAndFireDrivers() {
     try {
       totalCount++;
       console.log({ totalCount });
-      const response = await makeCRMRequestlimited({
-        body,
-      });
+      const response = await makeCRMRequestlimited({ body });
 
       const { errors, data } = response;
 
@@ -67,11 +59,7 @@ async function getAndFireDrivers() {
       });
     } catch (errors) {
       errorsCount++;
-      console.log({
-        text: 'skip cause error',
-        autoParkId,
-        driverId,
-      });
+      console.log({ text: 'skip cause error', autoParkId, driverId });
       console.error({ errors });
     }
   }

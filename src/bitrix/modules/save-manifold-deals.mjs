@@ -15,16 +15,11 @@ import { manifoldDealsTableSchema } from '../../bq/schemas.mjs';
 const bqTableId = 'manifold_deals';
 
 export async function refreshManifoldDeals() {
-  console.log({
-    time: new Date(),
-    message: 'refreshManifoldDeals',
-  });
+  console.log({ time: new Date(), message: 'refreshManifoldDeals' });
 
   const { manifoldDealsIds } = await getSavedManifoldDeals();
 
-  console.log({
-    getSavedManifoldDeals: manifoldDealsIds.length,
-  });
+  console.log({ getSavedManifoldDeals: manifoldDealsIds.length });
 
   if (manifoldDealsIds.length == 0) {
     return;
