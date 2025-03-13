@@ -230,3 +230,56 @@ export async function getCashboxTransactions(
     throw response.status;
   }
 }
+export async function getLocations() {
+  // return await fetch(`${process.env.REMONLINE_API}/branches/?token=${process.env.REMONLINE_API_TOKEN}`);
+  const url = `${process.env.REMONLINE_API}/branches/?token=${process.env.REMONLINE_API_TOKEN}`;
+  const options = { method: 'GET', headers: { accept: 'application/json' } };
+
+  const response = await fetch(url, options);
+  const { data } = await response.json();
+  return data;
+}
+
+export async function getTransfers({ branch_id }, _page = 1, _transfers = []) {
+  const url = `${process.env.REMONLINE_API}/warehouse/moves/?page=${_page}&branch_id=${branch_id}&token=${process.env.REMONLINE_API_TOKEN}`;
+
+  const options = { method: 'GET', headers: { accept: 'application/json' } };
+
+  const response = await fetch(url, options);
+
+  const data = await response.json();
+  const { success } = data;
+  if (!success) {
+    const { message, code } = data;
+    const { validation } = message;
+    if (response.status == 403 && code == 101) {
+      console.info({ function: 'getOrders', message: 'Get new Auth' });
+      await remonlineTokenToEnv(true);
+      return await getTransfers({ branch_id }, _page, _transfers);
+    }
+    console.error({
+      function: 'getTransfers',
+      message,
+      validation,
+      status: response.status,
+    });
+    return;
+  }
+  const { data: transfers, page, count } = data;
+  const doneOnPrevPage = (page - 1) * 50;
+
+  const leftToFinish = count - doneOnPrevPage - transfers.length;
+
+  _transfers.push(
+    ...transfers.map((transfer) => {
+      return { branch_id, ...transfer };
+    })
+  );
+
+  // console.log({ count, page, doneOnPrevPage, leftToFinish })
+
+  if (leftToFinish > 0) {
+    return await getTransfers({ branch_id }, parseInt(page) + 1, _transfers);
+  }
+  return { transfers: _transfers };
+}
