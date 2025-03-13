@@ -5,9 +5,9 @@ var type;
 var seed;
 
 /**
-  * We receive the dbmigrate dependency from dbmigrate initially.
-  * This enables us to not have to rely on NODE_PATH.
-  */
+ * We receive the dbmigrate dependency from dbmigrate initially.
+ * This enables us to not have to rely on NODE_PATH.
+ */
 exports.up = function (db, callback) {
   const data = `CREATE TABLE manifold_deals (
     id TEXT UNIQUE NOT NULL,
@@ -18,7 +18,7 @@ exports.up = function (db, callback) {
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     contacts_add_at DATETIME
-    )`
+    )`;
   db.runSql(data, function (err) {
     if (err) return console.log(err);
     callback();
@@ -26,7 +26,7 @@ exports.up = function (db, callback) {
 };
 
 exports.down = function (db, callback) {
-  const data = `DROP TABLE manifold_deals`
+  const data = `DROP TABLE manifold_deals`;
   db.runSql(data, function (err) {
     if (err) return console.log(err);
     callback();
@@ -34,5 +34,5 @@ exports.down = function (db, callback) {
 };
 
 exports._meta = {
-  "version": 1
+  version: 1,
 };
