@@ -5,9 +5,9 @@ var type;
 var seed;
 
 /**
-  * We receive the dbmigrate dependency from dbmigrate initially.
-  * This enables us to not have to rely on NODE_PATH.
-  */
+ * We receive the dbmigrate dependency from dbmigrate initially.
+ * This enables us to not have to rely on NODE_PATH.
+ */
 exports.setup = function (options, seedLink) {
   dbm = options.dbmigrate;
   type = dbm.dataType;
@@ -29,7 +29,7 @@ exports.up = function (db, callback) {
     deal_id TEXT,
     deat_add_at DATETIME,
     sync_at DATETIME
-    )`
+    )`;
   db.runSql(data, function (err) {
     if (err) return console.log(err);
     callback();
@@ -37,7 +37,7 @@ exports.up = function (db, callback) {
 };
 
 exports.down = function (db, callback) {
-  const data = `DROP TABLE drivers_revenue`
+  const data = `DROP TABLE drivers_revenue`;
   db.runSql(data, function (err) {
     if (err) return console.log(err);
     callback();
@@ -45,5 +45,5 @@ exports.down = function (db, callback) {
 };
 
 exports._meta = {
-  "version": 1
+  version: 1,
 };

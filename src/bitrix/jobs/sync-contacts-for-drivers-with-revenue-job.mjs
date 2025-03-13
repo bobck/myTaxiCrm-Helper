@@ -6,16 +6,16 @@ const cronTime = '40 9 * * *';
 const timeZone = 'Europe/Kiev';
 
 const job = CronJob.from({
-    cronTime,
-    timeZone,
-    onTick: async () => {
-        try {
-            await contactsForDriversWithRevenue();
-        } catch (error) {
-            console.error('Error occurred in onTick contactsForDriversWithRevenue');
-            console.error({ time: new Date(), error });
-        }
+  cronTime,
+  timeZone,
+  onTick: async () => {
+    try {
+      await contactsForDriversWithRevenue();
+    } catch (error) {
+      console.error('Error occurred in onTick contactsForDriversWithRevenue');
+      console.error({ time: new Date(), error });
     }
+  },
 });
 
 export const contactsForDriversWithRevenueJob = job;
