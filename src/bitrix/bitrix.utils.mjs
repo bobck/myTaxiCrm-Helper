@@ -517,7 +517,7 @@ export async function updateDriverBrandingCardItem({
   };
 }
 export async function updateBitrixDriverBrandingCards({ cards }) {
-  let batchArr = [];
+  let batchObj = {};
 
   for (let card of cards) {
     const { driver_id, stage_id, total_trips, bitrix_card_id } = card;
@@ -527,12 +527,13 @@ export async function updateBitrixDriverBrandingCards({ cards }) {
       'fields[STAGE_ID]': stage_id,
       'fields[ufCrm54_1738757712]': total_trips,
     };
-    batchArr.push({ method: 'crm.item.update', params });
+
+    batchObj[driver_id] = { method: 'crm.item.update', params };
   }
 
-  const { result: resp, time } = await bitrix.batch(batchArr);
-  const { result: itemArr } = resp;
+  const { result: resp, time } = await bitrix.batch(batchObj);
+  const { result: itemObj } = resp;
 
   //
-  return itemArr;
+  return itemObj;
 }

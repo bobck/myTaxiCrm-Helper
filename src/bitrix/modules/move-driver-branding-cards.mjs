@@ -64,8 +64,7 @@ export async function moveDriverBrandingCards() {
       continue;
     }
 
-    const stage_id = `DT1158_70:${computeBrandingCardStage(total_trips)}`;
-
+    const stage_id = `DT1138_62:${computeBrandingCardStage(total_trips)}`;
     const card = {
       driver_id,
       bitrix_card_id: dbcard.bitrix_card_id,
@@ -81,19 +80,19 @@ export async function moveDriverBrandingCards() {
   );
 
   for (const [index, chunk] of chunkedProcessedCards.entries()) {
-    const bitrixRespArr = await updateBitrixDriverBrandingCards({
+    const bitrixRespObj = await updateBitrixDriverBrandingCards({
       cards: chunk,
     });
-    const handledResponseArr = bitrixRespArr.reduce((acc, item) => {
-      const { id } = item['item'];
-      const matchingCard = chunk.find((c) => c.bitrix_card_id === id);
-      acc.push({
+    const handledResponseArr = [];
+    for (const driver_id in bitrixRespObj) {
+      const { id } = bitrixRespObj[driver_id]['item'];
+      const matchingCard = chunk.find((c) => c.driver_id === driver_id);
+      handledResponseArr.push({
         bitrix_card_id: id,
         driver_id: matchingCard.driver_id,
         total_trips: matchingCard.total_trips,
       });
-      return acc;
-    }, []);
+    }
 
     for (const respElement of handledResponseArr) {
       const { driver_id, total_trips } = respElement;
@@ -105,7 +104,6 @@ export async function moveDriverBrandingCards() {
       });
     }
   }
-
   console.log(
     `${processedCards.length} branding cards updating has been finished.`
   );
