@@ -3,7 +3,11 @@ import {
   getTransfers,
 } from '../../remonline/remonline.utils.mjs';
 import { remonlineTokenToEnv } from '../../remonline/remonline.api.mjs';
-import { createOrResetTableByName, insertRowsAsStream } from '../bq-utils.mjs';
+import {
+  createOrResetTableByName,
+  getColumnsFromBQ,
+  insertRowsAsStream,
+} from '../bq-utils.mjs';
 import {
   transferProductsTableSchema,
   transfersTableSchema,
@@ -81,9 +85,13 @@ export async function resetTransfersTables() {
 }
 if (process.env.ENV === 'TEST') {
   console.log('generateAndSaveTransfers testing...');
-  console.log(process.env.BQ_DATASET_ID);
-  await remonlineTokenToEnv();
-  await generateAndSaveTransfers();
+
+  const env = process.env.BQ_DATASET_ID;
+  process.env.BQ_DATASET_ID = 'RemOnline';
+  await getColumnsFromBQ({ table_id: 'transfers' }, 'id', 'branch_id');
+  // await remonlineTokenToEnv();
+  // await generateAndSaveTransfers();
+  process.env.BQ_DATASET_ID = env;
 }
 if (process.env.ENV === 'TEST_RESET') {
   console.log('resetTransfersTables testing...');

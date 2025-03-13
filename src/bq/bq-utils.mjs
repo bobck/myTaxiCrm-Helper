@@ -272,3 +272,29 @@ export async function generatePolandBookkeepingReport({
   const { rows } = result;
   return { rows };
 }
+
+export async function getColumnsFromBQ({ table_id }, ...columns) {
+  columns.reduce((acc, column, i) => {
+    if (i === 0) {
+      return column;
+    }
+    return `${acc},${column}`;
+  }, '');
+  const query = `SELECT ${columns} FROM ${process.env.BQ_PROJECT_NAME}.${process.env.BQ_DATASET_ID}.${table_id}`;
+
+  // Query options
+  const options = {
+    query: query,
+    location: 'US', // Adjust to your dataset location
+  };
+
+  try {
+    // Run the query
+    console.log(options);
+    const [rows] = await bigquery.query(options);
+
+    return rows;
+  } catch (error) {
+    console.error('Error running query:', error);
+  }
+}
