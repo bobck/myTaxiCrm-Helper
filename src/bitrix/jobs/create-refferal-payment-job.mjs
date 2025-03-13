@@ -13,10 +13,7 @@ const job = CronJob.from({
       await createRefferalPayment();
     } catch (error) {
       console.error('Error occurred in onTick on createRefferalPayment');
-      console.error({
-        time: new Date(),
-        error,
-      });
+      console.error({ time: new Date(), error });
     }
   },
 });

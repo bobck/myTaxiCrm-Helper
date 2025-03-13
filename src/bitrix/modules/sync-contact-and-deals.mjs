@@ -28,9 +28,7 @@ export async function contactsForDriversWithRevenue() {
 
 export async function dealForDriversWithRevenue({ category_id, companyIds }) {
   const { driversWithRevenue } =
-    await getAllDriversWithRevenueWitnConcactsAndNoDeals({
-      companyIds,
-    });
+    await getAllDriversWithRevenueWitnConcactsAndNoDeals({ companyIds });
   const { result } = await findDealByContact({
     drivers: driversWithRevenue,
     category_id,
@@ -44,10 +42,7 @@ export async function dealForDriversWithRevenue({ category_id, companyIds }) {
     const [deal] = deals;
     const { ID: deal_id } = deal;
 
-    concatsWithDeals.push({
-      concact_id,
-      deal_id,
-    });
+    concatsWithDeals.push({ concact_id, deal_id });
   }
 
   await updateLeadInDriversWithRevenue(concatsWithDeals);

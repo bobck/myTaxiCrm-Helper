@@ -78,9 +78,7 @@ export async function setDriversCustomTariff() {
       );
     }
   );
-  console.log({
-    driversForCustomTermsLength: driversForCustomTerms.length,
-  });
+  console.log({ driversForCustomTermsLength: driversForCustomTerms.length });
 
   const discountTariffsForAutoparksWithDriver = [];
 
@@ -109,19 +107,14 @@ export async function setDriversCustomTariff() {
     };
 
     try {
-      const response = await makeCRMRequestlimited({
-        body,
-      });
+      const response = await makeCRMRequestlimited({ body });
       const { data } = response;
 
       const { createDriverCustomTariff } = data;
 
       const tariffId = createDriverCustomTariff.id;
       const driverId = createDriverCustomTariffInput.driverId;
-      console.log({
-        tariffId,
-        driverId,
-      });
+      console.log({ tariffId, driverId });
       await saveCreatedDriverCustomTariffId({ tariffId, driverId });
     } catch (e) {
       console.error({
@@ -146,19 +139,14 @@ export async function deleteDriversCustomTariff() {
     const body = {
       operationName: 'DeleteDriverCustomTariff',
       variables: {
-        deleteDriverCustomTariffInput: {
-          tariffId,
-          driverId,
-        },
+        deleteDriverCustomTariffInput: { tariffId, driverId },
       },
       query:
         'mutation DeleteDriverCustomTariff($deleteDriverCustomTariffInput: DeleteDriverCustomTariffInput!) {\n  deleteDriverCustomTariff(\n    deleteDriverCustomTariffInput: $deleteDriverCustomTariffInput\n  ) {\n    success\n    __typename\n  }\n}\n',
     };
 
     try {
-      const response = await makeCRMRequestlimited({
-        body,
-      });
+      const response = await makeCRMRequestlimited({ body });
       const { data } = response;
       // console.log({ data })
       await markDriverCustomTariffAsDeleted({ tariffId });

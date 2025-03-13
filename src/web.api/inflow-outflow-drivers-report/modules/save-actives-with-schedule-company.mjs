@@ -29,9 +29,7 @@ export async function saveActiveDriversWithScheduleCompany(manualDate) {
 
   const { rows } = await getActiveDriversWithScheduleCompany({ date });
 
-  console.log({
-    getActiveDriversWithScheduleCompany: rows.length,
-  });
+  console.log({ getActiveDriversWithScheduleCompany: rows.length });
 
   if (rows.length == 0) {
     return;
@@ -44,10 +42,7 @@ export async function saveActiveDriversWithScheduleCompany(manualDate) {
     };
   });
 
-  await clearTableByDate({
-    bqTableId,
-    date,
-  });
+  await clearTableByDate({ bqTableId, date });
   const tempFilePath = path.join(
     os.tmpdir(),
     'temp_data_actives_with_schedule_company.json'

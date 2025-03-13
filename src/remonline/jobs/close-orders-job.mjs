@@ -13,10 +13,7 @@ const job = CronJob.from({
       await moveOrdersToClose();
     } catch (error) {
       console.error('Error occurred in onTick moveOrdersToCloseJob');
-      console.error({
-        time: new Date(),
-        error,
-      });
+      console.error({ time: new Date(), error });
     }
   },
 });

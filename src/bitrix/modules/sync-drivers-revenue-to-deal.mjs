@@ -28,9 +28,7 @@ export async function syncRevenueToDeals() {
           continue;
         }
 
-        updatedDealsInChunk.push({
-          deal_id,
-        });
+        updatedDealsInChunk.push({ deal_id });
       }
 
       await updateSyncTimeForDriversWithRevenue(updatedDealsInChunk);
@@ -50,11 +48,7 @@ export async function syncRevenueToDeals() {
         `chunk done in: ${Math.round((end - start) / 1000)} sec. maxOperating: ${maxOperating}`
       );
     } catch (error) {
-      console.error({
-        message: 'Failed updateDealsOpportunity',
-        error,
-        chunk,
-      });
+      console.error({ message: 'Failed updateDealsOpportunity', error, chunk });
     }
   }
 

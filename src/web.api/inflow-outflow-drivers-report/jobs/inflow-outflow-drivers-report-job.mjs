@@ -19,10 +19,7 @@ const job = CronJob.from({
       await saveActiveDriversWithScheduleEvents();
     } catch (error) {
       console.error('Error occurred in onTick inflo outflo report gen');
-      console.error({
-        time: new Date(),
-        error,
-      });
+      console.error({ time: new Date(), error });
     }
   },
 });

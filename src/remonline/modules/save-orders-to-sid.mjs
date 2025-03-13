@@ -9,10 +9,7 @@ import {
 import { updateSidIdAndStatus } from '../remonline.queries.mjs';
 
 export async function saveOrdersToSids() {
-  console.log({
-    time: new Date(),
-    message: 'saveOrdersToSids',
-  });
+  console.log({ time: new Date(), message: 'saveOrdersToSids' });
 
   const result = await getSidsWithNoId();
   const idLabelsArray = result.map((r) => r.sid_lable);
@@ -29,9 +26,7 @@ export async function saveOrdersToSids() {
   const chunksArray = [];
 
   for (let chunk of idLabelsChunks) {
-    const ordersPromise = getOrders({
-      idLabels: chunk,
-    });
+    const ordersPromise = getOrders({ idLabels: chunk });
     chunksArray.push(ordersPromise);
   }
 
@@ -48,18 +43,11 @@ export async function saveOrdersToSids() {
     if (statusId == process.env.CLOSED_STATUS_ID) {
       isClosed = true;
     }
-    updateSidIdAndStatus({
-      id,
-      statusId,
-      isClosed,
-      idLabel,
-    });
+    updateSidIdAndStatus({ id, statusId, isClosed, idLabel });
   }
 
   for (let idLabel of idLabelsArray) {
-    markSidsWithNoIdAsParsed({
-      idLabel,
-    });
+    markSidsWithNoIdAsParsed({ idLabel });
   }
 }
 

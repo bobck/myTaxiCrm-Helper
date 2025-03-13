@@ -64,9 +64,7 @@ export async function createDealsWithFiredDrivers() {
       rides_count_three_weeks_ago = 0,
     } = driverToImport;
 
-    const contactId = await findContactByPhone({
-      phone,
-    });
+    const contactId = await findContactByPhone({ phone });
 
     const firedReason = `${status} - ${comment}`;
     const title = `${name} - ${cityName} - ${ridesCount}`;

@@ -12,13 +12,9 @@ import { openSShTunnel } from '../../../ssh.mjs';
 export function computePeriodBounds() {
   const today = DateTime.local().startOf('day');
 
-  const lowerBound = today.minus({
-    days: today.weekday,
-  });
+  const lowerBound = today.minus({ days: today.weekday });
 
-  const upperBound = lowerBound.plus({
-    days: 7,
-  });
+  const upperBound = lowerBound.plus({ days: 7 });
 
   // Return the dates formatted as ISO strings (YYYY-MM-DD) for PostgreSQL
   return {
@@ -53,10 +49,7 @@ export async function createDriverBrandingCards() {
     period_to: bounds.upperBound.toISODate(),
   });
   const { period_from, period_to } = brandingProcess;
-  const { rows } = await getBrandingCardsInfo({
-    period_from,
-    period_to,
-  });
+  const { rows } = await getBrandingCardsInfo({ period_from, period_to });
 
   if (rows.length === 0) {
     console.error('No rows found for branding cards found.');

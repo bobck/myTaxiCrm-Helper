@@ -32,9 +32,7 @@ export async function saveWorkingDriversWithHistoryStatus(manualDate) {
 
   const { rows } = await getWorkingDriversWithHistoryStatus({ date });
 
-  console.log({
-    getWorkingDriversWithHistoryStatus: rows.length,
-  });
+  console.log({ getWorkingDriversWithHistoryStatus: rows.length });
 
   if (rows.length == 0) {
     return;
@@ -90,10 +88,7 @@ export async function saveWorkingDriversWithHistoryStatus(manualDate) {
     return;
   }
 
-  await clearTableByDate({
-    bqTableId,
-    date,
-  });
+  await clearTableByDate({ bqTableId, date });
   const tempFilePath = path.join(
     os.tmpdir(),
     'temp_data_new_drivers_added.json'

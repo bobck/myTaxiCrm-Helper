@@ -17,10 +17,7 @@ const job = CronJob.from({
       await deleteDriversCustomBonus();
     } catch (error) {
       console.error('Error occurred in onTick deleteDriversCustomBonus');
-      console.error({
-        time: new Date(),
-        error,
-      });
+      console.error({ time: new Date(), error });
     }
   },
 });

@@ -11,10 +11,7 @@ export function bqJobs() {
     generateAndSavePolandBookkeepingReportJob.start();
   } catch (error) {
     console.error('sync error, app down...');
-    console.error({
-      time: new Date(),
-      error,
-    });
+    console.error({ time: new Date(), error });
     console.error('Trying to restart...');
     generateAndSaveFleetsIncomAndExpensesReportJob.stop();
     generateAndSaveCarsRoutsReportJob.stop();

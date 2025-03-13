@@ -10,18 +10,13 @@ async function _getNewToken() {
 
   const response = await fetch(`${process.env.REMONLINE_API}/token/new`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: params,
   });
   // console.log(response.status, params, `${process.env.REMONLINE_API}/token/new`)
   const data = await response.json();
   const { token } = data;
-  await saveRemonlineToken({
-    token,
-    validTo,
-  });
+  await saveRemonlineToken({ token, validTo });
   return { token };
 }
 
@@ -33,8 +28,16 @@ export async function remonlineTokenToEnv(forceUpdate) {
   if (forceUpdate) {
     const { token } = await _getNewToken();
     process.env.REMONLINE_API_TOKEN = token;
+    console.log({
+      forceUpdate,
+      newRemonlineToken: process.env.REMONLINE_API_TOKEN,
+    });
     return;
   }
   process.env.REMONLINE_API_TOKEN = token;
+  console.log({
+    forceUpdate,
+    newRemonlineToken: process.env.REMONLINE_API_TOKEN,
+  });
   return;
 }

@@ -24,13 +24,8 @@ export async function generateAndSaveCarsRoutsReport() {
     message: 'generateAndSaveCarsRoutsReport',
   });
 
-  await clearTableByDate({
-    bqTableId,
-    date,
-  });
-  const { rows } = await generateCarsRoutsReport({
-    date,
-  });
+  await clearTableByDate({ bqTableId, date });
+  const { rows } = await generateCarsRoutsReport({ date });
 
   if (rows.length == 0) {
     return;
