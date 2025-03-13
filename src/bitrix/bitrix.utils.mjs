@@ -419,7 +419,7 @@ export async function updateDealPayOff({ id, ufCrmField, amount }) {
 }
 
 export async function createBitrixDriverBrandingCards({ cards }) {
-  let batchArr = [];
+  let batchObj = {};
 
   for (let card of cards) {
     const {
@@ -433,6 +433,7 @@ export async function createBitrixDriverBrandingCards({ cards }) {
       year,
       total_trips,
     } = card;
+
     const params = {
       entityTypeId: '1138',
       'fields[title]': driver_name,
@@ -445,14 +446,15 @@ export async function createBitrixDriverBrandingCards({ cards }) {
       'fields[ufCrm54_1738757867]': year,
       'fields[ufCrm54_1738757436]': cityBrandingId,
     };
-    batchArr.push({ method: 'crm.item.add', params });
+    batchObj[driver_id] = { method: 'crm.item.add', params };
   }
 
-  const { result: resp, time } = await bitrix.batch(batchArr);
-  const { result: itemArr } = resp;
+  const { result: resp, time } = await bitrix.batch(batchObj);
+  const { result: itemObj } = resp;
 
-  return itemArr;
+  return itemObj;
 }
+
 export async function createDriverBrandingCardItem(card) {
   const {
     driver_id,

@@ -81,7 +81,8 @@ export async function createDriverBrandingCards() {
       );
       continue;
     }
-    const stage_id = `DT1158_70:${computeBrandingCardStage(total_trips)}`;
+
+    const stage_id = `DT1138_62:${computeBrandingCardStage(total_trips)}`;
     const myTaxiDriverUrl = `https://fleets.mytaxicrm.com/${auto_park_id}/drivers/${driver_id}`;
     const cityBrandingId = getCityBrandingId(auto_park_id);
     const card = {
@@ -102,19 +103,20 @@ export async function createDriverBrandingCards() {
     Number(process.env.CHUNK_SIZE) || 7
   );
   for (const [index, chunk] of chunkedProcessedCards.entries()) {
-    const bitrixRespArr = await createBitrixDriverBrandingCards({
+    const bitrixRespObj = await createBitrixDriverBrandingCards({
       cards: chunk,
     });
-    const handledResponseArr = bitrixRespArr.reduce((acc, item) => {
-      const { id, ufCrm54_1738757552: phone } = item['item'];
-      const matchingCard = chunk.find((c) => c.phone === phone);
-      acc.push({
+    const handledResponseArr = [];
+    for (const driver_id in bitrixRespObj) {
+      const { id } = bitrixRespObj[driver_id]['item'];
+      const matchingCard = chunk.find((c) => c.driver_id === driver_id);
+      handledResponseArr.push({
         bitrix_card_id: id,
         driver_id: matchingCard.driver_id,
         total_trips: matchingCard.total_trips,
       });
-      return acc;
-    }, []);
+    }
+    console.log(handledResponseArr);
     for (const respElement of handledResponseArr) {
       const { driver_id, total_trips, bitrix_card_id } = respElement;
       await insertBrandingCard({
