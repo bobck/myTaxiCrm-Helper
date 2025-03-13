@@ -26,19 +26,11 @@ export async function saveFiredByDriversLogs(manualDate) {
       .minus({ days: 1 })
       .toFormat('yyyy-MM-dd');
 
-  console.log({
-    time: new Date(),
-    date,
-    message: 'saveFiredByDriversLogs',
-  });
+  console.log({ time: new Date(), date, message: 'saveFiredByDriversLogs' });
 
-  const { rows } = await getFiredByDriversLogs({
-    date,
-  });
+  const { rows } = await getFiredByDriversLogs({ date });
 
-  console.log({
-    getFiredByDriversLogs: rows.length,
-  });
+  console.log({ getFiredByDriversLogs: rows.length });
 
   if (rows.length == 0) {
     return;
@@ -69,10 +61,7 @@ export async function saveFiredByDriversLogs(manualDate) {
     return;
   }
 
-  await clearTableByDate({
-    bqTableId,
-    date,
-  });
+  await clearTableByDate({ bqTableId, date });
   const tempFilePath = path.join(
     os.tmpdir(),
     'temp_data_fired_by_drivers_logs.json'

@@ -28,9 +28,7 @@ export async function saveUniqWorkedDriversAndAvgLifeTime(dateTime) {
 
   const { rows } = await getUniqWorkedDriversAndAvgLifeTime({ week, year });
 
-  console.log({
-    getUniqWorkedDriversAndAvgLifeTime: rows.length,
-  });
+  console.log({ getUniqWorkedDriversAndAvgLifeTime: rows.length });
 
   if (rows.length == 0) {
     return;
@@ -50,12 +48,8 @@ export async function saveUniqWorkedDriversAndAvgLifeTime(dateTime) {
     });
   }
 
-  const firstDayOfTargetWeek = firstDayOfTargetYear.plus({
-    weeks: week - 1,
-  });
-  const lastDayOfTargetWeek = firstDayOfTargetWeek.plus({
-    days: 6,
-  });
+  const firstDayOfTargetWeek = firstDayOfTargetYear.plus({ weeks: week - 1 });
+  const lastDayOfTargetWeek = firstDayOfTargetWeek.plus({ days: 6 });
 
   const jsonData = rows.map((row) => {
     const { driver_created_at } = row;
@@ -86,11 +80,7 @@ export async function saveUniqWorkedDriversAndAvgLifeTime(dateTime) {
     };
   });
 
-  await clearTableByWeekAndYear({
-    bqTableId,
-    year,
-    week,
-  });
+  await clearTableByWeekAndYear({ bqTableId, year, week });
   const tempFilePath = path.join(
     os.tmpdir(),
     'temp_data_worked_drivers_with_life_time.json'

@@ -46,13 +46,8 @@ export async function referralValidadion(params) {
     !contact_id
   ) {
     if (task_id) {
-      console.log({
-        task_id,
-        message: 'delete by missing paramets',
-      });
-      await deleteBitrixTaskById({
-        task_id,
-      });
+      console.log({ task_id, message: 'delete by missing paramets' });
+      await deleteBitrixTaskById({ task_id });
     }
 
     await addCommentToDeal({
@@ -67,32 +62,22 @@ export async function referralValidadion(params) {
   });
 
   if (rows.length == 0) {
-    console.log({
-      task_id,
-      message: 'delete by no drivers found',
-    });
+    console.log({ task_id, message: 'delete by no drivers found' });
     await addCommentToDeal({
       deal_id,
       comment: `Відмовлено у рефелальній програмі. Не знайдено водія з номером договора ${contract}`,
     });
-    await deleteBitrixTaskById({
-      task_id,
-    });
+    await deleteBitrixTaskById({ task_id });
     return false;
   }
 
   if (rows.length > 1) {
-    console.log({
-      task_id,
-      message: 'delete by multiple drivers',
-    });
+    console.log({ task_id, message: 'delete by multiple drivers' });
     await addCommentToDeal({
       deal_id,
       comment: `Відмовлено у рефелальній програмі. Забагато водіїв з номеров договора ${contract}`,
     });
-    await deleteBitrixTaskById({
-      task_id,
-    });
+    await deleteBitrixTaskById({ task_id });
     return false;
   }
 
@@ -110,32 +95,22 @@ export async function referralValidadion(params) {
     trimAndReplace(last_name) != trimAndReplace(crm_last_name) ||
     trimAndReplace(first_name) != trimAndReplace(crm_first_name)
   ) {
-    console.log({
-      task_id,
-      message: 'delete by wrong name',
-    });
+    console.log({ task_id, message: 'delete by wrong name' });
     await addCommentToDeal({
       deal_id,
       comment: `Відмовлено у рефелальній програмі. ПІБ не співпадає з MyTaxiCRM`,
     });
-    await deleteBitrixTaskById({
-      task_id,
-    });
+    await deleteBitrixTaskById({ task_id });
     return false;
   }
 
   if (!driver_license_number) {
-    console.log({
-      task_id,
-      message: 'delete by missing doc_id in mytaxicrm',
-    });
+    console.log({ task_id, message: 'delete by missing doc_id in mytaxicrm' });
     await addCommentToDeal({
       deal_id,
       comment: `Відмовлено у рефелальній програмі. Серія та номер прав не вказано у MyTaxiCRM`,
     });
-    await deleteBitrixTaskById({
-      task_id,
-    });
+    await deleteBitrixTaskById({ task_id });
     return false;
   }
 
@@ -143,17 +118,12 @@ export async function referralValidadion(params) {
     transliterate(trimAndReplace(doc_id)) !=
     transliterate(driver_license_number)
   ) {
-    console.log({
-      task_id,
-      message: 'delete by wrong doc_id',
-    });
+    console.log({ task_id, message: 'delete by wrong doc_id' });
     await addCommentToDeal({
       deal_id,
       comment: `Відмовлено у рефелальній програмі. Серія та номер прав не співпадає з MyTaxiCRM`,
     });
-    await deleteBitrixTaskById({
-      task_id,
-    });
+    await deleteBitrixTaskById({ task_id });
     return false;
   }
 

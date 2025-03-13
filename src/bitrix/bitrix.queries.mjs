@@ -480,9 +480,7 @@ export async function getFinishedRefferalsProcentageReward({
                 ${autoParkFilter}`;
 
   const finishedRefferalsProcentageReward = await db.all(sql);
-  return {
-    finishedRefferalsProcentageReward,
-  };
+  return { finishedRefferalsProcentageReward };
 }
 
 export async function insertNewWorkingDriver({
@@ -516,9 +514,7 @@ export async function getNewWorkingDriverWorked7Days({ date }) {
                 WHERE JULIANDAY('${date}')-JULIANDAY(date(registrated_at)) = 7`;
 
   const newWorkingDriverWorked7Days = await db.all(sql);
-  return {
-    newWorkingDriverWorked7Days,
-  };
+  return { newWorkingDriverWorked7Days };
 }
 
 export async function saveDtpDebtTransactions(dtpDebtTopUps) {
@@ -566,9 +562,7 @@ export async function lastsaveDtpDebtTransactionDate() {
 export async function getDtpDebtTransactionsForValidation() {
   const sql = `SELECT dtp_deal_id from dtp_debt_transactions where is_valid is null`;
   const dtpDebtTransactionsForValidation = await db.all(sql);
-  return {
-    dtpDebtTransactionsForValidation,
-  };
+  return { dtpDebtTransactionsForValidation };
 }
 
 export async function markDtpDebtTransactionsIsValid({ id }) {

@@ -13,10 +13,7 @@ const job = CronJob.from({
       await createDealsWithFiredDrivers();
     } catch (error) {
       console.error('Error occurred in onTick createDealsWithFiredDrivers');
-      console.error({
-        time: new Date(),
-        error,
-      });
+      console.error({ time: new Date(), error });
     }
   },
 });

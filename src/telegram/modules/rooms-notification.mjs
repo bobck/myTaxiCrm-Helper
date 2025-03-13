@@ -5,10 +5,7 @@ import { chatRoomsWithParkIds } from '../telegram-query.mjs';
 import { pool } from '../../api/pool.mjs';
 
 export async function startRoomsNotification() {
-  console.log({
-    time: new Date(),
-    message: 'startRoomsNotification',
-  });
+  console.log({ time: new Date(), message: 'startRoomsNotification' });
 
   const { chatRooms } = await chatRoomsWithParkIds();
 
@@ -29,11 +26,7 @@ export async function startRoomsNotification() {
       return accumulator + current.total_trips;
     }, 0);
 
-    sendInfoToChatRoom({
-      chat_id,
-      plan_trips,
-      tripsCount,
-    });
+    sendInfoToChatRoom({ chat_id, plan_trips, tripsCount });
   }
 }
 

@@ -14,10 +14,7 @@ const job = CronJob.from({
       await startRoomsNotification();
     } catch (error) {
       console.error('Error occurred in onTick roomNotificationJob');
-      console.error({
-        time: new Date(),
-        error,
-      });
+      console.error({ time: new Date(), error });
     }
   },
 });

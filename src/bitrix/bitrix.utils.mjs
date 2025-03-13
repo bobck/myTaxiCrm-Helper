@@ -68,10 +68,7 @@ export async function findContactsByPhones({ drivers }) {
       type: 'PHONE',
       'values[]': driver.phone,
     };
-    batchArray.push({
-      method: 'crm.duplicate.findbycomm',
-      params,
-    });
+    batchArray.push({ method: 'crm.duplicate.findbycomm', params });
   }
   const { result, time } = await bitrix.batch(batchArray);
 
@@ -90,10 +87,7 @@ export async function findDealByContact({ drivers, category_id }) {
         'select[]': 'ID',
         'order[DATE_CREATE]': 'ASC',
       };
-      batchObj[contact] = {
-        method: Method.CRM_DEAL_LIST,
-        params,
-      };
+      batchObj[contact] = { method: Method.CRM_DEAL_LIST, params };
     }
   }
 
@@ -111,10 +105,7 @@ export async function updateDealsOpportunity({ drivers }) {
       ID: deal_id,
       'fields[OPPORTUNITY]': auto_park_revenue,
     };
-    batchObj[deal_id] = {
-      method: Method.CRM_DEAL_UPDATE,
-      params,
-    };
+    batchObj[deal_id] = { method: Method.CRM_DEAL_UPDATE, params };
   }
 
   const { result, time } = await bitrix.batch(batchObj);
@@ -230,10 +221,7 @@ export async function getDeals({ ids }) {
     const params = {
       ID: id,
     };
-    batchObj[id] = {
-      method: Method.CRM_DEAL_GET,
-      params,
-    };
+    batchObj[id] = { method: Method.CRM_DEAL_GET, params };
   }
 
   const { result, time } = await bitrix.batch(batchObj);
@@ -247,10 +235,7 @@ export async function getContacts({ ids }) {
     const params = {
       ID: id,
     };
-    batchObj[id] = {
-      method: Method.CRM_CONTACT_GET,
-      params,
-    };
+    batchObj[id] = { method: Method.CRM_CONTACT_GET, params };
   }
 
   const { result, time } = await bitrix.batch(batchObj);
@@ -266,18 +251,12 @@ export async function deleteBitrixTaskById({ task_id }) {
     const { task } = result;
 
     if (!task) {
-      throw {
-        message: 'Task not found',
-        task_id,
-      };
+      throw { message: 'Task not found', task_id };
     }
 
     return task;
   } catch (e) {
-    console.error({
-      message: 'Unable to delete task',
-      task_id,
-    });
+    console.error({ message: 'Unable to delete task', task_id });
   }
 }
 
@@ -291,18 +270,12 @@ export async function completeBitrixTaskById({ task_id }) {
     const { task } = result;
 
     if (!task) {
-      throw {
-        message: 'Task not found',
-        task_id,
-      };
+      throw { message: 'Task not found', task_id };
     }
 
     return task;
   } catch (e) {
-    console.error({
-      message: 'Unable to complete task',
-      task_id,
-    });
+    console.error({ message: 'Unable to complete task', task_id });
   }
 }
 
@@ -316,10 +289,7 @@ export async function addCommentToDeal({ deal_id, comment }) {
 
     return response;
   } catch (e) {
-    console.error({
-      message: 'Unable to create comment',
-      deal_id,
-    });
+    console.error({ message: 'Unable to create comment', deal_id });
   }
 }
 

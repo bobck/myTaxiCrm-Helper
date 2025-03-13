@@ -13,10 +13,7 @@ const job = CronJob.from({
       await getAndSaveDealsRescheduled();
     } catch (error) {
       console.error('Error occurred in onTick getAndSaveDealsRescheduled');
-      console.error({
-        time: new Date(),
-        error,
-      });
+      console.error({ time: new Date(), error });
     }
   },
 });

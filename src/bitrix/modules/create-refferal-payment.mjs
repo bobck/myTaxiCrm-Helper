@@ -83,10 +83,7 @@ async function getTripsForRefferals(refferalsForPay) {
       periodStartDate,
       periodEndDate,
     });
-    refferalsWithTrips.push({
-      ...refferal,
-      trips,
-    });
+    refferalsWithTrips.push({ ...refferal, trips });
   }
 
   return { refferalsWithTrips };
@@ -105,9 +102,7 @@ export async function createRefferalPayment() {
     return;
   }
 
-  const { refferalsForPay } = getRefferalsForPay({
-    activeRefferals,
-  });
+  const { refferalsForPay } = getRefferalsForPay({ activeRefferals });
 
   console.log({
     time: new Date(),
