@@ -87,42 +87,56 @@ export async function generateAndSaveTransfers() {
   }
 
   const { transfers, products } = splitTransfers({ transfersWithProducts });
-  const { filteredTransfers, filteredProducts } =
-    await filterTransfersAndProducts({
-      transfers,
-      products,
-    });
+  // const { filteredTransfers, filteredProducts } =
+  //   await filterTransfersAndProducts({
+  //     transfers,
+  //     products,
+  //   });
   try {
-    if (filteredTransfers.length > 0) {
+    if (transfers.length > 0) {
       await insertRowsAsStream({
-        rows: filteredTransfers,
+        rows: transfers,
         bqTableId: 'transfers',
       });
-      console.log(
-        `${filteredTransfers.length} transfers have been uploaded to BQ,${transfers.length - filteredTransfers.length} coincidences were filtered `
-      );
-    } else {
-      console.log(
-        `all transfers are already in BQ. Estimated rows count:${transfers.length}`
-      );
+      console.log(`${transfers.length} transfers have been uploaded to BQ`);
     }
-    if (filteredProducts.length > 0) {
+    if (products.length > 0) {
       await insertRowsAsStream({
-        rows: filteredProducts,
+        rows: products,
         bqTableId: 'transfers_products',
       });
-      console.log(
-        `${filteredProducts.length} Products have been uploaded to BQ,${products.length - filteredProducts.length} coincidences were filtered `
-      );
-    } else {
-      console.log(
-        `all transfers are already in BQ. Estimated rows count:${products.length}`
-      );
+      console.log(`${products.length} products have been uploaded to BQ`);
     }
-
-    console.log(
-      'transfers and transfers_products insertions have been successfully finished.'
-    );
+    // if (filteredTransfers.length > 0) {
+    //   await insertRowsAsStream({
+    //     rows: filteredTransfers,
+    //     bqTableId: 'transfers',
+    //   });
+    //   console.log(
+    //     `${filteredTransfers.length} transfers have been uploaded to BQ,${transfers.length - filteredTransfers.length} coincidences were filtered `
+    //   );
+    // } else {
+    //   console.log(
+    //     `all transfers are already in BQ. Estimated rows count:${transfers.length}`
+    //   );
+    // }
+    // if (filteredProducts.length > 0) {
+    //   await insertRowsAsStream({
+    //     rows: filteredProducts,
+    //     bqTableId: 'transfers_products',
+    //   });
+    //   console.log(
+    //     `${filteredProducts.length} Products have been uploaded to BQ,${products.length - filteredProducts.length} coincidences were filtered `
+    //   );
+    // } else {
+    //   console.log(
+    //     `all transfers are already in BQ. Estimated rows count:${products.length}`
+    //   );
+    // }
+    //
+    // console.log(
+    //   'transfers and transfers_products insertions have been successfully finished.'
+    // );
   } catch (e) {
     if (e.errors) {
       console.error(e.errors[0]);
