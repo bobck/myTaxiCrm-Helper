@@ -518,7 +518,7 @@ export async function updateDriverBrandingCardItem({
 }
 export async function updateBitrixDriverBrandingCards({ cards }) {
   let batchObj = {};
-
+  //
   for (let card of cards) {
     const { driver_id, stage_id, total_trips, bitrix_card_id } = card;
     const params = {
