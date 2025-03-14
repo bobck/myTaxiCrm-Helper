@@ -53,12 +53,18 @@ export async function resolveBrandingProcessById(brandingProcessId) {
  * @returns {Promise<Object>} - Resolves with the inserted record.
  */
 export async function insertBrandingCard(card) {
-  const { driver_id, bitrix_card_id, total_trips, branding_process_id } = card;
+  const {
+    driver_id,
+    bitrix_card_id,
+    total_trips,
+    branding_process_id,
+    auto_park_id,
+  } = card;
 
   const sql = `
         INSERT INTO branding_cards
-        (driver_id, bitrix_card_id, total_trips, branding_process_id, created_at, updated_at)
-        VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        (driver_id, bitrix_card_id, total_trips, branding_process_id, auto_park_id, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
         RETURNING *;
     `;
 
@@ -67,7 +73,8 @@ export async function insertBrandingCard(card) {
     driver_id,
     bitrix_card_id,
     total_trips,
-    branding_process_id
+    branding_process_id,
+    auto_park_id
   );
 }
 
@@ -78,7 +85,8 @@ export async function insertBrandingCard(card) {
  * @returns {Promise<Object>} - Resolves with the matching row (or undefined if not found).
  */
 export async function getCrmBrandingCardByDriverId({
-  driver_id, branding_process_id,
+  driver_id,
+  branding_process_id,
 }) {
   const sql = `
         SELECT bc.*, bp.weekNumber, bp.year
@@ -87,7 +95,7 @@ export async function getCrmBrandingCardByDriverId({
         WHERE bc.driver_id = ? AND bp.id=?;
     `;
 
-  return db.get(sql, driver_id,branding_process_id);
+  return db.get(sql, driver_id, branding_process_id);
 }
 
 /**

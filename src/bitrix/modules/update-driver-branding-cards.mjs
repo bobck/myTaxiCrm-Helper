@@ -6,25 +6,35 @@ import {
 } from '../bitrix.queries.mjs';
 import {
   chunkArray,
+  getCityBrandingId,
   updateBitrixDriverBrandingCards,
 } from '../bitrix.utils.mjs';
 import { getBrandingCardsInfo } from '../../web.api/web.api.utlites.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
+import { cityListWithAssignedBy as cityList } from '../bitrix.constants.mjs';
 
-function computeBrandingCardStage(total_trips) {
-  let trips = Number(total_trips);
+function computeBrandingCardStage({ total_trips, auto_park_id }) {
+  const trips = Number(total_trips);
+  const today = DateTime.local().startOf('day');
+  const maxGoalGap = 30 - (today.weekday - 5) * 10;
+  const { isKyivOrLviv } = getCityBrandingId(auto_park_id);
   if (isNaN(trips)) {
     console.error('Trips must be a number');
   }
-  if (trips >= 90) {
+  let GOAL = 60;
+
+  if (isKyivOrLviv) {
+    GOAL = 90;
+  }
+  const todaysTripsOptimalLowerBound = GOAL - maxGoalGap;
+  if (trips >= GOAL) {
     return 'PREPARATION';
-  } else if (trips < 30) {
+  } else if (trips < todaysTripsOptimalLowerBound) {
     return 'CLIENT';
   } else {
     return 'NEW';
   }
 }
-
 export async function updateDriverBrandingCards() {
   const today = DateTime.local().startOf('day');
   const brandingProcess = await getBrandingProcessByWeekNumber({
@@ -51,10 +61,10 @@ export async function updateDriverBrandingCards() {
     ) {
       break;
     }
-    const { driver_id, total_trips } = row;
+    const { driver_id, total_trips, auto_park_id } = row;
     const dbcard = await getCrmBrandingCardByDriverId({
       driver_id,
-      branding_process_id
+      branding_process_id,
     });
     if (!dbcard) {
       console.error(
@@ -62,11 +72,11 @@ export async function updateDriverBrandingCards() {
       );
       continue;
     }
-    if (!Number(dbcard.total_trips) >= Number(total_trips)) {
+    if (Number(dbcard.total_trips) >= Number(total_trips)) {
       continue;
     }
 
-    const stage_id = `DT1138_62:${computeBrandingCardStage(total_trips)}`;
+    const stage_id = `DT1138_62:${computeBrandingCardStage({ total_trips, auto_park_id })}`;
     const card = {
       driver_id,
       bitrix_card_id: dbcard.bitrix_card_id,
