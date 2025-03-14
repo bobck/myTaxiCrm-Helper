@@ -1,6 +1,12 @@
 import { Bitrix, Method } from '@2bad/bitrix';
 import fs from 'fs';
 import { pool } from './../api/pool.mjs';
+import {
+  Seven_days_without_trips_message_type,
+  debtorState,
+  notDebtorState,
+} from './bitrix.constants.mjs';
+
 const bitrix = Bitrix(
   `https://${process.env.BITRIX_PORTAL_HOST}/rest/${process.env.BITRIX_USER_ID}/${process.env.BITRIX_API_KEY}/`
 );
@@ -14,6 +20,7 @@ export async function getFreshFiredDrivers({ unixCreatedAt }) {
   const { rows, rowCount } = result;
   return { rows };
 }
+
 export async function createDeal({
   title,
   name,
@@ -417,65 +424,29 @@ export async function updateDealPayOff({ id, ufCrmField, amount }) {
   const { result } = response;
   return { result };
 }
-
-export async function createDriverBrandingCardItem(card) {
-  const {
-    driver_id,
-    driver_name,
-    myTaxiDriverUrl,
-    phone,
-    stage_id,
-    cityBrandingId,
-    weekNumber,
-    year,
-    total_trips,
-  } = card;
+export async function createBanBoltDriverCardItem(card) {
+  const { driver_id, full_name, cityId, bolt_id, isDebtor, debt } = card;
 
   const props = {
-    entityTypeId: '1138',
-    'fields[title]': driver_name,
-    'fields[STAGE_ID]': stage_id,
-    'fields[ufCrm54_1738757291]': driver_name,
-    'fields[ufCrm54_1738757552]': phone,
-    'fields[ufCrm54_1738757612]': myTaxiDriverUrl,
-    'fields[ufCrm54_1738757712]': total_trips,
-    'fields[ufCrm54_1738757784]': weekNumber,
-    'fields[ufCrm54_1738757867]': year,
-    'fields[ufCrm54_1738757436]': cityBrandingId,
+    entityTypeId: '1132',
+    'fields[title]': full_name,
+    'fields[STAGE_ID]': 'DT1132_60:NEW',
+    'fields[ufCrm52_1738324741]': full_name,
+    'fields[ufCrm52_1738324675]': bolt_id,
+    'fields[ufCrm52_1738324546]': Seven_days_without_trips_message_type,
+    'fields[ufCrm52_1738739843]': isDebtor ? debtorState : notDebtorState,
+    'fields[ufCrm52_1738837120]': debt,
+    'fields[ufCrm52_1738326821]': cityId,
   };
   const response = await bitrix.call('crm.item.add', props);
 
   const { result } = response;
   const { item } = result;
   const { id } = item;
-
+  //
   return {
     bitrix_card_id: id,
     driver_id,
-    total_trips,
-  };
-}
-export async function updateDriverBrandingCardItem({
-  bitrix_card_id,
-  ...card
-}) {
-  const { driver_id, stage_id, total_trips } = card;
-  const props = {
-    entityTypeId: '1138',
-    'fields[STAGE_ID]': stage_id,
-    'fields[ufCrm54_1738757712]': total_trips,
-  };
-  const response = await bitrix.call('crm.item.update', {
-    id: bitrix_card_id,
-    ...props,
-  });
-
-  const { result } = response;
-  const { item } = result;
-  const { id } = item;
-  return {
-    bitrix_card_id: id,
-    driver_id,
-    total_trips,
+    debt,
   };
 }

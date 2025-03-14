@@ -224,7 +224,7 @@ export const cityListWithAssignedBy = [
 export const referralTypeId = '1098';
 export const paymentsStageId = 'DT1102_44:NEW';
 export const paymentsTypeId = '1102';
-
+export const nameKeyWords = ['g', 'car', 'gcar', 'сто', 'сто', 'чернівці'];
 export const positionTextReferralsToPayments = {
   водитель: '2684',
   'кеш менеджер': '2686',
@@ -372,3 +372,8 @@ const assignedByMailToId = {
   'vubir2020@gmail.com': '51212',
   'minaieva.ii@gmail.com': '14150',
 };
+//'fields[ufCrm52_1738324546]': 3430,
+//     'fields[ufCrm52_1738739843]': isDebtor ? 3434 : 3436,
+export const Seven_days_without_trips_message_type = 3430;
+export const debtorState = 3434;
+export const notDebtorState = 3436;
