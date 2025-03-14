@@ -51,8 +51,13 @@ export async function createDriverBrandingCards() {
     period_from: bounds.lowerBound.toISODate(),
     period_to: bounds.upperBound.toISODate(),
   });
-  const { period_from, period_to,id:branding_process_id,weekNumber,year } = brandingProcess;
-  console.log(brandingProcess);
+  const {
+    period_from,
+    period_to,
+    id: branding_process_id,
+    weekNumber,
+    year,
+  } = brandingProcess;
   const { rows } = await getBrandingCardsInfo({ period_from, period_to });
 
   if (rows.length === 0) {
@@ -73,7 +78,7 @@ export async function createDriverBrandingCards() {
 
     const dbcard = await getCrmBrandingCardByDriverId({
       driver_id,
-      branding_process_id
+      branding_process_id,
     });
     if (dbcard) {
       console.error(
@@ -116,7 +121,6 @@ export async function createDriverBrandingCards() {
         total_trips: matchingCard.total_trips,
       });
     }
-    console.log(handledResponseArr);
     for (const respElement of handledResponseArr) {
       const { driver_id, total_trips, bitrix_card_id } = respElement;
       await insertBrandingCard({
