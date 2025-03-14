@@ -35,7 +35,7 @@ exports.up = function (db, callback) {
   db.runSql(sql, callback);
 };
 
-exports.down = function(db) {
+exports.down = function (db) {
   return null;
 };
 
