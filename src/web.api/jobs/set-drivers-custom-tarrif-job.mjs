@@ -17,10 +17,7 @@ const job = CronJob.from({
       await setDriversCustomTariff();
     } catch (error) {
       console.error('Error occurred in onTick setDriversCustomTariff');
-      console.error({
-        time: new Date(),
-        error,
-      });
+      console.error({ time: new Date(), error });
     }
   },
 });

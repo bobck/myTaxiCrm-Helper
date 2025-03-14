@@ -6,10 +6,7 @@ import {
 } from '../bitrix.queries.mjs';
 
 export async function checkDtpDealIdIsValid() {
-  console.log({
-    time: new Date(),
-    message: 'checkIsDtpDealIdValid',
-  });
+  console.log({ time: new Date(), message: 'checkIsDtpDealIdValid' });
 
   const { dtpDebtTransactionsForValidation } =
     await getDtpDebtTransactionsForValidation();
@@ -24,9 +21,7 @@ export async function checkDtpDealIdIsValid() {
     if (total === 0) {
       markDtpDebtTransactionsIsNotValid({ id });
     } else if (total === 1) {
-      markDtpDebtTransactionsIsValid({
-        id,
-      });
+      markDtpDebtTransactionsIsValid({ id });
     }
   }
 }

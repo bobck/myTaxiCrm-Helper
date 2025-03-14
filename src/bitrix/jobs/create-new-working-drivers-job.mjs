@@ -13,10 +13,7 @@ const job = CronJob.from({
       await saveNewWorkingDrivers();
     } catch (error) {
       console.error('Error occurred in onTick on saveNewWorkingDrivers');
-      console.error({
-        time: new Date(),
-        error,
-      });
+      console.error({ time: new Date(), error });
     }
   },
 });

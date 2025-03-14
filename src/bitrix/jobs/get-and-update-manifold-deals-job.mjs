@@ -21,10 +21,7 @@ const job = CronJob.from({
       await updateManifoldDealsWithPhone();
     } catch (error) {
       console.error('Error occurred in onTick on some Manifold function');
-      console.error({
-        time: new Date(),
-        error,
-      });
+      console.error({ time: new Date(), error });
     }
   },
 });

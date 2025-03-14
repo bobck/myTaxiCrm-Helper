@@ -29,9 +29,7 @@ export async function saveTemporaryLeaveByDriversEditingHistory(manualDate) {
 
   const { rows } = await getTemporaryLeaveByDriversEditingHistory({ date });
 
-  console.log({
-    getTemporaryLeaveByDriversEditingHistory: rows.length,
-  });
+  console.log({ getTemporaryLeaveByDriversEditingHistory: rows.length });
 
   if (rows.length == 0) {
     return;
@@ -44,10 +42,7 @@ export async function saveTemporaryLeaveByDriversEditingHistory(manualDate) {
     };
   });
 
-  await clearTableByDate({
-    bqTableId,
-    date,
-  });
+  await clearTableByDate({ bqTableId, date });
   const tempFilePath = path.join(
     os.tmpdir(),
     'temp_data_temporary_leave_drivers.json'

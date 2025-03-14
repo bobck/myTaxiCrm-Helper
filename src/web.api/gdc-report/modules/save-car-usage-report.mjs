@@ -21,17 +21,11 @@ export async function saveCarUsageReport(manualDate) {
       .minus({ days: 1 })
       .toFormat('yyyy-MM-dd');
 
-  console.log({
-    time: new Date(),
-    date,
-    message: 'saveCarUsageReport',
-  });
+  console.log({ time: new Date(), date, message: 'saveCarUsageReport' });
 
   const { rows } = await getCarUsageReport({ date });
 
-  console.log({
-    getCarUsageReport: rows.length,
-  });
+  console.log({ getCarUsageReport: rows.length });
 
   if (rows.length == 0) {
     return;
@@ -44,10 +38,7 @@ export async function saveCarUsageReport(manualDate) {
     };
   });
 
-  await clearTableByDate({
-    bqTableId,
-    date,
-  });
+  await clearTableByDate({ bqTableId, date });
   const tempFilePath = path.join(
     os.tmpdir(),
     'temp_data_car_usage_report.json'

@@ -28,10 +28,7 @@ const job = CronJob.from({
       });
     } catch (error) {
       console.error('Error occurred in onTick addNewDriversAutoparkRevenue');
-      console.error({
-        time: new Date(),
-        error,
-      });
+      console.error({ time: new Date(), error });
     }
   },
 });

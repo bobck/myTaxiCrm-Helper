@@ -13,10 +13,7 @@ const job = CronJob.from({
       await saveRepairAndAccidentCarsReport();
     } catch (error) {
       console.error('Error occurred in onTick saveRepairAndAccidentCarsReport');
-      console.error({
-        time: new Date(),
-        error,
-      });
+      console.error({ time: new Date(), error });
     }
   },
 });

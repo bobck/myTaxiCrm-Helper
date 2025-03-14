@@ -62,9 +62,7 @@ async function makeCRMRequestWithRetry({ body }) {
       }
 
       if (message == 'Driver bonus rule not found') {
-        return {
-          bonus_not_found: true,
-        };
+        return { bonus_not_found: true };
       }
 
       // console.error(`Attempt ${retryCount + 1} failed. Retrying in ${retryDelay}ms.`);
@@ -73,10 +71,7 @@ async function makeCRMRequestWithRetry({ body }) {
         await setTimeout(retryDelay);
         retryDelay *= 2;
       } else {
-        console.error({
-          message: 'Max retries reached',
-          error,
-        });
+        console.error({ message: 'Max retries reached', error });
         throw new Error('Max retries reached. Unable to complete the request.');
       }
     }
@@ -108,9 +103,7 @@ export async function getDriversCandidatsForCustomTerms({
 
   const result = await pool.query(sql, [isoDate, companyId, autoParksIds]);
   const { rows, rowCount } = result;
-  return {
-    driversCandidatsForCustomTerms: rows,
-  };
+  return { driversCandidatsForCustomTerms: rows };
 }
 
 async function getOriginalTariffs({ companyId, autoParksIds }) {
@@ -131,10 +124,7 @@ export async function getDiscountTariffsForAutoparksByDay({
   const discount = discountByDay[dayOfWeek];
   console.log({ dayOfWeek, discount });
 
-  let { rows } = await getOriginalTariffs({
-    companyId,
-    autoParksIds,
-  });
+  let { rows } = await getOriginalTariffs({ companyId, autoParksIds });
 
   const uniqueAutoParkIds = [];
 
@@ -199,9 +189,7 @@ export async function getDiscountTariffsForAutoparksByDay({
     prevTo = null;
   }
 
-  return {
-    discountTariffsForAutoparks,
-  };
+  return { discountTariffsForAutoparks };
 }
 
 async function getOriginalBonuses({ companyId, autoParksIds }) {
@@ -222,10 +210,7 @@ export async function getDiscountBonusesByAutoparksAndIntegrationsByDay({
   const discount = discountByDay[dayOfWeek];
   console.log({ dayOfWeek, discount });
 
-  let { rows } = await getOriginalBonuses({
-    companyId,
-    autoParksIds,
-  });
+  let { rows } = await getOriginalBonuses({ companyId, autoParksIds });
   const discountBonusesByAutoparksAndIntegrations = [];
   for (let bonuseRuleCard of rows) {
     const createDriverBonusRulesInput = {};
@@ -270,9 +255,7 @@ export async function getDiscountBonusesByAutoparksAndIntegrationsByDay({
     discountBonusesByAutoparksAndIntegrations.push(createDriverBonusRulesInput);
   }
 
-  return {
-    discountBonusesByAutoparksAndIntegrations,
-  };
+  return { discountBonusesByAutoparksAndIntegrations };
 }
 
 export async function createCashlessPaymentApplication({
@@ -304,9 +287,7 @@ export async function createCashlessPaymentApplication({
     query:
       'mutation CreateCashlessPaymentApplication($createCashlessPaymentApplicationInput: CreateCashlessPaymentApplicationInput!) {\n  createCashlessPaymentApplication(\n    createCashlessPaymentApplicationInput: $createCashlessPaymentApplicationInput\n  ) {\n    id\n    __typename\n  }\n}\n',
   };
-  const { data } = await makeCRMRequestlimited({
-    body,
-  });
+  const { data } = await makeCRMRequestlimited({ body });
   const { createCashlessPaymentApplication: cashlessPaymentApplication } = data;
   return { cashlessPaymentApplication };
 }
@@ -326,9 +307,7 @@ export async function editCashlessPaymentApplication({
     query:
       'mutation EditCashlessPaymentApplication($editCashlessPaymentApplicationInput: EditCashlessPaymentApplicationInput!) {\n  editCashlessPaymentApplication(\n    editCashlessPaymentApplicationInput: $editCashlessPaymentApplicationInput\n  ) {\n    status\n    __typename\n  }\n}\n',
   };
-  const { data } = await makeCRMRequestlimited({
-    body,
-  });
+  const { data } = await makeCRMRequestlimited({ body });
   const { editCashlessPaymentApplication: cashlessPaymentApplication } = data;
   return { cashlessPaymentApplication };
 }
@@ -345,9 +324,7 @@ export async function payApplication({ applicationId, autoParkId }) {
     query:
       'mutation PayApplication($payApplicationInput: PayApplicationInput!) {\n  payApplication(payApplicationInput: $payApplicationInput) {\n    success\n    __typename\n  }\n}\n',
   };
-  const { data } = await makeCRMRequestlimited({
-    body,
-  });
+  const { data } = await makeCRMRequestlimited({ body });
   const { payApplication } = data;
   return { payApplication };
 }

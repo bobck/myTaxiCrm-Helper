@@ -27,13 +27,9 @@ export async function saveCarTransferAcceptanceList(manualDate) {
     message: 'saveCarTransferAcceptanceList',
   });
 
-  const { rows } = await getCarTransferAcceptanceList({
-    date,
-  });
+  const { rows } = await getCarTransferAcceptanceList({ date });
 
-  console.log({
-    getCarTransferAcceptanceList: rows.length,
-  });
+  console.log({ getCarTransferAcceptanceList: rows.length });
 
   if (rows.length == 0) {
     return;
@@ -46,10 +42,7 @@ export async function saveCarTransferAcceptanceList(manualDate) {
     };
   });
 
-  await clearTableByDate({
-    bqTableId,
-    date,
-  });
+  await clearTableByDate({ bqTableId, date });
   const tempFilePath = path.join(
     os.tmpdir(),
     'temp_data_car_transfer_acceptance_list.json'

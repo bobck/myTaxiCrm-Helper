@@ -19,10 +19,7 @@ const job = CronJob.from({
       console.error(
         'Error occurred in onTick updateDriversCustomNotFoundBonus'
       );
-      console.error({
-        time: new Date(),
-        error,
-      });
+      console.error({ time: new Date(), error });
     }
   },
 });

@@ -13,10 +13,7 @@ const job = CronJob.from({
       await refreshManifoldDeals();
     } catch (error) {
       console.error('Error occurred in onTick on refreshManifoldDeals');
-      console.error({
-        time: new Date(),
-        error,
-      });
+      console.error({ time: new Date(), error });
     }
   },
 });

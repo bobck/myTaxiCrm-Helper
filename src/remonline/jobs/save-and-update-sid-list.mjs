@@ -15,10 +15,7 @@ const job = CronJob.from({
       await saveOrdersToSids();
     } catch (error) {
       console.error('Error occurred in onTick saveAndUpdateSidListJob');
-      console.error({
-        time: new Date(),
-        error,
-      });
+      console.error({ time: new Date(), error });
     }
   },
 });

@@ -27,9 +27,7 @@ export async function saveRepairAndAccidentCarsReport() {
 
   const { rows } = await getRepairAndAccidentCarsByDate({ date });
 
-  console.log({
-    getRepairAndAccidentCarsByDate: rows.length,
-  });
+  console.log({ getRepairAndAccidentCarsByDate: rows.length });
 
   if (rows.length == 0) {
     return;
@@ -42,10 +40,7 @@ export async function saveRepairAndAccidentCarsReport() {
     };
   });
 
-  await clearTableByDate({
-    bqTableId,
-    date,
-  });
+  await clearTableByDate({ bqTableId, date });
   const tempFilePath = path.join(
     os.tmpdir(),
     'temp_data_repair_and_accident_cars.json'
