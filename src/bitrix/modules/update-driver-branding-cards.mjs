@@ -11,20 +11,27 @@ import {
 import { getBrandingCardsInfo } from '../../web.api/web.api.utlites.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
 
-function computeBrandingCardStage(total_trips) {
-  let trips = Number(total_trips);
+function computeBrandingCardStage({ total_trips, isKyivOrLviv }) {
+  const trips = Number(total_trips);
+  const today = DateTime.local().startOf('day');
+  const maxGoalGap = 30 - (today.weekday - 5) * 10;
   if (isNaN(trips)) {
     console.error('Trips must be a number');
   }
-  if (trips >= 90) {
+  let GOAL = 60;
+
+  if (isKyivOrLviv) {
+    GOAL = 90;
+  }
+  const todaysTripsOptimalLowerBound = GOAL - maxGoalGap;
+  if (trips >= GOAL) {
     return 'PREPARATION';
-  } else if (trips < 30) {
+  } else if (trips < todaysTripsOptimalLowerBound) {
     return 'CLIENT';
   } else {
     return 'NEW';
   }
 }
-
 export async function updateDriverBrandingCards() {
   const today = DateTime.local().startOf('day');
   const brandingProcess = await getBrandingProcessByWeekNumber({
@@ -54,7 +61,7 @@ export async function updateDriverBrandingCards() {
     const { driver_id, total_trips } = row;
     const dbcard = await getCrmBrandingCardByDriverId({
       driver_id,
-      branding_process_id
+      branding_process_id,
     });
     if (!dbcard) {
       console.error(

@@ -12,7 +12,7 @@ import {
 } from '../bitrix.utils.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
 
-function computeBrandingCardStage(total_trips) {
+function computeBrandingCardStage({ total_trips, auto_park_id }) {
   let trips = Number(total_trips);
   if (isNaN(trips)) {
     console.error('Trips must be a number');
