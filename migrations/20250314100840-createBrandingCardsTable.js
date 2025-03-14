@@ -24,7 +24,7 @@ exports.up = function (db, callback) {
   `;
   db.runSql(sql, callback);
 };
-
+//
 exports.down = function (db, callback) {
   const sql = `DROP TABLE branding_cards`;
   db.runSql(sql, callback);
