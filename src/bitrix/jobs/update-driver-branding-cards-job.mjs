@@ -12,7 +12,7 @@ const updateBrandingCardsJob = CronJob.from({
     try {
       await updateDriverBrandingCards();
     } catch (error) {
-      console.error('Error occurred in Tuesday-Sunday branding job:', {
+      console.error('Error occurred in updating branding job:', {
         time: new Date(),
         error,
       });
