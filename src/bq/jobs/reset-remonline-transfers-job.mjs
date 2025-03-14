@@ -10,7 +10,10 @@ const resetRemonlineTransfersJob = CronJob.from({
   timeZone,
   onTick: async () => {
     try {
+      const env = process.env.BQ_DATASET_ID;
+      process.env.BQ_DATASET_ID = 'RemOnline';
       await resetTransfersTables();
+      process.env.BQ_DATASET_ID = env;
     } catch (e) {
       console.error('An error occurred while creating transfers tables');
       console.error(e.errors[0]);

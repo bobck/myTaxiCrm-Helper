@@ -78,9 +78,9 @@ export async function generateAndSaveTransfers() {
     'fetching transfers...\nwait please it could take few minutes...'
   );
   for (const [index, branch] of branches.entries()) {
-    if (process.env.ENV === 'TEST' && index !== branches.length - 1) {
-      continue;
-    }
+    // if (process.env.ENV === 'TEST' && index !== branches.length - 1) {
+    //   continue;
+    // }
     const { id: branch_id } = branch;
     const { transfers } = await getTransfers({ branch_id });
     transfersWithProducts.push(...transfers);
@@ -168,5 +168,8 @@ if (process.env.ENV === 'TEST') {
 }
 if (process.env.ENV === 'TEST_RESET') {
   console.log('resetTransfersTables testing...');
+  const env = process.env.BQ_DATASET_ID;
+  process.env.BQ_DATASET_ID = 'RemOnline';
   await resetTransfersTables();
+  process.env.BQ_DATASET_ID = env;
 }
