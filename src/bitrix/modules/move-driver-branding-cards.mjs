@@ -51,7 +51,7 @@ export async function moveDriverBrandingCards() {
       break;
     }
     const { driver_id, total_trips } = row;
-    const { weekNumber, year } = brandingProcess;
+
     const dbcard = await getCrmBrandingCardByDriverId({
       driver_id,
       weekNumber,
