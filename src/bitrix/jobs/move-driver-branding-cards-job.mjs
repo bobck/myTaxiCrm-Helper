@@ -12,7 +12,7 @@ const moveBrandingCardsJob = CronJob.from({
     try {
       await moveDriverBrandingCards();
     } catch (error) {
-      console.error('Error occurred in monday branding job:', {
+      console.error('Error occurred in movement branding job:', {
         time: new Date(),
         error,
       });
