@@ -35,7 +35,7 @@ export async function moveDriverBrandingCards() {
     period_to,
     weekNumber,
     year,
-    id: brandingProcessId,
+    id: branding_process_id,
   } = brandingProcess;
   const { rows } = await getBrandingCardsInfo({
     period_from,
@@ -54,8 +54,7 @@ export async function moveDriverBrandingCards() {
 
     const dbcard = await getCrmBrandingCardByDriverId({
       driver_id,
-      weekNumber,
-      year,
+      branding_process_id
     });
     if (!dbcard) {
       console.error(
@@ -98,7 +97,7 @@ export async function moveDriverBrandingCards() {
       const { driver_id, total_trips } = respElement;
 
       const dbupdate = await updateBrandingCardByDriverId({
-        branding_process_id: brandingProcess.id,
+        branding_process_id,
         driver_id,
         total_trips,
       });
