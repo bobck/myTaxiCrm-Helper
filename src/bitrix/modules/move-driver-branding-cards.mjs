@@ -54,7 +54,7 @@ export async function moveDriverBrandingCards() {
 
     const dbcard = await getCrmBrandingCardByDriverId({
       driver_id,
-      branding_process_id
+      branding_process_id,
     });
     if (!dbcard) {
       console.error(
@@ -108,7 +108,6 @@ export async function moveDriverBrandingCards() {
   );
 
   const resolveResp = await resolveBrandingProcessById(brandingProcess.id);
-  console.log(`Resolved resp: `, resolveResp);
 }
 if (process.env.ENV === 'TEST') {
   console.log(
