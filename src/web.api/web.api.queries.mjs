@@ -14,9 +14,7 @@ export async function saveCreatedDriverCustomTariffId({ tariffId, driverId }) {
 export async function getUndeletedDriversCustomTariffIds() {
   const sql = `SELECT tariff_id,driver_id FROM drivers_custom_tariff_ids WHERE is_deleted = false`;
   const undeletedDriversCustomTariffIds = await db.all(sql);
-  return {
-    undeletedDriversCustomTariffIds,
-  };
+  return { undeletedDriversCustomTariffIds };
 }
 
 export async function markDriverCustomTariffAsDeleted({ tariffId }) {
@@ -36,9 +34,7 @@ export async function saveCreatedDriverBonusRuleId({
 export async function getUndeletedDriversCustomBonuses() {
   const sql = `SELECT auto_park_id,bonus_rule_id FROM drivers_custom_bonus_rules_ids WHERE is_deleted = false AND is_not_found = false`;
   const undeletedDriversCustomBonuses = await db.all(sql);
-  return {
-    undeletedDriversCustomBonuses,
-  };
+  return { undeletedDriversCustomBonuses };
 }
 
 export async function markDriverCustomBonusRulesAsDeleted({ bonusRuleId }) {
@@ -54,9 +50,7 @@ export async function markDriverCustomBonusRulesAsNotFound({ bonusRuleId }) {
 export async function getNotFoundDriversCustomBonuses() {
   const sql = `SELECT driver_id,bonus_rule_id FROM drivers_custom_bonus_rules_ids WHERE is_not_found = true AND is_deleted = false`;
   const notFoundDriversCustomBonuses = await db.all(sql);
-  return {
-    notFoundDriversCustomBonuses,
-  };
+  return { notFoundDriversCustomBonuses };
 }
 
 export async function replaceOldDriverCustomBonusRulesWithNewId({

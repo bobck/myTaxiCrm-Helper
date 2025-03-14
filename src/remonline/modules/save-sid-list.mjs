@@ -15,11 +15,7 @@ export async function saveSidList() {
     lastSidCreatedAt = new Date(created_at + 1);
   }
 
-  console.log({
-    time: new Date(),
-    message: 'saveSidList',
-    lastSidCreatedAt,
-  });
+  console.log({ time: new Date(), message: 'saveSidList', lastSidCreatedAt });
 
   const sql = fs.readFileSync('./src/sql/sid_list.sql').toString();
 

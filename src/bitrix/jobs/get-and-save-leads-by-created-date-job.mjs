@@ -13,10 +13,7 @@ const job = CronJob.from({
       await getAndSaveLeadsByCreatedDate();
     } catch (error) {
       console.error('Error occurred in onTick getAndSaveLeadsByCreatedDate');
-      console.error({
-        time: new Date(),
-        error,
-      });
+      console.error({ time: new Date(), error });
     }
   },
 });

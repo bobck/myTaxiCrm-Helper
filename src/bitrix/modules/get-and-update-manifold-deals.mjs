@@ -15,16 +15,11 @@ import {
 import { cityListWithAssignedBy } from '../bitrix.constants.mjs';
 
 export async function saveNewManifoldDeals() {
-  console.log({
-    time: new Date(),
-    message: 'saveNewManifoldDeals',
-  });
+  console.log({ time: new Date(), message: 'saveNewManifoldDeals' });
 
   const result = await getManifoldDeals();
 
-  console.log({
-    getManifoldDeals: result.length,
-  });
+  console.log({ getManifoldDeals: result.length });
 
   if (result.length == 0) {
     return;
@@ -63,9 +58,7 @@ export async function saveNewManifoldDeals() {
     });
   }
 
-  console.log({
-    jsonData: jsonData.length,
-  });
+  console.log({ jsonData: jsonData.length });
 
   if (jsonData.length == 0) {
     return;
@@ -86,9 +79,7 @@ export async function updateManifoldDealsWithAncidentData() {
     return;
   }
   const ids = manifoldDealsIds.map((row) => row.id);
-  const { result } = await getDeals({
-    ids,
-  });
+  const { result } = await getDeals({ ids });
   await updateManifoldDealsAncidentData(result);
 }
 
@@ -106,17 +97,12 @@ export async function updateManifoldDealsWithContactId() {
   }
 
   const ids = manifoldDealsAncidentIds.map((row) => row.id);
-  const { result } = await getDeals({
-    ids,
-  });
+  const { result } = await getDeals({ ids });
   await updateManifoldDealsContactId(result);
 }
 
 export async function updateManifoldDealsWithPhone() {
-  console.log({
-    time: new Date(),
-    message: 'updateManifoldDealsWithPhone',
-  });
+  console.log({ time: new Date(), message: 'updateManifoldDealsWithPhone' });
 
   const { manifoldDealsAncidentIds } =
     await getSavedManifoldContactIdsWithNoPhone();
@@ -126,9 +112,7 @@ export async function updateManifoldDealsWithPhone() {
   }
 
   const ids = manifoldDealsAncidentIds.map((row) => row.contact_id);
-  const { result } = await getContacts({
-    ids,
-  });
+  const { result } = await getContacts({ ids });
 
   const jsonObj = {};
 
@@ -149,9 +133,7 @@ export async function updateManifoldDealsWithPhone() {
       continue;
     }
 
-    jsonObj[contact_id] = {
-      phone: `+${cleanedPhone}`,
-    };
+    jsonObj[contact_id] = { phone: `+${cleanedPhone}` };
   }
 
   await updateManifoldDealsPhone(jsonObj);

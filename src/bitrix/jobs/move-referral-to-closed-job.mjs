@@ -17,10 +17,7 @@ const job = CronJob.from({
       await moveReferralProcentageRewardToClosed();
     } catch (error) {
       console.error('Error occurred in onTick on moveReferralToClosed');
-      console.error({
-        time: new Date(),
-        error,
-      });
+      console.error({ time: new Date(), error });
     }
   },
 });

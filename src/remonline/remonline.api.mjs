@@ -10,18 +10,13 @@ async function _getNewToken() {
 
   const response = await fetch(`${process.env.REMONLINE_API}/token/new`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: params,
   });
   // console.log(response.status, params, `${process.env.REMONLINE_API}/token/new`)
   const data = await response.json();
   const { token } = data;
-  await saveRemonlineToken({
-    token,
-    validTo,
-  });
+  await saveRemonlineToken({ token, validTo });
   return { token };
 }
 

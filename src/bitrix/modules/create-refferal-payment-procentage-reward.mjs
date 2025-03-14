@@ -94,18 +94,11 @@ function getRefferalsForPayProcentageReward({
       continue;
     }
 
-    refferalsNotEligible.push({
-      ...referral,
-      ...revenueDetail,
-      targetMarker,
-    });
+    refferalsNotEligible.push({ ...referral, ...revenueDetail, targetMarker });
     continue;
   }
 
-  return {
-    refferalsReadyForPay,
-    refferalsNotEligible,
-  };
+  return { refferalsReadyForPay, refferalsNotEligible };
 }
 
 export async function createRefferalPaymentProcentageReward() {

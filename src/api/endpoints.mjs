@@ -50,10 +50,7 @@ export async function initApi({ pool }) {
       city_id,
     } = query;
 
-    console.log({
-      message: 'POST: referral-validation',
-      query,
-    });
+    console.log({ message: 'POST: referral-validation', query });
 
     const isValid = await referralValidadion({
       task_id,
@@ -96,15 +93,9 @@ export async function initApi({ pool }) {
         city_id,
       });
 
-      await completeBitrixTaskById({
-        task_id,
-      });
+      await completeBitrixTaskById({ task_id });
     } catch (e) {
-      console.error({
-        deal_id,
-        message: 'Unable to complete Bitrix Task',
-        e,
-      });
+      console.error({ deal_id, message: 'Unable to complete Bitrix Task', e });
       return res.status(400).json({ status: 'error' });
     }
 
@@ -115,10 +106,7 @@ export async function initApi({ pool }) {
     const { query } = req;
     const { referral_id, deal_id, task_id } = query;
 
-    console.log({
-      message: 'POST: referral-add',
-      query,
-    });
+    console.log({ message: 'POST: referral-add', query });
 
     await saveReferralIdForRecruitDeal({
       deal_id,
@@ -134,10 +122,7 @@ export async function initApi({ pool }) {
     const { referral_id, referrer_phone, referrer_name, referrer_position } =
       query;
 
-    console.log({
-      message: 'POST: referral-approval',
-      query,
-    });
+    console.log({ message: 'POST: referral-approval', query });
 
     //TODO: move to module and pass crm link to referral card. Add validation if not exist
     await approvalReferralById({

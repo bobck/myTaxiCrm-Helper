@@ -15,10 +15,7 @@ const job = CronJob.from({
       console.error(
         'Error occurred in onTick on createRefferalPaymentProcentageReward'
       );
-      console.error({
-        time: new Date(),
-        error,
-      });
+      console.error({ time: new Date(), error });
     }
   },
 });

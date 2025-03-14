@@ -30,14 +30,8 @@ export async function saveNewWorkingDrivers() {
       .setZone('Europe/Kyiv')
       .minus({ days: 1 })
       .toFormat('yyyy-MM-dd');
-  console.log({
-    time: new Date(),
-    date,
-    message: 'saveNewWorkingDrivers',
-  });
-  const { rows } = await getNewWorkingDriversByDate({
-    date,
-  });
+  console.log({ time: new Date(), date, message: 'saveNewWorkingDrivers' });
+  const { rows } = await getNewWorkingDriversByDate({ date });
 
   for (let driver of rows) {
     const matchingCity = cityListWithAssignedBy.find(
@@ -63,11 +57,7 @@ export async function moveNewWorkingDrivers() {
   const date =
     manualDate || DateTime.now().setZone('Europe/Kyiv').toFormat('yyyy-MM-dd');
 
-  console.log({
-    time: new Date(),
-    date,
-    message: 'moveNewWorkingDrivers',
-  });
+  console.log({ time: new Date(), date, message: 'moveNewWorkingDrivers' });
 
   const { newWorkingDriverWorked7Days } = await getNewWorkingDriverWorked7Days({
     date,
@@ -75,17 +65,12 @@ export async function moveNewWorkingDrivers() {
   const driversIds = newWorkingDriverWorked7Days.map(
     (driver) => driver.driver_id
   );
-  const { rows } = await getWorkingDriversById({
-    driversIds,
-  });
+  const { rows } = await getWorkingDriversById({ driversIds });
 
   const newWorkingDriverReadyForMove = newWorkingDriverWorked7Days
     .map((driver) => {
       const stillWorking = rows.some((row) => row.id === driver.driver_id);
-      return {
-        ...driver,
-        stillWorking,
-      };
+      return { ...driver, stillWorking };
     })
     .filter((driver) => driver.stillWorking == true);
 

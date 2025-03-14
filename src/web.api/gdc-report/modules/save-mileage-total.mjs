@@ -26,14 +26,9 @@ export async function saveMileagesAndHoursOnline(dateTime) {
     message: 'saveMileagesAndHoursOnline',
   });
 
-  const { rows } = await getMileagesAndHoursOnline({
-    week,
-    year,
-  });
+  const { rows } = await getMileagesAndHoursOnline({ week, year });
 
-  console.log({
-    getMileagesAndHoursOnline: rows.length,
-  });
+  console.log({ getMileagesAndHoursOnline: rows.length });
 
   if (rows.length == 0) {
     return;
@@ -47,11 +42,7 @@ export async function saveMileagesAndHoursOnline(dateTime) {
     };
   });
 
-  await clearTableByWeekAndYear({
-    bqTableId,
-    year,
-    week,
-  });
+  await clearTableByWeekAndYear({ bqTableId, year, week });
   const tempFilePath = path.join(
     os.tmpdir(),
     'temp_data_mileages_and_hours_online.json'

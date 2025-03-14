@@ -53,6 +53,7 @@ export async function createDriverBrandingCards() {
   });
   const { period_from, period_to } = brandingProcess;
   const { rows } = await getBrandingCardsInfo({ period_from, period_to });
+
   if (rows.length === 0) {
     console.error('No rows found for branding cards found.');
     return;
