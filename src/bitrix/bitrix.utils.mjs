@@ -1,6 +1,11 @@
 import { Bitrix, Method } from '@2bad/bitrix';
 import fs from 'fs';
 import { pool } from './../api/pool.mjs';
+import {
+  Seven_days_without_trips_message_type,
+  debtorState,
+  notDebtorState,
+} from './bitrix.constants.mjs';
 
 const bitrix = Bitrix(
   `https://${process.env.BITRIX_PORTAL_HOST}/rest/${process.env.BITRIX_USER_ID}/${process.env.BITRIX_API_KEY}/`
@@ -428,8 +433,8 @@ export async function createBanBoltDriverCardItem(card) {
     'fields[STAGE_ID]': 'DT1132_60:NEW',
     'fields[ufCrm52_1738324741]': full_name,
     'fields[ufCrm52_1738324675]': bolt_id,
-    'fields[ufCrm52_1738324546]': 3430,
-    'fields[ufCrm52_1738739843]': isDebtor ? 3434 : 3436,
+    'fields[ufCrm52_1738324546]': Seven_days_without_trips_message_type,
+    'fields[ufCrm52_1738739843]': isDebtor ? debtorState : notDebtorState,
     'fields[ufCrm52_1738837120]': debt,
     'fields[ufCrm52_1738326821]': cityId,
   };
