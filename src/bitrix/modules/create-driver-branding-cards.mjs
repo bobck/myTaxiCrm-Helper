@@ -8,8 +8,8 @@ import {
 import {
   chunkArray,
   createBitrixDriverBrandingCards,
+  getCityBrandingId,
 } from '../bitrix.utils.mjs';
-import { cityListWithAssignedBy as cityList } from '../bitrix.constants.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
 
 export function computePeriodBounds() {
@@ -46,14 +46,6 @@ function computeBrandingCardStage({ total_trips, isKyivOrLviv }) {
   } else {
     return 'NEW';
   }
-}
-function getCityBrandingId(auto_park_id) {
-  const matchingCity = cityList.find(
-    (obj) => obj.auto_park_id === auto_park_id
-  );
-  const { brandingId: cityBrandingId } = matchingCity;
-  const isKyivOrLviv = cityBrandingId === 3780 || cityBrandingId === 3756;
-  return { cityBrandingId, isKyivOrLviv };
 }
 
 export async function createDriverBrandingCards() {
@@ -113,6 +105,7 @@ export async function createDriverBrandingCards() {
       weekNumber,
       year,
       cityBrandingId,
+      auto_park_id,
     };
     processedCards.push(card);
   }
@@ -132,15 +125,18 @@ export async function createDriverBrandingCards() {
         bitrix_card_id: id,
         driver_id: matchingCard.driver_id,
         total_trips: matchingCard.total_trips,
+        auto_park_id: matchingCard.auto_park_id,
       });
     }
     for (const respElement of handledResponseArr) {
-      const { driver_id, total_trips, bitrix_card_id } = respElement;
+      const { driver_id, total_trips, bitrix_card_id, auto_park_id } =
+        respElement;
       await insertBrandingCard({
         driver_id,
         total_trips,
         bitrix_card_id,
         branding_process_id,
+        auto_park_id,
       });
     }
   }

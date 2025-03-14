@@ -8,16 +8,23 @@ import {
 } from '../bitrix.queries.mjs';
 import {
   chunkArray,
+  getCityBrandingId,
   updateBitrixDriverBrandingCards,
 } from '../bitrix.utils.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
 
 function computeBrandingCardStage({ total_trips, auto_park_id }) {
-  let trips = Number(total_trips);
+  const trips = Number(total_trips);
+  const { isKyivOrLviv } = getCityBrandingId(auto_park_id);
   if (isNaN(trips)) {
     console.error('Trips must be a number');
   }
-  if (trips >= 90) {
+  let GOAL = 60;
+
+  if (isKyivOrLviv) {
+    GOAL = 90;
+  }
+  if (trips >= GOAL) {
     return 'SUCCESS';
   } else {
     return 'FAIL';
@@ -50,7 +57,7 @@ export async function moveDriverBrandingCards() {
     ) {
       break;
     }
-    const { driver_id, total_trips } = row;
+    const { driver_id, total_trips, auto_park_id } = row;
 
     const dbcard = await getCrmBrandingCardByDriverId({
       driver_id,
@@ -63,7 +70,7 @@ export async function moveDriverBrandingCards() {
       continue;
     }
 
-    const stage_id = `DT1138_62:${computeBrandingCardStage(total_trips)}`;
+    const stage_id = `DT1138_62:${computeBrandingCardStage({ total_trips, auto_park_id })}`;
     const card = {
       driver_id,
       bitrix_card_id: dbcard.bitrix_card_id,

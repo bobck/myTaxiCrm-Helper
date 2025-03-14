@@ -1,6 +1,7 @@
 import { Bitrix, Method } from '@2bad/bitrix';
 import fs from 'fs';
 import { pool } from './../api/pool.mjs';
+import { cityListWithAssignedBy as cityList } from './bitrix.constants.mjs';
 const bitrix = Bitrix(
   `https://${process.env.BITRIX_PORTAL_HOST}/rest/${process.env.BITRIX_USER_ID}/${process.env.BITRIX_API_KEY}/`
 );
@@ -455,7 +456,6 @@ export async function createBitrixDriverBrandingCards({ cards }) {
   return itemObj;
 }
 
-
 export async function updateBitrixDriverBrandingCards({ cards }) {
   let batchObj = {};
   for (let card of cards) {
@@ -475,4 +475,12 @@ export async function updateBitrixDriverBrandingCards({ cards }) {
 
   //
   return itemObj;
+}
+export function getCityBrandingId(auto_park_id) {
+  const matchingCity = cityList.find(
+    (obj) => obj.auto_park_id === auto_park_id
+  );
+  const { brandingId: cityBrandingId } = matchingCity;
+  const isKyivOrLviv = cityBrandingId === '3780' || cityBrandingId === '3756';
+  return { cityBrandingId, isKyivOrLviv };
 }
