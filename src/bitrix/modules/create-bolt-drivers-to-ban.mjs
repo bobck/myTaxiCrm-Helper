@@ -4,7 +4,7 @@ import {
   cityListWithAssignedBy as cityList,
 } from '../bitrix.constants.mjs';
 import { createBanBoltDriverCardItem } from '../bitrix.utils.mjs';
-import { openSShTunel } from '../../../ssh.mjs';
+import { openSShTunnel } from '../../../ssh.mjs';
 import { DateTime } from 'luxon';
 import {
   getBoltDriverBanReqByDriverId,
@@ -70,8 +70,8 @@ export const createBoltDriversToBan = async () => {
       isDebtor,
     };
     const bitrixResp = await createBanBoltDriverCardItem(card);
-
-    await insertBoltDriverBanReq({ ...bitrixResp });
+    const { bitrix_card_id } = bitrixResp;
+    await insertBoltDriverBanReq({ bitrix_card_id, debt, driver_id });
   }
 };
 
@@ -79,6 +79,6 @@ if (process.env.ENV === 'TEST') {
   console.log(
     `testing bolt drivers ban cards creation\ncards count :${process.env.BOLT_DRIVERS_BAN_CARDS}`
   );
-  await openSShTunel;
+  await openSShTunnel;
   await createBoltDriversToBan();
 }

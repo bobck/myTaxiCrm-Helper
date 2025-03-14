@@ -4,7 +4,6 @@ SELECT
     d.full_name,
     MAX(dti.external_id) AS bolt_id,
     SUM(drc.total_trips) AS total_trips,
-    dti.integration_id,
     COUNT(*) AS report_count,
     (COALESCE(cs.total_payable_to_driver, 0) - COALESCE(cs.total_debt, 0)) AS driver_balance
 FROM drivers d
