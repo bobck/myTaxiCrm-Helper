@@ -5,7 +5,10 @@ import {
   getCrmBrandingCardByDriverId,
   insertBrandingCard,
 } from '../bitrix.queries.mjs';
-import { createDriverBrandingCardItem } from '../bitrix.utils.mjs';
+import {
+  chunkArray,
+  createBitrixDriverBrandingCards,
+} from '../bitrix.utils.mjs';
 import { cityListWithAssignedBy as cityList } from '../bitrix.constants.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
 
@@ -43,33 +46,39 @@ function getCityBrandingId(auto_park_id) {
 export async function createDriverBrandingCards() {
   const bounds = computePeriodBounds();
   const brandingProcess = await createBrandingProcess({
-    weekNumber: bounds.upperBound.weekNumber,
     year: bounds.upperBound.year,
+    weekNumber: bounds.upperBound.weekNumber,
     period_from: bounds.lowerBound.toISODate(),
     period_to: bounds.upperBound.toISODate(),
   });
-  const { period_from, period_to } = brandingProcess;
+  const {
+    period_from,
+    period_to,
+    id: branding_process_id,
+    weekNumber,
+    year,
+  } = brandingProcess;
   const { rows } = await getBrandingCardsInfo({ period_from, period_to });
 
   if (rows.length === 0) {
     console.error('No rows found for branding cards found.');
     return;
   }
+
+  const processedCards = [];
   for (const [index, row] of rows.entries()) {
     if (
       process.env.ENV === 'TEST' &&
       index === Number(process.env.BRANDING_CARDS_COUNT)
     ) {
-      return;
+      break;
     }
 
     const { driver_id, driver_name, phone, auto_park_id, total_trips } = row;
-    const { weekNumber, year } = bounds.upperBound;
 
     const dbcard = await getCrmBrandingCardByDriverId({
       driver_id,
-      weekNumber,
-      year,
+      branding_process_id,
     });
     if (dbcard) {
       console.error(
@@ -92,18 +101,45 @@ export async function createDriverBrandingCards() {
       year,
       cityBrandingId,
     };
-    const bitrixResp = await createDriverBrandingCardItem(card);
-
-    await insertBrandingCard({
-      ...bitrixResp,
-      branding_process_id: brandingProcess.id,
-    });
+    processedCards.push(card);
   }
+  const chunkedProcessedCards = chunkArray(
+    processedCards,
+    Number(process.env.CHUNK_SIZE) || 7
+  );
+  for (const [index, chunk] of chunkedProcessedCards.entries()) {
+    const bitrixRespObj = await createBitrixDriverBrandingCards({
+      cards: chunk,
+    });
+    const handledResponseArr = [];
+    for (const driver_id in bitrixRespObj) {
+      const { id } = bitrixRespObj[driver_id]['item'];
+      const matchingCard = chunk.find((c) => c.driver_id === driver_id);
+      handledResponseArr.push({
+        bitrix_card_id: id,
+        driver_id: matchingCard.driver_id,
+        total_trips: matchingCard.total_trips,
+      });
+    }
+    for (const respElement of handledResponseArr) {
+      const { driver_id, total_trips, bitrix_card_id } = respElement;
+      await insertBrandingCard({
+        driver_id,
+        total_trips,
+        bitrix_card_id,
+        branding_process_id,
+      });
+    }
+  }
+
+  console.log(
+    `${processedCards.length} branding cards creation has been finished.`
+  );
 }
 
 if (process.env.ENV === 'TEST') {
   console.log(
-    `testing driver branding creation\ncards count :${process.env.BRANDING_CARDS_COUNT}`
+    `testing driver branding creation\ncards count: ${process.env.BRANDING_CARDS_COUNT}\nchunk size: ${process.env.CHUNK_SIZE}`
   );
   await openSShTunnel;
   await createDriverBrandingCards();

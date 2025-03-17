@@ -54,6 +54,7 @@ export async function resolveBrandingProcessById(brandingProcessId) {
  */
 export async function insertBrandingCard(card) {
   const { driver_id, bitrix_card_id, total_trips, branding_process_id } = card;
+
   const sql = `
         INSERT INTO branding_cards
         (driver_id, bitrix_card_id, total_trips, branding_process_id, created_at, updated_at)
@@ -73,21 +74,20 @@ export async function insertBrandingCard(card) {
 /**
  * Retrieves a branding card by driver_id, joining branding_processes to get weekNumber & year.
  * @param {string} driver_id - The driver ID.
+ * @param branding_process_id
  * @returns {Promise<Object>} - Resolves with the matching row (or undefined if not found).
  */
 export async function getCrmBrandingCardByDriverId({
-  driver_id,
-  weekNumber,
-  year,
+  driver_id, branding_process_id,
 }) {
   const sql = `
         SELECT bc.*, bp.weekNumber, bp.year
         FROM branding_cards bc
         LEFT JOIN branding_processes bp ON bc.branding_process_id = bp.id
-        WHERE bc.driver_id = ? AND bp.weekNumber = ? AND bp.year = ?;
+        WHERE bc.driver_id = ? AND bp.id=?;
     `;
 
-  return db.get(sql, driver_id, weekNumber, year);
+  return db.get(sql, driver_id,branding_process_id);
 }
 
 /**
