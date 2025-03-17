@@ -5,9 +5,10 @@
   "main": "app.js",
   "scripts": {
     "dev": "node -r dotenv/config app.mjs",
-    "createBrandingCardsManual": "ENV=TEST BRANDING_CARDS_COUNT=4 CHUNK_SIZE=2 node -r dotenv/config src/bitrix/modules/create-driver-branding-cards.mjs",
-    "updateBrandingCardsManual": "ENV=TEST BRANDING_CARDS_COUNT=4 CHUNK_SIZE=2 node -r dotenv/config src/bitrix/modules/update-driver-branding-cards.mjs",
-    "moveBrandingCardsManual": "ENV=TEST BRANDING_CARDS_COUNT=4 CHUNK_SIZE=2 node -r dotenv/config src/bitrix/modules/move-driver-branding-cards.mjs",
+    "createFiredDebtorDriversCardsManual": "ENV=TEST DEBTOR_DRIVERS_CARDS_COUNT=4 node -r dotenv/config src/bitrix/modules/create-debtor-drivers-cards.mjs",
+    "createBrandingCardsManual": "ENV=TEST BRANDING_CARDS_COUNT=4 node -r dotenv/config src/bitrix/modules/create-driver-branding-cards.mjs",
+    "updateBrandingCardsManual": "ENV=TEST BRANDING_CARDS_COUNT=4 node -r dotenv/config src/bitrix/modules/update-driver-branding-cards.mjs",
+    "moveBrandingCardsManual": "ENV=TEST BRANDING_CARDS_COUNT=4 node -r dotenv/config src/bitrix/modules/move-driver-branding-cards.mjs",
     "update_plan": "ENV=TEST node -r dotenv/config src/sheets/modules/get-and-save-current-plan.mjs",
     "notification": "ENV=TEST node -r dotenv/config src/telegram/modules/rooms-notification.mjs",
     "savesid": "ENV=TEST node -r dotenv/config src/remonline/modules/save-sid-list.mjs",
@@ -42,8 +43,7 @@
     "iomanualsync": "node -r dotenv/config src/web.api/inflow-outflow-drivers-report/modules/manual-sync.mjs",
     "createrefferalpayment": "ENV=TEST node -r dotenv/config src/bitrix/modules/create-refferal-payment.mjs",
     "repairandaccidentreport": "ENV=TEST node -r dotenv/config src/web.api/modules/save-repair-and-accident-cars.mjs",
-    "newworkingdrivers": "ENV=TEST node -r dotenv/config src/bitrix/modules/new-working-drivers.mjs",
-    "format": "prettier --write ."
+    "newworkingdrivers": "ENV=TEST node -r dotenv/config src/bitrix/modules/new-working-drivers.mjs"
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",
@@ -65,8 +65,5 @@
     "sqlite3": "^5.1.6",
     "ssh2": "^1.14.0",
     "telegraf": "^4.15.0"
-  },
-  "devDependencies": {
-    "prettier": "^3.5.3"
   }
 }
