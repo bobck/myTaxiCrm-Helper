@@ -455,7 +455,6 @@ export async function createBitrixDriverBrandingCards({ cards }) {
   return itemObj;
 }
 
-
 export async function updateBitrixDriverBrandingCards({ cards }) {
   let batchObj = {};
   for (let card of cards) {
