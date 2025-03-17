@@ -489,3 +489,9 @@ export async function getBrandingCardsInfo({period_from, period_to}) {
     const { rows, rowCount } = result
     return { rows }
 }
+export async function getFiredDebtorDriversInfo() {
+    const sql = fs.readFileSync('src/sql/get_fired_debtor_drivers.sql').toString();
+    const result = await pool.query(sql)
+    const { rows, rowCount } = result
+    return { rows }
+}
