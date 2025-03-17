@@ -6,16 +6,16 @@ const cronTime = '10 */2 * * *';
 const timeZone = 'Europe/Kiev';
 
 const job = CronJob.from({
-    cronTime,
-    timeZone,
-    onTick: async () => {
-        try {
-            await checkIsSidStatusWasUpdated();
-        } catch (error) {
-            console.error('Error occurred in onTick checkIsSidStatusWasUpdatedJob');
-            console.error({ time: new Date(), error });
-        }
+  cronTime,
+  timeZone,
+  onTick: async () => {
+    try {
+      await checkIsSidStatusWasUpdated();
+    } catch (error) {
+      console.error('Error occurred in onTick checkIsSidStatusWasUpdatedJob');
+      console.error({ time: new Date(), error });
     }
+  },
 });
 
 export const checkIsSidStatusWasUpdatedJob = job;

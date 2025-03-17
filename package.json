@@ -43,7 +43,8 @@
     "iomanualsync": "node -r dotenv/config src/web.api/inflow-outflow-drivers-report/modules/manual-sync.mjs",
     "createrefferalpayment": "ENV=TEST node -r dotenv/config src/bitrix/modules/create-refferal-payment.mjs",
     "repairandaccidentreport": "ENV=TEST node -r dotenv/config src/web.api/modules/save-repair-and-accident-cars.mjs",
-    "newworkingdrivers": "ENV=TEST node -r dotenv/config src/bitrix/modules/new-working-drivers.mjs"
+    "newworkingdrivers": "ENV=TEST node -r dotenv/config src/bitrix/modules/new-working-drivers.mjs",
+    "format": "prettier --write ."
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",
@@ -65,5 +66,8 @@
     "sqlite3": "^5.1.6",
     "ssh2": "^1.14.0",
     "telegraf": "^4.15.0"
+  },
+  "devDependencies": {
+    "prettier": "^3.5.3"
   }
 }
