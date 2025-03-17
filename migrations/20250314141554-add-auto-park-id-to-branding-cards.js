@@ -22,8 +22,12 @@ exports.up = function (db, callback) {
   db.runSql(sql, callback);
 };
 
-exports.down = function (db) {
-  return null;
+exports.down = function (db, callback) {
+  const sql = `
+    ALTER TABLE branding_cards
+    DROP COLUMN auto_park_id;
+  `;
+  db.runSql(sql, callback);
 };
 
 exports._meta = {
