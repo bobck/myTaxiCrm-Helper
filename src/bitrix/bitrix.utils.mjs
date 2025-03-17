@@ -1,30 +1,14 @@
 import { Bitrix, Method } from '@2bad/bitrix';
 import fs from 'fs';
 import { pool } from './../api/pool.mjs';
-const bitrix = Bitrix(
-  `https://${process.env.BITRIX_PORTAL_HOST}/rest/${process.env.BITRIX_USER_ID}/${process.env.BITRIX_API_KEY}/`
-);
-
+const bitrix = Bitrix(`https://${process.env.BITRIX_PORTAL_HOST}/rest/${process.env.BITRIX_USER_ID}/${process.env.BITRIX_API_KEY}/`);
 export async function getFreshFiredDrivers({ unixCreatedAt }) {
-  const sql = fs
-    .readFileSync('./src/sql/fired_out_drivers_for_bitrix.sql')
-    .toString();
-
+  const sql = fs.readFileSync('./src/sql/fired_out_drivers_for_bitrix.sql').toString();
   const result = await pool.query(sql, [unixCreatedAt]);
   const { rows, rowCount } = result;
   return { rows };
 }
-export async function createDeal({
-  title,
-  name,
-  phone,
-  cityId,
-  firedReason,
-  ridesCount,
-  assignedBy,
-  workedDays,
-  contactId,
-}) {
+export async function createDeal({ title, name, phone, cityId, firedReason, ridesCount, assignedBy, workedDays, contactId }) {
   const response = await bitrix.deals.create({
     TITLE: title,
     CATEGORY_ID: process.env.FIRED_CATEGORY_ID,
@@ -42,15 +26,12 @@ export async function createDeal({
   const { result } = response;
   return result;
 }
-
 export async function findContactByPhone({ phone }) {
   const response = await bitrix.call('crm.contact.list', {
     filter: { PHONE: phone },
     select: ['ID', 'NAME', 'PHONE'],
   });
-
   const { result } = response;
-
   if (result.length > 0) {
     const [firstContact] = result;
     return firstContact.ID;
@@ -58,10 +39,8 @@ export async function findContactByPhone({ phone }) {
     return null;
   }
 }
-
 export async function findContactsByPhones({ drivers }) {
   let batchArray = [];
-
   for (let driver of drivers) {
     const params = {
       entity_type: 'CONTACT',
@@ -74,10 +53,8 @@ export async function findContactsByPhones({ drivers }) {
 
   return result;
 }
-
 export async function findDealByContact({ drivers, category_id }) {
   let batchObj = {};
-
   for (let driver of drivers) {
     const contacts = JSON.parse(driver.contacts_array);
     for (let contact of contacts) {
@@ -92,13 +69,10 @@ export async function findDealByContact({ drivers, category_id }) {
   }
 
   const { result, time } = await bitrix.batch(batchObj);
-
   return result;
 }
-
 export async function updateDealsOpportunity({ drivers }) {
   let batchObj = {};
-
   for (let driver of drivers) {
     const { deal_id, auto_park_revenue } = driver;
     const params = {
@@ -111,7 +85,6 @@ export async function updateDealsOpportunity({ drivers }) {
   const { result, time } = await bitrix.batch(batchObj);
   return result;
 }
-
 export function chunkArray(array, chunkSize) {
   const result = [];
   for (let i = 0; i < array.length; i += chunkSize) {
@@ -119,7 +92,6 @@ export function chunkArray(array, chunkSize) {
   }
   return result;
 }
-
 export async function getLeadsByCreateDateAndAssigned({ date, assigned }) {
   const response = await bitrix.leads.list({
     filter: {
@@ -129,11 +101,9 @@ export async function getLeadsByCreateDateAndAssigned({ date, assigned }) {
     },
     select: ['ID', 'SOURCE_ID', 'UF_CRM_1688301710585', 'UF_CRM_1526673568'],
   });
-
   const { result } = response;
   return result;
 }
-
 export async function getLeadsByCreateDateAndSourceId({ date, sourceId }) {
   const response = await bitrix.leads.list({
     filter: {
@@ -143,11 +113,9 @@ export async function getLeadsByCreateDateAndSourceId({ date, sourceId }) {
     },
     select: ['ID', 'SOURCE_ID', 'UF_CRM_1688301710585', 'UF_CRM_1526673568'],
   });
-
   const { result } = response;
   return result;
 }
-
 export async function getDealsByInterviewDate({ date }) {
   const response = await bitrix.deals.list({
     filter: {
@@ -155,19 +123,11 @@ export async function getDealsByInterviewDate({ date }) {
       '<=UF_CRM_1608302466359': `${date}T23:59:59`,
       CATEGORY_ID: '3',
     },
-    select: [
-      'ID',
-      'SOURCE_ID',
-      'STAGE_ID',
-      'UF_CRM_1527615815',
-      'UF_CRM_1722203030883',
-    ],
+    select: ['ID', 'SOURCE_ID', 'STAGE_ID', 'UF_CRM_1527615815', 'UF_CRM_1722203030883'],
   });
-
   const { result } = response;
   return result;
 }
-
 export async function getDealsByClosedDate({ date }) {
   const response = await bitrix.deals.list({
     filter: {
@@ -176,19 +136,11 @@ export async function getDealsByClosedDate({ date }) {
       CATEGORY_ID: '3',
       CLOSED: 'Y',
     },
-    select: [
-      'ID',
-      'SOURCE_ID',
-      'STAGE_ID',
-      'UF_CRM_1527615815',
-      'UF_CRM_1725629985727',
-    ],
+    select: ['ID', 'SOURCE_ID', 'STAGE_ID', 'UF_CRM_1527615815', 'UF_CRM_1725629985727'],
   });
-
   const { result } = response;
   return result;
 }
-
 export async function getDealsRescheduled() {
   const response = await bitrix.deals.list({
     filter: {
@@ -197,11 +149,9 @@ export async function getDealsRescheduled() {
     },
     select: ['ID', 'SOURCE_ID', 'UF_CRM_1527615815'],
   });
-
   const { result } = response;
   return result;
 }
-
 export async function getManifoldDeals() {
   const response = await bitrix.deals.list({
     filter: {
@@ -209,14 +159,11 @@ export async function getManifoldDeals() {
     },
     select: ['*', 'UF_CRM_1527615815'],
   });
-
   const { result } = response;
   return result;
 }
-
 export async function getDeals({ ids }) {
   let batchObj = {};
-
   for (let id of ids) {
     const params = {
       ID: id,
@@ -227,10 +174,8 @@ export async function getDeals({ ids }) {
   const { result, time } = await bitrix.batch(batchObj);
   return result;
 }
-
 export async function getContacts({ ids }) {
   let batchObj = {};
-
   for (let id of ids) {
     const params = {
       ID: id,
@@ -241,7 +186,6 @@ export async function getContacts({ ids }) {
   const { result, time } = await bitrix.batch(batchObj);
   return result;
 }
-
 export async function deleteBitrixTaskById({ task_id }) {
   try {
     const response = await bitrix.call('tasks.task.delete', {
@@ -265,7 +209,6 @@ export async function completeBitrixTaskById({ task_id }) {
     const response = await bitrix.call('tasks.task.complete', {
       taskId: task_id,
     });
-
     const { result } = response;
     const { task } = result;
 
@@ -292,17 +235,7 @@ export async function addCommentToDeal({ deal_id, comment }) {
     console.error({ message: 'Unable to create comment', deal_id });
   }
 }
-
-export async function createPayment({
-  title,
-  stageId,
-  city,
-  contactId,
-  assignedBy,
-  referrerPhone,
-  referrerName,
-  referrerPosition,
-}) {
+export async function createPayment({ title, stageId, city, contactId, assignedBy, referrerPhone, referrerName, referrerPosition }) {
   const response = await bitrix.call('crm.item.add', {
     entityTypeId: '1102',
     'fields[title]': title,
@@ -339,12 +272,7 @@ export async function changeItemStage({ referralTypeId, id, stageId }) {
   });
 }
 
-export async function createNewWorkingDriverItem({
-  name,
-  stageId,
-  city,
-  phone,
-}) {
+export async function createNewWorkingDriverItem({ name, stageId, city, phone }) {
   const response = await bitrix.call('crm.item.add', {
     entityTypeId: '1110',
     'fields[title]': name,
@@ -373,12 +301,7 @@ export async function getDtpDealById({ id }) {
       ID: id,
       CATEGORY_ID: `19`,
     },
-    select: [
-      'ID',
-      'UF_CRM_1654076033',
-      'UF_CRM_1654075624',
-      'UF_CRM_1654075693',
-    ],
+    select: ['ID', 'UF_CRM_1654076033', 'UF_CRM_1654075624', 'UF_CRM_1654075693'],
   });
 
   const { result, total } = response;
@@ -422,17 +345,7 @@ export async function createBitrixDriverBrandingCards({ cards }) {
   let batchObj = {};
 
   for (let card of cards) {
-    const {
-      driver_id,
-      driver_name,
-      myTaxiDriverUrl,
-      phone,
-      stage_id,
-      cityBrandingId,
-      weekNumber,
-      year,
-      total_trips,
-    } = card;
+    const { driver_id, driver_name, myTaxiDriverUrl, phone, stage_id, cityBrandingId, weekNumber, year, total_trips } = card;
 
     const params = {
       entityTypeId: '1138',
