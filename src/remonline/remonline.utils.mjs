@@ -8,25 +8,15 @@ const db = await open({
   driver: sqlite3.Database,
 });
 
-export async function saveSidRow({
-  id,
-  auto_park_id,
-  created_at,
-  purpose,
-  comment,
-  sid_lable,
-}) {
-  const result = await db.run(
-    'INSERT INTO sids(id,auto_park_id,created_at,purpose,comment,sid_lable) VALUES (:id,:auto_park_id,:created_at,:purpose,:comment,:sid_lable)',
-    {
-      ':id': id,
-      ':auto_park_id': auto_park_id,
-      ':created_at': created_at,
-      ':purpose': purpose,
-      ':comment': comment,
-      ':sid_lable': sid_lable,
-    }
-  );
+export async function saveSidRow({ id, auto_park_id, created_at, purpose, comment, sid_lable }) {
+  const result = await db.run('INSERT INTO sids(id,auto_park_id,created_at,purpose,comment,sid_lable) VALUES (:id,:auto_park_id,:created_at,:purpose,:comment,:sid_lable)', {
+    ':id': id,
+    ':auto_park_id': auto_park_id,
+    ':created_at': created_at,
+    ':purpose': purpose,
+    ':comment': comment,
+    ':sid_lable': sid_lable,
+  });
   return { result };
 }
 
@@ -45,16 +35,9 @@ export async function getOrders({ idLabels, ids }, _page = 1, _orders = []) {
     }
   }
 
-  const response = await fetch(
-    `${process.env.REMONLINE_API}/order/?token=${process.env.REMONLINE_API_TOKEN}&page=${_page}${idLabelsUrl}${idUrl}`
-  );
+  const response = await fetch(`${process.env.REMONLINE_API}/order/?token=${process.env.REMONLINE_API_TOKEN}&page=${_page}${idLabelsUrl}${idUrl}`);
 
-  if (
-    response.status == 414 ||
-    response.status == 503 ||
-    response.status == 502 ||
-    response.status == 504
-  ) {
+  if (response.status == 414 || response.status == 503 || response.status == 502 || response.status == 504) {
     throw await response.text();
   }
 
@@ -149,26 +132,15 @@ export async function changeOrderStatus({ id, statusId }) {
   return { changeOrderStatusData };
 }
 
-export async function getCashboxTransactions(
-  { createdAt, cashboxId },
-  _page = 1,
-  _transactions = []
-) {
+export async function getCashboxTransactions({ createdAt, cashboxId }, _page = 1, _transactions = []) {
   let createdAtUrl = '';
   if (createdAt) {
     createdAtUrl += `&created_at[]=${createdAt}`;
   }
 
-  const response = await fetch(
-    `${process.env.REMONLINE_API}/cashbox/report/${cashboxId}?token=${process.env.REMONLINE_API_TOKEN}&page=${_page}${createdAtUrl}&sort_dir=asc`
-  );
+  const response = await fetch(`${process.env.REMONLINE_API}/cashbox/report/${cashboxId}?token=${process.env.REMONLINE_API_TOKEN}&page=${_page}${createdAtUrl}&sort_dir=asc`);
 
-  if (
-    response.status == 414 ||
-    response.status == 503 ||
-    response.status == 502 ||
-    response.status == 504
-  ) {
+  if (response.status == 414 || response.status == 503 || response.status == 502 || response.status == 504) {
     throw await response.text();
   }
 
@@ -178,11 +150,7 @@ export async function getCashboxTransactions(
       message: 'Get new Auth',
     });
     await remonlineTokenToEnv(true);
-    return await getCashboxTransactions(
-      { createdAt, cashboxId },
-      _page,
-      _transactions
-    );
+    return await getCashboxTransactions({ createdAt, cashboxId }, _page, _transactions);
   }
 
   try {
@@ -211,11 +179,7 @@ export async function getCashboxTransactions(
     _transactions.push(...transactions);
 
     if (leftTofinish > 0) {
-      return await getCashboxTransactions(
-        { createdAt, cashboxId },
-        parseInt(page) + 1,
-        _transactions
-      );
+      return await getCashboxTransactions({ createdAt, cashboxId }, parseInt(page) + 1, _transactions);
     }
 
     return {
