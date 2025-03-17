@@ -1,15 +1,9 @@
-import { getBrandingCardsInfo, getFiredDebtorDriversInfo } from "../../web.api/web.api.utlites.mjs";
+import { getFiredDebtorDriversInfo } from "../../web.api/web.api.utlites.mjs";
 import { DateTime } from "luxon";
-import {
-    createBrandingProcess,
-    getCrmBrandingCardByDriverId,
-    insertBrandingCard,
-} from "../bitrix.queries.mjs";
+import { createBrandingProcess, getCrmBrandingCardByDriverId, insertBrandingCard } from "../bitrix.queries.mjs";
 import { createDriverBrandingCardItem } from "../bitrix.utils.mjs";
 import { cityListWithAssignedBy as cityList } from "../bitrix.constants.mjs";
 import { openSShTunnel } from "../../../ssh.mjs";
-
-
 
 function computeBrandingCardStage(total_trips) {
     let trips = Number(total_trips);
@@ -29,21 +23,20 @@ function getCityBrandingId(auto_park_id) {
 }
 
 export async function createFiredDebtorDriversCards() {
-
     const { rows } = await getFiredDebtorDriversInfo();
 
     if (rows.length === 0) {
         console.error("No rows found for fired debtor drivers found.");
         return;
     }
-    console.log('rows.length: ',rows.length);
+    console.log("rows.length: ", rows.length);
     for (const [index, row] of rows.entries()) {
-        if (process.env.ENV==="TEST" && index === Number(process.env.DEBTOR_DRIVERS_CARDS_COUNT=4)) {
+        if (process.env.ENV === "TEST" && index === Number((process.env.DEBTOR_DRIVERS_CARDS_COUNT = 4))) {
             return;
         }
 
-        const {}=row;
-        console.log(index,row)
+        const {} = row;
+        console.log(index, row);
 
         // const dbcard = await getCrmBrandingCardByDriverId({
         //     driver_id,
@@ -75,14 +68,11 @@ export async function createFiredDebtorDriversCards() {
         //     ...bitrixResp,
         //     branding_process_id:brandingProcess.id
         // });
-
-
     }
 }
 
-if(process.env.ENV==="TEST"){
-    console.log(`testing fired debtor drivers creation\ncards count :${process.env.DEBTOR_DRIVERS_CARDS_COUNT=4}`);
-    await openSShTunnel
+if (process.env.ENV === "TEST") {
+    console.log(`testing fired debtor drivers creation\ncards count :${(process.env.DEBTOR_DRIVERS_CARDS_COUNT = 4)}`);
+    await openSShTunnel;
     await createFiredDebtorDriversCards();
-
 }
