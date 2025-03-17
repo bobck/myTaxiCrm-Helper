@@ -2,16 +2,30 @@ import { Bitrix, Method } from '@2bad/bitrix';
 import fs from 'fs';
 import { pool } from './../api/pool.mjs';
 import { cityListWithAssignedBy as cityList } from './bitrix.constants.mjs';
-const bitrix = Bitrix(`https://${process.env.BITRIX_PORTAL_HOST}/rest/${process.env.BITRIX_USER_ID}/${process.env.BITRIX_API_KEY}/`);
+const bitrix = Bitrix(
+  `https://${process.env.BITRIX_PORTAL_HOST}/rest/${process.env.BITRIX_USER_ID}/${process.env.BITRIX_API_KEY}/`
+);
 
 export async function getFreshFiredDrivers({ unixCreatedAt }) {
-  const sql = fs.readFileSync('./src/sql/fired_out_drivers_for_bitrix.sql').toString();
+  const sql = fs
+    .readFileSync('./src/sql/fired_out_drivers_for_bitrix.sql')
+    .toString();
 
   const result = await pool.query(sql, [unixCreatedAt]);
   const { rows, rowCount } = result;
   return { rows };
 }
-export async function createDeal({ title, name, phone, cityId, firedReason, ridesCount, assignedBy, workedDays, contactId }) {
+export async function createDeal({
+  title,
+  name,
+  phone,
+  cityId,
+  firedReason,
+  ridesCount,
+  assignedBy,
+  workedDays,
+  contactId,
+}) {
   const response = await bitrix.deals.create({
     TITLE: title,
     CATEGORY_ID: process.env.FIRED_CATEGORY_ID,
@@ -142,7 +156,13 @@ export async function getDealsByInterviewDate({ date }) {
       '<=UF_CRM_1608302466359': `${date}T23:59:59`,
       CATEGORY_ID: '3',
     },
-    select: ['ID', 'SOURCE_ID', 'STAGE_ID', 'UF_CRM_1527615815', 'UF_CRM_1722203030883'],
+    select: [
+      'ID',
+      'SOURCE_ID',
+      'STAGE_ID',
+      'UF_CRM_1527615815',
+      'UF_CRM_1722203030883',
+    ],
   });
 
   const { result } = response;
@@ -157,7 +177,13 @@ export async function getDealsByClosedDate({ date }) {
       CATEGORY_ID: '3',
       CLOSED: 'Y',
     },
-    select: ['ID', 'SOURCE_ID', 'STAGE_ID', 'UF_CRM_1527615815', 'UF_CRM_1725629985727'],
+    select: [
+      'ID',
+      'SOURCE_ID',
+      'STAGE_ID',
+      'UF_CRM_1527615815',
+      'UF_CRM_1725629985727',
+    ],
   });
 
   const { result } = response;
@@ -268,7 +294,16 @@ export async function addCommentToDeal({ deal_id, comment }) {
   }
 }
 
-export async function createPayment({ title, stageId, city, contactId, assignedBy, referrerPhone, referrerName, referrerPosition }) {
+export async function createPayment({
+  title,
+  stageId,
+  city,
+  contactId,
+  assignedBy,
+  referrerPhone,
+  referrerName,
+  referrerPosition,
+}) {
   const response = await bitrix.call('crm.item.add', {
     entityTypeId: '1102',
     'fields[title]': title,
@@ -305,7 +340,12 @@ export async function changeItemStage({ referralTypeId, id, stageId }) {
   });
 }
 
-export async function createNewWorkingDriverItem({ name, stageId, city, phone }) {
+export async function createNewWorkingDriverItem({
+  name,
+  stageId,
+  city,
+  phone,
+}) {
   const response = await bitrix.call('crm.item.add', {
     entityTypeId: '1110',
     'fields[title]': name,
@@ -334,7 +374,12 @@ export async function getDtpDealById({ id }) {
       ID: id,
       CATEGORY_ID: `19`,
     },
-    select: ['ID', 'UF_CRM_1654076033', 'UF_CRM_1654075624', 'UF_CRM_1654075693'],
+    select: [
+      'ID',
+      'UF_CRM_1654076033',
+      'UF_CRM_1654075624',
+      'UF_CRM_1654075693',
+    ],
   });
 
   const { result, total } = response;
@@ -378,7 +423,17 @@ export async function createBitrixDriverBrandingCards({ cards }) {
   let batchObj = {};
 
   for (let card of cards) {
-    const { driver_id, driver_name, myTaxiDriverUrl, phone, stage_id, cityBrandingId, weekNumber, year, total_trips } = card;
+    const {
+      driver_id,
+      driver_name,
+      myTaxiDriverUrl,
+      phone,
+      stage_id,
+      cityBrandingId,
+      weekNumber,
+      year,
+      total_trips,
+    } = card;
 
     const params = {
       entityTypeId: '1138',
