@@ -65,15 +65,13 @@ export const createBoltDriversToBan = async () => {
     const cityId = getCityBrandingId(auto_park_id);
     const isDebtor = Number(driver_balance) < 0;
     const debt = isDebtor ? String(-1 * driver_balance) : '0';
-    const card = {
-      driver_id,
+    const bitrixResp = await createBanBoltDriverCardItem({
       full_name: checkedName,
       bolt_id,
       cityId,
       debt,
       isDebtor,
-    };
-    const bitrixResp = await createBanBoltDriverCardItem(card);
+    });
     const { bitrix_card_id } = bitrixResp;
     await insertBoltDriverBanReq({ bitrix_card_id, debt, driver_id });
   }

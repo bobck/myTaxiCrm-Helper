@@ -425,7 +425,7 @@ export async function updateDealPayOff({ id, ufCrmField, amount }) {
   return { result };
 }
 export async function createBanBoltDriverCardItem(card) {
-  const { driver_id, full_name, cityId, bolt_id, isDebtor, debt } = card;
+  const { full_name, cityId, bolt_id, isDebtor, debt } = card;
 
   const props = {
     entityTypeId: '1132',
@@ -446,7 +446,6 @@ export async function createBanBoltDriverCardItem(card) {
   //
   return {
     bitrix_card_id: id,
-    driver_id,
     debt,
   };
 }
