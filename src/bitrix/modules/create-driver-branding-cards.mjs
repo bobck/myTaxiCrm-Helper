@@ -1,52 +1,8 @@
 import { getBrandingCardsInfo } from '../../web.api/web.api.utlites.mjs';
-import { DateTime } from 'luxon';
-import {
-  createBrandingProcess,
-  getCrmBrandingCardByDriverId,
-  insertBrandingCard,
-} from '../bitrix.queries.mjs';
-import {
-  chunkArray,
-  createBitrixDriverBrandingCards,
-  getCityBrandingId,
-} from '../bitrix.utils.mjs';
+import { createBrandingProcess, getCrmBrandingCardByDriverId, insertBrandingCard } from '../bitrix.queries.mjs';
+import { chunkArray, createBitrixDriverBrandingCards } from '../bitrix.utils.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
-
-export function computePeriodBounds() {
-  const today = DateTime.local().startOf('day');
-
-  const lowerBound = today.minus({ days: today.weekday });
-
-  const upperBound = lowerBound.plus({ days: 7 });
-
-  // Return the dates formatted as ISO strings (YYYY-MM-DD) for PostgreSQL
-  return {
-    lowerBound,
-    upperBound,
-  };
-}
-
-function computeBrandingCardStage({ total_trips, isKyivOrLviv }) {
-  const trips = Number(total_trips);
-  const today = DateTime.local().startOf('day');
-  const maxGoalGap = 30 - (today.weekday - 5) * 10;
-  if (isNaN(trips)) {
-    console.error('Trips must be a number');
-  }
-  let GOAL = 60;
-
-  if (isKyivOrLviv) {
-    GOAL = 90;
-  }
-  const todaysTripsOptimalLowerBound = GOAL - maxGoalGap;
-  if (trips >= GOAL) {
-    return 'PREPARATION';
-  } else if (trips < todaysTripsOptimalLowerBound) {
-    return 'CLIENT';
-  } else {
-    return 'NEW';
-  }
-}
+import { computeBrandingCardInProgressStage, computePeriodBounds, getCityBrandingId, isHighLoadedCityCheck } from '../bitrix.business-entity.mjs';
 
 export async function createDriverBrandingCards() {
   const bounds = computePeriodBounds();
@@ -56,13 +12,8 @@ export async function createDriverBrandingCards() {
     period_from: bounds.lowerBound.toISODate(),
     period_to: bounds.upperBound.toISODate(),
   });
-  const {
-    period_from,
-    period_to,
-    id: branding_process_id,
-    weekNumber,
-    year,
-  } = brandingProcess;
+  const { period_from, period_to, id: branding_process_id, weekNumber, year } = brandingProcess;
+  console.log(brandingProcess);
   const { rows } = await getBrandingCardsInfo({ period_from, period_to });
 
   if (rows.length === 0) {
@@ -72,10 +23,7 @@ export async function createDriverBrandingCards() {
 
   const processedCards = [];
   for (const [index, row] of rows.entries()) {
-    if (
-      process.env.ENV === 'TEST' &&
-      index === Number(process.env.BRANDING_CARDS_COUNT)
-    ) {
+    if (process.env.ENV === 'TEST' && index === Number(process.env.BRANDING_CARDS_COUNT)) {
       break;
     }
 
@@ -86,14 +34,13 @@ export async function createDriverBrandingCards() {
       branding_process_id,
     });
     if (dbcard) {
-      console.error(
-        `Present driver card while creating driver_id:${driver_id}, year:${year}, weekNumber:${weekNumber}`
-      );
+      console.error(`Present driver card while creating driver_id:${driver_id}, year:${year}, weekNumber:${weekNumber}`);
       continue;
     }
 
-    const { cityBrandingId, isKyivOrLviv } = getCityBrandingId(auto_park_id);
-    const stage_id = `DT1138_62:${computeBrandingCardStage({ total_trips, isKyivOrLviv })}`;
+    const { cityBrandingId } = getCityBrandingId(auto_park_id);
+    const isHighLoadedCity = isHighLoadedCityCheck(auto_park_id);
+    const stage_id = `DT1138_62:${computeBrandingCardInProgressStage({ total_trips, isHighLoadedCity })}`;
     const myTaxiDriverUrl = `https://fleets.mytaxicrm.com/${auto_park_id}/drivers/${driver_id}`;
     const card = {
       driver_id,
@@ -109,10 +56,7 @@ export async function createDriverBrandingCards() {
     };
     processedCards.push(card);
   }
-  const chunkedProcessedCards = chunkArray(
-    processedCards,
-    Number(process.env.CHUNK_SIZE) || 7
-  );
+  const chunkedProcessedCards = chunkArray(processedCards, Number(process.env.CHUNK_SIZE) || 7);
   for (const [index, chunk] of chunkedProcessedCards.entries()) {
     const bitrixRespObj = await createBitrixDriverBrandingCards({
       cards: chunk,
@@ -129,8 +73,7 @@ export async function createDriverBrandingCards() {
       });
     }
     for (const respElement of handledResponseArr) {
-      const { driver_id, total_trips, bitrix_card_id, auto_park_id } =
-        respElement;
+      const { driver_id, total_trips, bitrix_card_id, auto_park_id } = respElement;
       await insertBrandingCard({
         driver_id,
         total_trips,
@@ -141,15 +84,11 @@ export async function createDriverBrandingCards() {
     }
   }
 
-  console.log(
-    `${processedCards.length} branding cards creation has been finished.`
-  );
+  console.log(`${processedCards.length} branding cards creation has been finished.`);
 }
 
 if (process.env.ENV === 'TEST') {
-  console.log(
-    `testing driver branding creation\ncards count: ${process.env.BRANDING_CARDS_COUNT}\nchunk size: ${process.env.CHUNK_SIZE}`
-  );
+  console.log(`testing driver branding creation\ncards count: ${process.env.BRANDING_CARDS_COUNT}\nchunk size: ${process.env.CHUNK_SIZE}`);
   await openSShTunnel;
   await createDriverBrandingCards();
 }

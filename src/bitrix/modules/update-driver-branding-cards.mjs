@@ -1,53 +1,17 @@
 import { DateTime } from 'luxon';
-import {
-  getBrandingProcessByWeekNumber,
-  getCrmBrandingCardByDriverId,
-  updateBrandingCardByDriverId,
-} from '../bitrix.queries.mjs';
-import {
-  chunkArray,
-  getCityBrandingId,
-  updateBitrixDriverBrandingCards,
-} from '../bitrix.utils.mjs';
+import { getBrandingProcessByWeekNumber, getCrmBrandingCardByDriverId, updateBrandingCardByDriverId } from '../bitrix.queries.mjs';
+import { chunkArray, updateBitrixDriverBrandingCards } from '../bitrix.utils.mjs';
 import { getBrandingCardsInfo } from '../../web.api/web.api.utlites.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
-import { cityListWithAssignedBy as cityList } from '../bitrix.constants.mjs';
+import { computeBrandingCardInProgressStage, isHighLoadedCityCheck } from '../bitrix.business-entity.mjs';
 
-function computeBrandingCardStage({ total_trips, auto_park_id }) {
-  const trips = Number(total_trips);
-  const today = DateTime.local().startOf('day');
-  const maxGoalGap = 30 - (today.weekday - 5) * 10;
-  const { isKyivOrLviv } = getCityBrandingId(auto_park_id);
-  if (isNaN(trips)) {
-    console.error('Trips must be a number');
-  }
-  let GOAL = 60;
-
-  if (isKyivOrLviv) {
-    GOAL = 90;
-  }
-  const todaysTripsOptimalLowerBound = GOAL - maxGoalGap;
-  if (trips >= GOAL) {
-    return 'PREPARATION';
-  } else if (trips < todaysTripsOptimalLowerBound) {
-    return 'CLIENT';
-  } else {
-    return 'NEW';
-  }
-}
 export async function updateDriverBrandingCards() {
-  const today = DateTime.local().startOf('day');
+  const today = DateTime.local().startOf('day').minus({ days: 1 });
   const brandingProcess = await getBrandingProcessByWeekNumber({
     weekNumber: today.weekNumber,
     year: today.year,
   });
-  const {
-    period_from,
-    period_to,
-    weekNumber,
-    year,
-    id: branding_process_id,
-  } = brandingProcess;
+  const { period_from, period_to, weekNumber, year, id: branding_process_id } = brandingProcess;
   const { rows } = await getBrandingCardsInfo({
     period_from,
     period_to,
@@ -55,10 +19,7 @@ export async function updateDriverBrandingCards() {
   const processedCards = [];
 
   for (const [index, row] of rows.entries()) {
-    if (
-      process.env.ENV === 'TEST' &&
-      index === Number(process.env.BRANDING_CARDS_COUNT)
-    ) {
+    if (process.env.ENV === 'TEST' && index === Number(process.env.BRANDING_CARDS_COUNT)) {
       break;
     }
     const { driver_id, total_trips, auto_park_id } = row;
@@ -66,17 +27,16 @@ export async function updateDriverBrandingCards() {
       driver_id,
       branding_process_id,
     });
+
     if (!dbcard) {
-      console.error(
-        `Absent driver card while updating driver_id: ${driver_id}, year:${year}, weekNumber:${weekNumber} `
-      );
+      console.error(`Absent driver card while updating driver_id: ${driver_id}, year:${year}, weekNumber:${weekNumber} `);
       continue;
     }
     if (Number(dbcard.total_trips) >= Number(total_trips)) {
       continue;
     }
-
-    const stage_id = `DT1138_62:${computeBrandingCardStage({ total_trips, auto_park_id })}`;
+    const isHighLoadedCity = isHighLoadedCityCheck(auto_park_id);
+    const stage_id = `DT1138_62:${computeBrandingCardInProgressStage({ total_trips, isHighLoadedCity })}`;
     const card = {
       driver_id,
       bitrix_card_id: dbcard.bitrix_card_id,
@@ -86,10 +46,7 @@ export async function updateDriverBrandingCards() {
     processedCards.push(card);
   }
 
-  const chunkedProcessedCards = chunkArray(
-    processedCards,
-    Number(process.env.CHUNK_SIZE) || 7
-  );
+  const chunkedProcessedCards = chunkArray(processedCards, Number(process.env.CHUNK_SIZE) || 7);
 
   for (const [index, chunk] of chunkedProcessedCards.entries()) {
     const bitrixRespObj = await updateBitrixDriverBrandingCards({
@@ -117,14 +74,10 @@ export async function updateDriverBrandingCards() {
     }
   }
 
-  console.log(
-    `${processedCards.length} branding cards updating has been finished.`
-  );
+  console.log(`${processedCards.length} branding cards updating has been finished.`);
 }
 if (process.env.ENV === 'TEST') {
-  console.log(
-    `testing driver branding updating\ncards count: ${process.env.BRANDING_CARDS_COUNT}\nchunk size: ${process.env.CHUNK_SIZE}`
-  );
+  console.log(`testing driver branding updating\ncards count: ${process.env.BRANDING_CARDS_COUNT}\nchunk size: ${process.env.CHUNK_SIZE}`);
   await openSShTunnel;
   await updateDriverBrandingCards();
 }

@@ -6,30 +6,9 @@ import {
   resolveBrandingProcessById,
   updateBrandingCardByDriverId,
 } from '../bitrix.queries.mjs';
-import {
-  chunkArray,
-  getCityBrandingId,
-  updateBitrixDriverBrandingCards,
-} from '../bitrix.utils.mjs';
+import { chunkArray, updateBitrixDriverBrandingCards } from '../bitrix.utils.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
-
-function computeBrandingCardStage({ total_trips, auto_park_id }) {
-  const trips = Number(total_trips);
-  const { isKyivOrLviv } = getCityBrandingId(auto_park_id);
-  if (isNaN(trips)) {
-    console.error('Trips must be a number');
-  }
-  let GOAL = 60;
-
-  if (isKyivOrLviv) {
-    GOAL = 90;
-  }
-  if (trips >= GOAL) {
-    return 'SUCCESS';
-  } else {
-    return 'FAIL';
-  }
-}
+import { computeBrandingCardFinishedStage, isHighLoadedCityCheck } from '../bitrix.business-entity.mjs';
 
 export async function moveDriverBrandingCards() {
   const yesterday = DateTime.local().startOf('day').minus({ days: 1 });
@@ -37,13 +16,7 @@ export async function moveDriverBrandingCards() {
     weekNumber: yesterday.weekNumber,
     year: yesterday.year,
   });
-  const {
-    period_from,
-    period_to,
-    weekNumber,
-    year,
-    id: branding_process_id,
-  } = brandingProcess;
+  const { period_from, period_to, weekNumber, year, id: branding_process_id } = brandingProcess;
   const { rows } = await getBrandingCardsInfo({
     period_from,
     period_to,
@@ -51,10 +24,7 @@ export async function moveDriverBrandingCards() {
   const processedCards = [];
 
   for (const [index, row] of rows.entries()) {
-    if (
-      process.env.ENV === 'TEST' &&
-      index === Number(process.env.BRANDING_CARDS_COUNT)
-    ) {
+    if (process.env.ENV === 'TEST' && index === Number(process.env.BRANDING_CARDS_COUNT)) {
       break;
     }
     const { driver_id, total_trips, auto_park_id } = row;
@@ -64,13 +34,11 @@ export async function moveDriverBrandingCards() {
       branding_process_id,
     });
     if (!dbcard) {
-      console.error(
-        `Absent driver card while updating driver_id: ${driver_id}, year:${year}, weekNumber:${weekNumber} `
-      );
+      console.error(`Absent driver card while updating driver_id: ${driver_id}, year:${year}, weekNumber:${weekNumber} `);
       continue;
     }
-
-    const stage_id = `DT1138_62:${computeBrandingCardStage({ total_trips, auto_park_id })}`;
+    const isHighLoadedCity = isHighLoadedCityCheck(auto_park_id);
+    const stage_id = `DT1138_62:${computeBrandingCardFinishedStage({ total_trips, isHighLoadedCity })}`;
     const card = {
       driver_id,
       bitrix_card_id: dbcard.bitrix_card_id,
@@ -80,10 +48,7 @@ export async function moveDriverBrandingCards() {
     processedCards.push(card);
   }
 
-  const chunkedProcessedCards = chunkArray(
-    processedCards,
-    Number(process.env.CHUNK_SIZE) || 7
-  );
+  const chunkedProcessedCards = chunkArray(processedCards, Number(process.env.CHUNK_SIZE) || 7);
 
   for (const [index, chunk] of chunkedProcessedCards.entries()) {
     const bitrixRespObj = await updateBitrixDriverBrandingCards({
@@ -110,16 +75,12 @@ export async function moveDriverBrandingCards() {
       });
     }
   }
-  console.log(
-    `${processedCards.length} branding cards updating has been finished.`
-  );
+  console.log(`${processedCards.length} branding cards updating has been finished.`);
 
   const resolveResp = await resolveBrandingProcessById(brandingProcess.id);
 }
 if (process.env.ENV === 'TEST') {
-  console.log(
-    `testing driver branding movement\ncards count :${process.env.BRANDING_CARDS_COUNT}`
-  );
+  console.log(`testing driver branding movement\ncards count :${process.env.BRANDING_CARDS_COUNT}`);
   await openSShTunnel;
   await moveDriverBrandingCards();
 }
