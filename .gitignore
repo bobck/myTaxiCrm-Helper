@@ -1,5 +1,6 @@
 /.DS_Store
 /.env
+.test/
 .idea/
 /id_rsa
 /node_modules
