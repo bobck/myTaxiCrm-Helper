@@ -49,6 +49,7 @@ SELECT
     cs_current_week.balance AS current_week_balance,
     cs_current_week.total_deposit AS current_week_total_deposit,
     cs_current_week.total_debt AS current_week_total_debt,
+    dcbr.rules as rules,
     (fd.fire_date::date)::TEXT AS fire_date
 FROM
     fired_drivers fd
@@ -72,6 +73,7 @@ FROM
                 current_date
                                        )
             AND cs_current_week.driver_id = fd.id
+        LEFT JOIN driver_cash_block_rules dcbr on fd.id=dcbr.driver_id
 WHERE
     (
      cs_current_week.balance+cs_current_week.total_deposit<0
