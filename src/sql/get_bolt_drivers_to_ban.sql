@@ -21,7 +21,7 @@ FROM drivers d
         ON cs.driver_id= d.id
         AND cs.week= $2
         AND cs.year= $3
-
+WHERE d.company_id = '4ea03592-9278-4ede-adf8-f7345a856893'
 GROUP BY
     d.id, d.full_name,dti.integration_id, d.auto_park_id,(COALESCE(cs.total_payable_to_driver, 0) - COALESCE(cs.total_debt, 0))
 HAVING SUM(drc.total_trips)=0

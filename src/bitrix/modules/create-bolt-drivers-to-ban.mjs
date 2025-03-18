@@ -34,7 +34,6 @@ function computeQueryParams() {
 export const createBoltDriversToBan = async () => {
   const queryParams = computeQueryParams();
   const { rows } = await getBoltDriversToBan(queryParams);
-
   if (rows.length === 0) {
     console.error('No any drivers to ban found.');
     return;
