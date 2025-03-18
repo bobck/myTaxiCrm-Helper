@@ -44,9 +44,9 @@ calculated_statements_per_c AS (
 ,handled_cash_block_rules AS (
     SELECT
         fd.id AS driver_id,
-        COALESCE((SELECT (rule->>'isEnabled')::boolean FROM jsonb_array_elements(dcbr.rules) AS rule WHERE rule->>'target' = 'BALANCE'), false) AS isBalance_Enabled,
+        COALESCE((SELECT (rule->>'isEnabled')::boolean FROM jsonb_array_elements(dcbr.rules) AS rule WHERE rule->>'target' = 'BALANCE'), false) AS is_balance_enabled,
         COALESCE((SELECT (rule->>'activationValue')::numeric FROM jsonb_array_elements(dcbr.rules) AS rule WHERE rule->>'target' = 'BALANCE'), NULL) AS balance_activation_value,
-        COALESCE((SELECT (rule->>'isEnabled')::boolean FROM jsonb_array_elements(dcbr.rules) AS rule WHERE rule->>'target' = 'DEPOSIT'), false) AS isDeposit_Enabled,
+        COALESCE((SELECT (rule->>'isEnabled')::boolean FROM jsonb_array_elements(dcbr.rules) AS rule WHERE rule->>'target' = 'DEPOSIT'), false) AS is_deposit_enabled,
         COALESCE((SELECT (rule->>'activationValue')::numeric FROM jsonb_array_elements(dcbr.rules) AS rule WHERE rule->>'target' = 'DEPOSIT'), NULL) AS deposit_activation_value
     FROM driver_cash_block_rules dcbr
              RIGHT JOIN fired_drivers fd ON dcbr.driver_id = fd.id
@@ -62,9 +62,9 @@ SELECT
     cs_current_week.total_deposit AS current_week_total_deposit,
     cs_current_week.total_debt AS current_week_total_debt,
     (fd.fire_date::date)::TEXT AS fire_date,
-    hcbr.isBalance_Enabled,
+    hcbr.is_balance_enabled,
     hcbr.balance_activation_value,
-    hcbr.isDeposit_Enabled,
+    hcbr.is_deposit_enabled ,
     hcbr.deposit_activation_value
 FROM
     fired_drivers fd
