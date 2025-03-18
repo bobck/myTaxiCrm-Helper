@@ -17,9 +17,7 @@ import {
 } from '../web.api.queries.mjs';
 
 export async function createCRMApplicationsFromRemonlineTransaction() {
-  console.log({
-    message: 'createCRMApplicationsFromRemonlineTransaction',
-  });
+  console.log({ message: 'createCRMApplicationsFromRemonlineTransaction' });
 
   const cashboxes = await getCaboxesWithCrmMapping();
 
@@ -140,10 +138,7 @@ export async function createCRMApplicationsFromRemonlineTransaction() {
 
           try {
             const { payApplication: payApplicationResponse } =
-              await payApplication({
-                applicationId,
-                autoParkId,
-              });
+              await payApplication({ applicationId, autoParkId });
             const { success } = payApplicationResponse;
             await updateSavedCashlessApplicationId({
               id: applicationId,

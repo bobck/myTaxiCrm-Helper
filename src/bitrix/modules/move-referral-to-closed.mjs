@@ -26,9 +26,7 @@ export async function moveReferralToClosed() {
 
 export async function moveReferralProcentageRewardToClosed() {
   const { finishedRefferalsProcentageReward } =
-    await getFinishedRefferalsProcentageReward({
-      procentageRewardAutoParkIds,
-    });
+    await getFinishedRefferalsProcentageReward({ procentageRewardAutoParkIds });
 
   for (let referral of finishedRefferalsProcentageReward) {
     const { referral_id } = referral;

@@ -13,10 +13,7 @@ const job = CronJob.from({
       await checkDtpDealIdIsValid();
     } catch (error) {
       console.error('Error occurred in onTick on checkDtpDealIdIsValid');
-      console.error({
-        time: new Date(),
-        error,
-      });
+      console.error({ time: new Date(), error });
     }
   },
 });

@@ -24,10 +24,7 @@ const job = CronJob.from({
       saveFiredByDriversLogs(manualDate);
     } catch (error) {
       console.error('Error occurred in onTick upToDateCurrentDateGDCReport');
-      console.error({
-        time: new Date(),
-        error,
-      });
+      console.error({ time: new Date(), error });
     }
   },
 });

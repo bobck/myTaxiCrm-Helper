@@ -37,10 +37,7 @@ if (process.env.ENV == 'RESET_TABLE') {
 
 if (process.env.ENV == 'REWRITE_REPORT') {
   const date = process.env.REPORT_DATE;
-  console.log({
-    env: 'REWRITE_REPORT',
-    date,
-  });
+  console.log({ env: 'REWRITE_REPORT', date });
 
   const query = `delete from \`${process.env.BQ_DATASET_ID}.${'drivers_with_fuel_card_report'}\` where date = '${date}'`;
   await bigquery

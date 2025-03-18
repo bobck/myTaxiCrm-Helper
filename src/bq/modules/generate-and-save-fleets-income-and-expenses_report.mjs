@@ -13,9 +13,7 @@ export async function generateAndSaveFleetsIncomAndExpensesReport() {
 
   const now = DateTime.now();
 
-  const pastDate = now.minus({
-    weeks: 8,
-  });
+  const pastDate = now.minus({ weeks: 8 });
 
   const week = pastDate.weekNumber;
   const year = pastDate.year;

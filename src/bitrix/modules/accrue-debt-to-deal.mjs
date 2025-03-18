@@ -29,9 +29,7 @@ export async function accrueDebtToDeal() {
       sum,
     } = transactions;
 
-    const { result: dealArray } = await getDtpDealById({
-      id: dtp_deal_id,
-    });
+    const { result: dealArray } = await getDtpDealById({ id: dtp_deal_id });
     const [deal] = dealArray;
 
     const {
@@ -122,13 +120,8 @@ async function forcedPayOffToDeal({
 Посилання на карту водія MyTaxiCRM:
 https://fleets.mytaxicrm.com/${auto_park_id}/drivers/${driver_id}`;
 
-  await addCommentToDtpDeal({
-    id: dtp_deal_id,
-    comment,
-  });
-  await markDtpDebtTransactionsAsSync({
-    human_id,
-  });
+  await addCommentToDtpDeal({ id: dtp_deal_id, comment });
+  await markDtpDebtTransactionsAsSync({ human_id });
 }
 
 async function voluntaryPayOffToDeal({
@@ -168,13 +161,8 @@ async function voluntaryPayOffToDeal({
 Посилання на карту водія MyTaxiCRM:
 https://fleets.mytaxicrm.com/${auto_park_id}/drivers/${driver_id}`;
 
-  await addCommentToDtpDeal({
-    id: dtp_deal_id,
-    comment,
-  });
-  await markDtpDebtTransactionsAsSync({
-    human_id,
-  });
+  await addCommentToDtpDeal({ id: dtp_deal_id, comment });
+  await markDtpDebtTransactionsAsSync({ human_id });
 }
 
 async function accruedDebtToDeal({
@@ -212,13 +200,8 @@ async function accruedDebtToDeal({
 Посилання на карту водія MyTaxiCRM:
 https://fleets.mytaxicrm.com/${auto_park_id}/drivers/${driver_id}`;
 
-  await addCommentToDtpDeal({
-    id: dtp_deal_id,
-    comment,
-  });
-  await markDtpDebtTransactionsAsSync({
-    human_id,
-  });
+  await addCommentToDtpDeal({ id: dtp_deal_id, comment });
+  await markDtpDebtTransactionsAsSync({ human_id });
 }
 
 if (process.env.ENV == 'TEST') {

@@ -40,6 +40,12 @@ async function makeCRMRequestWithRetry({ body }) {
         body: JSON.stringify(body),
       });
 
+      if (!response.ok) {
+        throw new Error(
+          `makeCRMRequestWithRetry HTTP error! status: ${response.status}`
+        );
+      }
+
       const json = await response.json();
 
       const { errors, data } = json;

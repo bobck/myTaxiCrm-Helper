@@ -13,10 +13,7 @@ const job = CronJob.from({
       await contactsForDriversWithRevenue();
     } catch (error) {
       console.error('Error occurred in onTick contactsForDriversWithRevenue');
-      console.error({
-        time: new Date(),
-        error,
-      });
+      console.error({ time: new Date(), error });
     }
   },
 });

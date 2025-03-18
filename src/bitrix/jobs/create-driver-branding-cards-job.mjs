@@ -12,7 +12,7 @@ const createBrandingCardsJob = CronJob.from({
     try {
       await createDriverBrandingCards();
     } catch (error) {
-      console.error('Error occurred in monday branding job:', {
+      console.error('Error occurred in creation branding job:', {
         time: new Date(),
         error,
       });

@@ -75,10 +75,7 @@ export async function getAndSaveLeadsByCreatedDate(manualDate) {
     };
   });
 
-  await clearTableByDate({
-    bqTableId,
-    date,
-  });
+  await clearTableByDate({ bqTableId, date });
   const tempFilePath = path.join(os.tmpdir(), 'temp_data.json');
   const jsonString = jsonData.map(JSON.stringify).join('\n');
   fs.writeFileSync(tempFilePath, jsonString);

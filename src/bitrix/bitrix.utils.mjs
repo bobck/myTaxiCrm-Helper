@@ -14,7 +14,6 @@ export async function getFreshFiredDrivers({ unixCreatedAt }) {
   const { rows, rowCount } = result;
   return { rows };
 }
-
 export async function createDeal({
   title,
   name,
@@ -417,6 +416,65 @@ export async function updateDealPayOff({ id, ufCrmField, amount }) {
 
   const { result } = response;
   return { result };
+}
+
+export async function createBitrixDriverBrandingCards({ cards }) {
+  let batchObj = {};
+
+  for (let card of cards) {
+    const {
+      driver_id,
+      driver_name,
+      myTaxiDriverUrl,
+      phone,
+      stage_id,
+      cityBrandingId,
+      weekNumber,
+      year,
+      total_trips,
+    } = card;
+
+    const params = {
+      entityTypeId: '1138',
+      'fields[title]': driver_name,
+      'fields[STAGE_ID]': stage_id,
+      'fields[ufCrm54_1738757291]': driver_name,
+      'fields[ufCrm54_1738757552]': phone,
+      'fields[ufCrm54_1738757612]': myTaxiDriverUrl,
+      'fields[ufCrm54_1738757712]': total_trips,
+      'fields[ufCrm54_1738757784]': weekNumber,
+      'fields[ufCrm54_1738757867]': year,
+      'fields[ufCrm54_1738757436]': cityBrandingId,
+    };
+    batchObj[driver_id] = { method: 'crm.item.add', params };
+  }
+
+  const { result: resp, time } = await bitrix.batch(batchObj);
+  const { result: itemObj } = resp;
+
+  return itemObj;
+}
+
+
+export async function updateBitrixDriverBrandingCards({ cards }) {
+  let batchObj = {};
+  for (let card of cards) {
+    const { driver_id, stage_id, total_trips, bitrix_card_id } = card;
+    const params = {
+      id: bitrix_card_id,
+      entityTypeId: '1138',
+      'fields[STAGE_ID]': stage_id,
+      'fields[ufCrm54_1738757712]': total_trips,
+    };
+
+    batchObj[driver_id] = { method: 'crm.item.update', params };
+  }
+
+  const { result: resp, time } = await bitrix.batch(batchObj);
+  const { result: itemObj } = resp;
+
+  //
+  return itemObj;
 }
 export async function createBanBoltDriverCardItem(card) {
   const { full_name, cityId, bolt_id, debt,messageType,isDebtorState } = card;

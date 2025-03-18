@@ -13,10 +13,7 @@ const job = CronJob.from({
       await accrueDebtToDeal();
     } catch (error) {
       console.error('Error occurred in onTick on accrueDebtToDeal');
-      console.error({
-        time: new Date(),
-        error,
-      });
+      console.error({ time: new Date(), error });
     }
   },
 });

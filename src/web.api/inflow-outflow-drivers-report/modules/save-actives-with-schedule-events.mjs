@@ -29,9 +29,7 @@ export async function saveActiveDriversWithScheduleEvents(manualDate) {
 
   const { rows } = await getActiveDriversWithScheduleEvents({ date });
 
-  console.log({
-    getActiveDriversWithScheduleEvents: rows.length,
-  });
+  console.log({ getActiveDriversWithScheduleEvents: rows.length });
 
   if (rows.length == 0) {
     return;
@@ -70,10 +68,7 @@ export async function saveActiveDriversWithScheduleEvents(manualDate) {
     };
   });
 
-  await clearTableByDate({
-    bqTableId,
-    date,
-  });
+  await clearTableByDate({ bqTableId, date });
   const tempFilePath = path.join(
     os.tmpdir(),
     'temp_data_actives_with_schedule_events.json'
