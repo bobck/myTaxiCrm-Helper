@@ -489,7 +489,7 @@ export async function markDtpDebtTransactionsAsSync({ human_id }) {
   await db.run(sql, human_id);
 }
 export const getBoltDriverBanReqByDriverId = async function ({ driver_id }) {
-  const sql = `SELECT * FROM bolt_driver_ban_requests WHERE driver_id = ?`;
+  const sql = `SELECT debt, bitrix_card_id, driver_id FROM bolt_driver_ban_requests WHERE driver_id = ?`;
   return db.get(sql, [driver_id]);
 };
 
