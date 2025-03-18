@@ -1,7 +1,6 @@
 import { getBoltDriversToBan } from '../../web.api/web.api.utlites.mjs';
 import {
-  nameKeyWords,
-  cityListWithAssignedBy as cityList, Seven_days_without_trips_message_type, notDebtorState, debtorState,
+  cityListWithAssignedBy as cityList
 } from '../bitrix.constants.mjs';
 import { createBanBoltDriverCardItem } from '../bitrix.utils.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
@@ -10,7 +9,9 @@ import {
   getBoltDriverBanReqByDriverId,
   insertBoltDriverBanReq,
 } from '../bitrix.queries.mjs';
-
+const Seven_days_without_trips_message_type = 3430;
+const debtorState = 3434;
+const notDebtorState = 3436;
 function getCityBrandingId(auto_park_id) {
   return cityList.find((obj) => obj.auto_park_id === auto_park_id).brandingId;
 }

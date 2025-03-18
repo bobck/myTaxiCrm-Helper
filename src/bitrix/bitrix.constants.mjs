@@ -371,6 +371,4 @@ const assignedByMailToId = {
   'vubir2020@gmail.com': '51212',
   'minaieva.ii@gmail.com': '14150',
 };
-export const Seven_days_without_trips_message_type = 3430;
-export const debtorState = 3434;
-export const notDebtorState = 3436;
+
