@@ -1,9 +1,27 @@
 import { getBrandingCardsInfo } from '../../web.api/web.api.utlites.mjs';
-import { createBrandingProcess, getCrmBrandingCardByDriverId, insertBrandingCard } from '../bitrix.queries.mjs';
-import { chunkArray, createBitrixDriverBrandingCards } from '../bitrix.utils.mjs';
+import {
+  createBrandingProcess,
+  getCrmBrandingCardByDriverId,
+  insertBrandingCard,
+} from '../bitrix.queries.mjs';
+import {
+  chunkArray,
+  createBitrixDriverBrandingCards,
+} from '../bitrix.utils.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
-import { computeBrandingCardInProgressStage, computePeriodBounds, getCityBrandingId, isHighLoadedCityCheck } from '../bitrix.business-entity.mjs';
-
+import {
+  computeBrandingCardInProgressStage,
+  computePeriodBounds,
+  isHighLoadedCityCheck,
+} from '../bitrix.business-entity.mjs';
+import { cityListWithAssignedBy as cityList } from '../bitrix.constants.mjs';
+function getCityBrandingId(auto_park_id) {
+  const matchingCity = cityList.find(
+    (obj) => obj.auto_park_id === auto_park_id
+  );
+  const { brandingId: cityBrandingId } = matchingCity;
+  return { cityBrandingId };
+}
 export async function createDriverBrandingCards() {
   const bounds = computePeriodBounds();
   const brandingProcess = await createBrandingProcess({
@@ -12,7 +30,13 @@ export async function createDriverBrandingCards() {
     period_from: bounds.lowerBound.toISODate(),
     period_to: bounds.upperBound.toISODate(),
   });
-  const { period_from, period_to, id: branding_process_id, weekNumber, year } = brandingProcess;
+  const {
+    period_from,
+    period_to,
+    id: branding_process_id,
+    weekNumber,
+    year,
+  } = brandingProcess;
   const { rows } = await getBrandingCardsInfo({ period_from, period_to });
 
   if (rows.length === 0) {
@@ -22,7 +46,10 @@ export async function createDriverBrandingCards() {
 
   const processedCards = [];
   for (const [index, row] of rows.entries()) {
-    if (process.env.ENV === 'TEST' && index === Number(process.env.BRANDING_CARDS_COUNT)) {
+    if (
+      process.env.ENV === 'TEST' &&
+      index === Number(process.env.BRANDING_CARDS_COUNT)
+    ) {
       break;
     }
 
@@ -33,7 +60,9 @@ export async function createDriverBrandingCards() {
       branding_process_id,
     });
     if (dbcard) {
-      console.error(`Present driver card while creating driver_id:${driver_id}, year:${year}, weekNumber:${weekNumber}`);
+      console.error(
+        `Present driver card while creating driver_id:${driver_id}, year:${year}, weekNumber:${weekNumber}`
+      );
       continue;
     }
 
@@ -55,7 +84,10 @@ export async function createDriverBrandingCards() {
     };
     processedCards.push(card);
   }
-  const chunkedProcessedCards = chunkArray(processedCards, Number(process.env.CHUNK_SIZE) || 7);
+  const chunkedProcessedCards = chunkArray(
+    processedCards,
+    Number(process.env.CHUNK_SIZE) || 7
+  );
   for (const [index, chunk] of chunkedProcessedCards.entries()) {
     const bitrixRespObj = await createBitrixDriverBrandingCards({
       cards: chunk,
@@ -72,7 +104,8 @@ export async function createDriverBrandingCards() {
       });
     }
     for (const respElement of handledResponseArr) {
-      const { driver_id, total_trips, bitrix_card_id, auto_park_id } = respElement;
+      const { driver_id, total_trips, bitrix_card_id, auto_park_id } =
+        respElement;
       await insertBrandingCard({
         driver_id,
         total_trips,
@@ -83,11 +116,15 @@ export async function createDriverBrandingCards() {
     }
   }
 
-  console.log(`${processedCards.length} branding cards creation has been finished.`);
+  console.log(
+    `${processedCards.length} branding cards creation has been finished.`
+  );
 }
 
 if (process.env.ENV === 'TEST') {
-  console.log(`testing driver branding creation\ncards count: ${process.env.BRANDING_CARDS_COUNT}\nchunk size: ${process.env.CHUNK_SIZE}`);
+  console.log(
+    `testing driver branding creation\ncards count: ${process.env.BRANDING_CARDS_COUNT}\nchunk size: ${process.env.CHUNK_SIZE}`
+  );
   await openSShTunnel;
   await createDriverBrandingCards();
 }

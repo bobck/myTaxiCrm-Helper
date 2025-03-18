@@ -13,9 +13,12 @@ export function computePeriodBounds() {
     upperBound,
   };
 }
-const lowBrandingGoal=60;
-const highBrandingGoal=90;
-export function computeBrandingCardInProgressStage({ total_trips, isHighLoadedCity }) {
+const lowBrandingGoal = 60;
+const highBrandingGoal = 90;
+export function computeBrandingCardInProgressStage({
+  total_trips,
+  isHighLoadedCity,
+}) {
   const trips = Number(total_trips);
   const today = DateTime.local().startOf('day');
   const maxGoalGap = 30 - (today.weekday - 5) * 10;
@@ -36,7 +39,10 @@ export function computeBrandingCardInProgressStage({ total_trips, isHighLoadedCi
     return 'NEW';
   }
 }
-export function computeBrandingCardFinishedStage({ total_trips, isHighLoadedCity }) {
+export function computeBrandingCardFinishedStage({
+  total_trips,
+  isHighLoadedCity,
+}) {
   const trips = Number(total_trips);
 
   if (isNaN(trips)) {
@@ -54,13 +60,10 @@ export function computeBrandingCardFinishedStage({ total_trips, isHighLoadedCity
   }
 }
 
-export function getCityBrandingId(auto_park_id) {
-  const matchingCity = cityList.find((obj) => obj.auto_park_id === auto_park_id);
-  const { brandingId: cityBrandingId } = matchingCity;
-  return { cityBrandingId };
-}
 export function isHighLoadedCityCheck(auto_park_id) {
-  const matchingCity = cityList.find((obj) => obj.auto_park_id === auto_park_id);
+  const matchingCity = cityList.find(
+    (obj) => obj.auto_park_id === auto_park_id
+  );
   const { brandingId: cityBrandingId } = matchingCity;
   return cityBrandingId === '3780' || cityBrandingId === '3756';
 }
