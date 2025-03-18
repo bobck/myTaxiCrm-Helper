@@ -15,7 +15,7 @@ exports.setup = function(options, seedLink) {
 };
 exports.up = function (db, callback) {
   const createTable = `
-    CREATE TABLE IF NOT EXISTS bolt_driver_ban_requests (
+    CREATE TABLE bolt_driver_ban_requests (
       debt REAL,
       bitrix_card_id INTEGER PRIMARY KEY,
       driver_id TEXT UNIQUE NOT NULL,
@@ -30,7 +30,7 @@ exports.up = function (db, callback) {
 };
 
 exports.down = function (db, callback) {
-  const dropTable = `DROP TABLE IF EXISTS bolt_driver_ban_requests;`;
+  const dropTable = `DROP TABLE bolt_driver_ban_requests;`;
 
   db.runSql(dropTable, function (err) {
     if (err) return console.log(err);

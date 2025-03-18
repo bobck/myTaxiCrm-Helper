@@ -372,8 +372,6 @@ const assignedByMailToId = {
   'vubir2020@gmail.com': '51212',
   'minaieva.ii@gmail.com': '14150',
 };
-//'fields[ufCrm52_1738324546]': 3430,
-//     'fields[ufCrm52_1738739843]': isDebtor ? 3434 : 3436,
 export const Seven_days_without_trips_message_type = 3430;
 export const debtorState = 3434;
 export const notDebtorState = 3436;
