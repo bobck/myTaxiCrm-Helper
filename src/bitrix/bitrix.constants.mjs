@@ -220,7 +220,7 @@ export const cityListWithAssignedBy = [
     supportCityId: '3122',
   },
 ];
-export const highLoadedCities = [
+export const brandingHighLoadedCities = [
   {
     assignedBy: '50222',
     auto_park_id: 'e4df553f-4ec2-43a8-b012-4795259e983a',

@@ -1,5 +1,11 @@
 import { DateTime } from 'luxon';
-import { cityListWithAssignedBy as cityList, highLoadedCities } from './bitrix.constants.mjs';
+import { brandingHighLoadedCities } from './bitrix.constants.mjs';
+
+
+const lowBrandingGoal = 60;
+const highBrandingGoal = 90;
+
+
 export function computePeriodBounds() {
   const today = DateTime.local().startOf('day');
 
@@ -51,10 +57,9 @@ export function computeBrandingCardFinishedStage({
     return 'FAIL';
   }
 }
-const lowBrandingGoal = 60;
-const highBrandingGoal = 90;
+
 function computeBrandingGoal({ auto_park_id }) {
-  const isHighLoadedCity=highLoadedCities.some((city)=>city.auto_park_id=== auto_park_id);
+  const isHighLoadedCity=brandingHighLoadedCities.some((city)=>city.auto_park_id=== auto_park_id);
   if(isHighLoadedCity) {
     return highBrandingGoal;
   }
