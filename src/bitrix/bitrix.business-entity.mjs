@@ -1,6 +1,5 @@
 import { DateTime } from 'luxon';
 import { cityListWithAssignedBy as cityList } from './bitrix.constants.mjs';
-
 export function computePeriodBounds() {
   const today = DateTime.local().startOf('day');
 
@@ -14,6 +13,8 @@ export function computePeriodBounds() {
     upperBound,
   };
 }
+const lowBrandingGoal=60;
+const highBrandingGoal=90;
 export function computeBrandingCardInProgressStage({ total_trips, isHighLoadedCity }) {
   const trips = Number(total_trips);
   const today = DateTime.local().startOf('day');
@@ -21,10 +22,10 @@ export function computeBrandingCardInProgressStage({ total_trips, isHighLoadedCi
   if (isNaN(trips)) {
     console.error('Trips must be a number');
   }
-  let GOAL = 60;
+  let GOAL = lowBrandingGoal;
 
   if (isHighLoadedCity) {
-    GOAL = 90;
+    GOAL = highBrandingGoal;
   }
   const todaysTripsOptimalLowerBound = GOAL - maxGoalGap;
   if (trips >= GOAL) {
@@ -41,10 +42,10 @@ export function computeBrandingCardFinishedStage({ total_trips, isHighLoadedCity
   if (isNaN(trips)) {
     console.error('Trips must be a number');
   }
-  let GOAL = 60;
+  let GOAL = lowBrandingGoal;
 
   if (isHighLoadedCity) {
-    GOAL = 90;
+    GOAL = highBrandingGoal;
   }
   if (trips >= GOAL) {
     return 'SUCCESS';

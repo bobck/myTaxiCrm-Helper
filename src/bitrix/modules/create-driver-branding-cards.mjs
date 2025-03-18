@@ -13,7 +13,6 @@ export async function createDriverBrandingCards() {
     period_to: bounds.upperBound.toISODate(),
   });
   const { period_from, period_to, id: branding_process_id, weekNumber, year } = brandingProcess;
-  console.log(brandingProcess);
   const { rows } = await getBrandingCardsInfo({ period_from, period_to });
 
   if (rows.length === 0) {
