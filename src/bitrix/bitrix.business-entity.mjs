@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { cityListWithAssignedBy as cityList } from './bitrix.constants.mjs';
+import { cityListWithAssignedBy as cityList, highLoadedCities } from './bitrix.constants.mjs';
 export function computePeriodBounds() {
   const today = DateTime.local().startOf('day');
 
@@ -13,8 +13,6 @@ export function computePeriodBounds() {
     upperBound,
   };
 }
-const lowBrandingGoal = 60;
-const highBrandingGoal = 90;
 export function computeBrandingCardInProgressStage({
   total_trips,
   auto_park_id,
@@ -53,21 +51,12 @@ export function computeBrandingCardFinishedStage({
     return 'FAIL';
   }
 }
-
+const lowBrandingGoal = 60;
+const highBrandingGoal = 90;
 function computeBrandingGoal({ auto_park_id }) {
-  const matchingCity = cityList.find(
-    (obj) => obj.auto_park_id === auto_park_id
-  );
-  const { brandingId } = matchingCity;
-  switch (brandingId) {
-    case '3780': {
-      return highBrandingGoal;
-    }
-    case '3756': {
-      return highBrandingGoal;
-    }
-    default: {
-      return lowBrandingGoal;
-    }
+  const isHighLoadedCity=highLoadedCities.some((city)=>city.auto_park_id=== auto_park_id);
+  if(isHighLoadedCity) {
+    return highBrandingGoal;
   }
+  return lowBrandingGoal;
 }

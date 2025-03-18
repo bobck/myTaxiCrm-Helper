@@ -220,7 +220,31 @@ export const cityListWithAssignedBy = [
     supportCityId: '3122',
   },
 ];
-
+export const highLoadedCities = [
+  {
+    assignedBy: '50222',
+    auto_park_id: 'e4df553f-4ec2-43a8-b012-4795259e983a',
+    cityId: '91',
+    brandingId: '3780',
+    cityName: 'Київ',
+    supportCityId: '3058',
+  },
+  {
+    assignedBy: '50222',
+    auto_park_id: '5571b3ea-1ccf-4f41-bbe0-0f12ee8dfb17',
+    cityId: '91',
+    brandingId: '3780',
+    cityName: 'Київ usa',
+  },
+  {
+    assignedBy: '106546',
+    auto_park_id: 'a7bb17b7-fc87-4617-a915-d2f9ec83cfa0',
+    cityId: '99',
+    brandingId: '3756',
+    cityName: 'Львів',
+    supportCityId: '3066',
+  },
+];
 export const referralTypeId = '1098';
 export const paymentsStageId = 'DT1102_44:NEW';
 export const paymentsTypeId = '1102';
