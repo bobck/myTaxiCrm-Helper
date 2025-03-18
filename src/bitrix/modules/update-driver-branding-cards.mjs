@@ -10,10 +10,7 @@ import {
 } from '../bitrix.utils.mjs';
 import { getBrandingCardsInfo } from '../../web.api/web.api.utlites.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
-import {
-  computeBrandingCardInProgressStage,
-  isHighLoadedCityCheck,
-} from '../bitrix.business-entity.mjs';
+import { computeBrandingCardInProgressStage } from '../bitrix.business-entity.mjs';
 
 export async function updateDriverBrandingCards() {
   const today = DateTime.local().startOf('day').minus({ days: 1 });
@@ -56,8 +53,8 @@ export async function updateDriverBrandingCards() {
     if (Number(dbcard.total_trips) >= Number(total_trips)) {
       continue;
     }
-    const isHighLoadedCity = isHighLoadedCityCheck(auto_park_id);
-    const stage_id = `DT1138_62:${computeBrandingCardInProgressStage({ total_trips, isHighLoadedCity })}`;
+
+    const stage_id = `DT1138_62:${computeBrandingCardInProgressStage({ total_trips, auto_park_id })}`;
     const card = {
       driver_id,
       bitrix_card_id: dbcard.bitrix_card_id,

@@ -12,10 +12,10 @@ import { openSShTunnel } from '../../../ssh.mjs';
 import {
   computeBrandingCardInProgressStage,
   computePeriodBounds,
-  isHighLoadedCityCheck,
 } from '../bitrix.business-entity.mjs';
 import { cityListWithAssignedBy as cityList } from '../bitrix.constants.mjs';
-function getCityBrandingId(auto_park_id) {
+
+function getCityBrandingId({ auto_park_id }) {
   const matchingCity = cityList.find(
     (obj) => obj.auto_park_id === auto_park_id
   );
@@ -66,9 +66,8 @@ export async function createDriverBrandingCards() {
       continue;
     }
 
-    const { cityBrandingId } = getCityBrandingId(auto_park_id);
-    const isHighLoadedCity = isHighLoadedCityCheck(auto_park_id);
-    const stage_id = `DT1138_62:${computeBrandingCardInProgressStage({ total_trips, isHighLoadedCity })}`;
+    const { cityBrandingId } = getCityBrandingId({ auto_park_id });
+    const stage_id = `DT1138_62:${computeBrandingCardInProgressStage({ total_trips, auto_park_id })}`;
     const myTaxiDriverUrl = `https://fleets.mytaxicrm.com/${auto_park_id}/drivers/${driver_id}`;
     const card = {
       driver_id,

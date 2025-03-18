@@ -17,7 +17,7 @@ const lowBrandingGoal = 60;
 const highBrandingGoal = 90;
 export function computeBrandingCardInProgressStage({
   total_trips,
-  isHighLoadedCity,
+  auto_park_id,
 }) {
   const trips = Number(total_trips);
   const today = DateTime.local().startOf('day');
@@ -25,11 +25,8 @@ export function computeBrandingCardInProgressStage({
   if (isNaN(trips)) {
     console.error('Trips must be a number');
   }
-  let GOAL = lowBrandingGoal;
+  const GOAL = computeBrandingGoal({ auto_park_id });
 
-  if (isHighLoadedCity) {
-    GOAL = highBrandingGoal;
-  }
   const todaysTripsOptimalLowerBound = GOAL - maxGoalGap;
   if (trips >= GOAL) {
     return 'PREPARATION';
@@ -41,18 +38,15 @@ export function computeBrandingCardInProgressStage({
 }
 export function computeBrandingCardFinishedStage({
   total_trips,
-  isHighLoadedCity,
+  auto_park_id,
 }) {
   const trips = Number(total_trips);
 
   if (isNaN(trips)) {
     console.error('Trips must be a number');
   }
-  let GOAL = lowBrandingGoal;
+  const GOAL = computeBrandingGoal({ auto_park_id });
 
-  if (isHighLoadedCity) {
-    GOAL = highBrandingGoal;
-  }
   if (trips >= GOAL) {
     return 'SUCCESS';
   } else {
@@ -60,10 +54,20 @@ export function computeBrandingCardFinishedStage({
   }
 }
 
-export function isHighLoadedCityCheck(auto_park_id) {
+function computeBrandingGoal({ auto_park_id }) {
   const matchingCity = cityList.find(
     (obj) => obj.auto_park_id === auto_park_id
   );
-  const { brandingId: cityBrandingId } = matchingCity;
-  return cityBrandingId === '3780' || cityBrandingId === '3756';
+  const { brandingId } = matchingCity;
+  switch (brandingId) {
+    case '3780': {
+      return highBrandingGoal;
+    }
+    case '3756': {
+      return highBrandingGoal;
+    }
+    default: {
+      return lowBrandingGoal;
+    }
+  }
 }
