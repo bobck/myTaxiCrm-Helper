@@ -594,3 +594,80 @@ export async function markDtpDebtTransactionsAsSync({ human_id }) {
   const sql = `UPDATE dtp_debt_transactions SET is_synchronised = true WHERE human_id = ?`;
   await db.run(sql, human_id);
 }
+/**
+ * Inserts a new fired debtor driver record.
+ * @param {Object} driver - The driver details.
+ * @returns {Promise<Object>} - The inserted record.
+ */
+export async function insertFiredDebtorDriver(driver) {
+  const {
+    bitrix_card_id,
+    full_name,
+    auto_park_id,
+    cs_current_week,
+    cs_current_year,
+    current_week_balance,
+    current_week_total_deposit,
+    current_week_total_debt,
+    fire_date,
+  } = driver;
+  const sql = `
+        INSERT INTO fired_debtor_drivers 
+        (bitrix_card_id, full_name, auto_park_id, cs_current_week, cs_current_year, current_week_balance, current_week_total_deposit, current_week_total_debt, fire_date, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        RETURNING *;
+    `;
+  return db.get(
+    sql,
+    bitrix_card_id,
+    full_name,
+    auto_park_id,
+    cs_current_week,
+    cs_current_year,
+    current_week_balance,
+    current_week_total_deposit,
+    current_week_total_debt,
+    fire_date
+  );
+}
+
+/**
+ * Retrieves a fired debtor driver by bitrix_card_id.
+ * @param {number} bitrix_card_id - The card ID.
+ * @returns {Promise<Object>} - The matching record.
+ */
+export async function getFiredDebtorDriverById(bitrix_card_id) {
+  const sql = `
+        SELECT * FROM fired_debtor_drivers WHERE bitrix_card_id = ?;
+    `;
+  return db.get(sql, bitrix_card_id);
+}
+
+/**
+ * Updates a fired debtor driver's balance details.
+ * @param {number} bitrix_card_id - The card ID.
+ * @param {string} current_week_balance - The updated balance.
+ * @param {string} current_week_total_deposit - The updated total deposit.
+ * @param {string} current_week_total_debt - The updated total debt.
+ * @returns {Promise<Object>} - The updated record.
+ */
+export async function updateFiredDebtorDriverBalance({
+  bitrix_card_id,
+  current_week_balance,
+  current_week_total_deposit,
+  current_week_total_debt,
+}) {
+  const sql = `
+        UPDATE fired_debtor_drivers 
+        SET current_week_balance = ?, current_week_total_deposit = ?, current_week_total_debt = ?, updated_at = CURRENT_TIMESTAMP 
+        WHERE bitrix_card_id = ?
+        RETURNING *;
+    `;
+  return db.get(
+    sql,
+    current_week_balance,
+    current_week_total_deposit,
+    current_week_total_debt,
+    bitrix_card_id
+  );
+}

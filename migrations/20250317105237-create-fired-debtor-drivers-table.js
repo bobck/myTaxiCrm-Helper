@@ -13,7 +13,7 @@ exports.setup = function (options, seedLink) {
 exports.up = function (db, callback) {
   const sql = `
     CREATE TABLE fired_debtor_drivers (
-                                      birtrix_card_id INTEGER PRIMARY KEY UNIQUE NOT NULL,
+                                      bitrix_card_id INTEGER PRIMARY KEY UNIQUE NOT NULL,
                                       full_name TEXT NOT NULL,
                                       auto_park_id TEXT NOT NULL,
                                       cs_current_week INTEGER NOT NULL,
