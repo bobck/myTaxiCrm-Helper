@@ -15,9 +15,6 @@ function computeBrandingCardStage(total_trips) {
     return 'NEW';
   }
 }
-function getCityBrandingId(auto_park_id) {
-  return cityList.find((obj) => obj.auto_park_id === auto_park_id).brandingId;
-}
 
 export async function createFiredDebtorDriversCards() {
   const { rows } = await getFiredDebtorDriversInfo();
@@ -26,17 +23,28 @@ export async function createFiredDebtorDriversCards() {
     console.error('No rows found for fired debtor drivers found.');
     return;
   }
-  console.log('rows.length: ', rows.length);
   for (const [index, row] of rows.entries()) {
     if (
       process.env.ENV === 'TEST' &&
-      index === Number((process.env.DEBTOR_DRIVERS_CARDS_COUNT = 4))
+      index ===320
     ) {
       return;
     }
 
-    const {} = row;
-    console.log(index, row);
+    const {
+      full_name,
+      auto_park_id,
+      cs_current_week,
+      cs_current_year,
+      current_week_balance,
+      current_week_total_deposit,
+      current_week_total_debt,
+      fire_date,
+      is_balance_enabled,
+      balance_activation_value,
+      is_deposit_enabled,
+      deposit_activation_value
+    } = row;
 
     // const dbcard = await getCrmBrandingCardByDriverId({
     //     driver_id,
