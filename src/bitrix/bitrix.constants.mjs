@@ -224,7 +224,6 @@ export const cityListWithAssignedBy = [
 export const referralTypeId = '1098';
 export const paymentsStageId = 'DT1102_44:NEW';
 export const paymentsTypeId = '1102';
-export const nameKeyWords = ['g', 'car', 'gcar', 'сто', 'сто', 'чернівці'];
 export const positionTextReferralsToPayments = {
   водитель: '2684',
   'кеш менеджер': '2686',

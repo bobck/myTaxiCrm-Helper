@@ -11,12 +11,6 @@ import {
   insertBoltDriverBanReq,
 } from '../bitrix.queries.mjs';
 
-const nameCheck = (full_name) => {
-  return full_name
-    .split(' ')
-    .filter((w) => !nameKeyWords.some((keyWord) => keyWord === w.toLowerCase()))
-    .join(' ');
-};
 function getCityBrandingId(auto_park_id) {
   return cityList.find((obj) => obj.auto_park_id === auto_park_id).brandingId;
 }
@@ -38,6 +32,7 @@ export const createBoltDriversToBan = async () => {
     console.error('No any drivers to ban found.');
     return;
   }
+  console.log(rows);
   for (const [index, row] of rows.entries()) {
     if (
       process.env.ENV === 'TEST' &&
@@ -60,13 +55,13 @@ export const createBoltDriversToBan = async () => {
       );
       continue;
     }
-    const checkedName = nameCheck(full_name);
+
     const cityId = getCityBrandingId(auto_park_id);
     const isDebtor = Number(driver_balance) < 0;
     const debt = isDebtor ? String(-1 * driver_balance) : '0';
     const isDebtorState=isDebtor ? debtorState : notDebtorState;
     const bitrixResp = await createBanBoltDriverCardItem({
-      full_name: checkedName,
+      full_name,
       bolt_id,
       cityId,
       debt,
