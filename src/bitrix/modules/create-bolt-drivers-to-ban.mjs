@@ -33,7 +33,6 @@ export const createBoltDriversToBan = async () => {
     console.error('No any drivers to ban found.');
     return;
   }
-  console.log(rows);
   for (const [index, row] of rows.entries()) {
     if (
       process.env.ENV === 'TEST' &&
