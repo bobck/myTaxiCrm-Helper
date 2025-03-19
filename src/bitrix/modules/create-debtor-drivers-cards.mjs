@@ -16,6 +16,7 @@ function computeBrandingCardStage(total_trips) {
   }
 }
 
+
 export async function createFiredDebtorDriversCards() {
   const { rows } = await getFiredDebtorDriversInfo();
 
@@ -24,27 +25,43 @@ export async function createFiredDebtorDriversCards() {
     return;
   }
   for (const [index, row] of rows.entries()) {
-    if (
-      process.env.ENV === 'TEST' &&
-      index ===320
-    ) {
-      return;
+    // if (
+    //   process.env.ENV === 'TEST' &&
+    //   index ===320
+    // ) {
+    //   return;
+    // }
+    if(row.is_balance_enabled||row.is_deposit_enabled){
+      console.log(row)
     }
-
-    const {
-      full_name,
-      auto_park_id,
-      cs_current_week,
-      cs_current_year,
-      current_week_balance,
-      current_week_total_deposit,
-      current_week_total_debt,
-      fire_date,
-      is_balance_enabled,
-      balance_activation_value,
-      is_deposit_enabled,
-      deposit_activation_value
-    } = row;
+    // const {
+    //   full_name,
+    //   auto_park_id,
+    //   cs_current_week,
+    //   cs_current_year,
+    //   current_week_balance,
+    //   current_week_total_deposit,
+    //   current_week_total_debt,
+    //   fire_date,
+    //   is_balance_enabled,
+    //   balance_activation_value,
+    //   is_deposit_enabled,
+    //   deposit_activation_value
+    // } = row;
+    // console.log({
+    //   full_name,
+    //   auto_park_id,
+    //   cs_current_week,
+    //   cs_current_year,
+    //   current_week_balance,
+    //   current_week_total_deposit,
+    //   current_week_total_debt,
+    //   fire_date,
+    //   is_balance_enabled,
+    //   balance_activation_value,
+    //   is_deposit_enabled,
+    //   deposit_activation_value
+    // })
 
     // const dbcard = await getCrmBrandingCardByDriverId({
     //     driver_id,
