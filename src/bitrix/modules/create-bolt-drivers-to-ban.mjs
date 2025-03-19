@@ -1,6 +1,6 @@
 import { getBoltDriversToBan } from '../../web.api/web.api.utlites.mjs';
 import { cityListWithAssignedBy as cityList } from '../bitrix.constants.mjs';
-import { createBanBoltDriverCardItem } from '../bitrix.utils.mjs';
+import { chunkArray, createBanBoltDriverCardItem, createBanBoltDriverCards } from '../bitrix.utils.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
 import { DateTime } from 'luxon';
 import {
@@ -31,13 +31,14 @@ export const createBoltDriversToBan = async () => {
     console.error('No any drivers to ban found.');
     return;
   }
+  const processedCards = [];
   for (const [index, row] of rows.entries()) {
     if (
       process.env.ENV === 'TEST' &&
       index === Number(process.env.BOLT_DRIVERS_BAN_CARDS)
     ) {
       console.log('testing has been ended');
-      return;
+      break;
     }
     const { driver_id, auto_park_id, full_name, bolt_id, driver_balance } = row;
 
@@ -49,17 +50,51 @@ export const createBoltDriversToBan = async () => {
 
     const cityId = getCityBrandingId(auto_park_id);
     const debt = String(-1 * driver_balance);
-    const bitrixResp = await createBanBoltDriverCardItem({
+    const card={
+      driver_id,
       full_name,
       bolt_id,
       cityId,
       debt,
       isDebtorState:debtorState,
       messageType: Seven_days_without_trips_message_type,
-    });
-    const { bitrix_card_id } = bitrixResp;
-    await insertBoltDriverBanReq({ bitrix_card_id, debt, driver_id });
+    }
+    processedCards.push(card);
+
   }
+  const chunkedProcessedCards = chunkArray(
+    processedCards,
+    Number(process.env.CHUNK_SIZE) || 5
+  );
+  for (const [index, chunk] of chunkedProcessedCards.entries()) {
+    const bitrixRespObj = await createBanBoltDriverCards({
+      cards: chunk,
+    });
+    const handledResponseArr = [];
+    for (const driver_id in bitrixRespObj) {
+      const { id } = bitrixRespObj[driver_id]['item'];
+      const matchingCard = chunk.find((c) => c.driver_id === driver_id);
+      //{ bitrix_card_id, debt, driver_id }
+      handledResponseArr.push({
+        bitrix_card_id: id,
+        driver_id: matchingCard.driver_id,
+        debt: matchingCard.debt,
+      });
+    }
+    for (const respElement of handledResponseArr) {
+      const { bitrix_card_id, debt, driver_id } =
+        respElement;
+      await insertBoltDriverBanReq({
+        driver_id,
+        bitrix_card_id,
+        debt
+      });
+    }
+  }
+
+  console.log(
+    `${processedCards.length} bolt drivers to ban cards creation has been finished.`
+  );
 };
 
 if (process.env.ENV === 'TEST') {
@@ -67,8 +102,9 @@ if (process.env.ENV === 'TEST') {
     `testing bolt drivers ban cards creation\ncards count :${process.env.BOLT_DRIVERS_BAN_CARDS}`
   );
   await openSShTunnel;
-  const queryParams = computeQueryParams();
-  const { rows } = await getBoltDriversToBan(queryParams);
-  console.log(rows.length);
-  // await createBoltDriversToBan();
+  // const queryParams = computeQueryParams();
+  // const { rows } = await getBoltDriversToBan(queryParams);
+  // console.log(rows)
+  // console.log(rows.length);
+  await createBoltDriversToBan();
 }

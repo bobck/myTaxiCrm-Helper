@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "dev": "node -r dotenv/config app.mjs",
-    "createBoltDriversBanCardsManual": "ENV=TEST BOLT_DRIVERS_BAN_CARDS=15 node -r dotenv/config src/bitrix/modules/create-bolt-drivers-to-ban.mjs",
+    "createBoltDriversBanCardsManual": "ENV=TEST BOLT_DRIVERS_BAN_CARDS=22 CHUNK_SIZE=2 node -r dotenv/config src/bitrix/modules/create-bolt-drivers-to-ban.mjs",
     "createBrandingCardsManual": "ENV=TEST BRANDING_CARDS_COUNT=4 node -r dotenv/config src/bitrix/modules/create-driver-branding-cards.mjs",
     "updateBrandingCardsManual": "ENV=TEST BRANDING_CARDS_COUNT=4 node -r dotenv/config src/bitrix/modules/update-driver-branding-cards.mjs",
     "moveBrandingCardsManual": "ENV=TEST BRANDING_CARDS_COUNT=4 node -r dotenv/config src/bitrix/modules/move-driver-branding-cards.mjs",
