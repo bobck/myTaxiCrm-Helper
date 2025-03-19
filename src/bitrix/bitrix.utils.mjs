@@ -15,16 +15,16 @@ export async function getFreshFiredDrivers({ unixCreatedAt }) {
   return { rows };
 }
 export async function createDeal({
-    title,
-    name,
-    phone,
-    cityId,
-    firedReason,
-    ridesCount,
-    assignedBy,
-    workedDays,
-    contactId,
-    }) {
+  title,
+  name,
+  phone,
+  cityId,
+  firedReason,
+  ridesCount,
+  assignedBy,
+  workedDays,
+  contactId,
+}) {
   const response = await bitrix.deals.create({
     TITLE: title,
     CATEGORY_ID: process.env.FIRED_CATEGORY_ID,
@@ -294,15 +294,15 @@ export async function addCommentToDeal({ deal_id, comment }) {
 }
 
 export async function createPayment({
-    title,
-    stageId,
-    city,
-    contactId,
-    assignedBy,
-    referrerPhone,
-    referrerName,
-    referrerPosition,
-    }) {
+  title,
+  stageId,
+  city,
+  contactId,
+  assignedBy,
+  referrerPhone,
+  referrerName,
+  referrerPosition,
+}) {
   const response = await bitrix.call('crm.item.add', {
     entityTypeId: '1102',
     'fields[title]': title,
@@ -340,11 +340,11 @@ export async function changeItemStage({ referralTypeId, id, stageId }) {
 }
 
 export async function createNewWorkingDriverItem({
-    name,
-    stageId,
-    city,
-    phone,
-    }) {
+  name,
+  stageId,
+  city,
+  phone,
+}) {
   const response = await bitrix.call('crm.item.add', {
     entityTypeId: '1110',
     'fields[title]': name,
@@ -454,7 +454,6 @@ export async function createBitrixDriverBrandingCards({ cards }) {
 
   return itemObj;
 }
-
 
 export async function updateBitrixDriverBrandingCards({ cards }) {
   let batchObj = {};

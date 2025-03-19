@@ -1,7 +1,17 @@
-import { getLocations, getTransfers } from '../../remonline/remonline.utils.mjs';
+import {
+  getLocations,
+  getTransfers,
+} from '../../remonline/remonline.utils.mjs';
 import { remonlineTokenToEnv } from '../../remonline/remonline.api.mjs';
-import { createOrResetTableByName, getColumnsFromBQ, insertRowsAsStream } from '../bq-utils.mjs';
-import { transferProductsTableSchema, transfersTableSchema } from '../schemas.mjs';
+import {
+  createOrResetTableByName,
+  getColumnsFromBQ,
+  insertRowsAsStream,
+} from '../bq-utils.mjs';
+import {
+  transferProductsTableSchema,
+  transfersTableSchema,
+} from '../schemas.mjs';
 
 const splitTransfers = ({ transfersWithProducts }) =>
   transfersWithProducts.reduce(
@@ -29,10 +39,32 @@ const splitTransfers = ({ transfersWithProducts }) =>
     { transfers: [], products: [] }
   );
 const filterTransfersAndProducts = async ({ transfers, products }) => {
-  const presentTransfers = await getColumnsFromBQ({ table_id: 'transfers' }, 'id', 'branch_id');
-  const presentProducts = await getColumnsFromBQ({ table_id: 'transfers_products' }, 'id', 'transfer_id');
-  const filteredTransfers = transfers.filter((transfer) => !presentTransfers.some((presentTransfer) => transfer.id === presentTransfer.id && transfer.branch_id === presentTransfer.branch_id));
-  const filteredProducts = products.filter((product) => !presentProducts.some((presentProduct) => product.transfer_id === presentProduct.transfer_id && product.id === presentProduct.id));
+  const presentTransfers = await getColumnsFromBQ(
+    { table_id: 'transfers' },
+    'id',
+    'branch_id'
+  );
+  const presentProducts = await getColumnsFromBQ(
+    { table_id: 'transfers_products' },
+    'id',
+    'transfer_id'
+  );
+  const filteredTransfers = transfers.filter(
+    (transfer) =>
+      !presentTransfers.some(
+        (presentTransfer) =>
+          transfer.id === presentTransfer.id &&
+          transfer.branch_id === presentTransfer.branch_id
+      )
+  );
+  const filteredProducts = products.filter(
+    (product) =>
+      !presentProducts.some(
+        (presentProduct) =>
+          product.transfer_id === presentProduct.transfer_id &&
+          product.id === presentProduct.id
+      )
+  );
   return { filteredTransfers, filteredProducts };
 };
 export async function generateAndSaveTransfers() {
@@ -42,7 +74,9 @@ export async function generateAndSaveTransfers() {
     return;
   }
   const transfersWithProducts = [];
-  console.log('fetching transfers...\nwait please it could take few minutes...');
+  console.log(
+    'fetching transfers...\nwait please it could take few minutes...'
+  );
   for (const [index, branch] of branches.entries()) {
     // if (process.env.ENV === 'TEST' && index !== branches.length - 1) {
     //   continue;
