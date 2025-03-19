@@ -455,7 +455,6 @@ export async function createBitrixDriverBrandingCards({ cards }) {
   return itemObj;
 }
 
-
 export async function updateBitrixDriverBrandingCards({ cards }) {
   let batchObj = {};
   for (let card of cards) {
@@ -477,7 +476,7 @@ export async function updateBitrixDriverBrandingCards({ cards }) {
   return itemObj;
 }
 export async function createBanBoltDriverCardItem(card) {
-  const { full_name, cityId, bolt_id, debt,messageType,isDebtorState } = card;
+  const { full_name, cityId, bolt_id, debt, messageType, isDebtorState } = card;
 
   const props = {
     entityTypeId: '1132',

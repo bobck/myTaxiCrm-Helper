@@ -1,7 +1,5 @@
 import { getBoltDriversToBan } from '../../web.api/web.api.utlites.mjs';
-import {
-  cityListWithAssignedBy as cityList
-} from '../bitrix.constants.mjs';
+import { cityListWithAssignedBy as cityList } from '../bitrix.constants.mjs';
 import { createBanBoltDriverCardItem } from '../bitrix.utils.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
 import { DateTime } from 'luxon';
@@ -52,14 +50,14 @@ export const createBoltDriversToBan = async () => {
     const cityId = getCityBrandingId(auto_park_id);
     const isDebtor = Number(driver_balance) < 0;
     const debt = isDebtor ? String(-1 * driver_balance) : '0';
-    const isDebtorState=isDebtor ? debtorState : notDebtorState;
+    const isDebtorState = isDebtor ? debtorState : notDebtorState;
     const bitrixResp = await createBanBoltDriverCardItem({
       full_name,
       bolt_id,
       cityId,
       debt,
       isDebtorState,
-      messageType:Seven_days_without_trips_message_type
+      messageType: Seven_days_without_trips_message_type,
     });
     const { bitrix_card_id } = bitrixResp;
     await insertBoltDriverBanReq({ bitrix_card_id, debt, driver_id });

@@ -371,4 +371,3 @@ const assignedByMailToId = {
   'vubir2020@gmail.com': '51212',
   'minaieva.ii@gmail.com': '14150',
 };
-
