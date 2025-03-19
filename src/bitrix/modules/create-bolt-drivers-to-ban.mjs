@@ -64,7 +64,7 @@ export const createBoltDriversToBan = async () => {
   }
   const chunkedProcessedCards = chunkArray(
     processedCards,
-    Number(process.env.CHUNK_SIZE) || 5
+    Number(process.env.CHUNK_SIZE) || 10
   );
   for (const [index, chunk] of chunkedProcessedCards.entries()) {
     const bitrixRespObj = await createBanBoltDriverCards({
@@ -90,6 +90,7 @@ export const createBoltDriversToBan = async () => {
         debt
       });
     }
+  //  console.log(`chunk ${index} with ${chunk.length} has been successfully uploaded`)
   }
 
   console.log(
@@ -99,12 +100,9 @@ export const createBoltDriversToBan = async () => {
 
 if (process.env.ENV === 'TEST') {
   console.log(
-    `testing bolt drivers ban cards creation\ncards count :${process.env.BOLT_DRIVERS_BAN_CARDS}`
+    `testing bolt drivers ban cards creation\ncards count :${process.env.BOLT_DRIVERS_BAN_CARDS}\nchunk size:${process.env.CHUNK_SIZE}`,
   );
   await openSShTunnel;
-  // const queryParams = computeQueryParams();
-  // const { rows } = await getBoltDriversToBan(queryParams);
-  // console.log(rows)
-  // console.log(rows.length);
+
   await createBoltDriversToBan();
 }
