@@ -13,7 +13,8 @@ exports.setup = function (options, seedLink) {
 exports.up = function (db, callback) {
   const sql = `
       CREATE TABLE fired_debtor_drivers (
-                                            driver_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+                                            bitrix_card_id INTEGER UNIQUE PRIMARY KEY,
+                                            driver_id UUID NOT NULL,
                                             full_name TEXT NOT NULL,
                                             auto_park_id UUID NOT NULL,
                                             cs_current_week INTEGER NOT NULL,

@@ -602,6 +602,7 @@ export async function markDtpDebtTransactionsAsSync({ human_id }) {
  */
 export async function insertFiredDebtorDriver(driver) {
   const {
+    bitrix_card_id,
     driver_id,
     full_name,
     auto_park_id,
@@ -614,16 +615,17 @@ export async function insertFiredDebtorDriver(driver) {
     is_balance_enabled,
     balance_activation_value,
     is_deposit_enabled,
-    deposit_activation_value,
+    deposit_activation_value
   } = driver;
   const sql = `
       INSERT INTO fired_debtor_drivers
-      (driver_id, full_name, auto_park_id, cs_current_week, cs_current_year, current_week_balance, current_week_total_deposit, current_week_total_debt, fire_date, is_balance_enabled, balance_activation_value, is_deposit_enabled, deposit_activation_value, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      (bitrix_card_id, driver_id, full_name, auto_park_id, cs_current_week, cs_current_year, current_week_balance, current_week_total_deposit, current_week_total_debt, fire_date, is_balance_enabled, balance_activation_value, is_deposit_enabled, deposit_activation_value, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
           RETURNING *;
   `;
   return db.get(
     sql,
+    bitrix_card_id,
     driver_id,
     full_name,
     auto_park_id,
@@ -641,35 +643,35 @@ export async function insertFiredDebtorDriver(driver) {
 }
 
 /**
- * Retrieves a fired debtor driver by driver_id.
- * @param {string} driver_id - The driver ID.
+ * Retrieves a fired debtor driver by bitrix_card_id.
+ * @param {number} bitrix_card_id - The bitrix card ID.
  * @returns {Promise<Object>} - The matching record.
  */
-export async function getFiredDebtorDriverById(driver_id) {
+export async function getFiredDebtorDriverByBitrixId({ bitrix_card_id }) {
   const sql = `
-      SELECT * FROM fired_debtor_drivers WHERE driver_id = ?;
+      SELECT * FROM fired_debtor_drivers WHERE bitrix_card_id = ?;
   `;
-  return db.get(sql, driver_id);
+  return db.get(sql, bitrix_card_id);
 }
 
 /**
  * Updates a fired debtor driver's balance details.
- * @param {string} driver_id - The driver ID.
+ * @param {number} bitrix_card_id - The bitrix card ID.
  * @param {string} current_week_balance - The updated balance.
  * @param {string} current_week_total_deposit - The updated total deposit.
  * @param {string} current_week_total_debt - The updated total debt.
  * @returns {Promise<Object>} - The updated record.
  */
 export async function updateFiredDebtorDriverBalance({
-  driver_id,
-  current_week_balance,
-  current_week_total_deposit,
-  current_week_total_debt,
-}) {
+                                                       bitrix_card_id,
+                                                       current_week_balance,
+                                                       current_week_total_deposit,
+                                                       current_week_total_debt,
+                                                     }) {
   const sql = `
       UPDATE fired_debtor_drivers
       SET current_week_balance = ?, current_week_total_deposit = ?, current_week_total_debt = ?, updated_at = CURRENT_TIMESTAMP
-      WHERE driver_id = ?
+      WHERE bitrix_card_id = ?
           RETURNING *;
   `;
   return db.get(
@@ -677,6 +679,20 @@ export async function updateFiredDebtorDriverBalance({
     current_week_balance,
     current_week_total_deposit,
     current_week_total_debt,
-    driver_id
+    bitrix_card_id
   );
+}
+
+/**
+ * Retrieves a fired debtor driver by driver_id, current week number, and current year.
+ * @param {string} driver_id - The driver ID.
+ * @param {number} cs_current_week - The current week number.
+ * @param {number} cs_current_year - The current year.
+ * @returns {Promise<Object>} - The matching record.
+ */
+export async function getFiredDebtorDriverByWeekAndYear({ driver_id, cs_current_week, cs_current_year }) {
+  const sql = `
+        SELECT * FROM fired_debtor_drivers WHERE driver_id = ? AND cs_current_week = ? AND cs_current_year = ?;
+    `;
+  return db.get(sql, driver_id, cs_current_week, cs_current_year);
 }
