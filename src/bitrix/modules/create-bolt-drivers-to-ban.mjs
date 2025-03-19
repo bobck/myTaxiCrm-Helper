@@ -48,15 +48,13 @@ export const createBoltDriversToBan = async () => {
     }
 
     const cityId = getCityBrandingId(auto_park_id);
-    const isDebtor = Number(driver_balance) < 0;
-    const debt = isDebtor ? String(-1 * driver_balance) : '0';
-    const isDebtorState = isDebtor ? debtorState : notDebtorState;
+    const debt = String(-1 * driver_balance);
     const bitrixResp = await createBanBoltDriverCardItem({
       full_name,
       bolt_id,
       cityId,
       debt,
-      isDebtorState,
+      isDebtorState:debtorState,
       messageType: Seven_days_without_trips_message_type,
     });
     const { bitrix_card_id } = bitrixResp;
@@ -69,5 +67,8 @@ if (process.env.ENV === 'TEST') {
     `testing bolt drivers ban cards creation\ncards count :${process.env.BOLT_DRIVERS_BAN_CARDS}`
   );
   await openSShTunnel;
-  await createBoltDriversToBan();
+  const queryParams = computeQueryParams();
+  const { rows } = await getBoltDriversToBan(queryParams);
+  console.log(rows.length);
+  // await createBoltDriversToBan();
 }

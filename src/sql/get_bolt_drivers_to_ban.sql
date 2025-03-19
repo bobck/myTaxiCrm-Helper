@@ -25,11 +25,11 @@ SELECT DISTINCT ON (d.id)
     d.auto_park_id,
     d.full_name,
     dti.external_id AS bolt_id,
-    (COALESCE(cs.total_payable_to_driver, 0) - COALESCE(cs.total_debt, 0)) AS driver_balance
+    (cs.total_payable_to_driver - cs.total_debt) AS driver_balance
 FROM aggregated_reports ar
     JOIN drivers d
 ON ar.driver_id = d.id
-    AND d.inner_status = 'WORKING'
+    AND d.inner_status = 'FIRED_OUT'
     JOIN calculated_statements cs
     ON cs.driver_id = ar.driver_id
     AND cs.week = $2
@@ -38,4 +38,5 @@ ON ar.driver_id = d.id
     ON ar.driver_id = dti.driver_id
     AND dti.integration_type = 'BOLT'
 WHERE dti.external_id IS NOT NULL
+    AND (cs.total_payable_to_driver - cs.total_debt)<0
 ORDER BY d.id;
