@@ -15,6 +15,7 @@ WITH aggregated_reports AS (
                   JOIN drivers_to_integrations dti
                        ON ar.driver_id = dti.driver_id
                            AND dti.integration_type = 'BOLT'
+                           AND dti.external_id IS NOT NULL
          GROUP BY ar.driver_id
      )
 SELECT
