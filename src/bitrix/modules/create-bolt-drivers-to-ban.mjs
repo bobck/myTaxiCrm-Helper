@@ -46,13 +46,6 @@ export const createBoltDriversToBan = async () => {
     const dbcard = await getBoltDriverBanReqByDriverId({ driver_id });
 
     if (dbcard) {
-      console.error(
-        {
-    message:'Present driver bolt driver ban request card while creating',
-    driver_id,
-    process: 'createBoltDriversToBan',
-}
-      );
       continue;
     }
 
