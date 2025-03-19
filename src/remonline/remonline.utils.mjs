@@ -69,10 +69,7 @@ export async function getOrders({ idLabels, ids }, _page = 1, _orders = []) {
     const { validation } = message;
 
     if (response.status == 403 && code == 101) {
-      console.info({
-        function: 'getOrders',
-        message: 'Get new Auth',
-      });
+      console.info({ function: 'getOrders', message: 'Get new Auth' });
       await remonlineTokenToEnv(true);
       return await getOrders({ idLabels, ids }, _page, _orders);
     }
@@ -112,9 +109,7 @@ export async function changeOrderStatus({ id, statusId }) {
 
   const response = await fetch(`${process.env.REMONLINE_API}/order/status/`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: params,
   });
 
@@ -125,15 +120,9 @@ export async function changeOrderStatus({ id, statusId }) {
     const { validation } = message;
 
     if (response.status == 403 && code == 101) {
-      console.info({
-        function: 'createOrder',
-        message: 'Get new Auth',
-      });
+      console.info({ function: 'createOrder', message: 'Get new Auth' });
       await remonlineTokenToEnv(true);
-      return await changeOrderStatus({
-        id,
-        statusId,
-      });
+      return await changeOrderStatus({ id, statusId });
     }
 
     console.error({
@@ -218,9 +207,7 @@ export async function getCashboxTransactions(
       );
     }
 
-    return {
-      transactions: _transactions,
-    };
+    return { transactions: _transactions };
   } catch (e) {
     console.error({
       function: 'getCashboxTransactions',

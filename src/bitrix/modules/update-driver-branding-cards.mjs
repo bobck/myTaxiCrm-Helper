@@ -54,7 +54,7 @@ export async function updateDriverBrandingCards() {
     const { driver_id, total_trips } = row;
     const dbcard = await getCrmBrandingCardByDriverId({
       driver_id,
-      branding_process_id,
+      branding_process_id
     });
     if (!dbcard) {
       console.error(

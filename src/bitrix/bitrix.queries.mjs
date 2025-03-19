@@ -78,8 +78,7 @@ export async function insertBrandingCard(card) {
  * @returns {Promise<Object>} - Resolves with the matching row (or undefined if not found).
  */
 export async function getCrmBrandingCardByDriverId({
-  driver_id,
-  branding_process_id,
+  driver_id, branding_process_id,
 }) {
   const sql = `
         SELECT bc.*, bp.weekNumber, bp.year
@@ -88,7 +87,7 @@ export async function getCrmBrandingCardByDriverId({
         WHERE bc.driver_id = ? AND bp.id=?;
     `;
 
-  return db.get(sql, driver_id, branding_process_id);
+  return db.get(sql, driver_id,branding_process_id);
 }
 
 /**
