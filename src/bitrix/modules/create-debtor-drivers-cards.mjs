@@ -16,7 +16,6 @@ function computeBrandingCardStage(total_trips) {
   }
 }
 
-
 export async function createFiredDebtorDriversCards() {
   const { rows } = await getFiredDebtorDriversInfo();
 
@@ -31,8 +30,8 @@ export async function createFiredDebtorDriversCards() {
     // ) {
     //   return;
     // }
-    if(row.is_balance_enabled||row.is_deposit_enabled){
-      console.log(row)
+    if (row.is_balance_enabled || row.is_deposit_enabled) {
+      console.log(row);
     }
     // const {
     //   full_name,
