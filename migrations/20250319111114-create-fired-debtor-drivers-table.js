@@ -22,11 +22,11 @@ exports.up = function (db, callback) {
                                             current_week_balance DECIMAL NOT NULL,
                                             current_week_total_deposit DECIMAL NOT NULL,
                                             current_week_total_debt DECIMAL NOT NULL,
-                                            fire_date DATE NOT NULL,
-                                            is_balance_enabled BOOLEAN NOT NULL,
-                                            balance_activation_value DECIMAL NOT NULL,
-                                            is_deposit_enabled BOOLEAN NOT NULL,
-                                            deposit_activation_value DECIMAL NOT NULL,
+                                            fire_date DATE,
+                                            is_balance_enabled BOOLEAN ,
+                                            balance_activation_value DECIMAL ,
+                                            is_deposit_enabled BOOLEAN,
+                                            deposit_activation_value DECIMAL,
                                             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                                             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );

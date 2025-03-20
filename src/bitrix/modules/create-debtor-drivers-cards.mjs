@@ -1,20 +1,15 @@
 import { getFiredDebtorDriversInfo } from '../../web.api/web.api.utlites.mjs';
 import { cityListWithAssignedBy as cityList } from '../bitrix.constants.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
-import { getFiredDebtorDriverByWeekAndYear } from '../bitrix.queries.mjs';
+import { getFiredDebtorDriverByWeekAndYear, insertFiredDebtorDriver } from '../bitrix.queries.mjs';
+import { chunkArray, createBitrixFiredDebtorDriversCards } from '../bitrix.utils.mjs';
 
-function computeCardStage(total_trips) {
-  let trips = Number(total_trips);
-  if (isNaN(trips)) {
-    console.error('Trips must be a number');
-  }
-  if (trips >= 90) {
-    return 'PREPARATION';
-  } else if (trips < 30) {
-    return 'CLIENT';
-  } else {
-    return 'NEW';
-  }
+function getCityBrandingId({ auto_park_id }) {
+  const matchingCity = cityList.find(
+    (obj) => obj.auto_park_id === auto_park_id
+  );
+  const { brandingId: cityBrandingId } = matchingCity;
+  return { cityBrandingId };
 }
 
 export async function createFiredDebtorDriversCards() {
@@ -28,7 +23,7 @@ export async function createFiredDebtorDriversCards() {
   for (const [index, row] of rows.entries()) {
     if (
       process.env.ENV === 'TEST' &&
-      index === Number(process.env.BRANDING_CARDS_COUNT)
+      index === Number(process.env.DEBTOR_DRIVERS_CARDS_COUNT)
     ) {
       break;
     }
@@ -40,6 +35,7 @@ export async function createFiredDebtorDriversCards() {
       cs_current_year,
       current_week_total_deposit,
       current_week_total_debt,
+      current_week_balance,
       fire_date,
       is_balance_enabled,
       balance_activation_value,
@@ -51,56 +47,53 @@ export async function createFiredDebtorDriversCards() {
 
     const dbcard = await getFiredDebtorDriverByWeekAndYear({driver_id,cs_current_week, cs_current_year});
     if (dbcard) {
-
+      console.log({message:'present card',driver_id,cs_current_week,cs_current_year});
+      continue;
     }
 
-  //   const { cityBrandingId } = getCityBrandingId({ auto_park_id });
-  //   const stage_id = `DT1138_62:${computeBrandingCardInProgressStage({ total_trips, auto_park_id })}`;
-  //   const myTaxiDriverUrl = `https://fleets.mytaxicrm.com/${auto_park_id}/drivers/${driver_id}`;
-  //   const card = {
-  //     driver_id,
-  //     driver_name,
-  //     stage_id,
-  //     phone,
-  //     myTaxiDriverUrl,
-  //     total_trips,
-  //     weekNumber,
-  //     year,
-  //     cityBrandingId,
-  //     auto_park_id,
-  //   };
-  //   processedCards.push(card);
-  // }
-  // const chunkedProcessedCards = chunkArray(
-  //   processedCards,
-  //   Number(process.env.CHUNK_SIZE) || 7
-  // );
-  // for (const [index, chunk] of chunkedProcessedCards.entries()) {
-  //   const bitrixRespObj = await createBitrixDriverBrandingCards({
-  //     cards: chunk,
-  //   });
-  //   const handledResponseArr = [];
-  //   for (const driver_id in bitrixRespObj) {
-  //     const { id } = bitrixRespObj[driver_id]['item'];
-  //     const matchingCard = chunk.find((c) => c.driver_id === driver_id);
-  //     handledResponseArr.push({
-  //       bitrix_card_id: id,
-  //       driver_id: matchingCard.driver_id,
-  //       total_trips: matchingCard.total_trips,
-  //       auto_park_id: matchingCard.auto_park_id,
-  //     });
-  //   }
-  //   for (const respElement of handledResponseArr) {
-  //     const { driver_id, total_trips, bitrix_card_id, auto_park_id } =
-  //       respElement;
-  //     await insertBrandingCard({
-  //       driver_id,
-  //       total_trips,
-  //       bitrix_card_id,
-  //       branding_process_id,
-  //       auto_park_id,
-  //     });
-  //   }
+    const stage_id = `DT1162_72:NEW`;
+    const { cityBrandingId } = getCityBrandingId({ auto_park_id });
+    const card = {
+      stage_id,
+      driver_id,
+      full_name,
+      auto_park_id,
+      cityBrandingId,
+      cs_current_week,
+      cs_current_year,
+      current_week_balance,
+      current_week_total_deposit,
+      current_week_total_debt,
+      fire_date,
+      is_balance_enabled,
+      balance_activation_value,
+      is_deposit_enabled,
+      deposit_activation_value
+    };
+    processedCards.push(card);
+  }
+  const chunkedProcessedCards = chunkArray(
+    processedCards,
+    Number(process.env.CHUNK_SIZE) || 5
+  );
+  for (const [index, chunk] of chunkedProcessedCards.entries()) {
+    const bitrixRespObj = await createBitrixFiredDebtorDriversCards({
+      cards: chunk,
+    });
+    const handledResponseArr = [];
+    for (const driver_id in bitrixRespObj) {
+      const { id } = bitrixRespObj[driver_id]['item'];
+      const matchingCard = chunk.find((c) => c.driver_id === driver_id);
+      handledResponseArr.push({
+        bitrix_card_id: id,
+        ...matchingCard,
+      });
+    }
+    for (const respElement of handledResponseArr) {
+      await insertFiredDebtorDriver({
+        ...respElement
+      });
+    }
   }
 
   console.log(
