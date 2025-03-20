@@ -665,30 +665,59 @@ export async function getFiredDebtorDriverByBitrixId({ bitrix_card_id }) {
 }
 
 /**
- * Updates a fired debtor driver's balance details.
- * @param {number} bitrix_card_id - The bitrix card ID.
- * @param {string} current_week_balance - The updated balance.
- * @param {string} current_week_total_deposit - The updated total deposit.
- * @param {string} current_week_total_debt - The updated total debt.
+ * Updates multiple fields in the fired_debtor_drivers table identified by bitrix_card_id.
+ * @param {Object} params - The update parameters.
+ * @param {number} params.bitrix_card_id - The Bitrix card ID.
+ * @param {number} params.cs_current_week - The current CS week.
+ * @param {number} params.cs_current_year - The current CS year.
+ * @param {number} params.current_week_balance - The balance for the current week.
+ * @param {number} params.current_week_total_deposit - The total deposit for the current week.
+ * @param {number} params.current_week_total_debt - The total debt for the current week.
+ * @param {boolean} params.is_balance_enabled - Whether the balance feature is enabled.
+ * @param {number} params.balance_activation_value - The balance activation value.
+ * @param {boolean} params.is_deposit_enabled - Whether deposits are enabled.
+ * @param {number} params.deposit_activation_value - The deposit activation value.
  * @returns {Promise<Object>} - The updated record.
  */
-export async function updateFiredDebtorDriverBalance({
+export async function updateFiredDebtorDriver({
   bitrix_card_id,
+  cs_current_week,
+  cs_current_year,
   current_week_balance,
   current_week_total_deposit,
   current_week_total_debt,
+  is_balance_enabled,
+  balance_activation_value,
+  is_deposit_enabled,
+  deposit_activation_value,
 }) {
   const sql = `
       UPDATE fired_debtor_drivers
-      SET current_week_balance = ?, current_week_total_deposit = ?, current_week_total_debt = ?, updated_at = CURRENT_TIMESTAMP
+      SET cs_current_week = ?,
+          cs_current_year = ?,
+          current_week_balance = ?,
+          current_week_total_deposit = ?,
+          current_week_total_debt = ?,
+          is_balance_enabled = ?,
+          balance_activation_value = ?,
+          is_deposit_enabled = ?,
+          deposit_activation_value = ?,
+          updated_at = CURRENT_TIMESTAMP
       WHERE bitrix_card_id = ?
           RETURNING *;
   `;
+
   return db.get(
     sql,
+    cs_current_week,
+    cs_current_year,
     current_week_balance,
     current_week_total_deposit,
     current_week_total_debt,
+    is_balance_enabled,
+    balance_activation_value,
+    is_deposit_enabled,
+    deposit_activation_value,
     bitrix_card_id
   );
 }
