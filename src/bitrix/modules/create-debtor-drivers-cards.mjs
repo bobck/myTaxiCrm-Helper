@@ -1,8 +1,14 @@
 import { getFiredDebtorDriversInfo } from '../../web.api/web.api.utlites.mjs';
 import { cityListWithAssignedBy as cityList } from '../bitrix.constants.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
-import { getFiredDebtorDriverByWeekAndYear, insertFiredDebtorDriver } from '../bitrix.queries.mjs';
-import { chunkArray, createBitrixFiredDebtorDriversCards } from '../bitrix.utils.mjs';
+import {
+  getFiredDebtorDriverByWeekAndYear,
+  insertFiredDebtorDriver,
+} from '../bitrix.queries.mjs';
+import {
+  chunkArray,
+  createBitrixFiredDebtorDriversCards,
+} from '../bitrix.utils.mjs';
 
 function getCityBrandingId({ auto_park_id }) {
   const matchingCity = cityList.find(
@@ -40,19 +46,33 @@ export async function createFiredDebtorDriversCards() {
       is_balance_enabled,
       balance_activation_value,
       is_deposit_enabled,
-      deposit_activation_value
-    }=row;
+      deposit_activation_value,
+    } = row;
 
-
-
-    const dbcard = await getFiredDebtorDriverByWeekAndYear({driver_id,cs_current_week, cs_current_year});
+    const dbcard = await getFiredDebtorDriverByWeekAndYear({
+      driver_id,
+      cs_current_week,
+      cs_current_year,
+    });
     if (dbcard) {
-      console.log({message:'present card',driver_id,cs_current_week,cs_current_year});
+      console.log({
+        message: 'present card',
+        driver_id,
+        cs_current_week,
+        cs_current_year,
+      });
       continue;
     }
 
     const stage_id = `DT1162_72:NEW`;
-    const { cityBrandingId } = getCityBrandingId({ auto_park_id });
+    let cityBrandingId;
+    try {
+      cityBrandingId = getCityBrandingId({ auto_park_id }).cityBrandingId;
+    } catch (err) {
+      console.log(
+        `Error getting city branding id for ${cityBrandingId}\n auto_park_id=${auto_park_id}`
+      );
+    }
     const card = {
       stage_id,
       driver_id,
@@ -68,7 +88,7 @@ export async function createFiredDebtorDriversCards() {
       is_balance_enabled,
       balance_activation_value,
       is_deposit_enabled,
-      deposit_activation_value
+      deposit_activation_value,
     };
     processedCards.push(card);
   }
@@ -91,20 +111,22 @@ export async function createFiredDebtorDriversCards() {
     }
     for (const respElement of handledResponseArr) {
       await insertFiredDebtorDriver({
-        ...respElement
+        ...respElement,
       });
     }
+    console.log(
+      `chunk${index} successfully uploaded with ${chunk.length} elements`
+    );
   }
 
   console.log(
     `${processedCards.length} branding cards creation has been finished.`
   );
-
 }
 
 if (process.env.ENV === 'TEST') {
   console.log(
-    `testing fired debtor drivers creation\ncards count :${(process.env.DEBTOR_DRIVERS_CARDS_COUNT = 4)}`
+    `testing fired debtor drivers creation\ncards count :${process.env.DEBTOR_DRIVERS_CARDS_COUNT}`
   );
   await openSShTunnel;
   await createFiredDebtorDriversCards();
