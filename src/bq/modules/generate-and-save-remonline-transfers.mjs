@@ -38,35 +38,7 @@ const splitTransfers = ({ transfersWithProducts }) =>
     },
     { transfers: [], products: [] }
   );
-const filterTransfersAndProducts = async ({ transfers, products }) => {
-  const presentTransfers = await getColumnsFromBQ(
-    { table_id: 'transfers' },
-    'id',
-    'branch_id'
-  );
-  const presentProducts = await getColumnsFromBQ(
-    { table_id: 'transfers_products' },
-    'id',
-    'transfer_id'
-  );
-  const filteredTransfers = transfers.filter(
-    (transfer) =>
-      !presentTransfers.some(
-        (presentTransfer) =>
-          transfer.id === presentTransfer.id &&
-          transfer.branch_id === presentTransfer.branch_id
-      )
-  );
-  const filteredProducts = products.filter(
-    (product) =>
-      !presentProducts.some(
-        (presentProduct) =>
-          product.transfer_id === presentProduct.transfer_id &&
-          product.id === presentProduct.id
-      )
-  );
-  return { filteredTransfers, filteredProducts };
-};
+
 export async function generateAndSaveTransfers() {
   const branches = await getLocations();
   if (branches.length === 0) {
@@ -78,20 +50,16 @@ export async function generateAndSaveTransfers() {
     'fetching transfers...\nwait please it could take few minutes...'
   );
   for (const [index, branch] of branches.entries()) {
-    // if (process.env.ENV === 'TEST' && index !== branches.length - 1) {
-    //   continue;
-    // }
+    if (process.env.ENV === 'TEST' && index !== branches.length - 1) {
+      continue;
+    }
     const { id: branch_id } = branch;
     const { transfers } = await getTransfers({ branch_id });
     transfersWithProducts.push(...transfers);
   }
 
   const { transfers, products } = splitTransfers({ transfersWithProducts });
-  // const { filteredTransfers, filteredProducts } =
-  //   await filterTransfersAndProducts({
-  //     transfers,
-  //     products,
-  //   });
+
   try {
     if (transfers.length > 0) {
       await insertRowsAsStream({
@@ -107,36 +75,6 @@ export async function generateAndSaveTransfers() {
       });
       console.log(`${products.length} products have been uploaded to BQ`);
     }
-    // if (filteredTransfers.length > 0) {
-    //   await insertRowsAsStream({
-    //     rows: filteredTransfers,
-    //     bqTableId: 'transfers',
-    //   });
-    //   console.log(
-    //     `${filteredTransfers.length} transfers have been uploaded to BQ,${transfers.length - filteredTransfers.length} coincidences were filtered `
-    //   );
-    // } else {
-    //   console.log(
-    //     `all transfers are already in BQ. Estimated rows count:${transfers.length}`
-    //   );
-    // }
-    // if (filteredProducts.length > 0) {
-    //   await insertRowsAsStream({
-    //     rows: filteredProducts,
-    //     bqTableId: 'transfers_products',
-    //   });
-    //   console.log(
-    //     `${filteredProducts.length} Products have been uploaded to BQ,${products.length - filteredProducts.length} coincidences were filtered `
-    //   );
-    // } else {
-    //   console.log(
-    //     `all transfers are already in BQ. Estimated rows count:${products.length}`
-    //   );
-    // }
-    //
-    // console.log(
-    //   'transfers and transfers_products insertions have been successfully finished.'
-    // );
   } catch (e) {
     if (e.errors) {
       console.error(e.errors[0]);
