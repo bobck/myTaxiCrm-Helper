@@ -615,7 +615,7 @@ export async function insertFiredDebtorDriver(driver) {
     is_balance_enabled,
     balance_activation_value,
     is_deposit_enabled,
-    deposit_activation_value
+    deposit_activation_value,
   } = driver;
   const sql = `
       INSERT INTO fired_debtor_drivers
@@ -641,6 +641,16 @@ export async function insertFiredDebtorDriver(driver) {
     deposit_activation_value
   );
 }
+/**
+ * Retrieves all driver IDs from fired_debtor_drivers.
+ * @returns {Promise<Array>} - An array of driver IDs.
+ */
+export async function getAllFiredDebtorDriverIds() {
+  const sql = `
+      SELECT driver_id FROM fired_debtor_drivers;
+  `;
+  return db.all(sql);
+}
 
 /**
  * Retrieves a fired debtor driver by bitrix_card_id.
@@ -663,11 +673,11 @@ export async function getFiredDebtorDriverByBitrixId({ bitrix_card_id }) {
  * @returns {Promise<Object>} - The updated record.
  */
 export async function updateFiredDebtorDriverBalance({
-                                                       bitrix_card_id,
-                                                       current_week_balance,
-                                                       current_week_total_deposit,
-                                                       current_week_total_debt,
-                                                     }) {
+  bitrix_card_id,
+  current_week_balance,
+  current_week_total_deposit,
+  current_week_total_debt,
+}) {
   const sql = `
       UPDATE fired_debtor_drivers
       SET current_week_balance = ?, current_week_total_deposit = ?, current_week_total_debt = ?, updated_at = CURRENT_TIMESTAMP
@@ -690,7 +700,11 @@ export async function updateFiredDebtorDriverBalance({
  * @param {number} cs_current_year - The current year.
  * @returns {Promise<Object>} - The matching record.
  */
-export async function getFiredDebtorDriverByWeekAndYear({ driver_id, cs_current_week, cs_current_year }) {
+export async function getFiredDebtorDriverByWeekAndYear({
+  driver_id,
+  cs_current_week,
+  cs_current_year,
+}) {
   const sql = `
         SELECT * FROM fired_debtor_drivers WHERE driver_id = ? AND cs_current_week = ? AND cs_current_year = ?;
     `;

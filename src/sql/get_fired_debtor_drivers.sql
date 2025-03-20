@@ -39,8 +39,6 @@ SELECT
     fd.id as driver_id,
     fd.full_name,
     fd.auto_park_id,
-    cs.week AS cs_current_week,
-    cs.year AS cs_current_year,
     cs.balance AS current_week_balance,
     cs.total_deposit AS current_week_total_deposit,
     cs.total_debt AS current_week_total_debt,

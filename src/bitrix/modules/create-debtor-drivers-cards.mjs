@@ -9,6 +9,7 @@ import {
   chunkArray,
   createBitrixFiredDebtorDriversCards,
 } from '../bitrix.utils.mjs';
+import { DateTime } from 'luxon';
 
 function getCityBrandingId({ auto_park_id }) {
   const matchingCity = cityList.find(
@@ -19,6 +20,8 @@ function getCityBrandingId({ auto_park_id }) {
 }
 
 export async function createFiredDebtorDriversCards() {
+  const today = DateTime.local().startOf('day');
+  const { weekNumber: cs_current_week, year: cs_current_year } = today;
   const { rows } = await getFiredDebtorDriversInfo();
 
   if (rows.length === 0) {
@@ -37,8 +40,6 @@ export async function createFiredDebtorDriversCards() {
       driver_id,
       full_name,
       auto_park_id,
-      cs_current_week,
-      cs_current_year,
       current_week_total_deposit,
       current_week_total_debt,
       current_week_balance,
