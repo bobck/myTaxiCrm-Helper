@@ -600,3 +600,14 @@ export async function getFiredDebtorDriversInfo() {
   const { rows, rowCount } = result;
   return { rows };
 }
+export async function checkFiredDebtorDriversInfo({ driver_ids }) {
+  if (driver_ids.length === 0) {
+    throw new Error('Invalid driver_ids: Must be a non-empty array.');
+  }
+  const sql = fs
+    .readFileSync('src/sql/check_fired_debtor_drivers.sql')
+    .toString();
+  const result = await pool.query(sql, [driver_ids]);
+  const { rows, rowCount } = result;
+  return { rows };
+}

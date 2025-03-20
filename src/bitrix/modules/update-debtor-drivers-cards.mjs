@@ -1,8 +1,11 @@
-import { getFiredDebtorDriversInfo } from '../../web.api/web.api.utlites.mjs';
+import {
+  checkFiredDebtorDriversInfo,
+  getFiredDebtorDriversInfo,
+} from '../../web.api/web.api.utlites.mjs';
 import { cityListWithAssignedBy as cityList } from '../bitrix.constants.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
 import {
-  getAllFiredDebtorDriverIds,
+  getAllFiredDebtorDriver,
   getFiredDebtorDriverByWeekAndYear,
   insertFiredDebtorDriver,
 } from '../bitrix.queries.mjs';
@@ -10,6 +13,9 @@ import {
   chunkArray,
   createBitrixFiredDebtorDriversCards,
 } from '../bitrix.utils.mjs';
+import { DateTime } from 'luxon';
+
+function computeStage() {}
 
 function getCityBrandingId({ auto_park_id }) {
   const matchingCity = cityList.find(
@@ -20,24 +26,20 @@ function getCityBrandingId({ auto_park_id }) {
 }
 
 export async function updateFiredDebtorDriversCards() {
-  const firedDebtorDrivers = await getAllFiredDebtorDriverIds();
-  const a = firedDebtorDrivers.reduce((acc, driver, index) => {
-    if (index === 0) {
-      return `'${driver.driver_id}'`;
-    }
-    return `${acc}, '${driver.driver_id}'`;
-  }, '');
-  if (firedDebtorDrivers.length === 0) {
-    console.error('No fired debtor drivers found.');
+  const firedDebtorDrivers = await getAllFiredDebtorDriver();
+  const driver_ids = firedDebtorDrivers.map((driver) => driver.driver_id);
+
+  const { rows } = await checkFiredDebtorDriversInfo({ driver_ids });
+  if (rows.length === 0) {
+    console.error('No rows found for fired debtor drivers found.');
     return;
   }
-  console.log(`(${a})`, firedDebtorDrivers.length);
-  // const { rows } = await getFiredDebtorDriversInfo();
-  //
-  // if (rows.length === 0) {
-  //   console.error('No rows found for fired debtor drivers found.');
-  //   return;
-  // }
+
+  const today = DateTime.local().startOf('day');
+  const { weekNumber: cs_current_week, year: cs_current_year } = today;
+
+  console.log(`rows.length: ${rows.length}`);
+
   // const processedCards = [];
   // for (const [index, row] of rows.entries()) {
   //   if (
@@ -48,14 +50,9 @@ export async function updateFiredDebtorDriversCards() {
   //   }
   //   const {
   //     driver_id,
-  //     full_name,
-  //     auto_park_id,
-  //     cs_current_week,
-  //     cs_current_year,
   //     current_week_total_deposit,
   //     current_week_total_debt,
   //     current_week_balance,
-  //     fire_date,
   //     is_balance_enabled,
   //     balance_activation_value,
   //     is_deposit_enabled,
@@ -67,9 +64,9 @@ export async function updateFiredDebtorDriversCards() {
   //     cs_current_week,
   //     cs_current_year,
   //   });
-  //   if (dbcard) {
+  //   if (!dbcard) {
   //     console.log({
-  //       message: 'present card',
+  //       message: 'Absent card',
   //       driver_id,
   //       cs_current_week,
   //       cs_current_year,

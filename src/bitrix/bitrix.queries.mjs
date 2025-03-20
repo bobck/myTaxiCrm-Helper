@@ -645,9 +645,9 @@ export async function insertFiredDebtorDriver(driver) {
  * Retrieves all driver IDs from fired_debtor_drivers.
  * @returns {Promise<Array>} - An array of driver IDs.
  */
-export async function getAllFiredDebtorDriverIds() {
+export async function getAllFiredDebtorDriver() {
   const sql = `
-      SELECT driver_id FROM fired_debtor_drivers;
+      SELECT * FROM fired_debtor_drivers;
   `;
   return db.all(sql);
 }
