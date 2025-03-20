@@ -1,5 +1,4 @@
 import { getBrandingCardsInfo } from '../../web.api/web.api.utlites.mjs';
-import { DateTime } from 'luxon';
 import {
   createBrandingProcess,
   getCrmBrandingCardByDriverId,
@@ -9,40 +8,20 @@ import {
   chunkArray,
   createBitrixDriverBrandingCards,
 } from '../bitrix.utils.mjs';
-import { cityListWithAssignedBy as cityList } from '../bitrix.constants.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
+import {
+  computeBrandingCardInProgressStage,
+  computePeriodBounds,
+} from '../bitrix.business-entity.mjs';
+import { cityListWithAssignedBy as cityList } from '../bitrix.constants.mjs';
 
-export function computePeriodBounds() {
-  const today = DateTime.local().startOf('day');
-
-  const lowerBound = today.minus({ days: today.weekday });
-
-  const upperBound = lowerBound.plus({ days: 7 });
-
-  // Return the dates formatted as ISO strings (YYYY-MM-DD) for PostgreSQL
-  return {
-    lowerBound,
-    upperBound,
-  };
+function getCityBrandingId({ auto_park_id }) {
+  const matchingCity = cityList.find(
+    (obj) => obj.auto_park_id === auto_park_id
+  );
+  const { brandingId: cityBrandingId } = matchingCity;
+  return { cityBrandingId };
 }
-
-function computeBrandingCardStage(total_trips) {
-  let trips = Number(total_trips);
-  if (isNaN(trips)) {
-    console.error('Trips must be a number');
-  }
-  if (trips >= 90) {
-    return 'PREPARATION';
-  } else if (trips < 30) {
-    return 'CLIENT';
-  } else {
-    return 'NEW';
-  }
-}
-function getCityBrandingId(auto_park_id) {
-  return cityList.find((obj) => obj.auto_park_id === auto_park_id).brandingId;
-}
-
 export async function createDriverBrandingCards() {
   const bounds = computePeriodBounds();
   const brandingProcess = await createBrandingProcess({
@@ -87,9 +66,9 @@ export async function createDriverBrandingCards() {
       continue;
     }
 
-    const stage_id = `DT1138_62:${computeBrandingCardStage(total_trips)}`;
+    const { cityBrandingId } = getCityBrandingId({ auto_park_id });
+    const stage_id = `DT1138_62:${computeBrandingCardInProgressStage({ total_trips, auto_park_id })}`;
     const myTaxiDriverUrl = `https://fleets.mytaxicrm.com/${auto_park_id}/drivers/${driver_id}`;
-    const cityBrandingId = getCityBrandingId(auto_park_id);
     const card = {
       driver_id,
       driver_name,
@@ -100,6 +79,7 @@ export async function createDriverBrandingCards() {
       weekNumber,
       year,
       cityBrandingId,
+      auto_park_id,
     };
     processedCards.push(card);
   }
@@ -119,15 +99,18 @@ export async function createDriverBrandingCards() {
         bitrix_card_id: id,
         driver_id: matchingCard.driver_id,
         total_trips: matchingCard.total_trips,
+        auto_park_id: matchingCard.auto_park_id,
       });
     }
     for (const respElement of handledResponseArr) {
-      const { driver_id, total_trips, bitrix_card_id } = respElement;
+      const { driver_id, total_trips, bitrix_card_id, auto_park_id } =
+        respElement;
       await insertBrandingCard({
         driver_id,
         total_trips,
         bitrix_card_id,
         branding_process_id,
+        auto_park_id,
       });
     }
   }
