@@ -221,3 +221,29 @@ export const repairAndAccidentCarsTableSchema = [
   { name: 'work_stopped', type: 'BOOLEAN', mode: 'REQUIRED' },
   { name: 'date', type: 'DATE', mode: 'REQUIRED' },
 ];
+export const transfersTableSchema = [
+  { name: 'branch_id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'warehouse_id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'created_at', type: 'INT64', mode: 'REQUIRED' },
+  { name: 'description', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'created_by_id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'id_label', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'cost', type: 'FLOAT', mode: 'REQUIRED' },
+  { name: 'source_warehouse_title', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'target_warehouse_title', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'created_by_fullname', type: 'STRING', mode: 'REQUIRED' },
+];
+
+export const transferProductsTableSchema = [
+  { name: 'id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'title', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'is_serial', type: 'BOOLEAN', mode: 'REQUIRED' },
+  { name: 'code', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'article', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'amount', type: 'FLOAT', mode: 'REQUIRED' },
+  { name: 'uom_id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'uom_description', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'uom_title', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'transfer_id', type: 'INTEGER', mode: 'REQUIRED' },
+];
