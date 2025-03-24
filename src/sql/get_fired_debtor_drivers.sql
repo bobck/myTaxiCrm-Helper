@@ -31,12 +31,13 @@ SELECT
     cs.total_deposit AS current_week_total_deposit,
     cs.total_debt AS current_week_total_debt,
     (fd.fire_date::date)::TEXT AS fire_date,
-        hcbr.is_balance_enabled,
+    hcbr.is_balance_enabled,
     hcbr.balance_activation_value,
     hcbr.is_deposit_enabled ,
     hcbr.deposit_activation_value
 FROM fired_drivers fd
-         JOIN calculated_statements cs on cs.year = EXTRACT(YEAR FROM current_date) AND cs.week = EXTRACT(week FROM current_date)
-    AND cs.driver_id = fd.id
+         JOIN calculated_statements cs on cs.driver_id = fd.id
          LEFT JOIN handled_cash_block_rules hcbr on fd.id=hcbr.driver_id
-WHERE (cs.balance+cs.total_deposit)<0;
+WHERE (cs.balance+cs.total_deposit)<0
+  AND cs.year = EXTRACT(YEAR FROM current_date)
+  AND cs.week = EXTRACT(week FROM current_date);

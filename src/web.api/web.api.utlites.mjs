@@ -612,3 +612,26 @@ export async function checkFiredDebtorDriversInfo({ driver_ids }) {
   const { rows, rowCount } = result;
   return { rows };
 }
+export async function getFiredDriversInfo() {
+  const sql = fs.readFileSync('src/sql/get_fired_drivers.sql').toString();
+  const result = await pool.query(sql, [UkrainianBrandingAutoParkIds]);
+  const { rows, rowCount } = result;
+  return { rows };
+}
+export async function getHandledCashBlockRulesInfo({ fired_drivers_ids }) {
+  const sql = fs
+    .readFileSync('src/sql/get_handled_cash_block_rules.sql')
+    .toString();
+  const result = await pool.query(sql, [fired_drivers_ids]);
+  const { rows, rowCount } = result;
+  return { rows };
+}
+
+export async function getFiredDebtorDriversCSInfo({ fired_drivers_ids }) {
+  const sql = fs
+    .readFileSync('src/sql/get_fired_debtor_drivers_cs.sql')
+    .toString();
+  const result = await pool.query(sql, [fired_drivers_ids]);
+  const { rows, rowCount } = result;
+  return { rows };
+}
