@@ -3,6 +3,7 @@ import fs from 'fs';
 import { setTimeout } from 'timers/promises';
 import { pool } from './../api/pool.mjs';
 import { globalLimiter } from './bottleneck.mjs';
+import { UkrainianBrandingAutoParkIds } from '../bitrix/bitrix.constants.mjs';
 
 async function makeCRMRequest({ body }) {
   const response = await fetch(process.env.WEB_API_ENDPOINT, {
@@ -596,7 +597,7 @@ export async function getFiredDebtorDriversInfo() {
   const sql = fs
     .readFileSync('src/sql/get_fired_debtor_drivers.sql')
     .toString();
-  const result = await pool.query(sql);
+  const result = await pool.query(sql, [UkrainianBrandingAutoParkIds]);
   const { rows, rowCount } = result;
   return { rows };
 }

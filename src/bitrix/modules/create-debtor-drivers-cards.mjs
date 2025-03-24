@@ -129,6 +129,9 @@ if (process.env.ENV === 'TEST') {
   console.log(
     `testing fired debtor drivers creation\ncards count :${process.env.DEBTOR_DRIVERS_CARDS_COUNT}`
   );
+  // await openSShTunnel;
+  // await createFiredDebtorDriversCards();
   await openSShTunnel;
-  await createFiredDebtorDriversCards();
+  const { rows: a } = await getFiredDebtorDriversInfo();
+  console.log(a, a.length, new Date());
 }
