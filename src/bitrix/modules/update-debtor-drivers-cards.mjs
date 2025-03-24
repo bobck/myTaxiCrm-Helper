@@ -1,18 +1,16 @@
 import {
   checkFiredDebtorDriversInfo,
-  getFiredDebtorDriversInfo,
+  getHandledCashBlockRulesInfo,
 } from '../../web.api/web.api.utlites.mjs';
 import { cityListWithAssignedBy as cityList } from '../bitrix.constants.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
 import {
   getAllFiredDebtorDriver,
   getFiredDebtorDriverByWeekAndYear,
-  insertFiredDebtorDriver,
   updateFiredDebtorDriver,
 } from '../bitrix.queries.mjs';
 import {
   chunkArray,
-  createBitrixFiredDebtorDriversCards,
   updateBitrixFiredDebtorDriversCards,
 } from '../bitrix.utils.mjs';
 import { DateTime } from 'luxon';
@@ -22,7 +20,7 @@ function computeStage({ apicard }) {
     ? 'PREPARATION'
     : 'NEW';
 }
-function updateCheck({ dbcard, apicard }) {
+function isUpdateFound({ dbcard, apicard }) {
   return (
     Number(dbcard.current_week_balance) ===
       Number(apicard.current_week_balance) &&
@@ -40,33 +38,77 @@ function updateCheck({ dbcard, apicard }) {
       Number(apicard.deposit_activation_value)
   );
 }
-function getCityBrandingId({ auto_park_id }) {
-  const matchingCity = cityList.find(
-    (obj) => obj.auto_park_id === auto_park_id
-  );
-  const { brandingId: cityBrandingId } = matchingCity;
-  return { cityBrandingId };
-}
 
-export async function updateFiredDebtorDriversCards() {
+async function prepareData() {
+  const debtor_fired_drivers_map = new Map();
+  const today = DateTime.local().startOf('day');
+  const { weekNumber: cs_current_week, year: cs_current_year } = today;
+
   const firedDebtorDrivers = await getAllFiredDebtorDriver();
   const driver_ids = firedDebtorDrivers.map((driver) => driver.driver_id);
 
-  const { rows } = await checkFiredDebtorDriversInfo({ driver_ids });
-  if (rows.length === 0) {
+  //fired drivers calculated statements for the last week
+  const { rows: actual_fired_drivers_cs } = await checkFiredDebtorDriversInfo({
+    driver_ids,
+  });
+  //handled cash block rules only for debtors
+  const { rows: hcbr } = await getHandledCashBlockRulesInfo({
+    fired_drivers_ids: driver_ids,
+  });
+
+  console.log(actual_fired_drivers_cs, actual_fired_drivers_cs.length);
+  for (const [index, fd_cs] of actual_fired_drivers_cs.entries()) {
+    if (index === Number(process.env.DEBTOR_DRIVERS_CARDS_COUNT)) {
+      break;
+    }
+    const {
+      driver_id,
+      current_week_total_deposit,
+      current_week_total_debt,
+      current_week_balance,
+    } = fd_cs;
+
+    let matching_hcbr = hcbr.find((hcbr) => hcbr.driver_id === driver_id);
+    if (!matching_hcbr) {
+      matching_hcbr = {
+        driver_id,
+        is_balance_enabled: null,
+        balance_activation_value: null,
+        is_deposit_enabled: null,
+        deposit_activation_value: null,
+      };
+    }
+    const {
+      is_balance_enabled,
+      balance_activation_value,
+      is_deposit_enabled,
+      deposit_activation_value,
+    } = matching_hcbr;
+
+    debtor_fired_drivers_map.set(driver_id, {
+      current_week_total_deposit,
+      current_week_total_debt,
+      current_week_balance,
+      cs_current_week,
+      cs_current_year,
+      is_balance_enabled,
+      balance_activation_value,
+      is_deposit_enabled,
+      deposit_activation_value,
+    });
+  }
+  return { debtor_fired_drivers_map };
+}
+export async function updateFiredDebtorDriversCards() {
+  const { debtor_fired_drivers_map } = await prepareData();
+  if (debtor_fired_drivers_map.size === 0) {
     console.error('No rows found for fired debtor drivers found.');
     return;
   }
 
-  const today = DateTime.local().startOf('day');
-  const { weekNumber: cs_current_week, year: cs_current_year } = today;
-
-  console.log(`rows.length: ${rows.length}`);
-
   const processedCards = [];
-  for (const [index, row] of rows.entries()) {
+  for (const [driver_id, payload] of debtor_fired_drivers_map) {
     const {
-      driver_id,
       current_week_total_deposit,
       current_week_total_debt,
       current_week_balance,
@@ -74,7 +116,9 @@ export async function updateFiredDebtorDriversCards() {
       balance_activation_value,
       is_deposit_enabled,
       deposit_activation_value,
-    } = row;
+      cs_current_week,
+      cs_current_year,
+    } = payload;
     const dbcard = await getFiredDebtorDriverByWeekAndYear({
       driver_id,
       cs_current_week,
@@ -89,14 +133,16 @@ export async function updateFiredDebtorDriversCards() {
       });
       continue;
     }
-    if (updateCheck({ dbcard, apicard: row })) {
-      // console.log(
-      //   `row #${index} hasn't been changed. There is no any sense to update it.`
-      // );
+    if (isUpdateFound({ dbcard, apicard: payload })) {
+      if (process.env.ENV === 'TEST') {
+        console.log(
+          `row #${driver_id} hasn't been changed. There is no any sense to update it.`
+        );
+      }
       continue;
     }
 
-    const stage_id = `DT1162_72:${computeStage({ apicard: row })}`;
+    const stage_id = `DT1162_72:${computeStage({ apicard: payload })}`;
     const card = {
       bitrix_card_id: dbcard.bitrix_card_id,
       stage_id,
@@ -151,4 +197,6 @@ if (process.env.ENV === 'TEST') {
   );
   await openSShTunnel;
   await updateFiredDebtorDriversCards();
+
+  // await prepareData();
 }

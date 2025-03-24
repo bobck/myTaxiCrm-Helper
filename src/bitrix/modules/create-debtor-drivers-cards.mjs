@@ -121,12 +121,14 @@ export async function createFiredDebtorDriversCards() {
       cs_current_year,
     });
     if (dbcard) {
-      console.log({
-        message: 'present card',
-        driver_id,
-        cs_current_week,
-        cs_current_year,
-      });
+      if (process.env.ENV === 'TEST') {
+        console.log({
+          message: 'present card',
+          driver_id,
+          cs_current_week,
+          cs_current_year,
+        });
+      }
       continue;
     }
 
