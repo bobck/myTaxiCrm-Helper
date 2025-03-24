@@ -87,27 +87,20 @@ export async function resetTransfersTables() {
   await createOrResetTableByName({
     bqTableId: 'transfers',
     schema: transfersTableSchema,
+    dataSetId: 'RemOnline',
   });
   await createOrResetTableByName({
     bqTableId: 'transfers_products',
     schema: transferProductsTableSchema,
+    dataSetId: 'RemOnline',
   });
   console.log('the schemes have been generated successfully.');
 }
 if (process.env.ENV === 'TEST') {
-  console.log('generateAndSaveTransfers testing...');
-
-  const env = process.env.BQ_DATASET_ID;
-  process.env.BQ_DATASET_ID = 'RemOnline';
-
   await remonlineTokenToEnv();
   await generateAndSaveTransfers();
-  process.env.BQ_DATASET_ID = env;
 }
 if (process.env.ENV === 'TEST_RESET') {
   console.log('resetTransfersTables testing...');
-  const env = process.env.BQ_DATASET_ID;
-  process.env.BQ_DATASET_ID = 'RemOnline';
   await resetTransfersTables();
-  process.env.BQ_DATASET_ID = env;
 }
