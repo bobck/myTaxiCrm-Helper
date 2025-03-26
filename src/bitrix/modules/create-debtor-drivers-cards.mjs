@@ -1,6 +1,5 @@
 import {
   getFiredDebtorDriversCSInfo,
-  getFiredDebtorDriversInfo,
   getFiredDriversInfo,
   getHandledCashBlockRulesInfo,
 } from '../../web.api/web.api.utlites.mjs';

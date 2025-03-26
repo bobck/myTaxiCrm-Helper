@@ -593,14 +593,6 @@ export async function getBrandingCardsInfo({ period_from, period_to }) {
   const { rows, rowCount } = result;
   return { rows };
 }
-export async function getFiredDebtorDriversInfo() {
-  const sql = fs
-    .readFileSync('src/sql/get_fired_debtor_drivers.sql')
-    .toString();
-  const result = await pool.query(sql, [UkrainianBrandingAutoParkIds]);
-  const { rows, rowCount } = result;
-  return { rows };
-}
 export async function checkFiredDebtorDriversInfo({ driver_ids }) {
   if (driver_ids.length === 0) {
     throw new Error('Invalid driver_ids: Must be a non-empty array.');
@@ -626,7 +618,7 @@ export async function getHandledCashBlockRulesInfo({ fired_drivers_ids }) {
   const { rows, rowCount } = result;
   return { rows };
 }
-
+//CS means calculated statements
 export async function getFiredDebtorDriversCSInfo({ fired_drivers_ids }) {
   const sql = fs
     .readFileSync('src/sql/get_fired_debtor_drivers_cs.sql')

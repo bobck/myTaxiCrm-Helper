@@ -2,7 +2,6 @@ import {
   checkFiredDebtorDriversInfo,
   getHandledCashBlockRulesInfo,
 } from '../../web.api/web.api.utlites.mjs';
-import { cityListWithAssignedBy as cityList } from '../bitrix.constants.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
 import {
   getAllFiredDebtorDriver,
