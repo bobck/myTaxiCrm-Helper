@@ -19,6 +19,8 @@ import { accrueDebtToDealJob } from './jobs/accrue-debt-to-deal-job.mjs';
 import { createBrandingCardsJob } from './jobs/create-driver-branding-cards-job.mjs';
 import { updateBrandingCardsJob } from './jobs/update-driver-branding-cards-job.mjs';
 import { moveBrandingCardsJob } from './jobs/move-driver-branding-cards-job.mjs';
+import { updateFiredDebtorDriversCardsJob } from './jobs/update-fired-debtor-driver-cards.mjs';
+import { createFiredDebtorDriversCardsJob } from './jobs/create-fired-debtor-driver-cards.mjs';
 
 export function bitrixJobs() {
   try {
@@ -43,7 +45,8 @@ export function bitrixJobs() {
     moveBrandingCardsJob.start();
     createBrandingCardsJob.start();
     updateBrandingCardsJob.start();
-
+    createFiredDebtorDriversCardsJob.start();
+    updateFiredDebtorDriversCardsJob.start();
     console.log('Bitrix Jobs has been started');
   } catch (error) {
     console.error({
@@ -73,6 +76,8 @@ export function bitrixJobs() {
     moveBrandingCardsJob.stop();
     createBrandingCardsJob.stop();
     updateBrandingCardsJob.stop();
+    createFiredDebtorDriversCardsJob.stop();
+    updateFiredDebtorDriversCardsJob.stop();
     bitrixJobs();
   }
 }
