@@ -1,5 +1,5 @@
 import { CronJob } from 'cron';
-import { createFiredDebtorDriversCards } from '../modules/create-debtor-drivers-cards.mjs';
+import { createFiredDebtorDriversCards } from '../modules/create-fired-debtor-driver-cards.mjs';
 
 // Cron expression for every day at 10:00 AM
 const cronTime = '0 10 * * *';

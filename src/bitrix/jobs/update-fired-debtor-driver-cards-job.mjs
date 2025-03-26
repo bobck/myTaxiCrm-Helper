@@ -1,5 +1,5 @@
 import { CronJob } from 'cron';
-import { updateFiredDebtorDriversCards } from '../modules/update-debtor-drivers-cards.mjs';
+import { updateFiredDebtorDriversCards } from '../modules/update-fired-debtor-driver-cards.mjs';
 
 // Cron expression for every day at 10:00 AM
 const cronTime = '30 10 * * *';

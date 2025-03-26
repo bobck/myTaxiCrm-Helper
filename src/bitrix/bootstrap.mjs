@@ -19,8 +19,8 @@ import { accrueDebtToDealJob } from './jobs/accrue-debt-to-deal-job.mjs';
 import { createBrandingCardsJob } from './jobs/create-driver-branding-cards-job.mjs';
 import { updateBrandingCardsJob } from './jobs/update-driver-branding-cards-job.mjs';
 import { moveBrandingCardsJob } from './jobs/move-driver-branding-cards-job.mjs';
-import { updateFiredDebtorDriversCardsJob } from './jobs/update-fired-debtor-driver-cards.mjs';
-import { createFiredDebtorDriversCardsJob } from './jobs/create-fired-debtor-driver-cards.mjs';
+import { updateFiredDebtorDriversCardsJob } from './jobs/update-fired-debtor-driver-cards-job.mjs';
+import { createFiredDebtorDriversCardsJob } from './jobs/create-fired-debtor-driver-cards-job.mjs';
 
 export function bitrixJobs() {
   try {
