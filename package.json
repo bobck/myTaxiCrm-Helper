@@ -43,7 +43,8 @@
     "createrefferalpayment": "ENV=TEST node -r dotenv/config src/bitrix/modules/create-refferal-payment.mjs",
     "repairandaccidentreport": "ENV=TEST node -r dotenv/config src/web.api/modules/save-repair-and-accident-cars.mjs",
     "newworkingdrivers": "ENV=TEST node -r dotenv/config src/bitrix/modules/new-working-drivers.mjs",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "remonlineTransfersToBQManual": "ENV=TEST node -r dotenv/config src/bq/modules/generate-and-save-remonline-transfers.mjs"
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",
