@@ -500,11 +500,19 @@ export async function createBanBoltDriverCardItem(card) {
     debt,
   };
 }
-export async function createBanBoltDriverCards({cards}){
+export async function createBanBoltDriverCards({ cards }) {
   let batchObj = {};
 
   for (let card of cards) {
-    const { driver_id,full_name, cityId, bolt_id, debt, messageType, isDebtorState } = card;
+    const {
+      driver_id,
+      full_name,
+      cityId,
+      bolt_id,
+      debt,
+      messageType,
+      isDebtorState,
+    } = card;
 
     const params = {
       entityTypeId: '1132',
@@ -519,7 +527,6 @@ export async function createBanBoltDriverCards({cards}){
     };
     batchObj[driver_id] = { method: 'crm.item.add', params };
   }
-
 
   const { result: resp, time } = await bitrix.batch(batchObj);
   const { result: itemObj } = resp;

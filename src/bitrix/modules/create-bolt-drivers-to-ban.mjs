@@ -1,6 +1,6 @@
 import { getBoltDriversToBan } from '../../web.api/web.api.utlites.mjs';
 import { cityListWithAssignedBy as cityList } from '../bitrix.constants.mjs';
-import { chunkArray, createBanBoltDriverCardItem, createBanBoltDriverCards } from '../bitrix.utils.mjs';
+import { chunkArray, createBanBoltDriverCards } from '../bitrix.utils.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
 import { DateTime } from 'luxon';
 import {
@@ -50,17 +50,16 @@ export const createBoltDriversToBan = async () => {
 
     const cityId = getCityBrandingId(auto_park_id);
     const debt = String(-1 * driver_balance);
-    const card={
+    const card = {
       driver_id,
       full_name,
       bolt_id,
       cityId,
       debt,
-      isDebtorState:debtorState,
+      isDebtorState: debtorState,
       messageType: Seven_days_without_trips_message_type,
-    }
+    };
     processedCards.push(card);
-
   }
   const chunkedProcessedCards = chunkArray(
     processedCards,
@@ -82,15 +81,14 @@ export const createBoltDriversToBan = async () => {
       });
     }
     for (const respElement of handledResponseArr) {
-      const { bitrix_card_id, debt, driver_id } =
-        respElement;
+      const { bitrix_card_id, debt, driver_id } = respElement;
       await insertBoltDriverBanReq({
         driver_id,
         bitrix_card_id,
-        debt
+        debt,
       });
     }
-  //  console.log(`chunk ${index} with ${chunk.length} has been successfully uploaded`)
+    //  console.log(`chunk ${index} with ${chunk.length} has been successfully uploaded`)
   }
 
   console.log(
@@ -100,7 +98,7 @@ export const createBoltDriversToBan = async () => {
 
 if (process.env.ENV === 'TEST') {
   console.log(
-    `testing bolt drivers ban cards creation\ncards count :${process.env.BOLT_DRIVERS_BAN_CARDS}\nchunk size:${process.env.CHUNK_SIZE}`,
+    `testing bolt drivers ban cards creation\ncards count :${process.env.BOLT_DRIVERS_BAN_CARDS}\nchunk size:${process.env.CHUNK_SIZE}`
   );
   await openSShTunnel;
 
