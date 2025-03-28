@@ -5,7 +5,6 @@ import {
 import { remonlineTokenToEnv } from '../../remonline/remonline.api.mjs';
 import {
   createOrResetTableByName,
-  getColumnsFromBQ,
   insertRowsAsStream,
 } from '../bq-utils.mjs';
 import {
