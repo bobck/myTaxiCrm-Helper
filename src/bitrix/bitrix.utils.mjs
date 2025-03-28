@@ -153,7 +153,7 @@ export async function getDealsByInterviewDate({ date, CATEGORY_ID }) {
     filter: {
       '>=UF_CRM_1608302466359': `${date}T00:00:00`,
       '<=UF_CRM_1608302466359': `${date}T23:59:59`,
-      CATEGORY_ID: CATEGORY_ID || '3',
+      CATEGORY_ID: CATEGORY_ID,
     },
     select: [
       'ID',
