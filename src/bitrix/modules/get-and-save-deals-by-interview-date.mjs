@@ -28,9 +28,9 @@ export async function getAndSaveDealsByInterviewDate(manualDate) {
 
   const bqTableId = 'deals_hr_interviewees';
 
-  const result = await getDealsByInterviewDate({ date });
-
-  console.log({ getDealsByInterviewDate: result.length });
+  const resultUA = await getDealsByInterviewDate({ date, CATEGORY_ID: '3' });
+  const resultPL = await getDealsByInterviewDate({ date, CATEGORY_ID: '40' });
+  const result = [...structuredClone(resultPL), ...structuredClone(resultUA)];
 
   if (result.length == 0) {
     return;
@@ -44,7 +44,7 @@ export async function getAndSaveDealsByInterviewDate(manualDate) {
       source_id: SOURCE_ID,
       city_id: UF_CRM_1527615815,
       stage_id: STAGE_ID,
-      is_rescheduled: UF_CRM_1722203030883 == '1' ? true : false,
+      is_rescheduled: UF_CRM_1722203030883 == '1',
       date,
     };
   });
