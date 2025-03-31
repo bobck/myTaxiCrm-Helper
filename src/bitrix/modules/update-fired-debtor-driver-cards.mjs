@@ -1,5 +1,5 @@
 import {
-  checkFiredDebtorDriversInfo,
+  getDriverBalances,
   getHandledCashBlockRulesInfo,
 } from '../../web.api/web.api.utlites.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
@@ -47,7 +47,7 @@ async function prepareFiredDebtorDriverCSWithHandledCashBlockRules() {
   const driver_ids = firedDebtorDrivers.map((driver) => driver.driver_id);
 
   //fired drivers calculated statements for the last week
-  const { rows: actual_fired_drivers_cs } = await checkFiredDebtorDriversInfo({
+  const { rows: actual_fired_drivers_cs } = await getDriverBalances({
     driver_ids,
   });
   //handled cash block rules only for debtors

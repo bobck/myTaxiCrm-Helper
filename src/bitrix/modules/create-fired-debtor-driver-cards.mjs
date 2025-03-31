@@ -1,6 +1,5 @@
 import {
-  getFiredDebtorDriversCSInfo,
-  getFiredDriversInfo,
+  getFiredDebtorDriversInfo,
   getHandledCashBlockRulesInfo,
 } from '../../web.api/web.api.utlites.mjs';
 import { cityListWithAssignedBy as cityList } from '../bitrix.constants.mjs';
@@ -29,28 +28,26 @@ async function prepareFiredDebtorDriverCSWithHandledCashBlockRules() {
   const { weekNumber: cs_current_week, year: cs_current_year } = today;
 
   //all fired drivers
-  const { rows: fired_drivers } = await getFiredDriversInfo();
-
-  //fired drivers calculated statements for the last week
-  const { rows: fired_drivers_cs } = await getFiredDebtorDriversCSInfo({
-    fired_drivers_ids: fired_drivers.map((fd) => fd.driver_id),
-  });
+  const { rows: fired_drivers } = await getFiredDebtorDriversInfo();
 
   //handled cash block rules only for debtors
   const { rows: handledCashBlockRules } = await getHandledCashBlockRulesInfo({
-    fired_drivers_ids: fired_drivers_cs.map((fd) => fd.driver_id),
+    fired_drivers_ids: fired_drivers.map((fd) => fd.driver_id),
   });
 
-  for (const [index, fired_driver_cs] of fired_drivers_cs.entries()) {
+  for (const [index, fired_driver] of fired_drivers.entries()) {
     if (index === Number(process.env.DEBTOR_DRIVERS_CARDS_COUNT)) {
       break;
     }
     const {
+      full_name,
+      auto_park_id,
+      fire_date,
       driver_id,
       current_week_total_deposit,
       current_week_total_debt,
       current_week_balance,
-    } = fired_driver_cs;
+    } = fired_driver;
 
     let matching_hcbr = handledCashBlockRules.find(
       (hcbr) => hcbr.driver_id === driver_id
@@ -64,16 +61,12 @@ async function prepareFiredDebtorDriverCSWithHandledCashBlockRules() {
         deposit_activation_value: null,
       };
     }
-    const matching_fired_driver = fired_drivers.find(
-      (fd) => fd.driver_id === driver_id
-    );
     const {
       is_balance_enabled,
       balance_activation_value,
       is_deposit_enabled,
       deposit_activation_value,
     } = matching_hcbr;
-    const { full_name, auto_park_id, fire_date } = matching_fired_driver;
 
     debtor_fired_drivers_map.set(driver_id, {
       full_name,
@@ -192,9 +185,11 @@ if (process.env.ENV === 'TEST') {
     `testing fired debtor drivers creation\ncards count :${process.env.DEBTOR_DRIVERS_CARDS_COUNT}`
   );
   await openSShTunnel;
+
   await createFiredDebtorDriversCards();
 
   // await openSShTunnel;
   //
-  // await prepareData();
+  // const a = await prepareFiredDebtorDriverCSWithHandledCashBlockRules();
+  // console.log(a);
 }
