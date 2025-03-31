@@ -653,18 +653,6 @@ export async function getAllFiredDebtorDriver() {
 }
 
 /**
- * Retrieves a fired debtor driver by bitrix_card_id.
- * @param {number} bitrix_card_id - The bitrix card ID.
- * @returns {Promise<Object>} - The matching record.
- */
-export async function getFiredDebtorDriverByBitrixId({ bitrix_card_id }) {
-  const sql = `
-      SELECT * FROM fired_debtor_drivers WHERE bitrix_card_id = ?;
-  `;
-  return db.get(sql, bitrix_card_id);
-}
-
-/**
  * Updates multiple fields in the fired_debtor_drivers table identified by bitrix_card_id.
  * @param {Object} params - The update parameters.
  * @param {number} params.bitrix_card_id - The Bitrix card ID.
@@ -735,7 +723,7 @@ export async function getFiredDebtorDriverByWeekAndYear({
   cs_current_year,
 }) {
   const sql = `
-        SELECT * FROM fired_debtor_drivers WHERE driver_id = ? AND cs_current_week = ? AND cs_current_year = ?;
+        SELECT bitrix_card_id, driver_id, full_name, auto_park_id, cs_current_week, cs_current_year, current_week_balance, current_week_total_deposit, current_week_total_debt, fire_date, is_balance_enabled, balance_activation_value, is_deposit_enabled, deposit_activation_value, created_at, updated_at FROM fired_debtor_drivers WHERE driver_id = ? AND cs_current_week = ? AND cs_current_year = ?;
     `;
   return db.get(sql, driver_id, cs_current_week, cs_current_year);
 }

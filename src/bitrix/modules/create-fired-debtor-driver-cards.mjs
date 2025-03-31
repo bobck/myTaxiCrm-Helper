@@ -23,7 +23,7 @@ function getCityBrandingId({ auto_park_id }) {
   return { cityBrandingId };
 }
 
-async function prepareData() {
+async function prepareFiredDebtorDriverCSWithHandledCashBlockRules() {
   const debtor_fired_drivers_map = new Map();
   const today = DateTime.local().startOf('day');
   const { weekNumber: cs_current_week, year: cs_current_year } = today;
@@ -37,11 +37,11 @@ async function prepareData() {
   });
 
   //handled cash block rules only for debtors
-  const { rows: hcbr } = await getHandledCashBlockRulesInfo({
+  const { rows: handledCashBlockRules } = await getHandledCashBlockRulesInfo({
     fired_drivers_ids: fired_drivers_cs.map((fd) => fd.driver_id),
   });
 
-  for (const [index, fd_cs] of fired_drivers_cs.entries()) {
+  for (const [index, fired_driver_cs] of fired_drivers_cs.entries()) {
     if (index === Number(process.env.DEBTOR_DRIVERS_CARDS_COUNT)) {
       break;
     }
@@ -50,9 +50,11 @@ async function prepareData() {
       current_week_total_deposit,
       current_week_total_debt,
       current_week_balance,
-    } = fd_cs;
+    } = fired_driver_cs;
 
-    let matching_hcbr = hcbr.find((hcbr) => hcbr.driver_id === driver_id);
+    let matching_hcbr = handledCashBlockRules.find(
+      (hcbr) => hcbr.driver_id === driver_id
+    );
     if (!matching_hcbr) {
       matching_hcbr = {
         driver_id,
@@ -92,7 +94,8 @@ async function prepareData() {
 }
 
 export async function createFiredDebtorDriversCards() {
-  const { debtor_fired_drivers_map } = await prepareData();
+  const { debtor_fired_drivers_map } =
+    await prepareFiredDebtorDriverCSWithHandledCashBlockRules();
   if (debtor_fired_drivers_map.size === 0) {
     console.error('No rows found for fired debtor drivers found.');
     return;
@@ -132,14 +135,7 @@ export async function createFiredDebtorDriversCards() {
     }
 
     const stage_id = `DT1162_72:NEW`;
-    let cityBrandingId;
-    try {
-      cityBrandingId = getCityBrandingId({ auto_park_id }).cityBrandingId;
-    } catch (err) {
-      console.log(
-        `Error getting city branding id for ${cityBrandingId}\n auto_park_id=${auto_park_id}`
-      );
-    }
+    const cityBrandingId = getCityBrandingId({ auto_park_id }).cityBrandingId;
     const card = {
       stage_id,
       driver_id,
@@ -161,7 +157,7 @@ export async function createFiredDebtorDriversCards() {
   }
   const chunkedProcessedCards = chunkArray(
     processedCards,
-    Number(process.env.CHUNK_SIZE) || 5
+    Number(process.env.CHUNK_SIZE) || 8
   );
   for (const [index, chunk] of chunkedProcessedCards.entries()) {
     const bitrixRespObj = await createBitrixFiredDebtorDriversCards({

@@ -20,7 +20,7 @@ function computeStage({ apicard }) {
     : 'NEW';
 }
 function isUpdateFound({ dbcard, apicard }) {
-  return (
+  return !(
     Number(dbcard.current_week_balance) ===
       Number(apicard.current_week_balance) &&
     Number(dbcard.current_week_total_deposit) ===
@@ -38,7 +38,7 @@ function isUpdateFound({ dbcard, apicard }) {
   );
 }
 
-async function prepareData() {
+async function prepareFiredDebtorDriverCSWithHandledCashBlockRules() {
   const debtor_fired_drivers_map = new Map();
   const today = DateTime.local().startOf('day');
   const { weekNumber: cs_current_week, year: cs_current_year } = today;
@@ -99,7 +99,8 @@ async function prepareData() {
   return { debtor_fired_drivers_map };
 }
 export async function updateFiredDebtorDriversCards() {
-  const { debtor_fired_drivers_map } = await prepareData();
+  const { debtor_fired_drivers_map } =
+    await prepareFiredDebtorDriverCSWithHandledCashBlockRules();
   if (debtor_fired_drivers_map.size === 0) {
     console.error('No rows found for fired debtor drivers found.');
     return;
@@ -132,7 +133,7 @@ export async function updateFiredDebtorDriversCards() {
       });
       continue;
     }
-    if (isUpdateFound({ dbcard, apicard: payload })) {
+    if (!isUpdateFound({ dbcard, apicard: payload })) {
       if (process.env.ENV === 'TEST') {
         console.log(
           `row #${driver_id} hasn't been changed. There is no any sense to update it.`
@@ -160,7 +161,7 @@ export async function updateFiredDebtorDriversCards() {
   }
   const chunkedProcessedCards = chunkArray(
     processedCards,
-    Number(process.env.CHUNK_SIZE) || 5
+    Number(process.env.CHUNK_SIZE) || 8
   );
   for (const [index, chunk] of chunkedProcessedCards.entries()) {
     const bitrixRespObj = await updateBitrixFiredDebtorDriversCards({
