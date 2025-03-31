@@ -475,31 +475,6 @@ export async function updateBitrixDriverBrandingCards({ cards }) {
   //
   return itemObj;
 }
-export async function createBanBoltDriverCardItem(card) {
-  const { full_name, cityId, bolt_id, debt, messageType, isDebtorState } = card;
-
-  const props = {
-    entityTypeId: '1132',
-    'fields[title]': full_name,
-    'fields[STAGE_ID]': 'DT1132_60:NEW',
-    'fields[ufCrm52_1738324741]': full_name,
-    'fields[ufCrm52_1738324675]': bolt_id,
-    'fields[ufCrm52_1738324546]': messageType,
-    'fields[ufCrm52_1738739843]': isDebtorState,
-    'fields[ufCrm52_1738837120]': debt,
-    'fields[ufCrm52_1738326821]': cityId,
-  };
-  const response = await bitrix.call('crm.item.add', props);
-
-  const { result } = response;
-  const { item } = result;
-  const { id } = item;
-  //
-  return {
-    bitrix_card_id: id,
-    debt,
-  };
-}
 export async function createBanBoltDriverCards({ cards }) {
   let batchObj = {};
 
