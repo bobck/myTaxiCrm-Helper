@@ -263,3 +263,20 @@ export async function generatePolandBookkeepingReport({
   const { rows } = result;
   return { rows };
 }
+export async function getBrandedLicencePlateNumbers() {
+  const query = `SELECT numbner as licence_plate_number FROM \`up-statistics.DB.brand_cars_status_list\` where approved_brand_type='BOLT'`;
+  const options = {
+    query,
+    location: 'US',
+  };
+  //the response from BQ is an array with rows array as first element, and payload data next
+  //this is the reason why here is array destructuring
+  const [rows] = await bigquery.query(options);
+
+  //the array mapping is required because the response has the shape[{ licence_plate_number: 'SOMEPLATENUMBER777' }]
+  const brandedLicencePlateNumbers = rows.map(
+    (row) => row.licence_plate_number
+  );
+
+  return { brandedLicencePlateNumbers };
+}

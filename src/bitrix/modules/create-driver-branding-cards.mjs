@@ -11,6 +11,7 @@ import {
 } from '../bitrix.utils.mjs';
 import { cityListWithAssignedBy as cityList } from '../bitrix.constants.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
+import { getBrandedLicencePlateNumbers } from '../../bq/bq-utils.mjs';
 
 export function computePeriodBounds() {
   const today = DateTime.local().startOf('day');
@@ -58,6 +59,7 @@ export async function createDriverBrandingCards() {
     weekNumber,
     year,
   } = brandingProcess;
+  const { brandedLicencePlateNumbers } = await getBrandedLicencePlateNumbers();
   const { rows } = await getBrandingCardsInfo({ period_from, period_to });
 
   if (rows.length === 0) {
@@ -142,5 +144,6 @@ if (process.env.ENV === 'TEST') {
     `testing driver branding creation\ncards count: ${process.env.BRANDING_CARDS_COUNT}\nchunk size: ${process.env.CHUNK_SIZE}`
   );
   await openSShTunnel;
-  await createDriverBrandingCards();
+  // await createDriverBrandingCards();
+  console.log(await getBrandedLicencePlateNumbers());
 }
