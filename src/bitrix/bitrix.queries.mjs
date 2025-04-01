@@ -59,12 +59,13 @@ export async function insertBrandingCard(card) {
     total_trips,
     branding_process_id,
     auto_park_id,
+    license_plate,
   } = card;
 
   const sql = `
         INSERT INTO branding_cards
-        (driver_id, bitrix_card_id, total_trips, branding_process_id, auto_park_id, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        (driver_id, bitrix_card_id,license_plate, total_trips, branding_process_id, auto_park_id, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
         RETURNING *;
     `;
 

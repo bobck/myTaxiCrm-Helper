@@ -581,10 +581,14 @@ export async function getWorkingDriversById({ driversIds }) {
   return { rows };
 }
 
-export async function getBrandingCardsInfo({ period_from, period_to }) {
+export async function getBrandingCardsInfo({
+  brandedLicencePlateNumbers,
+  period_from,
+  period_to,
+}) {
   const sql = fs.readFileSync('src/sql/get-branding-cars-info.sql').toString();
   const result = await pool.query(sql, [
-    UkrainianBrandingAutoParkIds,
+    brandedLicencePlateNumbers,
     period_from,
     period_to,
   ]);

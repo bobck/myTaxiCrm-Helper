@@ -451,7 +451,6 @@ export async function createBitrixDriverBrandingCards({ cards }) {
 
   const { result: resp, time } = await bitrix.batch(batchObj);
   const { result: itemObj } = resp;
-  console.log(itemObj);
   return itemObj;
 }
 
