@@ -63,7 +63,10 @@ async function makeCRMRequestWithRetry({ body }) {
 
       const [firstError] = error || [];
       const { message } = firstError || {};
-      if (message == 'Cashbox balance after transaction become negative') {
+      if (
+        message == 'Cashbox balance after transaction become negative' ||
+        message == 'Cashbox and contractor currencies must be the same'
+      ) {
         throw new Error(message);
       }
 
