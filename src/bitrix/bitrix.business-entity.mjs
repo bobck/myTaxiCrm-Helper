@@ -20,7 +20,7 @@ export function computeBrandingCardInProgressStage({
   total_trips,
   auto_park_id,
 }) {
-  const trips = Number(total_trips) + 5;
+  const trips = Number(total_trips);
   const today = DateTime.local().startOf('day');
   const maxGoalGap = 30 - (today.weekday - 5) * 10;
   if (isNaN(trips)) {

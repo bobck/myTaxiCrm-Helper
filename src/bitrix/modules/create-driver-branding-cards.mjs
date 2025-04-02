@@ -14,7 +14,7 @@ import {
   computePeriodBounds,
 } from '../bitrix.business-entity.mjs';
 import { cityListWithAssignedBy as cityList } from '../bitrix.constants.mjs';
-import { getBrandedLicencePlateNumbers } from '../../bq/bq-utils.mjs';
+import { getBrandedLicencePlateNumbersFromBQ } from '../../bq/bq-utils.mjs';
 
 function getCityBrandingId({ auto_park_id }) {
   const matchingCity = cityList.find(
@@ -39,7 +39,8 @@ export async function createDriverBrandingCards() {
     weekNumber,
     year,
   } = brandingProcess;
-  const { brandedLicencePlateNumbers } = await getBrandedLicencePlateNumbers();
+  const { brandedLicencePlateNumbers } =
+    await getBrandedLicencePlateNumbersFromBQ();
   const { rows } = await getBrandingCardsInfo({
     brandedLicencePlateNumbers,
     period_from,
@@ -60,7 +61,14 @@ export async function createDriverBrandingCards() {
       break;
     }
 
-    const { driver_id, driver_name, phone, auto_park_id, total_trips } = row;
+    const {
+      driver_id,
+      driver_name,
+      phone,
+      auto_park_id,
+      total_trips,
+      license_plate,
+    } = row;
 
     const dbcard = await getCrmBrandingCardByDriverId({
       driver_id,
@@ -87,6 +95,7 @@ export async function createDriverBrandingCards() {
       year,
       cityBrandingId,
       auto_park_id,
+      license_plate,
     };
     processedCards.push(card);
   }

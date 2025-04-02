@@ -260,7 +260,7 @@ export async function generatePolandBookkeepingReport({
   const { rows } = result;
   return { rows };
 }
-export async function getBrandedLicencePlateNumbers() {
+export async function getBrandedLicencePlateNumbersFromBQ() {
   const query = `SELECT numbner as licence_plate_number FROM \`up-statistics.DB.brand_cars_status_list\` where approved_brand_type='BOLT'`;
   const options = {
     query,

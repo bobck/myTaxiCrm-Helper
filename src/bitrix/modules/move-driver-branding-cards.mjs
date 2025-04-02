@@ -1,6 +1,7 @@
 import { getBrandingCardsInfo } from '../../web.api/web.api.utlites.mjs';
 import { DateTime } from 'luxon';
 import {
+  getBrandedLicencePlateNumbersByBrandingProcessId,
   getBrandingProcessByWeekNumber,
   getCrmBrandingCardByDriverId,
   resolveBrandingProcessById,
@@ -26,7 +27,13 @@ export async function moveDriverBrandingCards() {
     year,
     id: branding_process_id,
   } = brandingProcess;
+  const { brandedLicencePlateNumbers } =
+    await getBrandedLicencePlateNumbersByBrandingProcessId({
+      branding_process_id,
+    });
+
   const { rows } = await getBrandingCardsInfo({
+    brandedLicencePlateNumbers,
     period_from,
     period_to,
   });
