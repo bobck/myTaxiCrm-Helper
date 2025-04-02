@@ -29,7 +29,9 @@ async function prepareFiredDebtorDriverCSWithHandledCashBlockRules() {
 
   //all fired drivers
   const { rows: fired_drivers } = await getFiredDebtorDriversInfo();
-
+  if (fired_drivers.length === 0) {
+    return { debtor_fired_drivers_map: new Map() };
+  }
   //handled cash block rules only for debtors
   const { rows: handledCashBlockRules } = await getHandledCashBlockRulesInfo({
     fired_drivers_ids: fired_drivers.map((fd) => fd.driver_id),

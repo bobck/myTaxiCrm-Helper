@@ -647,7 +647,7 @@ export async function insertFiredDebtorDriver(driver) {
  */
 export async function getAllFiredDebtorDriver() {
   const sql = `
-      SELECT * FROM fired_debtor_drivers;
+      SELECT driver_id FROM fired_debtor_drivers;
   `;
   return db.all(sql);
 }

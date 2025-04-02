@@ -60,7 +60,7 @@ async function prepareFiredDebtorDriverCSWithHandledCashBlockRules() {
   const { rows: hcbr } = await getHandledCashBlockRulesInfo({
     fired_drivers_ids: driver_ids,
   });
-  for (const [index, fd_cs] of actual_fired_drivers_cs.entries()) {
+  for (const [index, fired_driver_cs] of actual_fired_drivers_cs.entries()) {
     if (index === Number(process.env.DEBTOR_DRIVERS_CARDS_COUNT)) {
       break;
     }
@@ -69,7 +69,7 @@ async function prepareFiredDebtorDriverCSWithHandledCashBlockRules() {
       current_week_total_deposit,
       current_week_total_debt,
       current_week_balance,
-    } = fd_cs;
+    } = fired_driver_cs;
     let matching_hcbr = hcbr.find((hcbr) => hcbr.driver_id === driver_id);
     if (!matching_hcbr) {
       matching_hcbr = {
