@@ -15,7 +15,9 @@ import {
 import { DateTime } from 'luxon';
 
 function computeStage({ apicard }) {
-  return apicard.current_week_balance + apicard.current_week_total_deposit > 0
+  return Number(apicard.current_week_balance) +
+    Number(apicard.current_week_total_deposit) >
+    0
     ? 'PREPARATION'
     : 'NEW';
 }
