@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
 import { specialBrandingCities } from './bitrix.constants.mjs';
 
-const defaultBrandingGoal = 60;
+const defaultBrandingGoal = 75;
 
 export function computePeriodBounds() {
   const today = DateTime.local().startOf('day');
@@ -20,14 +20,14 @@ export function computeBrandingCardInProgressStage({
   total_trips,
   auto_park_id,
 }) {
-  const trips = Number(total_trips);
+  const trips = Number(total_trips) + 5;
   const today = DateTime.local().startOf('day');
   const maxGoalGap = 30 - (today.weekday - 5) * 10;
   if (isNaN(trips)) {
     console.error('Trips must be a number');
   }
   const GOAL = computeBrandingGoal({ auto_park_id });
-
+  console.log({ auto_park_id, GOAL, maxGoalGap, trips });
   const todaysTripsOptimalLowerBound = GOAL - maxGoalGap;
   if (trips >= GOAL) {
     return 'PREPARATION';

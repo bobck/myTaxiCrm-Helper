@@ -11,6 +11,7 @@ import {
 import { getBrandingCardsInfo } from '../../web.api/web.api.utlites.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
 import { computeBrandingCardInProgressStage } from '../bitrix.business-entity.mjs';
+import { getBrandedLicencePlateNumbers } from '../../bq/bq-utils.mjs';
 
 export async function updateDriverBrandingCards() {
   const today = DateTime.local().startOf('day').minus({ days: 1 });
@@ -25,7 +26,9 @@ export async function updateDriverBrandingCards() {
     year,
     id: branding_process_id,
   } = brandingProcess;
+  const { brandedLicencePlateNumbers } = await getBrandedLicencePlateNumbers();
   const { rows } = await getBrandingCardsInfo({
+    brandedLicencePlateNumbers,
     period_from,
     period_to,
   });

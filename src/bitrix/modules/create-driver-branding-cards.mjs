@@ -128,7 +128,7 @@ export async function createDriverBrandingCards() {
       });
     }
   }
-
+  // console.log(processedCards);
   console.log(
     `${processedCards.length} branding cards creation has been finished.`
   );
