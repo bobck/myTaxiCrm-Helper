@@ -1,5 +1,6 @@
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
+import { getBrandedLicencePlateNumbersFromBQ } from '../bq/bq-utils.mjs';
 
 const db = await open({
   filename: process.env.DEV_DB,
@@ -59,12 +60,13 @@ export async function insertBrandingCard(card) {
     total_trips,
     branding_process_id,
     auto_park_id,
+    license_plate,
   } = card;
 
   const sql = `
         INSERT INTO branding_cards
-        (driver_id, bitrix_card_id, total_trips, branding_process_id, auto_park_id, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        (driver_id, bitrix_card_id,license_plate, total_trips, branding_process_id, auto_park_id, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
         RETURNING *;
     `;
 
@@ -72,6 +74,7 @@ export async function insertBrandingCard(card) {
     sql,
     driver_id,
     bitrix_card_id,
+    license_plate,
     total_trips,
     branding_process_id,
     auto_park_id
@@ -601,4 +604,19 @@ export async function getDtpAccrueDebtTransactions() {
 export async function markDtpDebtTransactionsAsSync({ human_id }) {
   const sql = `UPDATE dtp_debt_transactions SET is_synchronised = true WHERE human_id = ?`;
   await db.run(sql, human_id);
+}
+export async function getBrandedLicencePlateNumbersByBrandingProcessId({
+  branding_process_id,
+}) {
+  const sql = `
+        SELECT bc.license_plate
+        FROM branding_cards bc
+        WHERE  bc.branding_process_id=?;
+    `;
+
+  const licencePlates = await db.all(sql, branding_process_id);
+  const brandedLicencePlateNumbers = licencePlates.map(
+    (lp) => lp.license_plate
+  );
+  return { brandedLicencePlateNumbers };
 }

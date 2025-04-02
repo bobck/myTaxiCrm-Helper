@@ -14,6 +14,7 @@ import {
   computePeriodBounds,
 } from '../bitrix.business-entity.mjs';
 import { cityListWithAssignedBy as cityList } from '../bitrix.constants.mjs';
+import { getBrandedLicencePlateNumbersFromBQ } from '../../bq/bq-utils.mjs';
 
 function getCityBrandingId({ auto_park_id }) {
   const matchingCity = cityList.find(
@@ -30,6 +31,7 @@ export async function createDriverBrandingCards() {
     period_from: bounds.lowerBound.toISODate(),
     period_to: bounds.upperBound.toISODate(),
   });
+
   const {
     period_from,
     period_to,
@@ -37,7 +39,13 @@ export async function createDriverBrandingCards() {
     weekNumber,
     year,
   } = brandingProcess;
-  const { rows } = await getBrandingCardsInfo({ period_from, period_to });
+  const { brandedLicencePlateNumbers } =
+    await getBrandedLicencePlateNumbersFromBQ();
+  const { rows } = await getBrandingCardsInfo({
+    brandedLicencePlateNumbers,
+    period_from,
+    period_to,
+  });
 
   if (rows.length === 0) {
     console.error('No rows found for branding cards found.');
@@ -53,7 +61,14 @@ export async function createDriverBrandingCards() {
       break;
     }
 
-    const { driver_id, driver_name, phone, auto_park_id, total_trips } = row;
+    const {
+      driver_id,
+      driver_name,
+      phone,
+      auto_park_id,
+      total_trips,
+      license_plate,
+    } = row;
 
     const dbcard = await getCrmBrandingCardByDriverId({
       driver_id,
@@ -80,6 +95,7 @@ export async function createDriverBrandingCards() {
       year,
       cityBrandingId,
       auto_park_id,
+      license_plate,
     };
     processedCards.push(card);
   }
@@ -100,21 +116,28 @@ export async function createDriverBrandingCards() {
         driver_id: matchingCard.driver_id,
         total_trips: matchingCard.total_trips,
         auto_park_id: matchingCard.auto_park_id,
+        license_plate: matchingCard.license_plate,
       });
     }
     for (const respElement of handledResponseArr) {
-      const { driver_id, total_trips, bitrix_card_id, auto_park_id } =
-        respElement;
+      const {
+        driver_id,
+        total_trips,
+        bitrix_card_id,
+        auto_park_id,
+        license_plate,
+      } = respElement;
       await insertBrandingCard({
         driver_id,
         total_trips,
         bitrix_card_id,
         branding_process_id,
         auto_park_id,
+        license_plate,
       });
     }
   }
-
+  // console.log(processedCards);
   console.log(
     `${processedCards.length} branding cards creation has been finished.`
   );

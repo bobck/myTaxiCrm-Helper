@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon';
 import {
+  getBrandedLicencePlateNumbersByBrandingProcessId,
   getBrandingProcessByWeekNumber,
   getCrmBrandingCardByDriverId,
   updateBrandingCardByDriverId,
@@ -11,6 +12,7 @@ import {
 import { getBrandingCardsInfo } from '../../web.api/web.api.utlites.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
 import { computeBrandingCardInProgressStage } from '../bitrix.business-entity.mjs';
+import { getBrandedLicencePlateNumbersFromBQ } from '../../bq/bq-utils.mjs';
 
 export async function updateDriverBrandingCards() {
   const today = DateTime.local().startOf('day').minus({ days: 1 });
@@ -18,6 +20,7 @@ export async function updateDriverBrandingCards() {
     weekNumber: today.weekNumber,
     year: today.year,
   });
+
   const {
     period_from,
     period_to,
@@ -25,7 +28,14 @@ export async function updateDriverBrandingCards() {
     year,
     id: branding_process_id,
   } = brandingProcess;
+
+  const { brandedLicencePlateNumbers } =
+    await getBrandedLicencePlateNumbersByBrandingProcessId({
+      branding_process_id,
+    });
+
   const { rows } = await getBrandingCardsInfo({
+    brandedLicencePlateNumbers,
     period_from,
     period_to,
   });
