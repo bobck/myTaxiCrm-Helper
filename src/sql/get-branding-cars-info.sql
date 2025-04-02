@@ -1,23 +1,24 @@
-with branded_cars as(
-    select c.id,c.license_plate from cars c
-    where c.license_plate = any($1)
-), report_cards as(
-    select
-        bc.id as car_id,
-        count(t.id)as total_trips,
+with branded_cars AS(
+    SELECT c.id,c.license_plate FROM cars c
+    WHERE c.license_plate = ANY($1)
+), report_cards AS(
+    SELECT
+        bc.id AS car_id,
+        count(t.id) AS total_trips,
         CASE
             WHEN s.event_type != 'RENTAL' THEN s.driver_id
             ELSE (s.rental_settings -> 'mapping' -> 0 ->> 'driverId')::UUID
             END AS d_id
-    from branded_cars bc
-             join trips t on bc.id=t.car_id and t.call_date>=$2
+    FROM branded_cars bc
+             JOIN trips t ON bc.id=t.car_id AND t.call_date>=$2
+             JOIN integrations i ON t.integration_id=i.id AND i.type='BOLT'
              JOIN schedule s ON s.car_id = bc.id
         AND s.is_latest_version = TRUE
         AND s.is_deleted = FALSE
         AND s.event_type IN ('BUSY_WITH_CREW', 'BUSY_WITH_PRIVATE_TRADER', 'RENTAL')
         AND s.event_period_end >= $3
         AND s.parent_id IS NULL
-    group by bc.id,d_id
+    GROUP BY bc.id,d_id
 )
 SELECT
     d.id AS driver_id,
