@@ -49,5 +49,5 @@ jobs:
           git pull
           npm ci
           npm run migrate:up
-          pm2 restart myTaxiCrm Helper
-          pm2 reset myTaxiCrm Helper
+          pm2 restart 'myTaxiCrm Helper'
+          pm2 reset 'myTaxiCrm Helper'
