@@ -5,9 +5,9 @@
   "main": "app.js",
   "scripts": {
     "dev": "node -r dotenv/config app.mjs",
-    "createBrandingCardsManual": "ENV=TEST BRANDING_CARDS_COUNT=4 node -r dotenv/config src/bitrix/modules/create-driver-branding-cards.mjs",
-    "updateBrandingCardsManual": "ENV=TEST BRANDING_CARDS_COUNT=4 node -r dotenv/config src/bitrix/modules/update-driver-branding-cards.mjs",
-    "moveBrandingCardsManual": "ENV=TEST BRANDING_CARDS_COUNT=4 node -r dotenv/config src/bitrix/modules/move-driver-branding-cards.mjs",
+    "createBrandingCardsManual": "ENV=TEST BRANDING_CARDS_COUNT=2 CHUNK_SIZE=2 node -r dotenv/config src/bitrix/modules/create-driver-branding-cards.mjs",
+    "updateBrandingCardsManual": "ENV=TEST BRANDING_CARDS_COUNT=2 CHUNK_SIZE=2 node -r dotenv/config src/bitrix/modules/update-driver-branding-cards.mjs",
+    "moveBrandingCardsManual": "ENV=TEST BRANDING_CARDS_COUNT=2 CHUNK_SIZE=2 node -r dotenv/config src/bitrix/modules/move-driver-branding-cards.mjs",
     "update_plan": "ENV=TEST node -r dotenv/config src/sheets/modules/get-and-save-current-plan.mjs",
     "notification": "ENV=TEST node -r dotenv/config src/telegram/modules/rooms-notification.mjs",
     "savesid": "ENV=TEST node -r dotenv/config src/remonline/modules/save-sid-list.mjs",
@@ -45,6 +45,7 @@
     "newworkingdrivers": "ENV=TEST node -r dotenv/config src/bitrix/modules/new-working-drivers.mjs",
     "format": "prettier --write .",
     "createBoltDriversBanCardsManual": "ENV=TEST BOLT_DRIVERS_BAN_CARDS=17 CHUNK_SIZE=11 node -r dotenv/config src/bitrix/modules/create-bolt-drivers-to-ban.mjs"
+    "remonlineTransfersToBQManual": "ENV=TEST node -r dotenv/config src/bq/modules/generate-and-save-remonline-transfers.mjs"
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",
