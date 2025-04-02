@@ -170,13 +170,13 @@ export async function createFiredDebtorDriversCards() {
         ...respElement,
       });
     }
-    console.log(
-      `chunk${index} successfully uploaded with ${chunk.length} elements`
-    );
+    // console.log(
+    //   `chunk${index} successfully uploaded with ${chunk.length} elements`
+    // );
   }
 
   console.log(
-    `${processedCards.length} branding cards creation has been finished.`
+    `${processedCards.length} fired debtor driver cards creation has been finished.`
   );
 }
 
@@ -187,9 +187,4 @@ if (process.env.ENV === 'TEST') {
   await openSShTunnel;
 
   await createFiredDebtorDriversCards();
-
-  // await openSShTunnel;
-  //
-  // const a = await prepareFiredDebtorDriverCSWithHandledCashBlockRules();
-  // console.log(a);
 }

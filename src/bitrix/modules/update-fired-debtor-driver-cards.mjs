@@ -186,7 +186,7 @@ export async function updateFiredDebtorDriversCards() {
   }
 
   console.log(
-    `${processedCards.length} fired drivers cards updating has been finished.`
+    `${processedCards.length} fired debtor driver cards updating has been finished.`
   );
 }
 
@@ -195,7 +195,5 @@ if (process.env.ENV === 'TEST') {
     `testing fired debtor drivers updating\ncards count: ${process.env.DEBTOR_DRIVERS_CARDS_COUNT}\nchunk size: ${process.env.CHUNK_SIZE}`
   );
   await openSShTunnel;
-  // await updateFiredDebtorDriversCards();
-
-  await prepareFiredDebtorDriverCSWithHandledCashBlockRules();
+  await updateFiredDebtorDriversCards();
 }
