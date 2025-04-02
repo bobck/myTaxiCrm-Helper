@@ -42,20 +42,22 @@ async function prepareFiredDebtorDriverCSWithHandledCashBlockRules() {
   const debtor_fired_drivers_map = new Map();
   const today = DateTime.local().startOf('day');
   const { weekNumber: cs_current_week, year: cs_current_year } = today;
-
+  console.log('getAllFiredDebtorDriver...');
   const firedDebtorDrivers = await getAllFiredDebtorDriver();
   const driver_ids = firedDebtorDrivers.map((driver) => driver.driver_id);
-
   //fired drivers calculated statements for the last week
+  console.log('getDriverBalances...\n it could take few minutes...');
   const { rows: actual_fired_drivers_cs } = await getDriverBalances({
     driver_ids,
   });
+  console.log(actual_fired_drivers_cs);
+  return;
   //handled cash block rules only for debtors
+  console.log('getHandledCashBlockRulesInfo...');
   const { rows: hcbr } = await getHandledCashBlockRulesInfo({
     fired_drivers_ids: driver_ids,
   });
-
-  console.log(actual_fired_drivers_cs, actual_fired_drivers_cs.length);
+  console.log('joining...');
   for (const [index, fd_cs] of actual_fired_drivers_cs.entries()) {
     if (index === Number(process.env.DEBTOR_DRIVERS_CARDS_COUNT)) {
       break;
@@ -96,15 +98,32 @@ async function prepareFiredDebtorDriverCSWithHandledCashBlockRules() {
       deposit_activation_value,
     });
   }
+  console.log(
+    `returning... ${debtor_fired_drivers_map.size} map`,
+    debtor_fired_drivers_map.values().map((d) => d)[0]
+  );
   return { debtor_fired_drivers_map };
 }
 export async function updateFiredDebtorDriversCards() {
-  const { debtor_fired_drivers_map } =
-    await prepareFiredDebtorDriverCSWithHandledCashBlockRules();
+  let debtor_fired_drivers_map;
+  try {
+    const data = await prepareFiredDebtorDriverCSWithHandledCashBlockRules();
+    debtor_fired_drivers_map = data.debtor_fired_drivers_map;
+  } catch (e) {
+    console.error({
+      'function name': 'prepareFiredDebtorDriverCSWithHandledCashBlockRules',
+      e,
+    });
+    return;
+  }
+
   if (debtor_fired_drivers_map.size === 0) {
     console.error('No rows found for fired debtor drivers found.');
     return;
   }
+
+  console.log(debtor_fired_drivers_map);
+  return;
 
   const processedCards = [];
   for (const [driver_id, payload] of debtor_fired_drivers_map) {
@@ -196,7 +215,7 @@ if (process.env.ENV === 'TEST') {
     `testing fired debtor drivers updating\ncards count: ${process.env.DEBTOR_DRIVERS_CARDS_COUNT}\nchunk size: ${process.env.CHUNK_SIZE}`
   );
   await openSShTunnel;
-  await updateFiredDebtorDriversCards();
+  // await updateFiredDebtorDriversCards();
 
-  // await prepareData();
+  console.log(await prepareFiredDebtorDriverCSWithHandledCashBlockRules());
 }
