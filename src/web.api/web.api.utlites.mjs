@@ -594,9 +594,6 @@ export async function getBrandingCardsInfo({ period_from, period_to }) {
   return { rows };
 }
 export async function getDriverBalances({ driver_ids }) {
-  if (driver_ids.length === 0) {
-    throw new Error('Invalid driver_ids: Must be a non-empty array.');
-  }
   const sql = fs.readFileSync('src/sql/get_driver_balances.sql').toString();
   const result = await pool.query(sql, [driver_ids]);
   const { rows, rowCount } = result;

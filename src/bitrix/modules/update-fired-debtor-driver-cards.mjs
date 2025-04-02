@@ -41,68 +41,65 @@ function isUpdateFound({ dbcard, apicard }) {
 }
 
 async function prepareFiredDebtorDriverCSWithHandledCashBlockRules() {
-  try {
-    const debtor_fired_drivers_map = new Map();
-    const today = DateTime.local().startOf('day');
-    const { weekNumber: cs_current_week, year: cs_current_year } = today;
-    const firedDebtorDrivers = await getAllFiredDebtorDriver();
-    const driver_ids = firedDebtorDrivers.map((driver) => driver.driver_id);
-    //fired drivers calculated statements for the last week
-    const { rows: actual_fired_drivers_cs } = await getDriverBalances({
-      driver_ids,
-    });
+  const debtor_fired_drivers_map = new Map();
+  const today = DateTime.local().startOf('day');
+  const { weekNumber: cs_current_week, year: cs_current_year } = today;
+  const firedDebtorDrivers = await getAllFiredDebtorDriver();
 
-    //handled cash block rules only for debtors
-    const { rows: hcbr } = await getHandledCashBlockRulesInfo({
-      fired_drivers_ids: driver_ids,
-    });
-    for (const [index, fd_cs] of actual_fired_drivers_cs.entries()) {
-      if (index === Number(process.env.DEBTOR_DRIVERS_CARDS_COUNT)) {
-        break;
-      }
-      const {
-        driver_id,
-        current_week_total_deposit,
-        current_week_total_debt,
-        current_week_balance,
-      } = fd_cs;
-      let matching_hcbr = hcbr.find((hcbr) => hcbr.driver_id === driver_id);
-      if (!matching_hcbr) {
-        matching_hcbr = {
-          driver_id,
-          is_balance_enabled: null,
-          balance_activation_value: null,
-          is_deposit_enabled: null,
-          deposit_activation_value: null,
-        };
-      }
-      const {
-        is_balance_enabled,
-        balance_activation_value,
-        is_deposit_enabled,
-        deposit_activation_value,
-      } = matching_hcbr;
-
-      debtor_fired_drivers_map.set(driver_id, {
-        current_week_total_deposit,
-        current_week_total_debt,
-        current_week_balance,
-        cs_current_week,
-        cs_current_year,
-        is_balance_enabled,
-        balance_activation_value,
-        is_deposit_enabled,
-        deposit_activation_value,
-      });
-    }
-    return { debtor_fired_drivers_map };
-  } catch (e) {
-    console.error({
-      'function name': 'prepareFiredDebtorDriverCSWithHandledCashBlockRules',
-      e,
-    });
+  if (firedDebtorDrivers.length === 0) {
     return { debtor_fired_drivers_map: new Map() };
   }
+
+  const driver_ids = firedDebtorDrivers.map((driver) => driver.driver_id);
+  //fired drivers calculated statements for the last week
+  const { rows: actual_fired_drivers_cs } = await getDriverBalances({
+    driver_ids,
+  });
+
+  //handled cash block rules only for debtors
+  const { rows: hcbr } = await getHandledCashBlockRulesInfo({
+    fired_drivers_ids: driver_ids,
+  });
+  for (const [index, fd_cs] of actual_fired_drivers_cs.entries()) {
+    if (index === Number(process.env.DEBTOR_DRIVERS_CARDS_COUNT)) {
+      break;
+    }
+    const {
+      driver_id,
+      current_week_total_deposit,
+      current_week_total_debt,
+      current_week_balance,
+    } = fd_cs;
+    let matching_hcbr = hcbr.find((hcbr) => hcbr.driver_id === driver_id);
+    if (!matching_hcbr) {
+      matching_hcbr = {
+        driver_id,
+        is_balance_enabled: null,
+        balance_activation_value: null,
+        is_deposit_enabled: null,
+        deposit_activation_value: null,
+      };
+    }
+    const {
+      is_balance_enabled,
+      balance_activation_value,
+      is_deposit_enabled,
+      deposit_activation_value,
+    } = matching_hcbr;
+
+    debtor_fired_drivers_map.set(driver_id, {
+      current_week_total_deposit,
+      current_week_total_debt,
+      current_week_balance,
+      cs_current_week,
+      cs_current_year,
+      is_balance_enabled,
+      balance_activation_value,
+      is_deposit_enabled,
+      deposit_activation_value,
+    });
+  }
+  return { debtor_fired_drivers_map };
 }
 export async function updateFiredDebtorDriversCards() {
   const { debtor_fired_drivers_map } =

@@ -23,75 +23,67 @@ function getCityBrandingId({ auto_park_id }) {
 }
 
 async function prepareFiredDebtorDriverCSWithHandledCashBlockRules() {
-  try {
-    const debtor_fired_drivers_map = new Map();
-    const today = DateTime.local().startOf('day');
-    const { weekNumber: cs_current_week, year: cs_current_year } = today;
+  const debtor_fired_drivers_map = new Map();
+  const today = DateTime.local().startOf('day');
+  const { weekNumber: cs_current_week, year: cs_current_year } = today;
 
-    //all fired drivers
-    const { rows: fired_drivers } = await getFiredDebtorDriversInfo();
+  //all fired drivers
+  const { rows: fired_drivers } = await getFiredDebtorDriversInfo();
 
-    //handled cash block rules only for debtors
-    const { rows: handledCashBlockRules } = await getHandledCashBlockRulesInfo({
-      fired_drivers_ids: fired_drivers.map((fd) => fd.driver_id),
-    });
+  //handled cash block rules only for debtors
+  const { rows: handledCashBlockRules } = await getHandledCashBlockRulesInfo({
+    fired_drivers_ids: fired_drivers.map((fd) => fd.driver_id),
+  });
 
-    for (const [index, fired_driver] of fired_drivers.entries()) {
-      if (index === Number(process.env.DEBTOR_DRIVERS_CARDS_COUNT)) {
-        break;
-      }
-      const {
-        full_name,
-        auto_park_id,
-        fire_date,
-        driver_id,
-        current_week_total_deposit,
-        current_week_total_debt,
-        current_week_balance,
-      } = fired_driver;
-
-      let matching_hcbr = handledCashBlockRules.find(
-        (hcbr) => hcbr.driver_id === driver_id
-      );
-      if (!matching_hcbr) {
-        matching_hcbr = {
-          driver_id,
-          is_balance_enabled: null,
-          balance_activation_value: null,
-          is_deposit_enabled: null,
-          deposit_activation_value: null,
-        };
-      }
-      const {
-        is_balance_enabled,
-        balance_activation_value,
-        is_deposit_enabled,
-        deposit_activation_value,
-      } = matching_hcbr;
-
-      debtor_fired_drivers_map.set(driver_id, {
-        full_name,
-        auto_park_id,
-        fire_date,
-        current_week_total_deposit,
-        current_week_total_debt,
-        current_week_balance,
-        cs_current_week,
-        cs_current_year,
-        is_balance_enabled,
-        balance_activation_value,
-        is_deposit_enabled,
-        deposit_activation_value,
-      });
+  for (const [index, fired_driver] of fired_drivers.entries()) {
+    if (index === Number(process.env.DEBTOR_DRIVERS_CARDS_COUNT)) {
+      break;
     }
-    return { debtor_fired_drivers_map };
-  } catch (e) {
-    console.error({
-      'function name': 'prepareFiredDebtorDriverCSWithHandledCashBlockRules',
-      e,
+    const {
+      full_name,
+      auto_park_id,
+      fire_date,
+      driver_id,
+      current_week_total_deposit,
+      current_week_total_debt,
+      current_week_balance,
+    } = fired_driver;
+
+    let matching_hcbr = handledCashBlockRules.find(
+      (hcbr) => hcbr.driver_id === driver_id
+    );
+    if (!matching_hcbr) {
+      matching_hcbr = {
+        driver_id,
+        is_balance_enabled: null,
+        balance_activation_value: null,
+        is_deposit_enabled: null,
+        deposit_activation_value: null,
+      };
+    }
+    const {
+      is_balance_enabled,
+      balance_activation_value,
+      is_deposit_enabled,
+      deposit_activation_value,
+    } = matching_hcbr;
+
+    debtor_fired_drivers_map.set(driver_id, {
+      full_name,
+      auto_park_id,
+      fire_date,
+      current_week_total_deposit,
+      current_week_total_debt,
+      current_week_balance,
+      cs_current_week,
+      cs_current_year,
+      is_balance_enabled,
+      balance_activation_value,
+      is_deposit_enabled,
+      deposit_activation_value,
     });
-    return { debtor_fired_drivers_map: new Map() };
   }
+  return { debtor_fired_drivers_map };
 }
 
 export async function createFiredDebtorDriversCards() {
