@@ -1,8 +1,8 @@
 import { CronJob } from 'cron';
 import { createFiredDebtorDriversCards } from '../modules/create-fired-debtor-driver-cards.mjs';
 
-// Cron expression for every day at 10:00 AM
-const cronTime = '0 10 * * *';
+// Cron expression for every day at 10:15 AM
+const cronTime = '15 10 * * *';
 const timeZone = 'Europe/Kiev';
 const createFiredDebtorDriversCardsJob = CronJob.from({
   cronTime,
