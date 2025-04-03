@@ -3,10 +3,7 @@ import {
   getTransfers,
 } from '../../remonline/remonline.utils.mjs';
 import { remonlineTokenToEnv } from '../../remonline/remonline.api.mjs';
-import {
-  createOrResetTableByName,
-  insertRowsAsStream,
-} from '../bq-utils.mjs';
+import { createOrResetTableByName, insertRowsAsStream } from '../bq-utils.mjs';
 import {
   transferProductsTableSchema,
   transfersTableSchema,

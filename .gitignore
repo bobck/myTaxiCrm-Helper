@@ -4,7 +4,6 @@
 .test/
 /id_rsa
 /node_modules
-/package-lock.json
 main.db
 src/cron/.DS_Store
 src/.DS_Store

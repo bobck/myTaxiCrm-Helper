@@ -44,6 +44,9 @@
     "repairandaccidentreport": "ENV=TEST node -r dotenv/config src/web.api/modules/save-repair-and-accident-cars.mjs",
     "newworkingdrivers": "ENV=TEST node -r dotenv/config src/bitrix/modules/new-working-drivers.mjs",
     "format": "prettier --write .",
+    "remonlineTransfersToBQManual": "ENV=TEST node -r dotenv/config src/bq/modules/generate-and-save-remonline-transfers.mjs",
+    "format:check": "prettier --check .",
+    "migrate:up": "db-migrate up",
     "createBoltDriversBanCardsManual": "ENV=TEST BOLT_DRIVERS_BAN_CARDS=17 CHUNK_SIZE=11 node -r dotenv/config src/bitrix/modules/create-bolt-drivers-to-ban.mjs"
     "remonlineTransfersToBQManual": "ENV=TEST node -r dotenv/config src/bq/modules/generate-and-save-remonline-transfers.mjs"
   },
