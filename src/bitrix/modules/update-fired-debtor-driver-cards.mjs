@@ -104,6 +104,11 @@ async function prepareFiredDebtorDriverCSWithHandledCashBlockRules() {
 export async function updateFiredDebtorDriversCards() {
   const { debtor_fired_drivers_map } =
     await prepareFiredDebtorDriverCSWithHandledCashBlockRules();
+  console.log({
+    time: new Date(),
+    message: 'updateFiredDebtorDriversCards',
+    debtor_fired_drivers_map: debtor_fired_drivers_map.size,
+  });
   if (debtor_fired_drivers_map.size === 0) {
     return;
   }
