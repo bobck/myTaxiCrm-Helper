@@ -53,12 +53,18 @@ export async function resolveBrandingProcessById(brandingProcessId) {
  * @returns {Promise<Object>} - Resolves with the inserted record.
  */
 export async function insertBrandingCard(card) {
-  const { driver_id, bitrix_card_id, total_trips, branding_process_id } = card;
+  const {
+    driver_id,
+    bitrix_card_id,
+    total_trips,
+    branding_process_id,
+    auto_park_id,
+  } = card;
 
   const sql = `
         INSERT INTO branding_cards
-        (driver_id, bitrix_card_id, total_trips, branding_process_id, created_at, updated_at)
-        VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        (driver_id, bitrix_card_id, total_trips, branding_process_id, auto_park_id, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
         RETURNING *;
     `;
 
@@ -67,7 +73,8 @@ export async function insertBrandingCard(card) {
     driver_id,
     bitrix_card_id,
     total_trips,
-    branding_process_id
+    branding_process_id,
+    auto_park_id
   );
 }
 

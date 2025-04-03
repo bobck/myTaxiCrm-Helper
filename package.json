@@ -5,11 +5,12 @@
   "main": "app.js",
   "scripts": {
     "dev": "node -r dotenv/config app.mjs",
-    "createFiredDebtorDriversCardsManual": "ENV=TEST DEBTOR_DRIVERS_CARDS_COUNT=52 CHUNK_SIZE=8 node -r dotenv/config src/bitrix/modules/create-fired-debtor-driver-cards.mjs",
-    "updateFiredDebtorDriversCardsManual": "ENV=TEST DEBTOR_DRIVERS_CARDS_COUNT=52 CHUNK_SIZE=8 node -r dotenv/config src/bitrix/modules/update-fired-debtor-driver-cards.mjs",
     "createBrandingCardsManual": "ENV=TEST BRANDING_CARDS_COUNT=4 CHUNK_SIZE=2 node -r dotenv/config src/bitrix/modules/create-driver-branding-cards.mjs",
     "updateBrandingCardsManual": "ENV=TEST BRANDING_CARDS_COUNT=4 CHUNK_SIZE=2 node -r dotenv/config src/bitrix/modules/update-driver-branding-cards.mjs",
     "moveBrandingCardsManual": "ENV=TEST BRANDING_CARDS_COUNT=4 CHUNK_SIZE=2 node -r dotenv/config src/bitrix/modules/move-driver-branding-cards.mjs",
+    "createBrandingCardsManual": "ENV=TEST BRANDING_CARDS_COUNT=2 CHUNK_SIZE=2 node -r dotenv/config src/bitrix/modules/create-driver-branding-cards.mjs",
+    "updateBrandingCardsManual": "ENV=TEST BRANDING_CARDS_COUNT=2 CHUNK_SIZE=2 node -r dotenv/config src/bitrix/modules/update-driver-branding-cards.mjs",
+    "moveBrandingCardsManual": "ENV=TEST BRANDING_CARDS_COUNT=2 CHUNK_SIZE=2 node -r dotenv/config src/bitrix/modules/move-driver-branding-cards.mjs",
     "update_plan": "ENV=TEST node -r dotenv/config src/sheets/modules/get-and-save-current-plan.mjs",
     "notification": "ENV=TEST node -r dotenv/config src/telegram/modules/rooms-notification.mjs",
     "savesid": "ENV=TEST node -r dotenv/config src/remonline/modules/save-sid-list.mjs",
@@ -45,7 +46,12 @@
     "createrefferalpayment": "ENV=TEST node -r dotenv/config src/bitrix/modules/create-refferal-payment.mjs",
     "repairandaccidentreport": "ENV=TEST node -r dotenv/config src/web.api/modules/save-repair-and-accident-cars.mjs",
     "newworkingdrivers": "ENV=TEST node -r dotenv/config src/bitrix/modules/new-working-drivers.mjs",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "remonlineTransfersToBQManual": "ENV=TEST node -r dotenv/config src/bq/modules/generate-and-save-remonline-transfers.mjs",
+    "format:check": "prettier --check .",
+    "migrate:up": "db-migrate up",
+    "createFiredDebtorDriversCardsManual": "ENV=TEST DEBTOR_DRIVERS_CARDS_COUNT=52 CHUNK_SIZE=8 node -r dotenv/config src/bitrix/modules/create-fired-debtor-driver-cards.mjs",
+    "updateFiredDebtorDriversCardsManual": "ENV=TEST DEBTOR_DRIVERS_CARDS_COUNT=52 CHUNK_SIZE=8 node -r dotenv/config src/bitrix/modules/update-fired-debtor-driver-cards.mjs"    
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",
