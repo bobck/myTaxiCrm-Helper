@@ -91,11 +91,7 @@ async function prepareFiredDebtorDriverCSWithHandledCashBlockRules() {
 export async function createFiredDebtorDriversCards() {
   const { debtor_fired_drivers_map } =
     await prepareFiredDebtorDriverCSWithHandledCashBlockRules();
-  console.log({
-    time: new Date(),
-    message: 'createFiredDebtorDriversCards',
-    createFiredDebtorDriversCards: debtor_fired_drivers_map.size,
-  });
+
   if (debtor_fired_drivers_map.size === 0) {
     console.error('No rows found for fired debtor drivers found.');
     return;
