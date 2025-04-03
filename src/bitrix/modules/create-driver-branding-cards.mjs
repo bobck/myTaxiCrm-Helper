@@ -38,7 +38,11 @@ export async function createDriverBrandingCards() {
     year,
   } = brandingProcess;
   const { rows } = await getBrandingCardsInfo({ period_from, period_to });
-
+  console.log({
+    time:new Date(),
+    message:'createDriverBrandingCards',
+    createDriverBrandingCards: rows.length
+  })
   if (rows.length === 0) {
     console.error('No rows found for branding cards found.');
     return;

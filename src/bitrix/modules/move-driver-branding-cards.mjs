@@ -30,6 +30,11 @@ export async function moveDriverBrandingCards() {
     period_from,
     period_to,
   });
+  console.log({
+    time:new Date(),
+    message:'moveDriverBrandingCards',
+    moveDriverBrandingCards: rows.length
+  })
   const processedCards = [];
 
   for (const [index, row] of rows.entries()) {
