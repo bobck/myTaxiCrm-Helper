@@ -38,9 +38,12 @@ export async function createDriverBrandingCards() {
     year,
   } = brandingProcess;
   const { rows } = await getBrandingCardsInfo({ period_from, period_to });
-
+  console.log({
+    time: new Date(),
+    message: 'createDriverBrandingCards',
+    rows: rows.length,
+  });
   if (rows.length === 0) {
-    console.error('No rows found for branding cards found.');
     return;
   }
 
@@ -60,12 +63,9 @@ export async function createDriverBrandingCards() {
       branding_process_id,
     });
     if (dbcard) {
-      console.error(
-        `Present driver card while creating driver_id:${driver_id}, year:${year}, weekNumber:${weekNumber}`
-      );
       continue;
     }
-
+    //
     const { cityBrandingId } = getCityBrandingId({ auto_park_id });
     const stage_id = `DT1138_62:${computeBrandingCardInProgressStage({ total_trips, auto_park_id })}`;
     const myTaxiDriverUrl = `https://fleets.mytaxicrm.com/${auto_park_id}/drivers/${driver_id}`;

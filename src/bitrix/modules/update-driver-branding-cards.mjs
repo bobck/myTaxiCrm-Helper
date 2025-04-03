@@ -29,6 +29,11 @@ export async function updateDriverBrandingCards() {
     period_from,
     period_to,
   });
+  console.log({
+    time: new Date(),
+    message: 'updateDriverBrandingCards',
+    updateDriverBrandingCards: rows.length,
+  });
   const processedCards = [];
 
   for (const [index, row] of rows.entries()) {
@@ -45,9 +50,6 @@ export async function updateDriverBrandingCards() {
     });
 
     if (!dbcard) {
-      console.error(
-        `Absent driver card while updating driver_id: ${driver_id}, year:${year}, weekNumber:${weekNumber} `
-      );
       continue;
     }
     if (Number(dbcard.total_trips) >= Number(total_trips)) {

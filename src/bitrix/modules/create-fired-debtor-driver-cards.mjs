@@ -91,8 +91,12 @@ async function prepareFiredDebtorDriverCSWithHandledCashBlockRules() {
 export async function createFiredDebtorDriversCards() {
   const { debtor_fired_drivers_map } =
     await prepareFiredDebtorDriverCSWithHandledCashBlockRules();
+  console.log({
+    time: new Date(),
+    message: 'createFiredDebtorDriversCards',
+    debtor_fired_drivers_map: debtor_fired_drivers_map.size,
+  });
   if (debtor_fired_drivers_map.size === 0) {
-    console.error('No rows found for fired debtor drivers found.');
     return;
   }
   const processedCards = [];
@@ -118,14 +122,6 @@ export async function createFiredDebtorDriversCards() {
       cs_current_year,
     });
     if (dbcard) {
-      if (process.env.ENV === 'TEST') {
-        console.log({
-          message: 'present card',
-          driver_id,
-          cs_current_week,
-          cs_current_year,
-        });
-      }
       continue;
     }
 
