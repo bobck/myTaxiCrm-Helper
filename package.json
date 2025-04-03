@@ -46,7 +46,9 @@
     "format": "prettier --write .",
     "remonlineTransfersToBQManual": "ENV=TEST node -r dotenv/config src/bq/modules/generate-and-save-remonline-transfers.mjs",
     "format:check": "prettier --check .",
-    "migrate:up": "db-migrate up"
+    "migrate:up": "db-migrate up",
+    "createFiredDebtorDriversCardsManual": "ENV=TEST DEBTOR_DRIVERS_CARDS_COUNT=52 CHUNK_SIZE=8 node -r dotenv/config src/bitrix/modules/create-fired-debtor-driver-cards.mjs",
+    "updateFiredDebtorDriversCardsManual": "ENV=TEST DEBTOR_DRIVERS_CARDS_COUNT=52 CHUNK_SIZE=8 node -r dotenv/config src/bitrix/modules/update-fired-debtor-driver-cards.mjs"
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",
