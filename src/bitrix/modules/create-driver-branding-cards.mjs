@@ -44,7 +44,6 @@ export async function createDriverBrandingCards() {
     createDriverBrandingCards: rows.length,
   });
   if (rows.length === 0) {
-    console.error('No rows found for branding cards found.');
     return;
   }
 
@@ -64,9 +63,6 @@ export async function createDriverBrandingCards() {
       branding_process_id,
     });
     if (dbcard) {
-      console.error(
-        `Present driver card while creating driver_id:${driver_id}, year:${year}, weekNumber:${weekNumber}`
-      );
       continue;
     }
 

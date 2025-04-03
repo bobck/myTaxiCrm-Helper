@@ -51,9 +51,6 @@ export async function moveDriverBrandingCards() {
       branding_process_id,
     });
     if (!dbcard) {
-      console.error(
-        `Absent driver card while updating driver_id: ${driver_id}, year:${year}, weekNumber:${weekNumber} `
-      );
       continue;
     }
     const stage_id = `DT1138_62:${computeBrandingCardFinishedStage({ total_trips, auto_park_id })}`;

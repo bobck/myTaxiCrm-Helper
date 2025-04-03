@@ -110,7 +110,6 @@ export async function updateFiredDebtorDriversCards() {
     updateFiredDebtorDriversCards: debtor_fired_drivers_map.size,
   });
   if (debtor_fired_drivers_map.size === 0) {
-    console.error('No rows found for fired debtor drivers found.');
     return;
   }
 
@@ -136,11 +135,6 @@ export async function updateFiredDebtorDriversCards() {
       continue;
     }
     if (!isUpdateFound({ dbcard, apicard: payload })) {
-      if (process.env.ENV === 'TEST') {
-        console.log(
-          `row #${driver_id} hasn't been changed. There is no any sense to update it.`
-        );
-      }
       continue;
     }
 
