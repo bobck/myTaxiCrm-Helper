@@ -60,7 +60,7 @@ export async function createDriverBrandingCards() {
     if (dbcard) {
       continue;
     }
-
+    //
     const { cityBrandingId } = getCityBrandingId({ auto_park_id });
     const stage_id = `DT1138_62:${computeBrandingCardInProgressStage({ total_trips, auto_park_id })}`;
     const myTaxiDriverUrl = `https://fleets.mytaxicrm.com/${auto_park_id}/drivers/${driver_id}`;
