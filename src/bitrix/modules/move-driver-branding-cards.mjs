@@ -31,10 +31,10 @@ export async function moveDriverBrandingCards() {
     period_to,
   });
   console.log({
-    time:new Date(),
-    message:'moveDriverBrandingCards',
-    moveDriverBrandingCards: rows.length
-  })
+    time: new Date(),
+    message: 'moveDriverBrandingCards',
+    moveDriverBrandingCards: rows.length,
+  });
   const processedCards = [];
 
   for (const [index, row] of rows.entries()) {

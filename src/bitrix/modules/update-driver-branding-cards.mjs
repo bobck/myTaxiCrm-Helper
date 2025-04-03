@@ -30,10 +30,10 @@ export async function updateDriverBrandingCards() {
     period_to,
   });
   console.log({
-    time:new Date(),
-    message:'updateDriverBrandingCards',
-    updateDriverBrandingCards: rows.length
-  })
+    time: new Date(),
+    message: 'updateDriverBrandingCards',
+    updateDriverBrandingCards: rows.length,
+  });
   const processedCards = [];
 
   for (const [index, row] of rows.entries()) {
