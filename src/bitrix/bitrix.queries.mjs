@@ -724,13 +724,9 @@ export async function updateFiredDebtorDriver({
  * @param {number} cs_current_year - The current year.
  * @returns {Promise<Object>} - The matching record.
  */
-export async function getFiredDebtorDriverByWeekAndYear({
-  driver_id,
-  cs_current_week,
-  cs_current_year,
-}) {
+export async function getFiredDebtorDriverByDriverId({ driver_id }) {
   const sql = `
-        SELECT bitrix_card_id, driver_id, full_name, auto_park_id, cs_current_week, cs_current_year, current_week_balance, current_week_total_deposit, current_week_total_debt, fire_date, is_balance_enabled, balance_activation_value, is_deposit_enabled, deposit_activation_value, created_at, updated_at FROM fired_debtor_drivers WHERE driver_id = ? AND cs_current_week = ? AND cs_current_year = ?;
+        SELECT bitrix_card_id, driver_id, full_name, auto_park_id, cs_current_week, cs_current_year, current_week_balance, current_week_total_deposit, current_week_total_debt, fire_date, is_balance_enabled, balance_activation_value, is_deposit_enabled, deposit_activation_value, created_at, updated_at FROM fired_debtor_drivers WHERE driver_id = ?;
     `;
-  return db.get(sql, driver_id, cs_current_week, cs_current_year);
+  return db.get(sql, driver_id);
 }

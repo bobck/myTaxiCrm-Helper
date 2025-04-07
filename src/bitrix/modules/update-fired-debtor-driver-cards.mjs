@@ -5,7 +5,7 @@ import {
 import { openSShTunnel } from '../../../ssh.mjs';
 import {
   getAllFiredDebtorDriver,
-  getFiredDebtorDriverByWeekAndYear,
+  getFiredDebtorDriverByDriverId,
   updateFiredDebtorDriver,
 } from '../bitrix.queries.mjs';
 import {
@@ -61,9 +61,6 @@ async function prepareFiredDebtorDriverCSWithHandledCashBlockRules() {
     fired_drivers_ids: driver_ids,
   });
   for (const [index, fired_driver_cs] of actual_fired_drivers_cs.entries()) {
-    if (index === Number(process.env.DEBTOR_DRIVERS_CARDS_COUNT)) {
-      break;
-    }
     const {
       driver_id,
       current_week_total_deposit,
@@ -126,10 +123,8 @@ export async function updateFiredDebtorDriversCards() {
       cs_current_week,
       cs_current_year,
     } = payload;
-    const dbcard = await getFiredDebtorDriverByWeekAndYear({
+    const dbcard = await getFiredDebtorDriverByDriverId({
       driver_id,
-      cs_current_week,
-      cs_current_year,
     });
     if (!dbcard) {
       continue;
@@ -188,9 +183,11 @@ export async function updateFiredDebtorDriversCards() {
 }
 
 if (process.env.ENV === 'TEST') {
-  console.log(
-    `testing fired debtor drivers updating\ncards count: ${process.env.DEBTOR_DRIVERS_CARDS_COUNT}\nchunk size: ${process.env.CHUNK_SIZE}`
-  );
+  console.log({
+    message: 'testing fired debtor drivers updating',
+    cards_count: '(all cards from local db)',
+    chunk_size: process.env.CHUNK_SIZE,
+  });
   await openSShTunnel;
   await updateFiredDebtorDriversCards();
 }
