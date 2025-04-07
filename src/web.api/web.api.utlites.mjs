@@ -602,11 +602,16 @@ export async function getDriverBalances({ driver_ids }) {
   const { rows, rowCount } = result;
   return { rows };
 }
-export async function getFiredDebtorDriversInfo() {
+export async function getFiredDebtorDriversInfo({
+  fired_debtor_drivers_with_existing_bitrix_cards,
+}) {
   const sql = fs
     .readFileSync('src/sql/get_fired_debtor_drivers.sql')
     .toString();
-  const result = await pool.query(sql, [UkrainianBrandingAutoParkIds]);
+  const result = await pool.query(sql, [
+    UkrainianBrandingAutoParkIds,
+    fired_debtor_drivers_with_existing_bitrix_cards,
+  ]);
   const { rows, rowCount } = result;
   return { rows };
 }

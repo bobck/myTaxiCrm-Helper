@@ -7,6 +7,7 @@ import { openSShTunnel } from '../../../ssh.mjs';
 import {
   getFiredDebtorDriverByWeekAndYear,
   insertFiredDebtorDriver,
+  getAllFiredDebtorDriver,
 } from '../bitrix.queries.mjs';
 import {
   chunkArray,
@@ -26,9 +27,16 @@ async function prepareFiredDebtorDriverCSWithHandledCashBlockRules() {
   const debtor_fired_drivers_map = new Map();
   const today = DateTime.local().startOf('day');
   const { weekNumber: cs_current_week, year: cs_current_year } = today;
+  const firedDebtorDrivers = await getAllFiredDebtorDriver();
 
-  //all fired drivers
-  const { rows: fired_drivers } = await getFiredDebtorDriversInfo();
+  // array of fired debtor drivers with existing bitrix cards
+  const fired_debtor_drivers_with_existing_bitrix_cards =
+    firedDebtorDrivers.map((driver) => driver.driver_id);
+
+  const { rows: fired_drivers } = await getFiredDebtorDriversInfo({
+    fired_debtor_drivers_with_existing_bitrix_cards,
+  });
+
   if (fired_drivers.length === 0) {
     return { debtor_fired_drivers_map: new Map() };
   }
@@ -184,5 +192,8 @@ if (process.env.ENV === 'TEST') {
   );
   await openSShTunnel;
 
-  await createFiredDebtorDriversCards();
+  // await createFiredDebtorDriversCards();
+
+  const {debtor_fired_drivers_map:preparedData}=await prepareFiredDebtorDriverCSWithHandledCashBlockRules()
+  console.log(preparedData, preparedData.size);
 }

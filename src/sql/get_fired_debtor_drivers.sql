@@ -12,5 +12,6 @@ FROM
         AND cs.year = EXTRACT(YEAR FROM current_date)
         AND cs.week = EXTRACT(week FROM current_date)
 WHERE d.inner_status = 'FIRED_OUT' AND d.auto_park_id = ANY($1)
+        AND d.id!= ALL($2)
 ORDER BY
     d.id ASC
