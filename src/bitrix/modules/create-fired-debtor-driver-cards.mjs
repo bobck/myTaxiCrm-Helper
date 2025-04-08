@@ -5,8 +5,8 @@ import {
 import { cityListWithAssignedBy as cityList } from '../bitrix.constants.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
 import {
-  getFiredDebtorDriverByWeekAndYear,
   insertFiredDebtorDriver,
+  getAllFiredDebtorDriver,
 } from '../bitrix.queries.mjs';
 import {
   chunkArray,
@@ -26,9 +26,16 @@ async function prepareFiredDebtorDriverCSWithHandledCashBlockRules() {
   const debtor_fired_drivers_map = new Map();
   const today = DateTime.local().startOf('day');
   const { weekNumber: cs_current_week, year: cs_current_year } = today;
+  const firedDebtorDrivers = await getAllFiredDebtorDriver();
 
-  //all fired drivers
-  const { rows: fired_drivers } = await getFiredDebtorDriversInfo();
+  // array of fired debtor drivers with existing bitrix cards
+  const fired_debtor_drivers_with_existing_bitrix_cards =
+    firedDebtorDrivers.map((driver) => driver.driver_id);
+
+  const { rows: fired_drivers } = await getFiredDebtorDriversInfo({
+    fired_debtor_drivers_with_existing_bitrix_cards,
+  });
+
   if (fired_drivers.length === 0) {
     return { debtor_fired_drivers_map: new Map() };
   }
@@ -38,7 +45,10 @@ async function prepareFiredDebtorDriverCSWithHandledCashBlockRules() {
   });
 
   for (const [index, fired_driver] of fired_drivers.entries()) {
-    if (index === Number(process.env.DEBTOR_DRIVERS_CARDS_COUNT)) {
+    if (
+      process.env.ENV === 'TEST' &&
+      index === Number(process.env.DEBTOR_DRIVERS_CARDS_COUNT)
+    ) {
       break;
     }
     const {
@@ -116,15 +126,6 @@ export async function createFiredDebtorDriversCards() {
       cs_current_year,
     } = payload;
 
-    const dbcard = await getFiredDebtorDriverByWeekAndYear({
-      driver_id,
-      cs_current_week,
-      cs_current_year,
-    });
-    if (dbcard) {
-      continue;
-    }
-
     const stage_id = `DT1162_72:NEW`;
     const cityBrandingId = getCityBrandingId({ auto_park_id }).cityBrandingId;
     const card = {
@@ -146,6 +147,7 @@ export async function createFiredDebtorDriversCards() {
     };
     processedCards.push(card);
   }
+
   const chunkedProcessedCards = chunkArray(
     processedCards,
     Number(process.env.CHUNK_SIZE) || 8
@@ -179,10 +181,16 @@ export async function createFiredDebtorDriversCards() {
 }
 
 if (process.env.ENV === 'TEST') {
-  console.log(
-    `testing fired debtor drivers creation\ncards count :${process.env.DEBTOR_DRIVERS_CARDS_COUNT}`
-  );
+  console.log({
+    message: 'testing fired debtor drivers creation',
+    cards_count: process.env.DEBTOR_DRIVERS_CARDS_COUNT,
+    chunk_size: process.env.CHUNK_SIZE,
+  });
   await openSShTunnel;
 
   await createFiredDebtorDriversCards();
+
+  // const { debtor_fired_drivers_map: preparedData } =
+  //   await prepareFiredDebtorDriverCSWithHandledCashBlockRules();
+  // console.log(preparedData, preparedData.size);
 }
