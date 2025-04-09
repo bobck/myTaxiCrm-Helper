@@ -1,6 +1,7 @@
 with branded_cars AS(
     SELECT c.id,c.license_plate FROM cars c
     WHERE c.license_plate = ANY($1)
+        AND c.company_id='4ea03592-9278-4ede-adf8-f7345a856893'
 ), report_cards AS(
     SELECT
         bc.id AS car_id,

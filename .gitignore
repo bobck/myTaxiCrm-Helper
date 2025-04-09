@@ -1,6 +1,7 @@
 /.DS_Store
 /.env
 .idea/
+.vscode/
 .test/
 /id_rsa
 /node_modules

@@ -46,6 +46,8 @@ export async function createDriverBrandingCards() {
     period_from,
     period_to,
   });
+  console.log(rows);
+  return;
 
   if (rows.length === 0) {
     console.error('No rows found for branding cards found.');

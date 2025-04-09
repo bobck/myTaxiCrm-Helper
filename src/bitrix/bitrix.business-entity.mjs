@@ -27,7 +27,6 @@ export function computeBrandingCardInProgressStage({
     console.error('Trips must be a number');
   }
   const GOAL = computeBrandingGoal({ auto_park_id });
-  console.log({ auto_park_id, GOAL, maxGoalGap, trips });
   const todaysTripsOptimalLowerBound = GOAL - maxGoalGap;
   if (trips >= GOAL) {
     return 'PREPARATION';
