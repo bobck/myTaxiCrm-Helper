@@ -9,11 +9,17 @@ export function computePeriodBounds() {
   const lowerBound = today.minus({ days: today.weekday });
 
   const upperBound = lowerBound.plus({ days: 7 });
+  const { year, weekNumber } = today;
 
   // Return the dates formatted as ISO strings (YYYY-MM-DD) for PostgreSQL
+  const period_from = lowerBound.toISODate();
+  const period_to = upperBound.toISODate();
+  
   return {
-    lowerBound,
-    upperBound,
+    period_from,
+    period_to,
+    year,
+    weekNumber,
   };
 }
 export function computeBrandingCardInProgressStage({

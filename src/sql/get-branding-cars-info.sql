@@ -17,8 +17,8 @@ with branded_cars AS(
         AND s.is_latest_version = TRUE
         AND s.is_deleted = FALSE
         AND s.event_type IN ('BUSY_WITH_CREW', 'BUSY_WITH_PRIVATE_TRADER', 'RENTAL')
-        AND s.event_period_start <= current_time
-        AND s.event_period_end >= current_time
+        AND s.event_period_start <= now()
+        AND s.event_period_end >= now()
         AND s.parent_id IS NULL
     GROUP BY bc.id,branded_car_driver_id
 )

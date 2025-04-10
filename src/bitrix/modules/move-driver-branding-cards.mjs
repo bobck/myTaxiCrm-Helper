@@ -23,8 +23,6 @@ export async function moveDriverBrandingCards() {
   const {
     period_from,
     period_to,
-    weekNumber,
-    year,
     id: branding_process_id,
   } = brandingProcess;
   const { brandedLicencePlateNumbers } =

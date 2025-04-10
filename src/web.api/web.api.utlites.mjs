@@ -593,13 +593,11 @@ export async function getWorkingDriversById({ driversIds }) {
 export async function getBrandingCardsInfo({
   brandedLicencePlateNumbers,
   period_from,
-  period_to,
 }) {
   const sql = fs.readFileSync('src/sql/get-branding-cars-info.sql').toString();
   const result = await pool.query(sql, [
     brandedLicencePlateNumbers,
-    period_from,
-    period_to,
+    period_from
   ]);
   const { rows, rowCount } = result;
   return { rows };

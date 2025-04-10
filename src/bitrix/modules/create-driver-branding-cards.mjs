@@ -1,8 +1,9 @@
 import { getBrandingCardsInfo } from '../../web.api/web.api.utlites.mjs';
 import {
   createBrandingProcess,
-  getCrmBrandingCardByDriverId,
   insertBrandingCard,
+  getBrandingProcessByWeekNumber,
+  getBrandedLicencePlateNumbersByBrandingProcessId,
 } from '../bitrix.queries.mjs';
 import {
   chunkArray,
@@ -23,14 +24,27 @@ function getCityBrandingId({ auto_park_id }) {
   const { brandingId: cityBrandingId } = matchingCity;
   return { cityBrandingId };
 }
-export async function createDriverBrandingCards() {
-  const bounds = computePeriodBounds();
-  const brandingProcess = await createBrandingProcess({
-    year: bounds.upperBound.year,
-    weekNumber: bounds.upperBound.weekNumber,
-    period_from: bounds.lowerBound.toISODate(),
-    period_to: bounds.upperBound.toISODate(),
+
+async function getBrandingProcess() {
+  const { weekNumber, year, period_from, period_to } = computePeriodBounds();
+  const brandingProcess = await getBrandingProcessByWeekNumber({
+    weekNumber,
+    year,
   });
+  if (brandingProcess) {
+    return { brandingProcess };
+  }
+  const newbrandingProcess = await createBrandingProcess({
+    year,
+    weekNumber,
+    period_from,
+    period_to,
+  });
+  return { brandingProcess: newbrandingProcess };
+}
+export async function createDriverBrandingCards() {
+  const { brandingProcess } = await getBrandingProcess();
+  console.log(brandingProcess);
 
   const {
     period_from,
@@ -39,12 +53,17 @@ export async function createDriverBrandingCards() {
     weekNumber,
     year,
   } = brandingProcess;
+  const { brandedLicencePlateNumbers: existingBrandedLicencePlateNumbers } =
+    await getBrandedLicencePlateNumbersByBrandingProcessId({
+      branding_process_id,
+    });
   const { brandedLicencePlateNumbers } =
-    await getBrandedLicencePlateNumbersFromBQ();
+    await getBrandedLicencePlateNumbersFromBQ({
+      existingBrandedLicencePlateNumbers,
+    });
   const { rows } = await getBrandingCardsInfo({
     brandedLicencePlateNumbers,
     period_from,
-    period_to,
   });
 
   if (rows.length === 0) {
@@ -69,14 +88,6 @@ export async function createDriverBrandingCards() {
       license_plate,
     } = row;
 
-    const dbcard = await getCrmBrandingCardByDriverId({
-      driver_id,
-      branding_process_id,
-    });
-    if (dbcard) {
-      continue;
-    }
-    //
     const { cityBrandingId } = getCityBrandingId({ auto_park_id });
     const stage_id = `DT1138_62:${computeBrandingCardInProgressStage({ total_trips, auto_park_id })}`;
     const myTaxiDriverUrl = `https://fleets.mytaxicrm.com/${auto_park_id}/drivers/${driver_id}`;

@@ -34,9 +34,7 @@ export async function updateDriverBrandingCards() {
     });
 
   const { rows } = await getBrandingCardsInfo({
-    brandedLicencePlateNumbers,
-    period_from,
-    period_to,
+    brandedLicencePlateNumbers
   });
   console.log({
     time: new Date(),

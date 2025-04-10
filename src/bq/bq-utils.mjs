@@ -263,11 +263,19 @@ export async function generatePolandBookkeepingReport({
   const { rows } = result;
   return { rows };
 }
-export async function getBrandedLicencePlateNumbersFromBQ() {
-  const query = `SELECT numbner as licence_plate_number FROM \`up-statistics.DB.brand_cars_status_list\` where approved_brand_type='BOLT'`;
+export async function getBrandedLicencePlateNumbersFromBQ({
+  existingBrandedLicencePlateNumbers,
+}) {
+  const query = /*sql*/ `
+    SELECT numbner AS licence_plate_number
+    FROM \`up-statistics.DB.brand_cars_status_list\`
+    WHERE approved_brand_type = 'BOLT'
+      AND numbner NOT IN UNNEST(@existingNumbers)
+  `;
   const options = {
     query,
     location: 'US',
+    params: { existingNumbers: existingBrandedLicencePlateNumbers },
   };
   //the response from BQ is an array with rows array as first element, and payload data next
   //this is the reason why here is array destructuring

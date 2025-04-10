@@ -122,6 +122,7 @@ export async function updateBrandingCardByDriverId({
   return db.get(sql, total_trips, driver_id, branding_process_id);
 }
 
+
 export async function getLastUnixCreatedAt({ categoryId }) {
   const sql = `SELECT unix_created_at FROM last_fired_driver WHERE category_id = ?`;
   return db.get(sql, categoryId);
