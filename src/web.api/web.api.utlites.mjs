@@ -597,7 +597,7 @@ export async function getBrandingCardsInfo({
   const sql = fs.readFileSync('src/sql/get-branding-cars-info.sql').toString();
   const result = await pool.query(sql, [
     brandedLicencePlateNumbers,
-    period_from
+    period_from,
   ]);
   const { rows, rowCount } = result;
   return { rows };

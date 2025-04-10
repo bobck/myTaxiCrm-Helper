@@ -20,10 +20,7 @@ export async function updateDriverBrandingCards() {
     year: today.year,
   });
 
-  const {
-    period_from,
-    id: branding_process_id,
-  } = brandingProcess;
+  const { period_from, id: branding_process_id } = brandingProcess;
 
   const { brandedLicencePlateNumbers } =
     await getBrandedLicencePlateNumbersByBrandingProcessId({

@@ -14,7 +14,7 @@ export function computePeriodBounds() {
   // Return the dates formatted as ISO strings (YYYY-MM-DD) for PostgreSQL
   const period_from = lowerBound.toISODate();
   const period_to = upperBound.toISODate();
-  
+
   return {
     period_from,
     period_to,

@@ -45,7 +45,6 @@ async function getBrandingProcess() {
 export async function createDriverBrandingCards() {
   const { brandingProcess } = await getBrandingProcess();
 
-
   const {
     period_from,
     period_to,
