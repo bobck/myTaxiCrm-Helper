@@ -1,10 +1,11 @@
 import { CronJob } from 'cron';
 import { createDriverBrandingCards } from '../modules/create-driver-branding-cards.mjs';
 
-// Cron expression for every Monday at 7:30
-// Day-of-week: 5 Friday
-const cronTime = '30 7 * * 5';
+// Cron expression: "30 7-23/2 * * 5"
+// This translates to every Friday at 7:30, 9:30, 11:30, ..., 23:30.
+const cronTime = '30 7-23/2 * * 5';
 const timeZone = 'Europe/Kiev';
+
 const createBrandingCardsJob = CronJob.from({
   cronTime,
   timeZone,
