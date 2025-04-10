@@ -13,7 +13,6 @@ import { getBrandingCardsInfo } from '../../web.api/web.api.utlites.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
 import { computeBrandingCardInProgressStage } from '../bitrix.business-entity.mjs';
 
-
 export async function updateDriverBrandingCards() {
   const today = DateTime.local().startOf('day').minus({ days: 1 });
   const brandingProcess = await getBrandingProcessByWeekNumber({

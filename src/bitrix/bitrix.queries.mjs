@@ -62,7 +62,7 @@ export async function insertBrandingCard(card) {
     license_plate,
   } = card;
 
-  const sql = /*sql*/`
+  const sql = /*sql*/ `
         INSERT INTO branding_cards
         (driver_id, bitrix_card_id,license_plate, total_trips, branding_process_id, auto_park_id, created_at, updated_at)
         VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
