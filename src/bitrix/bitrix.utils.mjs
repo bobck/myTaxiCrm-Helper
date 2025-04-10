@@ -148,12 +148,12 @@ export async function getLeadsByCreateDateAndSourceId({ date, sourceId }) {
   return result;
 }
 
-export async function getDealsByInterviewDate({ date }) {
+export async function getDealsByInterviewDate({ date, CATEGORY_ID }) {
   const response = await bitrix.deals.list({
     filter: {
       '>=UF_CRM_1608302466359': `${date}T00:00:00`,
       '<=UF_CRM_1608302466359': `${date}T23:59:59`,
-      CATEGORY_ID: '3',
+      CATEGORY_ID: CATEGORY_ID,
     },
     select: [
       'ID',
@@ -472,5 +472,98 @@ export async function updateBitrixDriverBrandingCards({ cards }) {
   const { result: itemObj } = resp;
 
   //
+  return itemObj;
+}
+export async function createBitrixFiredDebtorDriversCards({ cards }) {
+  const batchObj = {};
+
+  for (const card of cards) {
+    const {
+      stage_id,
+      driver_id,
+      full_name,
+      cityBrandingId,
+      cs_current_week,
+      cs_current_year,
+      current_week_total_deposit,
+      current_week_total_debt,
+      current_week_balance,
+      fire_date,
+      is_balance_enabled,
+      balance_activation_value,
+      is_deposit_enabled,
+      deposit_activation_value,
+    } = card;
+    // Индивидуальные условия -> UF_CRM_64_1741780398
+    // Комментарий -> UF_CRM_64_1741782814
+    // Дата обработки -> UF_CRM_64_1741782917
+    // Число активации блокировки депозита -  UF_CRM_64_1742373572
+    const params = {
+      entityTypeId: '1162',
+      'fields[title]': full_name,
+      'fields[STAGE_ID]': stage_id,
+      'fields[ufCrm64_1741780227]': full_name,
+      'fields[ufCrm64_1741780126]': cityBrandingId,
+      'fields[ufCrm64_1741780303]': fire_date,
+      'fields[ufCrm64_1741785328]': current_week_balance,
+      'fields[ufCrm64_1741786347]': current_week_total_deposit,
+      'fields[ufCrm64_1741786515]': current_week_total_debt,
+      'fields[ufCrm64_1741780627]': cs_current_week,
+      'fields[ufCrm64_1741780703]': cs_current_year,
+      'fields[ufCrm64_1742373272]': is_balance_enabled,
+      'fields[ufCrm64_1742373369]': balance_activation_value,
+      'fields[ufCrm64_1742373461]': is_deposit_enabled,
+      'fields[ufCrm64_1742373572]': deposit_activation_value,
+    };
+    batchObj[driver_id] = { method: 'crm.item.add', params };
+  }
+
+  const { result: resp, time } = await bitrix.batch(batchObj);
+  const { result: itemObj } = resp;
+
+  return itemObj;
+}
+export async function updateBitrixFiredDebtorDriversCards({ cards }) {
+  const batchObj = {};
+
+  for (const card of cards) {
+    const {
+      bitrix_card_id,
+      stage_id,
+      driver_id,
+      cs_current_week,
+      cs_current_year,
+      current_week_balance,
+      current_week_total_deposit,
+      current_week_total_debt,
+      is_balance_enabled,
+      balance_activation_value,
+      is_deposit_enabled,
+      deposit_activation_value,
+    } = card;
+    // Индивидуальные условия -> UF_CRM_64_1741780398
+    // Комментарий -> UF_CRM_64_1741782814
+    // Дата обработки -> UF_CRM_64_1741782917
+    // Число активации блокировки депозита -  UF_CRM_64_1742373572
+    const params = {
+      id: bitrix_card_id,
+      entityTypeId: '1162',
+      'fields[STAGE_ID]': stage_id,
+      'fields[ufCrm64_1741785328]': current_week_balance,
+      'fields[ufCrm64_1741786347]': current_week_total_deposit,
+      'fields[ufCrm64_1741786515]': current_week_total_debt,
+      'fields[ufCrm64_1741780627]': cs_current_week,
+      'fields[ufCrm64_1741780703]': cs_current_year,
+      'fields[ufCrm64_1742373272]': is_balance_enabled,
+      'fields[ufCrm64_1742373369]': balance_activation_value,
+      'fields[ufCrm64_1742373461]': is_deposit_enabled,
+      'fields[ufCrm64_1742373572]': deposit_activation_value,
+    };
+    batchObj[driver_id] = { method: 'crm.item.update', params };
+  }
+
+  const { result: resp, time } = await bitrix.batch(batchObj);
+  const { result: itemObj } = resp;
+
   return itemObj;
 }

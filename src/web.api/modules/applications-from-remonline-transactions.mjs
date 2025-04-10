@@ -157,11 +157,13 @@ export async function createCRMApplicationsFromRemonlineTransaction() {
           }
         } catch (error) {
           console.error({
+            name: 'createCRMApplicationsFromRemonlineTransaction',
             date: new Date(),
             error,
             transactionId,
             created_at,
             cashboxId,
+            contractorId,
           });
           break;
         }

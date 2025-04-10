@@ -41,6 +41,12 @@ async function makeCRMRequestWithRetry({ body }) {
         body: JSON.stringify(body),
       });
 
+      if (!response.ok) {
+        throw new Error(
+          `makeCRMRequestWithRetry HTTP error! status: ${response.status}`
+        );
+      }
+
       const json = await response.json();
 
       const { errors, data } = json;
@@ -58,7 +64,10 @@ async function makeCRMRequestWithRetry({ body }) {
 
       const [firstError] = error || [];
       const { message } = firstError || {};
-      if (message == 'Cashbox balance after transaction become negative') {
+      if (
+        message == 'Cashbox balance after transaction become negative' ||
+        message == 'Cashbox and contractor currencies must be the same'
+      ) {
         throw new Error(message);
       }
 
@@ -592,6 +601,33 @@ export async function getBrandingCardsInfo({
     period_from,
     period_to,
   ]);
+  const { rows, rowCount } = result;
+  return { rows };
+}
+export async function getDriverBalances({ driver_ids }) {
+  const sql = fs.readFileSync('src/sql/get_driver_balances.sql').toString();
+  const result = await pool.query(sql, [driver_ids]);
+  const { rows, rowCount } = result;
+  return { rows };
+}
+export async function getFiredDebtorDriversInfo({
+  fired_debtor_drivers_with_existing_bitrix_cards,
+}) {
+  const sql = fs
+    .readFileSync('src/sql/get_fired_debtor_drivers.sql')
+    .toString();
+  const result = await pool.query(sql, [
+    UkrainianBrandingAutoParkIds,
+    fired_debtor_drivers_with_existing_bitrix_cards,
+  ]);
+  const { rows, rowCount } = result;
+  return { rows };
+}
+export async function getHandledCashBlockRulesInfo({ fired_drivers_ids }) {
+  const sql = fs
+    .readFileSync('src/sql/get_handled_cash_block_rules.sql')
+    .toString();
+  const result = await pool.query(sql, [fired_drivers_ids]);
   const { rows, rowCount } = result;
   return { rows };
 }

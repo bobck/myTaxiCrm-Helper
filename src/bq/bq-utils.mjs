@@ -97,7 +97,6 @@ export async function clearFleetsIncomAndExpensesReportTableByYearAndWeek({
 
 export async function createOrResetLeadsTable({ bqTableId }) {
   console.log({ time: new Date(), message: 'createOrResetLeadsTable' });
-
   try {
     await bigquery.dataset(process.env.BQ_DATASET_ID).table(bqTableId).delete();
   } catch (e) {}
@@ -226,11 +225,15 @@ export async function clearTableByWeekAndYearAndAutoParkId({
   await bigquery.query(options);
 }
 
-export async function createOrResetTableByName({ bqTableId, schema }) {
+export async function createOrResetTableByName({
+  bqTableId,
+  schema,
+  dataSetId,
+}) {
   console.log({ time: new Date(), message: 'createOrResetTableByName' });
-
+  const BQ_DATASET_ID = dataSetId || process.env.BQ_DATASET_ID;
   try {
-    await bigquery.dataset(process.env.BQ_DATASET_ID).table(bqTableId).delete();
+    await bigquery.dataset(BQ_DATASET_ID).table(bqTableId).delete();
   } catch (e) {}
 
   const options = {
@@ -238,7 +241,7 @@ export async function createOrResetTableByName({ bqTableId, schema }) {
     location: 'US',
   };
   const response = await bigquery
-    .dataset(process.env.BQ_DATASET_ID)
+    .dataset(BQ_DATASET_ID)
     .createTable(bqTableId, options);
   // console.log({ response })
 }

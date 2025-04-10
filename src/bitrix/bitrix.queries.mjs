@@ -619,3 +619,131 @@ export async function getBrandedLicencePlateNumbersByBrandingProcessId({
   );
   return { brandedLicencePlateNumbers };
 }
+/**
+ * Inserts a new fired debtor driver record.
+ * @param {Object} driver - The driver details.
+ * @returns {Promise<Object>} - The inserted record.
+ */
+export async function insertFiredDebtorDriver(driver) {
+  const {
+    bitrix_card_id,
+    driver_id,
+    full_name,
+    auto_park_id,
+    cs_current_week,
+    cs_current_year,
+    current_week_balance,
+    current_week_total_deposit,
+    current_week_total_debt,
+    fire_date,
+    is_balance_enabled,
+    balance_activation_value,
+    is_deposit_enabled,
+    deposit_activation_value,
+  } = driver;
+  const sql = `
+      INSERT INTO fired_debtor_drivers
+      (bitrix_card_id, driver_id, full_name, auto_park_id, cs_current_week, cs_current_year, current_week_balance, current_week_total_deposit, current_week_total_debt, fire_date, is_balance_enabled, balance_activation_value, is_deposit_enabled, deposit_activation_value, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+          RETURNING *;
+  `;
+  return db.get(
+    sql,
+    bitrix_card_id,
+    driver_id,
+    full_name,
+    auto_park_id,
+    cs_current_week,
+    cs_current_year,
+    current_week_balance,
+    current_week_total_deposit,
+    current_week_total_debt,
+    fire_date,
+    is_balance_enabled,
+    balance_activation_value,
+    is_deposit_enabled,
+    deposit_activation_value
+  );
+}
+/**
+ * Retrieves all driver IDs from fired_debtor_drivers.
+ * @returns {Promise<Array>} - An array of driver IDs.
+ */
+export async function getAllFiredDebtorDriver() {
+  const sql = `
+      SELECT driver_id FROM fired_debtor_drivers;
+  `;
+  return db.all(sql);
+}
+
+/**
+ * Updates multiple fields in the fired_debtor_drivers table identified by bitrix_card_id.
+ * @param {Object} params - The update parameters.
+ * @param {number} params.bitrix_card_id - The Bitrix card ID.
+ * @param {number} params.cs_current_week - The current CS week.
+ * @param {number} params.cs_current_year - The current CS year.
+ * @param {number} params.current_week_balance - The balance for the current week.
+ * @param {number} params.current_week_total_deposit - The total deposit for the current week.
+ * @param {number} params.current_week_total_debt - The total debt for the current week.
+ * @param {boolean} params.is_balance_enabled - Whether the balance feature is enabled.
+ * @param {number} params.balance_activation_value - The balance activation value.
+ * @param {boolean} params.is_deposit_enabled - Whether deposits are enabled.
+ * @param {number} params.deposit_activation_value - The deposit activation value.
+ * @returns {Promise<Object>} - The updated record.
+ */
+export async function updateFiredDebtorDriver({
+  bitrix_card_id,
+  cs_current_week,
+  cs_current_year,
+  current_week_balance,
+  current_week_total_deposit,
+  current_week_total_debt,
+  is_balance_enabled,
+  balance_activation_value,
+  is_deposit_enabled,
+  deposit_activation_value,
+}) {
+  const sql = `
+      UPDATE fired_debtor_drivers
+      SET cs_current_week = ?,
+          cs_current_year = ?,
+          current_week_balance = ?,
+          current_week_total_deposit = ?,
+          current_week_total_debt = ?,
+          is_balance_enabled = ?,
+          balance_activation_value = ?,
+          is_deposit_enabled = ?,
+          deposit_activation_value = ?,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE bitrix_card_id = ?
+          RETURNING *;
+  `;
+
+  return db.get(
+    sql,
+    cs_current_week,
+    cs_current_year,
+    current_week_balance,
+    current_week_total_deposit,
+    current_week_total_debt,
+    is_balance_enabled,
+    balance_activation_value,
+    is_deposit_enabled,
+    deposit_activation_value,
+    bitrix_card_id
+  );
+}
+
+/**
+ * Retrieves a fired debtor driver by driver_id, current week number, and current year.
+ * @param {string} driver_id - The driver ID.
+ * @param {number} cs_current_week - The current week number.
+ * @param {number} cs_current_year - The current year.
+ * @returns {Promise<Object>} - The matching record.
+ */
+export async function getFiredDebtorDriverByDriverId({ driver_id }) {
+  const sql = `
+        SELECT bitrix_card_id, driver_id, full_name, auto_park_id, cs_current_week, cs_current_year, current_week_balance, current_week_total_deposit, current_week_total_debt, fire_date, is_balance_enabled, balance_activation_value, is_deposit_enabled, deposit_activation_value, created_at, updated_at FROM fired_debtor_drivers WHERE driver_id = ?;
+    `;
+  return db.get(sql, driver_id);
+}
