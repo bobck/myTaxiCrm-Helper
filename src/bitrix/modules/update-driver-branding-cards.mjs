@@ -22,9 +22,6 @@ export async function updateDriverBrandingCards() {
 
   const {
     period_from,
-    period_to,
-    weekNumber,
-    year,
     id: branding_process_id,
   } = brandingProcess;
 
@@ -34,7 +31,8 @@ export async function updateDriverBrandingCards() {
     });
 
   const { rows } = await getBrandingCardsInfo({
-    brandedLicencePlateNumbers
+    brandedLicencePlateNumbers,
+    period_from,
   });
   console.log({
     time: new Date(),
@@ -44,21 +42,12 @@ export async function updateDriverBrandingCards() {
   const processedCards = [];
 
   for (const [index, row] of rows.entries()) {
-    if (
-      process.env.ENV === 'TEST' &&
-      index === Number(process.env.BRANDING_CARDS_COUNT)
-    ) {
-      break;
-    }
     const { driver_id, total_trips, auto_park_id } = row;
     const dbcard = await getCrmBrandingCardByDriverId({
       driver_id,
       branding_process_id,
     });
 
-    if (!dbcard) {
-      continue;
-    }
     if (Number(dbcard.total_trips) >= Number(total_trips)) {
       continue;
     }

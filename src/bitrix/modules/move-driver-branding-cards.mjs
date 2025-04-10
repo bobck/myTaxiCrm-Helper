@@ -22,7 +22,6 @@ export async function moveDriverBrandingCards() {
   });
   const {
     period_from,
-    period_to,
     id: branding_process_id,
   } = brandingProcess;
   const { brandedLicencePlateNumbers } =
@@ -33,7 +32,6 @@ export async function moveDriverBrandingCards() {
   const { rows } = await getBrandingCardsInfo({
     brandedLicencePlateNumbers,
     period_from,
-    period_to,
   });
   console.log({
     time: new Date(),
