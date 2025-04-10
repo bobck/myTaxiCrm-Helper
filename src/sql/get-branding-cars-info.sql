@@ -9,7 +9,7 @@ with branded_cars AS(
         CASE
             WHEN s.event_type != 'RENTAL' THEN s.driver_id
             ELSE (s.rental_settings -> 'mapping' -> 0 ->> 'driverId')::UUID
-            END AS d_id
+            END AS branded_car_driver_id
     FROM branded_cars bc
              JOIN trips t ON bc.id=t.car_id AND t.call_date>=$2
              JOIN integrations i ON t.integration_id=i.id AND i.type='BOLT'
@@ -17,9 +17,10 @@ with branded_cars AS(
         AND s.is_latest_version = TRUE
         AND s.is_deleted = FALSE
         AND s.event_type IN ('BUSY_WITH_CREW', 'BUSY_WITH_PRIVATE_TRADER', 'RENTAL')
-        AND s.event_period_end >= $3
+        AND s.event_period_start <= current_time
+        AND s.event_period_end >= current_time
         AND s.parent_id IS NULL
-    GROUP BY bc.id,d_id
+    GROUP BY bc.id,branded_car_driver_id
 )
 SELECT
     d.id AS driver_id,
@@ -29,5 +30,5 @@ SELECT
     rc.total_trips,
     bc.license_plate
 FROM report_cards rc
-         JOIN drivers d ON rc.d_id = d.id
+         JOIN drivers d ON rc.branded_car_driver_id = d.id
          JOIN branded_cars bc on rc.car_id=bc.id;
