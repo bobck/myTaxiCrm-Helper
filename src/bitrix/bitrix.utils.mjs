@@ -420,7 +420,6 @@ export async function updateDealPayOff({ id, ufCrmField, amount }) {
 
 export async function createBitrixDriverBrandingCards({ cards }) {
   let batchObj = {};
-
   for (let card of cards) {
     const {
       driver_id,
@@ -432,10 +431,11 @@ export async function createBitrixDriverBrandingCards({ cards }) {
       weekNumber,
       year,
       total_trips,
+      contact_id
     } = card;
-
     const params = {
       entityTypeId: '1138',
+      'fields[CONTACT_ID]': contact_id,
       'fields[title]': driver_name,
       'fields[STAGE_ID]': stage_id,
       'fields[ufCrm54_1738757291]': driver_name,

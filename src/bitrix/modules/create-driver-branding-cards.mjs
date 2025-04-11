@@ -8,6 +8,7 @@ import {
 import {
   chunkArray,
   createBitrixDriverBrandingCards,
+  findContactByPhone,
 } from '../bitrix.utils.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
 import {
@@ -16,7 +17,7 @@ import {
 } from '../bitrix.business-entity.mjs';
 import { cityListWithAssignedBy as cityList } from '../bitrix.constants.mjs';
 import { getBrandedLicencePlateNumbersFromBQ } from '../../bq/bq-utils.mjs';
-
+import { carTransferAcceptanceCompanyTableSchema } from '../../bq/schemas.mjs';
 function getCityBrandingId({ auto_park_id }) {
   const matchingCity = cityList.find(
     (obj) => obj.auto_park_id === auto_park_id
@@ -90,6 +91,7 @@ export async function createDriverBrandingCards() {
     const { cityBrandingId } = getCityBrandingId({ auto_park_id });
     const stage_id = `DT1138_62:${computeBrandingCardInProgressStage({ total_trips, auto_park_id })}`;
     const myTaxiDriverUrl = `https://fleets.mytaxicrm.com/${auto_park_id}/drivers/${driver_id}`;
+    const contact_id = await findContactByPhone({ phone });
     const card = {
       driver_id,
       driver_name,
@@ -102,6 +104,7 @@ export async function createDriverBrandingCards() {
       cityBrandingId,
       auto_park_id,
       license_plate,
+      contact_id,
     };
     processedCards.push(card);
   }
@@ -113,6 +116,7 @@ export async function createDriverBrandingCards() {
     const bitrixRespObj = await createBitrixDriverBrandingCards({
       cards: chunk,
     });
+
     const handledResponseArr = [];
     for (const driver_id in bitrixRespObj) {
       const { id } = bitrixRespObj[driver_id]['item'];
@@ -155,4 +159,5 @@ if (process.env.ENV === 'TEST') {
   );
   await openSShTunnel;
   await createDriverBrandingCards();
+  // await getContactsTest({phone:'+380686776239'});
 }
