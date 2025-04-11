@@ -8,10 +8,7 @@ import {
 import {
   chunkArray,
   createBitrixDriverBrandingCards,
-  findContactByPhone,
-  getContactByCustomField,
-  findContactsByPhonesTest,
-  findContactsByPhones,
+  getContactsByPhones,
 } from '../bitrix.utils.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
 import {
@@ -115,7 +112,7 @@ export async function createDriverBrandingCards() {
 
   //chunk extension with contact_ids
   for (const [index, chunk] of chunkedProcessedCards.entries()) {
-    const contact_ids = await findContactsByPhonesTest({ drivers: chunk });
+    const contact_ids = await getContactsByPhones({ drivers: chunk });
     for (const card of chunk) {
       const { driver_id } = card;
       const contact_id = contact_ids[driver_id];
@@ -175,7 +172,4 @@ if (process.env.ENV === 'TEST') {
   );
   await openSShTunnel;
   await createDriverBrandingCards();
-  // await getContactsTest({phone:'+380686776239'});
-  // await getContactByCustomField({mytaxi_url:"https://fleets.mytaxicrm.com/052da49c-2175-4033-8010-c8e1f9a755ab/drivers/fc6dd705-3aa1-492d-9099-15125f446ccf"})
-  // await findContactsByPhonesTest({phone:'+380958063159'});
 }
