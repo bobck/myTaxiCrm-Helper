@@ -9,7 +9,7 @@ import {
   chunkArray,
   updateBitrixDriverBrandingCards,
 } from '../bitrix.utils.mjs';
-import { getBrandingCardsInfo } from '../../web.api/web.api.utlites.mjs';
+import { getBrandingCarsInfo } from '../../web.api/web.api.utlites.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
 import { computeBrandingCardInProgressStage } from '../bitrix.business-entity.mjs';
 
@@ -27,7 +27,7 @@ export async function updateDriverBrandingCards() {
       branding_process_id,
     });
 
-  const { rows } = await getBrandingCardsInfo({
+  const { rows } = await getBrandingCarsInfo({
     brandedLicencePlateNumbers,
     period_from,
   });

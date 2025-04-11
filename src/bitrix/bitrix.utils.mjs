@@ -568,13 +568,12 @@ export async function updateBitrixFiredDebtorDriversCards({ cards }) {
   return itemObj;
 }
 
-export async function getContactsByPhones({ drivers }) {
+export async function findContactsByPhonesObjectReturned({ drivers }) {
   const batchObj = {};
 
   for (let driver of drivers) {
     const params = {
       entity_type: 'CONTACT',
-      driver_id: driver.driver_id,
       type: 'PHONE',
       'values[]': driver.phone,
     };

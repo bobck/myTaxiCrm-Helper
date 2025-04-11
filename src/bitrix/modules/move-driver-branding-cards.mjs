@@ -1,4 +1,4 @@
-import { getBrandingCardsInfo } from '../../web.api/web.api.utlites.mjs';
+import { getBrandingCarsInfo } from '../../web.api/web.api.utlites.mjs';
 import { DateTime } from 'luxon';
 import {
   getBrandedLicencePlateNumbersByBrandingProcessId,
@@ -26,7 +26,7 @@ export async function moveDriverBrandingCards() {
       branding_process_id,
     });
 
-  const { rows } = await getBrandingCardsInfo({
+  const { rows } = await getBrandingCarsInfo({
     brandedLicencePlateNumbers,
     period_from,
   });

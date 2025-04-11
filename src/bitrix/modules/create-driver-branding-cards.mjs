@@ -1,4 +1,4 @@
-import { getBrandingCardsInfo } from '../../web.api/web.api.utlites.mjs';
+import { getBrandingCarsInfo } from '../../web.api/web.api.utlites.mjs';
 import {
   createBrandingProcess,
   insertBrandingCard,
@@ -8,7 +8,7 @@ import {
 import {
   chunkArray,
   createBitrixDriverBrandingCards,
-  getContactsByPhones,
+  findContactsByPhonesObjectReturned,
 } from '../bitrix.utils.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
 import {
@@ -60,11 +60,18 @@ export async function createDriverBrandingCards() {
     await getBrandedLicencePlateNumbersFromBQ({
       existingBrandedLicencePlateNumbers,
     });
-  const { rows } = await getBrandingCardsInfo({
+  if (brandedLicencePlateNumbers.length === 0) {
+    return;
+  }
+  const { rows } = await getBrandingCarsInfo({
     brandedLicencePlateNumbers,
     period_from,
   });
-
+  console.log({
+    time: new Date(),
+    message: 'createDriverBrandingCards',
+    createDriverBrandingCards: rows.length,
+  });
   if (rows.length === 0) {
     return;
   }
@@ -112,7 +119,9 @@ export async function createDriverBrandingCards() {
 
   //chunk extension with contact_ids
   for (const [index, chunk] of chunkedProcessedCards.entries()) {
-    const contact_ids = await getContactsByPhones({ drivers: chunk });
+    const contact_ids = await findContactsByPhonesObjectReturned({
+      drivers: chunk,
+    });
     for (const card of chunk) {
       const { driver_id } = card;
       const contact_id = contact_ids[driver_id];

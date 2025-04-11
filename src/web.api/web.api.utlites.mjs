@@ -590,7 +590,7 @@ export async function getWorkingDriversById({ driversIds }) {
   return { rows };
 }
 
-export async function getBrandingCardsInfo({
+export async function getBrandingCarsInfo({
   brandedLicencePlateNumbers,
   period_from,
 }) {
