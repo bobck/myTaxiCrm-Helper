@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon';
 import {
+  getBrandedLicencePlateNumbersByBrandingProcessId,
   getBrandingProcessByWeekNumber,
   getCrmBrandingCardByDriverId,
   updateBrandingCardByDriverId,
@@ -18,16 +19,17 @@ export async function updateDriverBrandingCards() {
     weekNumber: today.weekNumber,
     year: today.year,
   });
-  const {
-    period_from,
-    period_to,
-    weekNumber,
-    year,
-    id: branding_process_id,
-  } = brandingProcess;
+
+  const { period_from, id: branding_process_id } = brandingProcess;
+
+  const { brandedLicencePlateNumbers } =
+    await getBrandedLicencePlateNumbersByBrandingProcessId({
+      branding_process_id,
+    });
+
   const { rows } = await getBrandingCardsInfo({
+    brandedLicencePlateNumbers,
     period_from,
-    period_to,
   });
   console.log({
     time: new Date(),
@@ -37,21 +39,12 @@ export async function updateDriverBrandingCards() {
   const processedCards = [];
 
   for (const [index, row] of rows.entries()) {
-    if (
-      process.env.ENV === 'TEST' &&
-      index === Number(process.env.BRANDING_CARDS_COUNT)
-    ) {
-      break;
-    }
     const { driver_id, total_trips, auto_park_id } = row;
     const dbcard = await getCrmBrandingCardByDriverId({
       driver_id,
       branding_process_id,
     });
 
-    if (!dbcard) {
-      continue;
-    }
     if (Number(dbcard.total_trips) >= Number(total_trips)) {
       continue;
     }

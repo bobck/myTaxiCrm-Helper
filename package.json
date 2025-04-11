@@ -5,9 +5,9 @@
   "main": "app.js",
   "scripts": {
     "dev": "node -r dotenv/config app.mjs",
-    "createBrandingCardsManual": "ENV=TEST BRANDING_CARDS_COUNT=2 CHUNK_SIZE=2 node -r dotenv/config src/bitrix/modules/create-driver-branding-cards.mjs",
-    "updateBrandingCardsManual": "ENV=TEST BRANDING_CARDS_COUNT=2 CHUNK_SIZE=2 node -r dotenv/config src/bitrix/modules/update-driver-branding-cards.mjs",
-    "moveBrandingCardsManual": "ENV=TEST BRANDING_CARDS_COUNT=2 CHUNK_SIZE=2 node -r dotenv/config src/bitrix/modules/move-driver-branding-cards.mjs",
+    "createBrandingCardsManual": "ENV=TEST BRANDING_CARDS_COUNT=15 CHUNK_SIZE=7 node -r dotenv/config src/bitrix/modules/create-driver-branding-cards.mjs",
+    "updateBrandingCardsManual": "ENV=TEST BRANDING_CARDS_COUNT=15 CHUNK_SIZE=7 node -r dotenv/config src/bitrix/modules/update-driver-branding-cards.mjs",
+    "moveBrandingCardsManual": "ENV=TEST BRANDING_CARDS_COUNT=15 CHUNK_SIZE=7 node -r dotenv/config src/bitrix/modules/move-driver-branding-cards.mjs",
     "update_plan": "ENV=TEST node -r dotenv/config src/sheets/modules/get-and-save-current-plan.mjs",
     "notification": "ENV=TEST node -r dotenv/config src/telegram/modules/rooms-notification.mjs",
     "savesid": "ENV=TEST node -r dotenv/config src/remonline/modules/save-sid-list.mjs",
