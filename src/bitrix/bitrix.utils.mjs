@@ -431,7 +431,7 @@ export async function createBitrixDriverBrandingCards({ cards }) {
       weekNumber,
       year,
       total_trips,
-      contact_id
+      contact_id,
     } = card;
     const params = {
       entityTypeId: '1138',

@@ -266,16 +266,15 @@ export async function generatePolandBookkeepingReport({
 export async function getBrandedLicencePlateNumbersFromBQ({
   existingBrandedLicencePlateNumbers,
 }) {
-
   // the check is necessary because the BQ does not support null or undefined in the IN clause
   // and the query will fail if the array is empty
   const areBrandedLicencePlateNumbersEmpty =
     existingBrandedLicencePlateNumbers === undefined ||
     existingBrandedLicencePlateNumbers === null ||
     existingBrandedLicencePlateNumbers.length === 0;
-  const query = areBrandedLicencePlateNumbersEmpty?
-    /*sql*/`SELECT numbner as licence_plate_number FROM \`up-statistics.DB.brand_cars_status_list\` where approved_brand_type='BOLT'`
-    :/*sql*/ `
+  const query = areBrandedLicencePlateNumbersEmpty
+    ? /*sql*/ `SELECT numbner as licence_plate_number FROM \`up-statistics.DB.brand_cars_status_list\` where approved_brand_type='BOLT'`
+    : /*sql*/ `
     SELECT numbner AS licence_plate_number
     FROM \`up-statistics.DB.brand_cars_status_list\`
     WHERE approved_brand_type = 'BOLT'
@@ -285,8 +284,8 @@ export async function getBrandedLicencePlateNumbersFromBQ({
     query,
     location: 'US',
   };
-  if(!areBrandedLicencePlateNumbersEmpty){
-    options.params={ existingNumbers: existingBrandedLicencePlateNumbers}
+  if (!areBrandedLicencePlateNumbersEmpty) {
+    options.params = { existingNumbers: existingBrandedLicencePlateNumbers };
   }
   //the response from BQ is an array with rows array as first element, and payload data next
   //this is the reason why here is array destructuring
