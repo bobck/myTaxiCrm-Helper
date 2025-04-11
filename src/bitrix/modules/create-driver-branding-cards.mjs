@@ -9,6 +9,9 @@ import {
   chunkArray,
   createBitrixDriverBrandingCards,
   findContactByPhone,
+  getContactByCustomField,
+  findContactsByPhonesTest,
+  findContactsByPhones,
 } from '../bitrix.utils.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
 import {
@@ -90,7 +93,6 @@ export async function createDriverBrandingCards() {
     const { cityBrandingId } = getCityBrandingId({ auto_park_id });
     const stage_id = `DT1138_62:${computeBrandingCardInProgressStage({ total_trips, auto_park_id })}`;
     const myTaxiDriverUrl = `https://fleets.mytaxicrm.com/${auto_park_id}/drivers/${driver_id}`;
-    const contact_id = await findContactByPhone({ phone });
     const card = {
       driver_id,
       driver_name,
@@ -103,7 +105,6 @@ export async function createDriverBrandingCards() {
       cityBrandingId,
       auto_park_id,
       license_plate,
-      contact_id,
     };
     processedCards.push(card);
   }
@@ -111,6 +112,21 @@ export async function createDriverBrandingCards() {
     processedCards,
     Number(process.env.CHUNK_SIZE) || 7
   );
+
+  //chunk extension with contact_ids
+  for (const [index, chunk] of chunkedProcessedCards.entries()) {
+    const contact_ids = await findContactsByPhonesTest({ drivers: chunk });
+    for (const card of chunk) {
+      const { driver_id } = card;
+      const contact_id = contact_ids[driver_id];
+      if (contact_id instanceof Array) {
+        card.contact_id = null;
+        continue;
+      }
+      card.contact_id = contact_id.CONTACT[0];
+    }
+  }
+  //bitrix card creation
   for (const [index, chunk] of chunkedProcessedCards.entries()) {
     const bitrixRespObj = await createBitrixDriverBrandingCards({
       cards: chunk,
@@ -128,6 +144,7 @@ export async function createDriverBrandingCards() {
         license_plate: matchingCard.license_plate,
       });
     }
+    //sqlite insertion
     for (const respElement of handledResponseArr) {
       const {
         driver_id,
@@ -159,4 +176,6 @@ if (process.env.ENV === 'TEST') {
   await openSShTunnel;
   await createDriverBrandingCards();
   // await getContactsTest({phone:'+380686776239'});
+  // await getContactByCustomField({mytaxi_url:"https://fleets.mytaxicrm.com/052da49c-2175-4033-8010-c8e1f9a755ab/drivers/fc6dd705-3aa1-492d-9099-15125f446ccf"})
+  // await findContactsByPhonesTest({phone:'+380958063159'});
 }

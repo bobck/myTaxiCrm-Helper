@@ -567,3 +567,51 @@ export async function updateBitrixFiredDebtorDriversCards({ cards }) {
 
   return itemObj;
 }
+export async function getContactByCustomField({ mytaxi_url }) {
+  try {
+    const { result } = await bitrix.call('crm.contact.userfield.list', {
+      filter: { uf_crm_1730707864: mytaxi_url },
+      select: ['CONTACT_ID'],
+    });
+    console.log('Result:', result);
+    console.log(result[0]);
+    return result;
+  } catch (error) {
+    console.error('Error fetching contact custom fields:', error);
+    throw error;
+  }
+}
+export async function findContactsByPhonesTest2({ phone }) {
+  let batchArray = [];
+
+  const params = {
+    entity_type: 'CONTACT',
+    type: 'PHONE',
+    'values[]': phone,
+  };
+  batchArray.push({ method: 'crm.duplicate.findbycomm', params });
+
+  const { result, time } = await bitrix.batch(batchArray);
+  console.log(result, '\n\n\n', result.result);
+  return result;
+}
+
+export async function findContactsByPhonesTest({ drivers }) {
+  const batchObj = {};
+
+  for (let driver of drivers) {
+    const params = {
+      entity_type: 'CONTACT',
+      driver_id: driver.driver_id,
+      type: 'PHONE',
+      'values[]': driver.phone,
+    };
+    batchObj[driver.driver_id] = { method: 'crm.duplicate.findbycomm', params };
+  }
+  // const { result:t_res, time } = await bitrix.batch(batchObj);
+  // const {result}=t_res;
+  // return result;
+  const { result: temp_result } = await bitrix.batch(batchObj);
+  const { result } = temp_result;
+  return result;
+}
