@@ -17,7 +17,6 @@ import {
 } from '../bitrix.business-entity.mjs';
 import { cityListWithAssignedBy as cityList } from '../bitrix.constants.mjs';
 import { getBrandedLicencePlateNumbersFromBQ } from '../../bq/bq-utils.mjs';
-import { carTransferAcceptanceCompanyTableSchema } from '../../bq/schemas.mjs';
 function getCityBrandingId({ auto_park_id }) {
   const matchingCity = cityList.find(
     (obj) => obj.auto_park_id === auto_park_id
