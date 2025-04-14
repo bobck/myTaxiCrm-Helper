@@ -308,15 +308,15 @@ export async function getOrders(
   try {
     data = await response.json();
   } catch (e) {
-    console.error({
-      function: 'getOrders',
-      page: current_page,
-      message: 'Error parsing JSON',
-      data,
-      ordersCount: _orders.length,
-      response,
-      target_page,
-    });
+    // console.error({
+    //   function: 'getOrders',
+    //   page: current_page,
+    //   message: 'Error parsing JSON',
+    //   data,
+    //   ordersCount: _orders.length,
+    //   response,
+    //   target_page,
+    // });
     for (let i = current_page; i <= target_page; i++) {
       _failedPages.push(i);
     }
@@ -351,11 +351,11 @@ export async function getOrders(
   // }
 
   if (page === target_page) {
-    console.log({
-      target_page,
-      start_page: target_page - 5,
-      fetched_orders: _orders.length,
-    });
+    // console.log({
+    //   target_page,
+    //   start_page: target_page - 5,
+    //   fetched_orders: _orders.length,
+    // });
     return { orders: _orders, failedPages: _failedPages };
   } else {
     return await getOrders({

@@ -19,8 +19,11 @@ async function prepareOrders() {
     const target_page =
       target_page_pretendent > pagesCount ? pagesCount : target_page_pretendent;
     promises.push(getOrders({ current_page, target_page }));
-    console.log('fetching started', { current_page, target_page });
+    // console.log('fetching started', { current_page, target_page });
   }
+  console.log(
+    `orders downloading has been initiated in ${promises.length} parallel threads...`
+  );
   const results = await Promise.all(promises);
   // const orders = results.flat();
   let { orders, failedPages } = results.reduce(
@@ -31,8 +34,10 @@ async function prepareOrders() {
     },
     { orders: [], failedPages: [] }
   );
-
   let TTL = 10;
+  console.log(
+    `initial download finished with ${failedPages.length} failed pages.${failedPages.length ? `\nstarting to resolve failed pages...\ngiven TTL: ${TTL}` : ''}`
+  );
   do {
     const { orders: tem_orders, failedPages: temp_failedPages } =
       await getOrdersByPageIds({ pages: failedPages });
