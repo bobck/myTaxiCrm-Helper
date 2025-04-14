@@ -1,6 +1,6 @@
 import lodash from 'lodash';
 
-import { getOrders } from '../remonline.utils.mjs';
+import { getOrdersByIdLabels } from '../remonline.utils.mjs';
 import { remonlineTokenToEnv } from '../remonline.api.mjs';
 import {
   getSidsWithNoId,
@@ -26,7 +26,7 @@ export async function saveOrdersToSids() {
   const chunksArray = [];
 
   for (let chunk of idLabelsChunks) {
-    const ordersPromise = getOrders({ idLabels: chunk });
+    const ordersPromise = getOrdersByIdLabels({ idLabels: chunk });
     chunksArray.push(ordersPromise);
   }
 

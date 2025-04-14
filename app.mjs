@@ -9,15 +9,15 @@ import { driversCustomTariffJobs } from './src/web.api/bootstrap.mjs';
 import { pool } from './src/api/pool.mjs';
 import { bitrixJobs } from './src/bitrix/bootstrap.mjs';
 
-await openSShTunnel;
+// await openSShTunnel;
 
-await initApi({ pool });
-// telegramJobs();
-// sheetJobs();
-bqJobs();
+// await initApi({ pool });
+// // telegramJobs();
+// // sheetJobs();
+// bqJobs();
 
-await remonlineTokenToEnv();
-remonlineJobs();
+await remonlineTokenToEnv(true);
+// remonlineJobs();
 
-driversCustomTariffJobs();
-bitrixJobs();
+// driversCustomTariffJobs();
+// bitrixJobs();

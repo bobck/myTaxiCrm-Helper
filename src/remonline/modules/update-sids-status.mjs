@@ -2,7 +2,7 @@ import {
   getSidsNotReadyDoBeClosed,
   updateSidStatus,
 } from '../remonline.queries.mjs';
-import { getOrders } from '../remonline.utils.mjs';
+import { getOrdersByIdLabels } from '../remonline.utils.mjs';
 import { remonlineTokenToEnv } from '../remonline.api.mjs';
 import { chunkArray } from '../../bitrix/bitrix.utils.mjs';
 
@@ -17,7 +17,7 @@ export async function checkIsSidStatusWasUpdated() {
   const idsChunked = chunkArray(ids, 50);
   const orders = [];
   for (let chunk of idsChunked) {
-    const { orders: _orders } = await getOrders({ ids: chunk });
+    const { orders: _orders } = await getOrdersByIdLabels({ ids: chunk });
     orders.push(..._orders);
   }
 
