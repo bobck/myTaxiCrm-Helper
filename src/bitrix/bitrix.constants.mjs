@@ -220,7 +220,7 @@ export const cityListWithAssignedBy = [
     supportCityId: '3122',
   },
 ];
-export const brandingHighLoadedCities = [
+export const specialBrandingCities = [
   {
     assignedBy: '50222',
     auto_park_id: 'e4df553f-4ec2-43a8-b012-4795259e983a',
@@ -228,13 +228,25 @@ export const brandingHighLoadedCities = [
     brandingId: '3780',
     cityName: 'Київ',
     supportCityId: '3058',
+    tripsGoal: 90,
+  },
+  {
+    assignedBy: '46926',
+    auto_park_id: '65844e7d-5e8a-4582-9ac3-c8cdaa988726',
+    cityId: '469',
+    brandingId: '3768',
+    cityName: 'Каменець-Подільский',
+    supportCityId: '3110',
+    tripsGoal: 60,
   },
   {
     assignedBy: '50222',
-    auto_park_id: '5571b3ea-1ccf-4f41-bbe0-0f12ee8dfb17',
-    cityId: '91',
-    brandingId: '3780',
-    cityName: 'Київ usa',
+    auto_park_id: '9c8bae55-2aa2-4b25-a1e0-c93ab4bbb3ad',
+    cityId: '405',
+    brandingId: '3762',
+    cityName: 'Тернопіль',
+    supportCityId: '3092',
+    tripsGoal: 60,
   },
   {
     assignedBy: '106546',
@@ -243,6 +255,7 @@ export const brandingHighLoadedCities = [
     brandingId: '3756',
     cityName: 'Львів',
     supportCityId: '3066',
+    tripsGoal: 100,
   },
 ];
 export const referralTypeId = '1098';
