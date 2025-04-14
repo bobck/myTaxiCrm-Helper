@@ -2,6 +2,7 @@ import fetch from 'node-fetch';
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
 import { remonlineTokenToEnv } from './remonline.api.mjs';
+import * as Stream from 'node:stream';
 
 const db = await open({
   filename: process.env.DEV_DB,
@@ -280,7 +281,11 @@ export async function getTransfers({ branch_id }, _page = 1, _transfers = []) {
 }
 
 export async function getOrders(
-  { current_page, _orders, target_page } = { current_page: 1, _orders: [] }
+  { current_page, _orders, target_page, _failedPages } = {
+    current_page: 1,
+    _orders: [],
+    _failedPages: [],
+  }
 ) {
   if (!target_page || !current_page) {
     console.error({
@@ -290,6 +295,9 @@ export async function getOrders(
   }
   if (!_orders) {
     _orders = [];
+  }
+  if (!_failedPages) {
+    _failedPages = [];
   }
   const url = `${process.env.REMONLINE_API}/order/?page=${current_page}&token=${process.env.REMONLINE_API_TOKEN}`;
 
@@ -305,8 +313,14 @@ export async function getOrders(
       page: current_page,
       message: 'Error parsing JSON',
       data,
+      ordersCount: _orders.length,
+      response,
+      target_page,
     });
-    return _orders;
+    for (let i = current_page; i <= target_page; i++) {
+      _failedPages.push(i);
+    }
+    return { orders: _orders, failedPages: _failedPages };
     // throw e;
   }
 
@@ -339,10 +353,10 @@ export async function getOrders(
   if (page === target_page) {
     console.log({
       target_page,
-      start_page: target_page - 10,
+      start_page: target_page - 5,
       fetched_orders: _orders.length,
     });
-    return _orders;
+    return { orders: _orders, failedPages: _failedPages };
   } else {
     return await getOrders({
       current_page: parseInt(page) + 1,
@@ -350,6 +364,56 @@ export async function getOrders(
       target_page,
     });
   }
+}
+export async function getOrdersByPageIds({pages}){
+  if(!(pages instanceof Array)) {
+    console.error({
+      function: 'getOrdersByPageIds',
+      message: 'pages must be an array',
+      pages
+    })
+  }
+
+  const  _orders = [];
+
+
+  const  _failedPages = [];
+  for (const page of pages) {
+    const url = `${process.env.REMONLINE_API}/order/?page=${page}&token=${process.env.REMONLINE_API_TOKEN}`;
+
+    const options = { method: 'GET', headers: { accept: 'application/json' } };
+
+    const response = await fetch(url, options);
+    let data;
+    try {
+      data = await response.json();
+    } catch (e) {
+      console.error({
+        function: 'getOrders',
+        page,
+        message: 'Error parsing JSON',
+        data,
+        ordersCount: _orders.length,
+        response,
+      });
+
+        _failedPages.push(page);
+
+      return { orders: _orders, failedPages: _failedPages };
+    }
+
+    const { data: orders } = data;
+
+    _orders.push(...structuredClone(orders));
+
+  }
+
+
+  return{
+    orders:_orders.flat(),
+    failedPages:_failedPages,
+  }
+
 }
 export async function getOrderCount() {
   const url = `${process.env.REMONLINE_API}/order/?token=${process.env.REMONLINE_API_TOKEN}`;
