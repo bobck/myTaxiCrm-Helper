@@ -50,7 +50,7 @@
     "createFiredDebtorDriversCardsManual": "ENV=TEST DEBTOR_DRIVERS_CARDS_COUNT=15 CHUNK_SIZE=8 node -r dotenv/config src/bitrix/modules/create-fired-debtor-driver-cards.mjs",
     "updateFiredDebtorDriversCardsManual": "ENV=TEST CHUNK_SIZE=8 node -r dotenv/config src/bitrix/modules/update-fired-debtor-driver-cards.mjs",
     "remonlineOrdersToBQManual": "ENV=TEST node -r dotenv/config src/bq/modules/load-remonline-orders.mjs"
-    },
+  },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",
   "dependencies": {
