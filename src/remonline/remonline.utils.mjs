@@ -365,19 +365,18 @@ export async function getOrders(
     });
   }
 }
-export async function getOrdersByPageIds({pages}){
-  if(!(pages instanceof Array)) {
+export async function getOrdersByPageIds({ pages }) {
+  if (!(pages instanceof Array)) {
     console.error({
       function: 'getOrdersByPageIds',
       message: 'pages must be an array',
-      pages
-    })
+      pages,
+    });
   }
 
-  const  _orders = [];
+  const _orders = [];
 
-
-  const  _failedPages = [];
+  const _failedPages = [];
   for (const page of pages) {
     const url = `${process.env.REMONLINE_API}/order/?page=${page}&token=${process.env.REMONLINE_API_TOKEN}`;
 
@@ -397,7 +396,7 @@ export async function getOrdersByPageIds({pages}){
         response,
       });
 
-        _failedPages.push(page);
+      _failedPages.push(page);
 
       return { orders: _orders, failedPages: _failedPages };
     }
@@ -405,15 +404,12 @@ export async function getOrdersByPageIds({pages}){
     const { data: orders } = data;
 
     _orders.push(...structuredClone(orders));
-
   }
 
-
-  return{
-    orders:_orders.flat(),
-    failedPages:_failedPages,
-  }
-
+  return {
+    orders: _orders.flat(),
+    failedPages: _failedPages,
+  };
 }
 export async function getOrderCount() {
   const url = `${process.env.REMONLINE_API}/order/?token=${process.env.REMONLINE_API_TOKEN}`;

@@ -1,4 +1,8 @@
-import { getOrders, getOrderCount, getOrdersByPageIds } from '../../remonline/remonline.utils.mjs';
+import {
+  getOrders,
+  getOrderCount,
+  getOrdersByPageIds,
+} from '../../remonline/remonline.utils.mjs';
 import { remonlineTokenToEnv } from '../../remonline/remonline.api.mjs';
 async function prepareOrders() {
   const { orderCount } = await getOrderCount();
@@ -19,21 +23,23 @@ async function prepareOrders() {
   }
   const results = await Promise.all(promises);
   // const orders = results.flat();
-  const { _orders, _failedPages } = results.reduce(
+  let { orders, failedPages } = results.reduce(
     (acc, curr) => {
-      acc._orders.push(curr.orders);
-      acc._failedPages.push(curr.failedPages);
+      acc.orders.push(...curr.orders);
+      acc.failedPages.push(...curr.failedPages);
       return acc;
     },
-    { _orders: [], _failedPages: [] }
+    { orders: [], failedPages: [] }
   );
 
-  const orders = _orders.flat();
-  const failedPages = _failedPages.flat();
-  console.log({failedQty: failedPages.length});
-  const {orders:orders2,failedPages:FailedPages} = await getOrdersByPageIds({pages:failedPages});
-  console.log({orders2Length: orders2.length,failedPages:FailedPages,failedQty:FailedPages.length});
-
+  let TTL = 10;
+  do {
+    const { orders: tem_orders, failedPages: temp_failedPages } =
+      await getOrdersByPageIds({ pages: failedPages });
+    orders.push(...tem_orders);
+    failedPages = structuredClone(temp_failedPages);
+  } while (TTL-- > 0 && failedPages.length > 0);
+  console.log('all fails resolved with TTL:', TTL);
   return {
     // orders,
     results,
@@ -51,9 +57,6 @@ export async function loadRemonlineOrders() {
    * 2260 * 0.7 = 1582 sec
    * 1582 sec = 26.3 min
    * so we need to load orders in parallel
-   *
-   * We can load 10 pages in parallel
-   *
    */
   const time = new Date();
   const { orderCount, results, orders, failedPages } = await prepareOrders();
