@@ -589,8 +589,8 @@ export async function getCardIdsFromSpecialEntity(entityTypeId) {
     // We only select the 'ID' field.
     const { result } = await bitrix.call('crm.item.list', {
       entityTypeId,
-      start:1800,
-      select: ['ID','TITLE']
+      start:1831,
+      select: ['ID','TITLE','ufCrm4_1744703234']
     });
     
     // // Map the result to extract only the ID from each card (or CRM item)
@@ -645,4 +645,16 @@ export async function getAllSpecialEntityRows(entityTypeId) {
     console.error('Error retrieving rows in batch:', error);
     throw error;
   }
+}
+
+export async function updateCarStatusAndBrnad({status,brand,bitrix_card_id}){
+  console.log({status,brand,bitrix_card_id})
+  const response = await bitrix.call('crm.item.update', {
+    id: bitrix_card_id,
+    entityTypeId:'138',
+    'fields[ufCrm4_1744703234]': status,//UF_CRM_4_1744703234
+    'fields[ufCrm4_1741607811]': brand,//UF_CRM_4_1741607811
+  });
+  const { result } = response;
+  return result;
 }
