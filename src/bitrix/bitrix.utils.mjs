@@ -583,3 +583,66 @@ export async function findContactsByPhonesObjectReturned({ drivers }) {
   const { result } = temp_result;
   return result;
 }
+export async function getCardIdsFromSpecialEntity(entityTypeId) {
+  try {
+    // Call the universal list method for the specified entity type.
+    // We only select the 'ID' field.
+    const { result } = await bitrix.call('crm.item.list', {
+      entityTypeId,
+      start:1800,
+      select: ['ID','TITLE']
+    });
+    
+    // // Map the result to extract only the ID from each card (or CRM item)
+    // const cardIds = result.map(item => item.ID);
+    
+    // console.log('Retrieved card IDs:', cardIds);
+    return result.items;
+  } catch (error) {
+    console.error('Error retrieving cards from entity:', error);
+    throw error;
+  }
+}
+
+export async function getAllSpecialEntityRows(entityTypeId) {
+  // Define how many rows to request per call. Many Bitrix methods default to 50.
+  const pageSize = 50;
+  
+  // If you already know approximately how many rows to expect,
+  // you can calculate the number of pages. For example, for 2K rows:
+  const totalPages = Math.ceil(2000 / pageSize);  // This gives ~40 pages
+  
+  // Build the batch command object.
+  const batchCommands = {};
+  for (let i = 0; i < totalPages; i++) {
+    // Each batch command calls crm.item.list with a different "start" offset.
+    batchCommands[`cmd_${i}`] = [
+      'crm.item.list',
+      {
+        entityTypeId,
+        start: i * pageSize,
+        // Select the fields you need, for example, ID and your custom field.
+        select: ['ID', 'TITLE']
+      }
+    ];
+  }
+  
+  try {
+    // Call the 'batch' method with the commands. All commands execute in one request.
+    const { result } = await bitrix.call('batch', { cmd: batchCommands });
+    
+    // Merge the pages
+    let allRows = [];
+    for (let i = 0; i < totalPages; i++) {
+      const cmdResult = result[`cmd_${i}`];
+      if (cmdResult && cmdResult.result && cmdResult.result.length) {
+        allRows = allRows.concat(cmdResult.result);
+      }
+    }
+    console.log('Retrieved rows:', allRows);
+    return allRows;
+  } catch (error) {
+    console.error('Error retrieving rows in batch:', error);
+    throw error;
+  }
+}
