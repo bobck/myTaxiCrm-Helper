@@ -280,7 +280,7 @@ export async function getTransfers({ branch_id }, _page = 1, _transfers = []) {
   return { transfers: _transfers };
 }
 
-export async function getOrders(
+export async function getOrdersInRange(
   { current_page, _orders, target_page, _failedPages } = {
     current_page: 1,
     _orders: [],
@@ -308,15 +308,6 @@ export async function getOrders(
   try {
     data = await response.json();
   } catch (e) {
-    // console.error({
-    //   function: 'getOrders',
-    //   page: current_page,
-    //   message: 'Error parsing JSON',
-    //   data,
-    //   ordersCount: _orders.length,
-    //   response,
-    //   target_page,
-    // });
     for (let i = current_page; i <= target_page; i++) {
       _failedPages.push(i);
     }
@@ -438,4 +429,61 @@ export async function getOrderCount() {
   }
   const { count } = data;
   return { orderCount: count };
+}
+export async function getOrders( _page = 1, _orders = []) {
+  /**
+   * Average time to load 50 orders is 0.7 sec,
+   * Remonline API has around 113K orders,
+   * via one request we can get 50 orders
+   * 113000 / 50 = 2260 pages
+   * 2260 * 0.7 = 1582 sec
+   * 1582 sec = 26.3 min
+   * so we need to load orders in parallel
+   */
+  const url = `${process.env.REMONLINE_API}/order/?page=${_page}&token=${process.env.REMONLINE_API_TOKEN}`;
+
+  const options = { method: 'GET', headers: { accept: 'application/json' } };
+
+  const response = await fetch(url, options);
+
+  const data = await response.json();
+  const { success } = data;
+  if (!success) {
+    const { message, code } = data;
+    const { validation } = message;
+    if (response.status == 403 && code == 101) {
+      console.info({ function: 'getOrders', message: 'Get new Auth' });
+      await remonlineTokenToEnv(true);
+      return await getTransfers({ branch_id }, _page, _orders);
+    }
+    console.error({
+      function: 'getTransfers',
+      message,
+      validation,
+      status: response.status,
+    });
+    return;
+  }
+  const { data: orders, page, count } = data;
+
+  const doneOnPrevPage = (page - 1) * 50;
+
+  const leftToFinish = count - doneOnPrevPage - orders.length;
+
+  _orders.push(
+    ...orders.map((order) => structuredClone(order))
+  );
+
+  // console.log({ count, page, doneOnPrevPage, leftToFinish })
+  if(process.env.ENV==='TEST'){
+    console.log({ count, page, doneOnPrevPage, leftToFinish })
+    if(page===2){
+      return { orders: _orders };
+    }
+  }
+  console.log(doneOnPrevPage, leftToFinish, orders.length)
+  if (leftToFinish > 0) {
+    return await getOrders(parseInt(page) + 1, _orders);
+  }
+  return { orders: _orders };
 }
