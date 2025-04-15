@@ -5,8 +5,8 @@ import {
 } from '../../remonline/remonline.utils.mjs';
 import { remonlineTokenToEnv } from '../../remonline/remonline.api.mjs';
 async function prepareOrders() {
-  const { orderCount } = await getOrderCount();
-  // const orderCount = 20000;
+  // const { orderCount } = await getOrderCount();
+  const orderCount = 200;
   const requestsPerCall = 5;
   const ordersPerPage = 50;
   const pagesCount = Math.ceil(orderCount / ordersPerPage);
@@ -46,12 +46,69 @@ async function prepareOrders() {
   } while (TTL-- > 0 && failedPages.length > 0);
   console.log('all fails resolved with TTL:', TTL);
   return {
-    // orders,
-    results,
     orderCount,
     orders,
     failedPages,
   };
+}
+async function handleOrders({ orders }) {
+  const assignOrderId = ({ order_id, arr }) => {
+    arr.forEach((item, index) => (arr[index] = { order_id, ...item }));
+  };
+
+  return orders.reduce(
+    (acc, curr) => {
+      const order = {
+        ...structuredClone(curr),
+        client_id: curr.client.id,
+        asset_id: curr.asset.id,
+        ...curr.custom_fields,
+        order_type_id: curr.order_type.id,
+        status_id: curr.status.id,
+      };
+
+      const { id: order_id } = order;
+
+      const parts = structuredClone(curr.parts);
+      const operations = structuredClone(curr.operations);
+      const attachments = structuredClone(curr.attachments);
+
+      delete order.parts;
+      delete order.client;
+      delete order.status;
+      delete order.resources;
+      delete order.asset;
+      delete order.custom_fields;
+      delete order.order_type;
+      delete order.operations;
+      delete order.attachments;
+
+      // order
+
+      assignOrderId({ order_id, arr: parts });
+      assignOrderId({ order_id, arr: operations });
+      assignOrderId({ order_id, arr: attachments });
+
+      acc.handledOrders = [...acc.handledOrders, order];
+      acc.handledOrderParts = [...acc.handledOrderParts, ...parts];
+      acc.handledOrderOperations = [
+        ...acc.handledOrderOperations,
+        ...operations,
+      ];
+      acc.handledOrderAttachments = [
+        ...acc.handledOrderAttachments,
+        ...attachments,
+      ];
+
+      return acc;
+    },
+    {
+      handledOrders: [],
+      handledOrderParts: [],
+      handledOrderOperations: [],
+      handledOrderAttachments: [],
+    }
+  );
 }
 export async function loadRemonlineOrders() {
   /**
@@ -64,7 +121,7 @@ export async function loadRemonlineOrders() {
    * so we need to load orders in parallel
    */
   const time = new Date();
-  const { orderCount, results, orders, failedPages } = await prepareOrders();
+  const { orderCount, orders, failedPages } = await prepareOrders();
   console.log({
     time,
     message: 'loadRemonlineOrders',
@@ -72,14 +129,29 @@ export async function loadRemonlineOrders() {
     ordersCount: orders.length,
     failedPages: failedPages.length,
   });
-  console.log(failedPages);
-  console.log({ downloadingTime: new Date() - time });
+  const time2 = new Date();
+  console.log({ downloadingTime: time2 - time });
+  const {
+    handledOrders,
+    handledOrderParts,
+    handledOrderOperations,
+    handledOrderAttachments,
+  } = await handleOrders({ orders });
+  console.log({
+    handledOrders: handledOrders.length,
+    handledOrderParts: handledOrderParts.length,
+    handledOrderOperations: handledOrderOperations.length,
+    handledOrderAttachments: handledOrderAttachments.length,
+  });
+  const time3 = new Date();
+  console.log({
+    handledOrders: handledOrders[0],
+    handledOrderParts: handledOrderParts[0],
+    handledOrderOperations: handledOrderOperations[0],
+    handledOrderAttachments: handledOrderAttachments[0],
+  });
 
-  //   const {orders} = await getOrders({current_page:10,_orders:[]});
-  //   if (orders.length === 0) {
-  //     return;
-  //   }
-  //   console.log(orders[0]);
+  console.log({ reducingTime: time3 - time2 });
 }
 
 if (process.env.ENV === 'TEST') {
