@@ -5,8 +5,8 @@ import {
 } from '../../remonline/remonline.utils.mjs';
 import { remonlineTokenToEnv } from '../../remonline/remonline.api.mjs';
 async function prepareOrders() {
-  // const { orderCount } = await getOrderCount();
-  const orderCount = 200;
+  const { orderCount } = await getOrderCount();
+  // const orderCount = 20000;
   const requestsPerCall = 5;
   const ordersPerPage = 50;
   const pagesCount = Math.ceil(orderCount / ordersPerPage);
@@ -57,7 +57,8 @@ async function handleOrders({ orders }) {
   };
 
   return orders.reduce(
-    (acc, curr) => {
+    (acc, curr, index) => {
+      console.log(`parsing(${index}), date now:${Date.now()}`);
       const order = {
         ...structuredClone(curr),
         client_id: curr.client.id,
@@ -144,11 +145,28 @@ export async function loadRemonlineOrders() {
     handledOrderAttachments: handledOrderAttachments.length,
   });
   const time3 = new Date();
+  // console.log({
+  //   handledOrders: handledOrders[0],
+  //   handledOrderParts: handledOrderParts[0],
+  //   handledOrderOperations: handledOrderOperations[0],
+  //   handledOrderAttachments: handledOrderAttachments[0],
+  // });
+
   console.log({
-    handledOrders: handledOrders[0],
-    handledOrderParts: handledOrderParts[0],
-    handledOrderOperations: handledOrderOperations[0],
-    handledOrderAttachments: handledOrderAttachments[0],
+    handledOrdersWithoutAd_Campaign: handledOrders.reduce(
+      (acc, curr) => {
+        if ((
+          curr.ad_campaign &&
+          typeof curr.ad_campaign === 'object' &&
+          Object.keys(curr.ad_campaign).length > 0
+        )) {
+          acc.qty += 1;
+          acc.orderIds.push(curr.order_id);
+        }
+        return acc;
+      },
+      { qty: 0, orderIds: [] }
+    ),
   });
 
   console.log({ reducingTime: time3 - time2 });
