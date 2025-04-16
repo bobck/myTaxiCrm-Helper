@@ -12,10 +12,8 @@ exports.setup = function (options, seedLink) {
 
 exports.up = function (db, callback) {
   const sql = `
-      CREATE TABLE "remonline-orders" (
+      CREATE TABLE remonline_orders (
           order_id INTEGER PRIMARY KEY,
-          page INTEGER NOT NULL,
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
   `;
@@ -24,7 +22,7 @@ exports.up = function (db, callback) {
 
 exports.down = function (db, callback) {
   const sql = `
-      DROP TABLE "remonline-orders";
+      DROP TABLE remonline_orders;
   `;
   db.runSql(sql, callback);
 };
