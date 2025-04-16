@@ -3,7 +3,7 @@ import {
   getOrderCount,
   getOrdersInRange,
   getOrdersByPageIds,
-  getEmployees
+  getEmployees,
 } from '../../remonline/remonline.utils.mjs';
 import { remonlineTokenToEnv } from '../../remonline/remonline.api.mjs';
 async function prepareOrders() {
@@ -63,10 +63,10 @@ async function prepareOrdersSync() {
 }
 async function handleOrders({ orders }) {
   const employees = await getEmployees();
-  const getEmployeeById=({ id }) =>{
+  const getEmployeeById = ({ id }) => {
     return employees.find((item) => item.id === id);
-  }
-  
+  };
+
   const handleOrderProps = ({ order_id, arr }) => {
     arr.forEach((item, index) => {
       const handledItem = { order_id, ...item, uom_id: item.uom.id };
@@ -81,8 +81,8 @@ async function handleOrders({ orders }) {
 
   return orders.reduce(
     (acc, curr, index) => {
-      const order_creator= getEmployeeById({ id: curr.created_by_id });
-      const created_by=`${order_creator.first_name} ${order_creator.last_name}`;
+      const order_creator = getEmployeeById({ id: curr.created_by_id });
+      const created_by = `${order_creator.first_name} ${order_creator.last_name}`;
       const order = {
         ...structuredClone(curr),
         client_id: curr.client.id,
@@ -184,16 +184,14 @@ export async function loadRemonlineOrders() {
   console.log({ reducingTime: time3 - time2 });
   const stat = handledOrders.reduce((acc, curr) => {
     for (const key in curr) {
-     
-        if (acc.has(key)) {
-          const a=acc.get(key)
-          acc.set(key, {...a, qty: a.qty + 1 });
-        } else {
-          acc.set(key, {qty:1,example: curr[key]});
-        }
-      
+      if (acc.has(key)) {
+        const a = acc.get(key);
+        acc.set(key, { ...a, qty: a.qty + 1 });
+      } else {
+        acc.set(key, { qty: 1, example: curr[key] });
+      }
     }
-  
+
     return acc;
   }, new Map());
   console.log(stat, stat.size);

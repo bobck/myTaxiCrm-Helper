@@ -496,9 +496,9 @@ export async function getOrders(_page = 1, _orders = [], _failedPages = []) {
   }
   return { orders: _orders };
 }
-export async function getEmployees(){
+export async function getEmployees() {
   const url = `${process.env.REMONLINE_API}/employees/?token=${process.env.REMONLINE_API_TOKEN}`;
-  const options = {method: 'GET', headers: {accept: 'application/json'}};
+  const options = { method: 'GET', headers: { accept: 'application/json' } };
   const response = await fetch(url, options);
   let data;
   try {
@@ -529,6 +529,5 @@ export async function getEmployees(){
   }
   const { data: employees } = data;
   // console.log(data);
-  return employees
-
+  return employees;
 }

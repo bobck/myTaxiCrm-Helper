@@ -288,7 +288,7 @@ export const ordersTableSchema = [
   { name: 'created_by', type: 'STRING', mode: 'REQUIRED' },
   { name: 'asset_id', type: 'INTEGER', mode: 'REQUIRED' },
   { name: 'order_type_id', type: 'INTEGER', mode: 'REQUIRED' },
-  { name: 'status_id', type: 'INTEGER', mode: 'REQUIRED' }
+  { name: 'status_id', type: 'INTEGER', mode: 'REQUIRED' },
 ];
 
 export const orderPartsTableSchema = [
@@ -305,7 +305,7 @@ export const orderPartsTableSchema = [
   { name: 'article', type: 'STRING', mode: 'REQUIRED' },
   { name: 'warranty', type: 'INTEGER', mode: 'REQUIRED' },
   { name: 'warranty_period', type: 'INTEGER', mode: 'REQUIRED' },
-  { name: 'uom_id', type: 'INTEGER', mode: 'REQUIRED' }
+  { name: 'uom_id', type: 'INTEGER', mode: 'REQUIRED' },
 ];
 
 export const orderOperationsTableSchema = [
@@ -320,12 +320,12 @@ export const orderOperationsTableSchema = [
   { name: 'discount_value', type: 'INTEGER', mode: 'REQUIRED' },
   { name: 'warranty', type: 'INTEGER', mode: 'REQUIRED' },
   { name: 'warranty_period', type: 'INTEGER', mode: 'REQUIRED' },
-  { name: 'uom_id', type: 'INTEGER', mode: 'REQUIRED' }
+  { name: 'uom_id', type: 'INTEGER', mode: 'REQUIRED' },
 ];
 
 export const orderAttachmentsTableSchema = [
   { name: 'created_at', type: 'TIMESTAMP', mode: 'REQUIRED' }, // Convert using TIMESTAMP_MILLIS.
   { name: 'created_by_id', type: 'INTEGER', mode: 'REQUIRED' },
   { name: 'filename', type: 'STRING', mode: 'REQUIRED' },
-  { name: 'url', type: 'STRING', mode: 'REQUIRED' }
+  { name: 'url', type: 'STRING', mode: 'REQUIRED' },
 ];
