@@ -322,14 +322,14 @@ export async function getOrdersInRange(
     if (response.status == 403 && code == 101) {
       // console.info({ function: 'getOrders', message: 'Get new Auth' });
       await remonlineTokenToEnv(true);
-      return await getOrders({ current_page, _orders, target_page });
+      return await getOrdersInRange({ current_page, _orders, target_page });
     }
-    // console.error({
-    //   function: 'getOrders',
-    //   message,
-    //   validation,
-    //   status: response.status,
-    // });
+    console.error({
+      function: 'getOrdersInRange',
+      message,
+      validation,
+      status: response.status,
+    });
     return;
   }
   const { data: orders, page, count } = data;
@@ -469,7 +469,7 @@ export async function getOrders(_page = 1, _orders = [], _failedPages = []) {
       return await getOrders(_page, _orders);
     }
     console.error({
-      function: 'getTransfers',
+      function: 'getOrders',
       message,
       validation,
       status: response.status,
@@ -496,14 +496,39 @@ export async function getOrders(_page = 1, _orders = [], _failedPages = []) {
   }
   return { orders: _orders };
 }
-export async function getOrderCounttest() {
-  const url = `${process.env.REMONLINE_API}/order/?token=${process.env.REMONLINE_API_TOKEN}`;
-
-  const options = { method: 'GET', headers: { accept: 'application/json' } };
-
+export async function getEmployees(){
+  const url = `${process.env.REMONLINE_API}/employees/?token=${process.env.REMONLINE_API_TOKEN}`;
+  const options = {method: 'GET', headers: {accept: 'application/json'}};
   const response = await fetch(url, options);
+  let data;
+  try {
+    data = await response.json();
+  } catch (e) {
+    console.error({
+      function: 'getEmpoyees',
+      message: 'Error parsing JSON',
+      data,
+    });
+  }
+  const { success } = data;
+  if (!success) {
+    const { message, code } = data;
+    const { validation } = message;
+    if (response.status == 403 && code == 101) {
+      console.info({ function: 'getEmployees', message: 'Get new Auth' });
+      await remonlineTokenToEnv(true);
+      return await getEmployees();
+    }
+    console.error({
+      function: 'getEmployees',
+      message,
+      validation,
+      status: response.status,
+    });
+    return;
+  }
+  const { data: employees } = data;
+  // console.log(data);
+  return employees
 
-  const data = await response.json();
-  const { count } = data;
-  return { orderCount: count };
 }

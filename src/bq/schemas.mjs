@@ -247,3 +247,85 @@ export const transferProductsTableSchema = [
   { name: 'uom_title', type: 'STRING', mode: 'REQUIRED' },
   { name: 'transfer_id', type: 'INTEGER', mode: 'REQUIRED' },
 ];
+export const ordersTableSchema = [
+  { name: 'id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'modified_at', type: 'TIMESTAMP', mode: 'REQUIRED' }, // Use TIMESTAMP_MILLIS during ingestion.
+  { name: 'uuid', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'created_at', type: 'TIMESTAMP', mode: 'REQUIRED' },
+  { name: 'done_at', type: 'TIMESTAMP', mode: 'REQUIRED' },
+  { name: 'scheduled_for', type: 'TIMESTAMP', mode: 'REQUIRED' },
+  { name: 'duration', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'kindof_good', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'serial', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'packagelist', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'appearance', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'malfunction', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'manager_notes', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'engineer_notes', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'resume', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'payed', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'missed_payments', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'warranty_measures', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'warranty_date', type: 'TIMESTAMP', mode: 'REQUIRED' },
+  { name: 'urgent', type: 'BOOLEAN', mode: 'REQUIRED' },
+  { name: 'discount_sum', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'custom_fields', type: 'JSON', mode: 'NULLABLE' }, // Set as JSON for unpredictable custom fields.
+  { name: 'estimated_cost', type: 'NUMERIC', mode: 'REQUIRED' },
+  { name: 'closed_at', type: 'TIMESTAMP', mode: 'REQUIRED' },
+  { name: 'estimated_done_at', type: 'TIMESTAMP', mode: 'REQUIRED' },
+  { name: 'id_label', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'price', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'branch_id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'overdue', type: 'BOOLEAN', mode: 'REQUIRED' },
+  { name: 'status_overdue', type: 'BOOLEAN', mode: 'REQUIRED' },
+  { name: 'manager_id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'engineer_id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'created_by_id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'closed_by_id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'brand', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'model', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'client_id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'created_by', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'asset_id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'order_type_id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'status_id', type: 'INTEGER', mode: 'REQUIRED' }
+];
+
+export const orderPartsTableSchema = [
+  { name: 'order_id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'entity_id', type: 'INTEGER', mode: 'REQUIRED' }, // Converted from entityId.
+  { name: 'engineer_id', type: 'INTEGER', mode: 'REQUIRED' }, // Converted from engineerId.
+  { name: 'title', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'amount', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'price', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'cost', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'discount_value', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'code', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'article', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'warranty', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'warranty_period', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'uom_id', type: 'INTEGER', mode: 'REQUIRED' }
+];
+
+export const orderOperationsTableSchema = [
+  { name: 'order_id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'entity_id', type: 'INTEGER', mode: 'REQUIRED' }, // Converted from entityId.
+  { name: 'engineer_id', type: 'INTEGER', mode: 'REQUIRED' }, // Converted from engineerId.
+  { name: 'title', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'amount', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'price', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'cost', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'discount_value', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'warranty', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'warranty_period', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'uom_id', type: 'INTEGER', mode: 'REQUIRED' }
+];
+
+export const orderAttachmentsTableSchema = [
+  { name: 'created_at', type: 'TIMESTAMP', mode: 'REQUIRED' }, // Convert using TIMESTAMP_MILLIS.
+  { name: 'created_by_id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'filename', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'url', type: 'STRING', mode: 'REQUIRED' }
+];
