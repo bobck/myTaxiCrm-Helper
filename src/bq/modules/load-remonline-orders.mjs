@@ -1,30 +1,34 @@
 import {
   getOrders,
   getOrderCount,
+  getOrdersInRange,
   getOrdersByPageIds,
+  getOrderCounttest
 } from '../../remonline/remonline.utils.mjs';
 import { remonlineTokenToEnv } from '../../remonline/remonline.api.mjs';
 async function prepareOrders() {
   // const { orderCount } = await getOrderCount();
-  // const orderCount = 20000;
+  const orderCount = 2000;
   const requestsPerCall = 5;
   const ordersPerPage = 50;
   const pagesCount = Math.ceil(orderCount / ordersPerPage);
   const promises = [];
-  console.log({ orderCount, requestsPerCall, pagesCount, ordersPerPage });
-  console.log('downloading orders...');
+  // console.log({ orderCount, requestsPerCall, pagesCount, ordersPerPage });
+  // console.log('downloading orders...');
   for (let i = 1; i <= pagesCount; i += requestsPerCall + 1) {
     const current_page = i;
     const target_page_pretendent = i + requestsPerCall;
     const target_page =
       target_page_pretendent > pagesCount ? pagesCount : target_page_pretendent;
-    promises.push(getOrders({ current_page, target_page }));
+    promises.push(getOrdersInRange({ current_page, target_page }));
     // console.log('fetching started', { current_page, target_page });
   }
-  console.log(
-    `orders downloading has been initiated in ${promises.length} parallel threads...`
-  );
+  // console.log(
+  //   `orders downloading has been initiated in ${promises.length} parallel threads...`
+  // );
   const results = await Promise.all(promises);
+
+  // console.log('orders downloading has been finished');
   // const orders = results.flat();
   let { orders, failedPages } = results.reduce(
     (acc, curr) => {
@@ -35,30 +39,38 @@ async function prepareOrders() {
     { orders: [], failedPages: [] }
   );
   let TTL = 10;
-  console.log(
-    `initial download finished with ${failedPages.length} failed pages.${failedPages.length ? `\nstarting to resolve failed pages...\ngiven TTL: ${TTL}` : ''}`
-  );
+  // console.log(
+  //   `initial download finished with ${failedPages.length} failed pages.${failedPages.length ? `\nstarting to resolve failed pages...\ngiven TTL: ${TTL}` : ''}`
+  // );
   do {
     const { orders: tem_orders, failedPages: temp_failedPages } =
       await getOrdersByPageIds({ pages: failedPages });
     orders.push(...tem_orders);
     failedPages = structuredClone(temp_failedPages);
   } while (TTL-- > 0 && failedPages.length > 0);
-  console.log('all fails resolved with TTL:', TTL);
+  // console.log('all fails resolved with TTL:', TTL);
   return {
     orderCount,
     orders,
     failedPages,
   };
 }
+
+async function prepareOrdersSync() {
+  const { orderCount } = await getOrderCount();
+  const { orders,failedPages } = await getOrders();
+  return {orders, orderCount, failedPages};
+}
 async function handleOrders({ orders }) {
   const assignOrderId = ({ order_id, arr }) => {
     arr.forEach((item, index) => (arr[index] = { order_id, ...item }));
   };
+  const handleOrderParts = ({parts}) => {
+
+  }
 
   return orders.reduce(
     (acc, curr, index) => {
-      console.log(`parsing(${index}), date now:${Date.now()}`);
       const order = {
         ...structuredClone(curr),
         client_id: curr.client.id,
@@ -123,6 +135,7 @@ export async function loadRemonlineOrders() {
    */
   const time = new Date();
   const { orderCount, orders, failedPages } = await prepareOrders();
+  // const { orderCount, orders, failedPages } = await prepareOrdersSync();
   console.log({
     time,
     message: 'loadRemonlineOrders',
@@ -145,13 +158,7 @@ export async function loadRemonlineOrders() {
     handledOrderAttachments: handledOrderAttachments.length,
   });
   const time3 = new Date();
-  // console.log({
-  //   handledOrders: handledOrders[0],
-  //   handledOrderParts: handledOrderParts[0],
-  //   handledOrderOperations: handledOrderOperations[0],
-  //   handledOrderAttachments: handledOrderAttachments[0],
-  // });
-
+  // console.log(handledOrderParts.find((item) => item.taxes.length > 0));
 
   console.log({ reducingTime: time3 - time2 });
 }
@@ -160,4 +167,5 @@ if (process.env.ENV === 'TEST') {
   console.log(`running loadRemonlineOrders in Test mode...`);
   await remonlineTokenToEnv(true);
   await loadRemonlineOrders();
+  // console.log(await getOrderCounttest());
 }
