@@ -8,7 +8,7 @@ import {
 import { remonlineTokenToEnv } from '../../remonline/remonline.api.mjs';
 async function prepareOrders() {
   // const { orderCount } = await getOrderCount();
-  const orderCount = 2000;
+  const orderCount = 20000;
   const requestsPerCall = 5;
   const ordersPerPage = 50;
   const pagesCount = Math.ceil(orderCount / ordersPerPage);
@@ -98,6 +98,7 @@ async function handleOrders({ orders }) {
       const parts = structuredClone(curr.parts);
       const operations = structuredClone(curr.operations);
       const attachments = structuredClone(curr.attachments);
+      const resources = structuredClone(curr.resources);
 
       delete order.parts;
       delete order.client;
@@ -109,6 +110,7 @@ async function handleOrders({ orders }) {
       delete order.operations;
       delete order.attachments;
       delete order.ad_campaign;
+      delete order.resources;
 
       // order
 
@@ -127,6 +129,14 @@ async function handleOrders({ orders }) {
         ...attachments,
       ];
 
+      resources.forEach((item) => {
+        acc.orders2Resources.push({ resource_id: item.id, order_id });
+        const doesExist=acc.handledOrderResources.some((i) => i.id === item.id);
+        if(!doesExist){
+          acc.handledOrderResources.push(item)
+        }
+      });
+
       return acc;
     },
     {
@@ -134,6 +144,8 @@ async function handleOrders({ orders }) {
       handledOrderParts: [],
       handledOrderOperations: [],
       handledOrderAttachments: [],
+      handledOrderResources: [],
+      orders2Resources: [],
     }
   );
 }
@@ -165,12 +177,16 @@ export async function loadRemonlineOrders() {
     handledOrderParts,
     handledOrderOperations,
     handledOrderAttachments,
+    handledOrderResources,
+    orders2Resources,
   } = await handleOrders({ orders });
   console.log({
     handledOrders: handledOrders.length,
     handledOrderParts: handledOrderParts.length,
     handledOrderOperations: handledOrderOperations.length,
     handledOrderAttachments: handledOrderAttachments.length,
+    orders2Resources: orders2Resources.length,
+    handledOrderResources: handledOrderResources.length,
   });
   const time3 = new Date();
   // console.log(handledOrderParts.find((item) => item.taxes.length > 0));
@@ -182,19 +198,21 @@ export async function loadRemonlineOrders() {
     handledOrderAttachments: handledOrderAttachments[0],
   });
   console.log({ reducingTime: time3 - time2 });
-  const stat = handledOrders.reduce((acc, curr) => {
-    for (const key in curr) {
-      if (acc.has(key)) {
-        const a = acc.get(key);
-        acc.set(key, { ...a, qty: a.qty + 1 });
-      } else {
-        acc.set(key, { qty: 1, example: curr[key] });
-      }
-    }
+  // const stat = handledOrders.reduce((acc, curr) => {
+  //   for (const key in curr) {
+  //     if (acc.has(key)) {
+  //       const a = acc.get(key);
+  //       acc.set(key, { ...a, qty: a.qty + 1 });
+  //     } else {
+  //       acc.set(key, { qty: 1, example: curr[key] });
+  //     }
+  //   }
 
-    return acc;
-  }, new Map());
-  console.log(stat, stat.size);
+  //   return acc;
+  // }, new Map());
+  // console.log(stat, stat.size);
+
+  console.log(handledOrderResources);
 }
 if (process.env.ENV === 'TEST') {
   console.log(`running loadRemonlineOrders in Test mode...`);
@@ -202,4 +220,13 @@ if (process.env.ENV === 'TEST') {
   await loadRemonlineOrders();
   // await getEmployees();
   // console.log(await getOrderCounttest());
+  // const a = { id: 62564, name: '01_1_Подъемник 2' };
+  // const b = { id: 62565, name: '01_1_Подъемник 3' };
+
+  // const set = new Set();
+  // set.add(a);
+  // set.add(b);
+  // console.log(set);
+  // const acopy = structuredClone(a);
+  // set.add(acopy);
 }
