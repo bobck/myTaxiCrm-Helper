@@ -281,7 +281,8 @@ export async function getTransfers({ branch_id }, _page = 1, _transfers = []) {
 }
 
 export async function getOrdersInRange(
-  { current_page, _orders, target_page, _failedPages } = {
+  { current_page, modified_at, _orders, target_page, _failedPages } = {
+    modified_at: 0,
     current_page: 1,
     _orders: [],
     _failedPages: [],
@@ -299,8 +300,13 @@ export async function getOrdersInRange(
   if (!_failedPages) {
     _failedPages = [];
   }
-  const url = `${process.env.REMONLINE_API}/order/?page=${current_page}&token=${process.env.REMONLINE_API_TOKEN}`;
-
+  if (!modified_at) {
+    modified_at = 0;
+  }
+  const url = `${process.env.REMONLINE_API}/order/?sort_dir=asc&modified_at[]=${modified_at}&page=${current_page}&token=${process.env.REMONLINE_API_TOKEN}`;
+  // const url = 'https://api.remonline.app/order/?page=1&sort_dir=asc&modified_at[]=1742926803000&token=2c1293a28cfefff0409a40d7f9b837df2cc7ad54';
+  // const options = {method: 'GET', headers: {accept: 'application/json'}};
+  // console.log(url)
   const options = { method: 'GET', headers: { accept: 'application/json' } };
 
   const response = await fetch(url, options);
@@ -350,13 +356,14 @@ export async function getOrdersInRange(
     return { orders: _orders, failedPages: _failedPages };
   } else {
     return await getOrdersInRange({
+      modified_at,
       current_page: parseInt(page) + 1,
       _orders,
       target_page,
     });
   }
 }
-export async function getOrdersByPageIds({ pages }) {
+export async function getOrdersByPageIds({ modified_at, pages }) {
   // if (!(pages instanceof Array)) {
   //   console.error({
   //     function: 'getOrdersByPageIds',
@@ -369,7 +376,7 @@ export async function getOrdersByPageIds({ pages }) {
 
   const _failedPages = [];
   for (const page of pages) {
-    const url = `${process.env.REMONLINE_API}/order/?page=${page}&token=${process.env.REMONLINE_API_TOKEN}`;
+    const url = `${process.env.REMONLINE_API}/order/?sort_dir=asc&modified_at[]=${modified_at}page=${page}&token=${process.env.REMONLINE_API_TOKEN}`;
 
     const options = { method: 'GET', headers: { accept: 'application/json' } };
 
@@ -402,25 +409,26 @@ export async function getOrdersByPageIds({ pages }) {
     failedPages: _failedPages,
   };
 }
-export async function getOrderCount() {
-  const url = `${process.env.REMONLINE_API}/order/?token=${process.env.REMONLINE_API_TOKEN}`;
+export async function getOrderCount({ modified_at }) {
+  const url = `${process.env.REMONLINE_API}/order/?sort_dir=asc&modified_at[]=${modified_at}&token=${process.env.REMONLINE_API_TOKEN}`;
 
   const options = { method: 'GET', headers: { accept: 'application/json' } };
 
   const response = await fetch(url, options);
 
   const data = await response.json();
+  // console.log({ data });
   const { success } = data;
   if (!success) {
     const { message, code } = data;
     const { validation } = message;
     if (response.status == 403 && code == 101) {
-      console.info({ function: 'getOrders', message: 'Get new Auth' });
+      console.info({ function: 'getOrderCount', message: 'Get new Auth' });
       await remonlineTokenToEnv(true);
-      return await getOrders({ current_page, _orders, target_page });
+      return await getOrderCount({ current_page, _orders, target_page });
     }
     console.error({
-      function: 'getTransfers',
+      function: 'getOrdersCount',
       message,
       validation,
       status: response.status,

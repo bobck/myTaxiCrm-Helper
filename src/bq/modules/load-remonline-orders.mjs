@@ -7,14 +7,27 @@ import {
   getOrdersByLastModificationDate,
 } from '../../remonline/remonline.utils.mjs';
 import { remonlineTokenToEnv } from '../../remonline/remonline.api.mjs';
-
+import { createOrResetTableByName } from '../bq-utils.mjs';
+import {
+  ordersTableSchema,
+  orderPartsTableSchema,
+  orderOperationsTableSchema,
+  orderAttachmentsTableSchema,
+  orders2ResourcesTableSchema,
+  orderResourcesTableSchema,
+  campaignsTableSchema,
+} from '../schemas.mjs';
+import {createMultipleRemonlineOrders,deleteMultipleRemonlineOrders,getMaxOrderModifiedAt} from '../bq-queries.mjs';
 async function prepareOrders() {
-  const { orderCount } = await getOrderCount();
+  const modified_at = Date.now() - 1000 * 60 * 60 * 24 * 7;
+  // const modified_at = 1744917651000;
+  const { orderCount } = await getOrderCount({ modified_at });
   // const orderCount = 20000;
-  const startPage = 2200;
+  const startPage = 1;
   const requestsPerCall = 5;
   const ordersPerPage = 50;
   const pagesCount = Math.ceil(orderCount / ordersPerPage);
+  // return
   const promises = [];
   console.log({
     orderCount,
@@ -23,13 +36,14 @@ async function prepareOrders() {
     pagesCount,
     ordersPerPage,
   });
+  // return;
   console.log('downloading orders...');
   for (let i = startPage; i <= pagesCount; i += requestsPerCall + 1) {
     const current_page = i;
     const target_page_pretendent = i + requestsPerCall;
     const target_page =
       target_page_pretendent > pagesCount ? pagesCount : target_page_pretendent;
-    promises.push(getOrdersInRange({ current_page, target_page }));
+    promises.push(getOrdersInRange({ modified_at, current_page, target_page }));
     // console.log('fetching started', { current_page, target_page });
   }
   console.log(
@@ -53,7 +67,7 @@ async function prepareOrders() {
   );
   do {
     const { orders: tem_orders, failedPages: temp_failedPages } =
-      await getOrdersByPageIds({ pages: failedPages });
+      await getOrdersByPageIds({ modified_at, pages: failedPages });
     orders.push(...tem_orders);
     failedPages = structuredClone(temp_failedPages);
   } while (TTL-- > 0 && failedPages.length > 0);
@@ -217,58 +231,78 @@ export async function loadRemonlineOrders() {
   const time3 = new Date();
   // console.log(handledOrderParts.find((item) => item.taxes.length > 0));
 
-  console.log({
-    handledOrders: handledOrders[0],
-    handledOrderParts: handledOrderParts[0],
-    handledOrderOperations: handledOrderOperations[0],
-    handledOrderAttachments: handledOrderAttachments[0],
-    orders2Resources: orders2Resources[0],
-    handledOrderResources: handledOrderResources[0],
-    handledCampaigns: handledCampaigns[0],
-  });
+  // console.log({
+  //   handledOrders: handledOrders[0],
+  //   handledOrderParts: handledOrderParts[0],
+  //   handledOrderOperations: handledOrderOperations[0],
+  //   handledOrderAttachments: handledOrderAttachments[0],
+  //   orders2Resources: orders2Resources[0],
+  //   handledOrderResources: handledOrderResources[0],
+  //   handledCampaigns: handledCampaigns[0],
+  // });
   console.log({ reducingTime: time3 - time2 });
-  const stat = handledOrders.reduce((acc, curr) => {
-    for (const key in curr) {
-      if (acc.has(key)) {
-        const a = acc.get(key);
-        acc.set(key, { ...a, qty: a.qty + 1 });
-      } else {
-        acc.set(key, { qty: 1, example: curr[key] });
-      }
-    }
+  // const stat = handledOrders.reduce((acc, curr) => {
+  //   for (const key in curr) {
+  //     if (acc.has(key)) {
+  //       const a = acc.get(key);
+  //       acc.set(key, { ...a, qty: a.qty + 1 });
+  //     } else {
+  //       acc.set(key, { qty: 1, example: curr[key] });
+  //     }
+  //   }
 
-    return acc;
-  }, new Map());
-  console.log(stat, stat.size);
+  //   return acc;
+  // }, new Map());
+  // console.log(stat, stat.size);
+  
+  await deleteMultipleRemonlineOrders({ orders: handledOrders });
+  await createMultipleRemonlineOrders({orders: handledOrders});
+  const lastModifiedAt = await getMaxOrderModifiedAt();
+  console.log({ lastModifiedAt });
+  const time4 = new Date();
+  console.log({ localDBLoadingTime: time4 - time3 });
+}
+async function createOrResetOrdersTables() {
+  await createOrResetTableByName({
+    bqTableId: 'orders',
+    schema: ordersTableSchema,
+    dataSetId: 'RemOnline',
+  });
+  await createOrResetTableByName({
+    bqTableId: 'order_parts',
+    schema: orderPartsTableSchema,
+    dataSetId: 'RemOnline',
+  });
+  await createOrResetTableByName({
+    bqTableId: 'order_operations',
+    schema: orderOperationsTableSchema,
+    dataSetId: 'RemOnline',
+  });
+  await createOrResetTableByName({
+    bqTableId: 'order_attachments',
+    schema: orderAttachmentsTableSchema,
+    dataSetId: 'RemOnline',
+  });
+  await createOrResetTableByName({
+    bqTableId: 'orders_to_resources',
+    schema: orders2ResourcesTableSchema,
+    dataSetId: 'RemOnline',
+  });
+  await createOrResetTableByName({
+    bqTableId: 'order_resources',
+    schema: orderResourcesTableSchema,
+    dataSetId: 'RemOnline',
+  });
+  await createOrResetTableByName({
+    bqTableId: 'campaigns',
+    schema: campaignsTableSchema,
+    dataSetId: 'RemOnline',
+  });
 }
 if (process.env.ENV === 'TEST') {
   console.log(`running loadRemonlineOrders in Test mode...`);
   await remonlineTokenToEnv(true);
-  // await loadRemonlineOrders();
-  const time = Date.now() - 1000 * 60 * 42;
-
-  const { orders } = await getOrdersByLastModificationDate(1744917651000);
-  const red = orders.reduce((acc, curr) => {
-    if (acc.has(curr.id)) {
-      const a = acc.get(curr.id);
-      acc.set(curr.id, { ...a, qty: a.qty + 1 });
-    } else {
-      acc.set(curr.id, { qty: 1, example: curr });
-    }
-    return acc;
-  }, new Map());
-  console.log(red, time);
-  console.log(orders.length);
-  // await getEmployees();
-  // console.log(await getOrderCounttest());
-  // const a = { id: 62564, name: '01_1_Подъемник 2' };
-  // const b = { id: 62565, name: '01_1_Подъемник 3' };
-
-  // const set = new Set();
-  // set.add(a);
-  // set.add(b);
-  // console.log(set);
-  // const acopy = structuredClone(a);
-  // set.add(acopy);
+  await loadRemonlineOrders();
+  // await createOrResetOrdersTables();
 }
 // 1744917651000
