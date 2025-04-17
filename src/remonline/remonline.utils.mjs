@@ -2,6 +2,7 @@ import fetch from 'node-fetch';
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
 import { remonlineTokenToEnv } from './remonline.api.mjs';
+import * as Stream from 'node:stream';
 
 const db = await open({
   filename: process.env.DEV_DB,
@@ -30,7 +31,11 @@ export async function saveSidRow({
   return { result };
 }
 
-export async function getOrders({ idLabels, ids }, _page = 1, _orders = []) {
+export async function getOrdersByIdLabels(
+  { idLabels, ids },
+  _page = 1,
+  _orders = []
+) {
   let idLabelsUrl = '';
   if (idLabels) {
     for (let idLabel of idLabels) {
@@ -71,11 +76,11 @@ export async function getOrders({ idLabels, ids }, _page = 1, _orders = []) {
     if (response.status == 403 && code == 101) {
       console.info({ function: 'getOrders', message: 'Get new Auth' });
       await remonlineTokenToEnv(true);
-      return await getOrders({ idLabels, ids }, _page, _orders);
+      return await getOrdersByIdLabels({ idLabels, ids }, _page, _orders);
     }
 
     console.error({
-      function: 'getOrders',
+      function: 'getOrdersByIdLabels',
       message,
       validation,
       status: response.status,
@@ -94,7 +99,11 @@ export async function getOrders({ idLabels, ids }, _page = 1, _orders = []) {
   // console.log({ count, page, doneOnPrevPage, leftTofinish })
 
   if (leftTofinish > 0) {
-    return await getOrders({ idLabels, ids }, parseInt(page) + 1, _orders);
+    return await getOrdersByIdLabels(
+      { idLabels, ids },
+      parseInt(page) + 1,
+      _orders
+    );
   }
 
   return { orders: _orders };
@@ -240,7 +249,7 @@ export async function getTransfers({ branch_id }, _page = 1, _transfers = []) {
     const { message, code } = data;
     const { validation } = message;
     if (response.status == 403 && code == 101) {
-      console.info({ function: 'getOrders', message: 'Get new Auth' });
+      console.info({ function: 'getTransfers', message: 'Get new Auth' });
       await remonlineTokenToEnv(true);
       return await getTransfers({ branch_id }, _page, _transfers);
     }
@@ -269,4 +278,349 @@ export async function getTransfers({ branch_id }, _page = 1, _transfers = []) {
     return await getTransfers({ branch_id }, parseInt(page) + 1, _transfers);
   }
   return { transfers: _transfers };
+}
+
+export async function getOrdersInRange(
+  { current_page, modified_at, _orders, target_page, _failedPages } = {
+    modified_at: 0,
+    current_page: 1,
+    _orders: [],
+    _failedPages: [],
+  }
+) {
+  // console.log('calling getOrdersInRange', {
+  //   current_page,
+  //   _orders,
+  //   target_page,
+  //   _failedPages,
+  // });
+  if (!_orders) {
+    _orders = [];
+  }
+  if (!_failedPages) {
+    _failedPages = [];
+  }
+  if (!modified_at) {
+    modified_at = 0;
+  }
+  const url = `${process.env.REMONLINE_API}/order/?sort_dir=asc&modified_at[]=${modified_at}&page=${current_page}&token=${process.env.REMONLINE_API_TOKEN}`;
+  // const url = 'https://api.remonline.app/order/?page=1&sort_dir=asc&modified_at[]=1742926803000&token=2c1293a28cfefff0409a40d7f9b837df2cc7ad54';
+  // const options = {method: 'GET', headers: {accept: 'application/json'}};
+  // console.log(url)
+  const options = { method: 'GET', headers: { accept: 'application/json' } };
+
+  const response = await fetch(url, options);
+  let data;
+  try {
+    data = await response.json();
+  } catch (e) {
+    for (let i = current_page; i <= target_page; i++) {
+      _failedPages.push(i);
+    }
+    return { orders: _orders, failedPages: _failedPages };
+    // throw e;
+  }
+
+  const { success } = data;
+  if (!success) {
+    const { message, code } = data;
+    const { validation } = message;
+    if (response.status == 403 && code == 101) {
+      // console.info({ function: 'getOrders', message: 'Get new Auth' });
+      await remonlineTokenToEnv(true);
+      return await getOrdersInRange({ current_page, _orders, target_page });
+    }
+    console.error({
+      function: 'getOrdersInRange',
+      message,
+      validation,
+      status: response.status,
+    });
+    return;
+  }
+  const { data: orders, page, count } = data;
+
+  _orders.push(...orders.map((order) => structuredClone(order)));
+
+  // console.log({ count, page, doneOnPrevPage, leftToFinish })
+  // if (process.env.ENV === 'TEST') {
+  //   console.log({ current_page, target_page });
+  // }
+
+  if (page === target_page) {
+    // console.log({
+    //   target_page,
+    //   start_page: target_page - 5,
+    //   fetched_orders: _orders.length,
+    // });
+    return { orders: _orders, failedPages: _failedPages };
+  } else {
+    return await getOrdersInRange({
+      modified_at,
+      current_page: parseInt(page) + 1,
+      _orders,
+      target_page,
+    });
+  }
+}
+export async function getOrdersByPageIds({ modified_at, pages }) {
+  // if (!(pages instanceof Array)) {
+  //   console.error({
+  //     function: 'getOrdersByPageIds',
+  //     message: 'pages must be an array',
+  //     pages,
+  //   });
+  // }
+
+  const _orders = [];
+
+  const _failedPages = [];
+  for (const page of pages) {
+    const url = `${process.env.REMONLINE_API}/order/?sort_dir=asc&modified_at[]=${modified_at}page=${page}&token=${process.env.REMONLINE_API_TOKEN}`;
+
+    const options = { method: 'GET', headers: { accept: 'application/json' } };
+
+    const response = await fetch(url, options);
+    let data;
+    try {
+      data = await response.json();
+    } catch (e) {
+      // console.error({
+      //   function: 'getOrders',
+      //   page,
+      //   message: 'Error parsing JSON',
+      //   data,
+      //   ordersCount: _orders.length,
+      //   response,
+      // });
+
+      _failedPages.push(page);
+
+      return { orders: _orders, failedPages: _failedPages };
+    }
+
+    const { data: orders } = data;
+
+    _orders.push(...structuredClone(orders));
+  }
+
+  return {
+    orders: _orders.flat(),
+    failedPages: _failedPages,
+  };
+}
+export async function getOrderCount({ modified_at }) {
+  const url = `${process.env.REMONLINE_API}/order/?sort_dir=asc&modified_at[]=${modified_at}&token=${process.env.REMONLINE_API_TOKEN}`;
+
+  const options = { method: 'GET', headers: { accept: 'application/json' } };
+
+  const response = await fetch(url, options);
+
+  const data = await response.json();
+  // console.log({ data });
+  const { success } = data;
+  if (!success) {
+    const { message, code } = data;
+    const { validation } = message;
+    if (response.status == 403 && code == 101) {
+      console.info({ function: 'getOrderCount', message: 'Get new Auth' });
+      await remonlineTokenToEnv(true);
+      return await getOrderCount({ current_page, _orders, target_page });
+    }
+    console.error({
+      function: 'getOrdersCount',
+      message,
+      validation,
+      status: response.status,
+    });
+    return;
+  }
+  const { count } = data;
+  return { orderCount: count };
+}
+export async function getOrders(_page = 1, _orders = [], _failedPages = []) {
+  /**
+   * Average time to load 50 orders is 0.7 sec,
+   * Remonline API has around 113K orders,
+   * via one request we can get 50 orders
+   * 113000 / 50 = 2260 pages
+   * 2260 * 0.7 = 1582 sec
+   * 1582 sec = 26.3 min
+   * so we need to load orders in parallel
+   */
+  const url = `${process.env.REMONLINE_API}/order/?page=${_page}&token=${process.env.REMONLINE_API_TOKEN}`;
+
+  const options = { method: 'GET', headers: { accept: 'application/json' } };
+
+  const response = await fetch(url, options);
+  let data;
+  try {
+    data = await response.json();
+  } catch (e) {
+    console.error({
+      function: 'getOrders',
+      message: 'Error parsing JSON',
+      data,
+      ordersCount: _orders.length,
+      response,
+    });
+    _failedPages.push(_page);
+    return await getOrders(parseInt(page) + 1, _orders, _failedPages);
+  }
+  const { success } = data;
+  if (!success) {
+    const { message, code } = data;
+    const { validation } = message;
+    if (response.status == 403 && code == 101) {
+      console.info({ function: 'getOrders', message: 'Get new Auth' });
+      await remonlineTokenToEnv(true);
+      return await getOrders(_page, _orders);
+    }
+    console.error({
+      function: 'getOrders',
+      message,
+      validation,
+      status: response.status,
+    });
+    return;
+  }
+  const { data: orders, page, count } = data;
+
+  const doneOnPrevPage = (page - 1) * 50;
+
+  const leftToFinish = count - doneOnPrevPage - orders.length;
+
+  _orders.push(...orders.map((order) => structuredClone(order)));
+
+  if (process.env.ENV === 'TEST') {
+    // console.log({ count, page, doneOnPrevPage, leftToFinish })
+    if (page === 2) {
+      return { orders: _orders, failedPages: _failedPages };
+    }
+  }
+  console.log(doneOnPrevPage, leftToFinish, orders.length);
+  if (leftToFinish > 0) {
+    return await getOrders(parseInt(page) + 1, _orders, _failedPages);
+  }
+  return { orders: _orders };
+}
+export async function getEmployees() {
+  const url = `${process.env.REMONLINE_API}/employees/?token=${process.env.REMONLINE_API_TOKEN}`;
+  const options = { method: 'GET', headers: { accept: 'application/json' } };
+  const response = await fetch(url, options);
+  let data;
+  try {
+    data = await response.json();
+  } catch (e) {
+    console.error({
+      function: 'getEmpoyees',
+      message: 'Error parsing JSON',
+      data,
+    });
+  }
+  const { success } = data;
+  if (!success) {
+    const { message, code } = data;
+    const { validation } = message;
+    if (response.status == 403 && code == 101) {
+      console.info({ function: 'getEmployees', message: 'Get new Auth' });
+      await remonlineTokenToEnv(true);
+      return await getEmployees();
+    }
+    console.error({
+      function: 'getEmployees',
+      message,
+      validation,
+      status: response.status,
+    });
+    return;
+  }
+  const { data: employees } = data;
+  // console.log(data);
+  return employees;
+}
+
+export async function getOrdersByLastModificationDate(
+  modified_at,
+  _page = 1,
+  _orders = [],
+  _failedPages = []
+) {
+  /**
+   * Average time to load 50 orders is 0.7 sec,
+   * Remonline API has around 113K orders,
+   * via one request we can get 50 orders
+   * 113000 / 50 = 2260 pages
+   * 2260 * 0.7 = 1582 sec
+   * 1582 sec = 26.3 min
+   * so we need to load orders in parallel
+   */
+  const url = `${process.env.REMONLINE_API}/order/?sort_dir=asc&modified_at[]=${modified_at}&page=${_page}&token=${process.env.REMONLINE_API_TOKEN}`;
+
+  const options = { method: 'GET', headers: { accept: 'application/json' } };
+
+  const response = await fetch(url, options);
+  let data;
+  try {
+    data = await response.json();
+  } catch (e) {
+    console.error({
+      function: 'getOrdersByLastModificationDate',
+      message: 'Error parsing JSON',
+      data,
+      ordersCount: _orders.length,
+      response,
+    });
+    _failedPages.push(_page);
+    return await getOrdersByLastModificationDate(
+      modified_at,
+      parseInt(page) + 1,
+      _orders,
+      _failedPages
+    );
+  }
+  const { success } = data;
+  if (!success) {
+    const { message, code } = data;
+    const { validation } = message;
+    if (response.status == 403 && code == 101) {
+      console.info({
+        function: 'getOrdersByLastModificationDate',
+        message: 'Get new Auth',
+      });
+      await remonlineTokenToEnv(true);
+      return await getOrdersByLastModificationDate(modified_at, _page, _orders);
+    }
+    console.error({
+      function: 'getOrdersByLastModificationDate',
+      message,
+      validation,
+      status: response.status,
+    });
+    return;
+  }
+  const { data: orders, page, count } = data;
+
+  const doneOnPrevPage = (page - 1) * 50;
+
+  const leftToFinish = count - doneOnPrevPage - orders.length;
+
+  _orders.push(...orders.map((order) => structuredClone(order)));
+
+  // if (process.env.ENV === 'TEST') {
+  //   // console.log({ count, page, doneOnPrevPage, leftToFinish })
+  //   if (page === 2) {
+  //     return { orders: _orders, failedPages: _failedPages };
+  //   }
+  // }
+  console.log(doneOnPrevPage, leftToFinish, orders.length);
+  if (leftToFinish > 0) {
+    return await getOrdersByLastModificationDate(
+      modified_at,
+      parseInt(page) + 1,
+      _orders,
+      _failedPages
+    );
+  }
+  return { orders: _orders };
 }
