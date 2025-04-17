@@ -4,6 +4,7 @@ import {
   getOrdersInRange,
   getOrdersByPageIds,
   getEmployees,
+  getOrdersByLastModificationDate
 } from '../../remonline/remonline.utils.mjs';
 import { remonlineTokenToEnv } from '../../remonline/remonline.api.mjs';
 
@@ -238,7 +239,23 @@ export async function loadRemonlineOrders() {
 if (process.env.ENV === 'TEST') {
   console.log(`running loadRemonlineOrders in Test mode...`);
   await remonlineTokenToEnv(true);
-  await loadRemonlineOrders();
+  // await loadRemonlineOrders();
+  const time=Date.now()-1000*60*42;
+  
+  const {orders} = await getOrdersByLastModificationDate(1744917651000);
+  const red=orders.reduce((acc, curr) => {
+    if(acc.has(curr.id)){
+      const a = acc.get(curr.id);
+      acc.set(curr.id, { ...a, qty: a.qty + 1 });
+    }
+    else {
+      acc.set(curr.id, { qty: 1, example: curr });
+    }
+    return acc;
+  }
+  , new Map());
+  console.log(red,time);
+  console.log(orders.length)
   // await getEmployees();
   // console.log(await getOrderCounttest());
   // const a = { id: 62564, name: '01_1_Подъемник 2' };
@@ -251,3 +268,4 @@ if (process.env.ENV === 'TEST') {
   // const acopy = structuredClone(a);
   // set.add(acopy);
 }
+// 1744917651000
