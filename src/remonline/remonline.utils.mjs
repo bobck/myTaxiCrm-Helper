@@ -532,7 +532,12 @@ export async function getEmployees() {
   return employees;
 }
 
-export async function getOrdersByLastModificationDate(modified_at,_page = 1, _orders = [], _failedPages = []) {
+export async function getOrdersByLastModificationDate(
+  modified_at,
+  _page = 1,
+  _orders = [],
+  _failedPages = []
+) {
   /**
    * Average time to load 50 orders is 0.7 sec,
    * Remonline API has around 113K orders,
@@ -559,16 +564,24 @@ export async function getOrdersByLastModificationDate(modified_at,_page = 1, _or
       response,
     });
     _failedPages.push(_page);
-    return await getOrdersByLastModificationDate(modified_at,parseInt(page) + 1, _orders, _failedPages);
+    return await getOrdersByLastModificationDate(
+      modified_at,
+      parseInt(page) + 1,
+      _orders,
+      _failedPages
+    );
   }
   const { success } = data;
   if (!success) {
     const { message, code } = data;
     const { validation } = message;
     if (response.status == 403 && code == 101) {
-      console.info({ function: 'getOrdersByLastModificationDate', message: 'Get new Auth' });
+      console.info({
+        function: 'getOrdersByLastModificationDate',
+        message: 'Get new Auth',
+      });
       await remonlineTokenToEnv(true);
-      return await getOrdersByLastModificationDate(modified_at,_page, _orders);
+      return await getOrdersByLastModificationDate(modified_at, _page, _orders);
     }
     console.error({
       function: 'getOrdersByLastModificationDate',
@@ -594,7 +607,12 @@ export async function getOrdersByLastModificationDate(modified_at,_page = 1, _or
   // }
   console.log(doneOnPrevPage, leftToFinish, orders.length);
   if (leftToFinish > 0) {
-    return await getOrdersByLastModificationDate(modified_at,parseInt(page) + 1, _orders, _failedPages);
+    return await getOrdersByLastModificationDate(
+      modified_at,
+      parseInt(page) + 1,
+      _orders,
+      _failedPages
+    );
   }
   return { orders: _orders };
 }
