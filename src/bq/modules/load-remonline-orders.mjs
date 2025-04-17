@@ -6,16 +6,20 @@ import {
   getEmployees,
 } from '../../remonline/remonline.utils.mjs';
 import { remonlineTokenToEnv } from '../../remonline/remonline.api.mjs';
+
+
+
 async function prepareOrders() {
-  // const { orderCount } = await getOrderCount();
-  const orderCount = 20000;
+  const { orderCount } = await getOrderCount();
+  // const orderCount = 20000;
+  const startPage = 2200;
   const requestsPerCall = 5;
   const ordersPerPage = 50;
   const pagesCount = Math.ceil(orderCount / ordersPerPage);
   const promises = [];
-  console.log({ orderCount, requestsPerCall, pagesCount, ordersPerPage });
+  console.log({ orderCount, requestsPerCall,startPage, pagesCount, ordersPerPage });
   console.log('downloading orders...');
-  for (let i = 1; i <= pagesCount; i += requestsPerCall + 1) {
+  for (let i = startPage; i <= pagesCount; i += requestsPerCall + 1) {
     const current_page = i;
     const target_page_pretendent = i + requestsPerCall;
     const target_page =
@@ -83,6 +87,7 @@ async function handleOrders({ orders }) {
     (acc, curr, index) => {
       const order_creator = getEmployeeById({ id: curr.created_by_id });
       const created_by = `${order_creator.first_name} ${order_creator.last_name}`;
+      const ad_campaign = structuredClone(curr.ad_campaign);
       const order = {
         ...structuredClone(curr),
         client_id: curr.client.id,
@@ -92,6 +97,15 @@ async function handleOrders({ orders }) {
         order_type_id: curr.order_type.id,
         status_id: curr.status.id,
       };
+      //compaign handling
+      const hasCampaign =  typeof ad_campaign ==='object' && ad_campaign !== null && Object.keys(ad_campaign).length > 0;
+      if(hasCampaign){
+        order.ad_campaign_id = ad_campaign.id;
+        if(!acc.handledCampaigns.some((i) => i.id === order.ad_campaign.id)){
+          acc.handledCampaigns.push(ad_campaign);
+        }
+      }
+      delete order.ad_campaign;
 
       const { id: order_id } = order;
 
@@ -99,6 +113,7 @@ async function handleOrders({ orders }) {
       const operations = structuredClone(curr.operations);
       const attachments = structuredClone(curr.attachments);
       const resources = structuredClone(curr.resources);
+
 
       delete order.parts;
       delete order.client;
@@ -109,7 +124,6 @@ async function handleOrders({ orders }) {
       delete order.order_type;
       delete order.operations;
       delete order.attachments;
-      delete order.ad_campaign;
       delete order.resources;
 
       // order
@@ -137,6 +151,8 @@ async function handleOrders({ orders }) {
         }
       });
 
+      
+
       return acc;
     },
     {
@@ -146,6 +162,7 @@ async function handleOrders({ orders }) {
       handledOrderAttachments: [],
       handledOrderResources: [],
       orders2Resources: [],
+      handledCampaigns: [],
     }
   );
 }
@@ -179,6 +196,7 @@ export async function loadRemonlineOrders() {
     handledOrderAttachments,
     handledOrderResources,
     orders2Resources,
+    handledCampaigns,
   } = await handleOrders({ orders });
   console.log({
     handledOrders: handledOrders.length,
@@ -187,6 +205,7 @@ export async function loadRemonlineOrders() {
     handledOrderAttachments: handledOrderAttachments.length,
     orders2Resources: orders2Resources.length,
     handledOrderResources: handledOrderResources.length,
+    handledCampaigns: handledCampaigns.length,
   });
   const time3 = new Date();
   // console.log(handledOrderParts.find((item) => item.taxes.length > 0));
@@ -196,23 +215,25 @@ export async function loadRemonlineOrders() {
     handledOrderParts: handledOrderParts[0],
     handledOrderOperations: handledOrderOperations[0],
     handledOrderAttachments: handledOrderAttachments[0],
+    orders2Resources: orders2Resources[0],
+    handledOrderResources: handledOrderResources[0],
+    handledCampaigns: handledCampaigns[0]
   });
   console.log({ reducingTime: time3 - time2 });
-  // const stat = handledOrders.reduce((acc, curr) => {
-  //   for (const key in curr) {
-  //     if (acc.has(key)) {
-  //       const a = acc.get(key);
-  //       acc.set(key, { ...a, qty: a.qty + 1 });
-  //     } else {
-  //       acc.set(key, { qty: 1, example: curr[key] });
-  //     }
-  //   }
+  const stat = handledOrders.reduce((acc, curr) => {
+    for (const key in curr) {
+      if (acc.has(key)) {
+        const a = acc.get(key);
+        acc.set(key, { ...a, qty: a.qty + 1 });
+      } else {
+        acc.set(key, { qty: 1, example: curr[key] });
+      }
+    }
 
-  //   return acc;
-  // }, new Map());
-  // console.log(stat, stat.size);
+    return acc;
+  }, new Map());
+  console.log(stat, stat.size);
 
-  console.log(handledOrderResources);
 }
 if (process.env.ENV === 'TEST') {
   console.log(`running loadRemonlineOrders in Test mode...`);
