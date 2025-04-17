@@ -17,7 +17,11 @@ import {
   orderResourcesTableSchema,
   campaignsTableSchema,
 } from '../schemas.mjs';
-import {createMultipleRemonlineOrders,deleteMultipleRemonlineOrders,getMaxOrderModifiedAt} from '../bq-queries.mjs';
+import {
+  createMultipleRemonlineOrders,
+  deleteMultipleRemonlineOrders,
+  getMaxOrderModifiedAt,
+} from '../bq-queries.mjs';
 async function prepareOrders() {
   const modified_at = Date.now() - 1000 * 60 * 60 * 24 * 7;
   // const modified_at = 1744917651000;
@@ -254,9 +258,9 @@ export async function loadRemonlineOrders() {
   //   return acc;
   // }, new Map());
   // console.log(stat, stat.size);
-  
+
   await deleteMultipleRemonlineOrders({ orders: handledOrders });
-  await createMultipleRemonlineOrders({orders: handledOrders});
+  await createMultipleRemonlineOrders({ orders: handledOrders });
   const lastModifiedAt = await getMaxOrderModifiedAt();
   console.log({ lastModifiedAt });
   const time4 = new Date();
