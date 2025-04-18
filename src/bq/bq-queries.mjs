@@ -15,7 +15,7 @@ export async function getMaxOrderModifiedAt() {
         FROM remonline_orders
     `;
   const row = await db.get(sql);
-  return row?.maxModifiedAt ?? null;
+  return row?.maxModifiedAt ?? 1;
 }
 
 /**
@@ -28,7 +28,7 @@ export async function getMaxOrderModifiedAt() {
 export async function createMultipleRemonlineOrders({ orders }) {
   const ordersArray = orders.map((order) => {
     return {
-      order_id: order.order_id,
+      order_id: order.id,
       modified_at: order.modified_at ?? null,
     };
   });

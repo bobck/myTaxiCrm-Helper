@@ -30,9 +30,9 @@ export async function generateDriversWithFuelCardReport({ date }) {
   return { rows };
 }
 
-export async function insertRowsAsStream({ rows, bqTableId }) {
+export async function insertRowsAsStream({ dataset_id, rows, bqTableId }) {
   await bigquery
-    .dataset(process.env.BQ_DATASET_ID)
+    .dataset(dataset_id || process.env.BQ_DATASET_ID)
     .table(bqTableId)
     .insert(rows);
 }
@@ -262,4 +262,17 @@ export async function generatePolandBookkeepingReport({
   const result = await pool.query(sqlp, [periodFrom, periodTo, autoParkId]);
   const { rows } = result;
   return { rows };
+}
+export async function clearOrdersByIds({ bqTableId, ids }) {
+  // Turn [1,2,3] → "1, 2, 3"
+  const idsList = ids.join(', ');
+  const query = `
+    DELETE FROM \`${process.env.BQ_PROJECT_NAME}.RemOnline.${bqTableId}\`
+    WHERE id IN (${idsList})
+  `;
+  const options = {
+    query,
+    location: 'US'
+  };
+  await bigquery.query(options);
 }

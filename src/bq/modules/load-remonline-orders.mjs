@@ -7,7 +7,11 @@ import {
   getOrdersByLastModificationDate,
 } from '../../remonline/remonline.utils.mjs';
 import { remonlineTokenToEnv } from '../../remonline/remonline.api.mjs';
-import { createOrResetTableByName } from '../bq-utils.mjs';
+import {
+  createOrResetTableByName,
+  insertRowsAsStream,
+  clearOrdersByIds,
+} from '../bq-utils.mjs';
 import {
   ordersTableSchema,
   orderPartsTableSchema,
@@ -22,8 +26,24 @@ import {
   deleteMultipleRemonlineOrders,
   getMaxOrderModifiedAt,
 } from '../bq-queries.mjs';
+
+function convertMsUs(t) {
+  // threshold somewhere between 1e13 and 1e14
+  const MICROS_THRESHOLD = 1e11;
+  // console.log(
+  //   `t: ${t} > MICROS_THRESHOLD: ${MICROS_THRESHOLD} : ${t > MICROS_THRESHOLD}`
+  // );
+  if (t > MICROS_THRESHOLD) {
+    // probably µs: bring it back to ms
+    return Math.floor(t / 1000);
+  } else {
+    // probably ms: convert to µs
+    return t * 1000;
+  }
+}
 async function prepareOrders() {
-  const modified_at = Date.now() - 1000 * 60 * 60 * 24 * 7;
+  // const modified_at = Date.now() - 1000 * 60 * 60 * 24;
+  const modified_at = convertMsUs(await getMaxOrderModifiedAt());
   // const modified_at = 1744917651000;
   const { orderCount } = await getOrderCount({ modified_at });
   // const orderCount = 20000;
@@ -94,17 +114,53 @@ async function handleOrders({ orders }) {
     return employees.find((item) => item.id === id);
   };
 
-  const handleOrderProps = ({ order_id, arr }) => {
+  const handleOrderParts = ({ order_id, arr }) => {
     arr.forEach((item, index) => {
-      const handledItem = { order_id, ...item, uom_id: item.uom.id };
+      const handledItem = {
+        order_id,
+        ...item,
+        entity_id: item.entityId,
+        engineer_id: item.engineerId,
+        uom_id: item.uom.id,
+      };
+      delete handledItem.entityId;
+      delete handledItem.engineerId;
       delete handledItem.taxes;
       delete handledItem.uom;
       arr[index] = handledItem;
     });
   };
-  const assignOrderId = ({ order_id, arr }) => {
-    arr.forEach((item) => ({ order_id, ...item }));
+  const handleOrderOperations = ({ order_id, arr }) => {
+    arr.forEach((item, index) => {
+      const handledItem = {
+        order_id,
+        ...item,
+        entity_id: item.entityId,
+        engineer_id: item.engineerId,
+        uom_id: item.uom.id,
+      };
+
+      delete handledItem.entityId;
+      delete handledItem.engineerId;
+      delete handledItem.taxes;
+      delete handledItem.uom;
+      arr[index] = handledItem;
+    });
   };
+
+  const handleAttachments = ({ order_id, arr }) => {
+    arr.forEach((item, index) => {
+      const handledAttachment = {
+        ...item,
+        order_id,
+        created_at: convertMsUs(item.created_at),
+      };
+      arr[index] = handledAttachment;
+    });
+  };
+  // const assignOrderId = ({ order_id, arr }) => {
+  //   arr.forEach((item) => ({ order_id, ...item }));
+  // };
 
   return orders.reduce(
     (acc, curr, index) => {
@@ -116,6 +172,14 @@ async function handleOrders({ orders }) {
         client_id: curr.client.id,
         created_by,
         asset_id: curr.asset.id,
+        modified_at: convertMsUs(curr.modified_at),
+        created_at: convertMsUs(curr.created_at),
+        done_at: convertMsUs(curr.done_at),
+        scheduled_for: convertMsUs(curr.scheduled_for),
+        warranty_date: convertMsUs(curr.warranty_date),
+        closed_at: convertMsUs(curr.closed_at),
+        estimated_done_at: convertMsUs(curr.estimated_done_at),
+        custom_fields: JSON.stringify(curr.custom_fields),
         // ...curr.custom_fields,
         order_type_id: curr.order_type.id,
         status_id: curr.status.id,
@@ -153,9 +217,9 @@ async function handleOrders({ orders }) {
 
       // order
 
-      handleOrderProps({ order_id, arr: parts });
-      handleOrderProps({ order_id, arr: operations });
-      assignOrderId({ order_id, arr: attachments });
+      handleOrderParts({ order_id, arr: parts });
+      handleOrderOperations({ order_id, arr: operations });
+      handleAttachments({ order_id, arr: attachments });
 
       acc.handledOrders = [...acc.handledOrders, order];
       acc.handledOrderParts = [...acc.handledOrderParts, ...parts];
@@ -257,14 +321,68 @@ export async function loadRemonlineOrders() {
 
   //   return acc;
   // }, new Map());
-  // console.log(stat, stat.size);
-
-  await deleteMultipleRemonlineOrders({ orders: handledOrders });
-  await createMultipleRemonlineOrders({ orders: handledOrders });
-  const lastModifiedAt = await getMaxOrderModifiedAt();
-  console.log({ lastModifiedAt });
+  // // console.log(stat, stat.size);
+  // console.log(`updating orders to local DB...`);
+  // await deleteMultipleRemonlineOrders({ orders: handledOrders });
+  // await createMultipleRemonlineOrders({ orders: handledOrders });
+  // const lastModifiedAt = await getMaxOrderModifiedAt();
+  // console.log({ lastModifiedAt });
   const time4 = new Date();
   console.log({ localDBLoadingTime: time4 - time3 });
+
+  console.log(`inserting orders to BQ...`);
+  try {
+    await insertRowsAsStream({
+      dataset_id: 'RemOnline',
+      rows: handledOrders,
+      bqTableId: 'orders',
+    });
+    // await clearOrdersByIds({
+    //   bqTableId: 'orders',
+    //   ids: handledOrders.map((item) => item.id),
+    // });
+    await insertRowsAsStream({
+      dataset_id: 'RemOnline',
+      rows: handledOrderParts,
+      bqTableId: 'order_parts',
+    });
+    await insertRowsAsStream({
+      dataset_id: 'RemOnline',
+      rows: handledOrderOperations,
+      bqTableId: 'order_operations',
+    });
+    await insertRowsAsStream({
+      dataset_id: 'RemOnline',
+      rows: handledOrderAttachments,
+      bqTableId: 'order_attachments',
+    });
+    await insertRowsAsStream({
+      dataset_id: 'RemOnline',
+      rows: orders2Resources,
+      bqTableId: 'orders_to_resources',
+    });
+    await insertRowsAsStream({
+      dataset_id: 'RemOnline',
+      rows: handledOrderResources,
+      bqTableId: 'order_resources',
+    });
+    await insertRowsAsStream({
+      dataset_id: 'RemOnline',
+      rows: handledCampaigns,
+      bqTableId: 'campaigns',
+    });
+  } catch (e) {
+    e.errors.forEach((error) => {
+      if (error.errors) {
+        if (error.errors[0].message !== '') {
+          console.error(error);
+        }
+      }
+      // console.log(error)
+    });
+  }
+  const time5 = new Date();
+  console.log({ bqLoadingTime: time5 - time4 });
 }
 async function createOrResetOrdersTables() {
   await createOrResetTableByName({
@@ -306,6 +424,7 @@ async function createOrResetOrdersTables() {
 if (process.env.ENV === 'TEST') {
   console.log(`running loadRemonlineOrders in Test mode...`);
   await remonlineTokenToEnv(true);
+
   await loadRemonlineOrders();
   // await createOrResetOrdersTables();
 }

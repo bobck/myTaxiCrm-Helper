@@ -303,7 +303,14 @@ export async function getOrdersInRange(
   if (!modified_at) {
     modified_at = 0;
   }
-  const url = `${process.env.REMONLINE_API}/order/?sort_dir=asc&modified_at[]=${modified_at}&page=${current_page}&token=${process.env.REMONLINE_API_TOKEN}`;
+
+  let url;
+
+  if (process.env.ENV !== 'TEST') {
+    url = `${process.env.REMONLINE_API}/order/?sort_dir=asc&modified_at[]=${modified_at - 1000 * 60 * 60}&modified_at[]=${modified_at}&page=${current_page}&token=${process.env.REMONLINE_API_TOKEN}`;
+  } else {
+    url = `${process.env.REMONLINE_API}/order/?sort_dir=asc&modified_at[]=${modified_at}&page=${current_page}&token=${process.env.REMONLINE_API_TOKEN}`;
+  }
   // const url = 'https://api.remonline.app/order/?page=1&sort_dir=asc&modified_at[]=1742926803000&token=2c1293a28cfefff0409a40d7f9b837df2cc7ad54';
   // const options = {method: 'GET', headers: {accept: 'application/json'}};
   // console.log(url)
@@ -410,6 +417,7 @@ export async function getOrdersByPageIds({ modified_at, pages }) {
   };
 }
 export async function getOrderCount({ modified_at }) {
+  console.log({ modified_at }, 'getOrderCount');
   const url = `${process.env.REMONLINE_API}/order/?sort_dir=asc&modified_at[]=${modified_at}&token=${process.env.REMONLINE_API_TOKEN}`;
 
   const options = { method: 'GET', headers: { accept: 'application/json' } };

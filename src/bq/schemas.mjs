@@ -249,11 +249,11 @@ export const transferProductsTableSchema = [
 ];
 export const ordersTableSchema = [
   { name: 'id', type: 'INTEGER', mode: 'REQUIRED' },
-  { name: 'modified_at', type: 'TIMESTAMP', mode: 'REQUIRED' }, // from millis via TIMESTAMP_MILLIS
+  { name: 'modified_at', type: 'TIMESTAMP', mode: 'REQUIRED' },
   { name: 'uuid', type: 'STRING', mode: 'REQUIRED' },
-  { name: 'created_at', type: 'TIMESTAMP', mode: 'REQUIRED' }, // from millis via TIMESTAMP_MILLIS
-  { name: 'done_at', type: 'TIMESTAMP', mode: 'REQUIRED' }, // from millis via TIMESTAMP_MILLIS
-  { name: 'scheduled_for', type: 'TIMESTAMP', mode: 'REQUIRED' }, // from millis via TIMESTAMP_MILLIS
+  { name: 'created_at', type: 'TIMESTAMP', mode: 'REQUIRED' },
+  { name: 'done_at', type: 'TIMESTAMP', mode: 'NULLABLE' },
+  { name: 'scheduled_for', type: 'TIMESTAMP', mode: 'REQUIRED' },
   { name: 'duration', type: 'INTEGER', mode: 'REQUIRED' },
   { name: 'kindof_good', type: 'STRING', mode: 'NULLABLE' },
   { name: 'serial', type: 'STRING', mode: 'NULLABLE' },
@@ -263,25 +263,25 @@ export const ordersTableSchema = [
   { name: 'manager_notes', type: 'STRING', mode: 'NULLABLE' },
   { name: 'engineer_notes', type: 'STRING', mode: 'NULLABLE' },
   { name: 'resume', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'payed', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'payed', type: 'FLOAT', mode: 'REQUIRED' },
   { name: 'missed_payments', type: 'INTEGER', mode: 'REQUIRED' },
   { name: 'warranty_measures', type: 'INTEGER', mode: 'REQUIRED' },
-  { name: 'warranty_date', type: 'TIMESTAMP', mode: 'REQUIRED' }, // from millis via TIMESTAMP_MILLIS
+  { name: 'warranty_date', type: 'TIMESTAMP', mode: 'NULLABLE' },
   { name: 'urgent', type: 'BOOLEAN', mode: 'REQUIRED' },
   { name: 'discount_sum', type: 'FLOAT', mode: 'REQUIRED' },
-  { name: 'custom_fields', type: 'JSON', mode: 'NULLABLE' },
+  { name: 'custom_fields', type: 'STRING', mode: 'NULLABLE' }, // store JSON.stringify(...)
   { name: 'estimated_cost', type: 'NUMERIC', mode: 'REQUIRED' },
-  { name: 'closed_at', type: 'TIMESTAMP', mode: 'REQUIRED' }, // from millis via TIMESTAMP_MILLIS
-  { name: 'estimated_done_at', type: 'TIMESTAMP', mode: 'REQUIRED' }, // from millis via TIMESTAMP_MILLIS
+  { name: 'closed_at', type: 'TIMESTAMP', mode: 'NULLABLE' },
+  { name: 'estimated_done_at', type: 'TIMESTAMP', mode: 'NULLABLE' },
   { name: 'id_label', type: 'STRING', mode: 'REQUIRED' },
-  { name: 'price', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'price', type: 'FLOAT', mode: 'REQUIRED' },
   { name: 'branch_id', type: 'INTEGER', mode: 'REQUIRED' },
   { name: 'overdue', type: 'BOOLEAN', mode: 'REQUIRED' },
   { name: 'status_overdue', type: 'BOOLEAN', mode: 'REQUIRED' },
   { name: 'manager_id', type: 'INTEGER', mode: 'REQUIRED' },
   { name: 'engineer_id', type: 'INTEGER', mode: 'REQUIRED' },
   { name: 'created_by_id', type: 'INTEGER', mode: 'REQUIRED' },
-  { name: 'closed_by_id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'closed_by_id', type: 'INTEGER', mode: 'NULLABLE' },
   { name: 'brand', type: 'STRING', mode: 'REQUIRED' },
   { name: 'model', type: 'STRING', mode: 'REQUIRED' },
   { name: 'client_id', type: 'INTEGER', mode: 'REQUIRED' },
@@ -292,20 +292,20 @@ export const ordersTableSchema = [
 ];
 
 export const orderPartsTableSchema = [
-  { name: 'order_id', type: 'INTEGER', mode: 'REQUIRED' },
-  { name: 'id', type: 'INTEGER', mode: 'REQUIRED' },
-  { name: 'entity_id', type: 'INTEGER', mode: 'REQUIRED' }, // from entityId
-  { name: 'engineer_id', type: 'INTEGER', mode: 'REQUIRED' }, // from engineerId
-  { name: 'title', type: 'STRING', mode: 'REQUIRED' },
-  { name: 'amount', type: 'INTEGER', mode: 'REQUIRED' },
-  { name: 'price', type: 'FLOAT', mode: 'REQUIRED' },
-  { name: 'cost', type: 'FLOAT', mode: 'REQUIRED' },
-  { name: 'discount_value', type: 'FLOAT', mode: 'REQUIRED' },
+  { name: 'order_id', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'id', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'entity_id', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'engineer_id', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'title', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'amount', type: 'FLOAT', mode: 'REQUIRED' },
+  { name: 'price', type: 'FLOAT', mode: 'NULLABLE' },
+  { name: 'cost', type: 'FLOAT', mode: 'NULLABLE' },
+  { name: 'discount_value', type: 'FLOAT', mode: 'NULLABLE' },
   { name: 'code', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'article', type: 'STRING', mode: 'REQUIRED' },
-  { name: 'warranty', type: 'INTEGER', mode: 'REQUIRED' },
-  { name: 'warranty_period', type: 'INTEGER', mode: 'REQUIRED' },
-  { name: 'uom_id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'article', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'warranty', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'warranty_period', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'uom_id', type: 'INTEGER', mode: 'NULLABLE' },
 ];
 
 export const orderOperationsTableSchema = [
@@ -314,7 +314,7 @@ export const orderOperationsTableSchema = [
   { name: 'entity_id', type: 'INTEGER', mode: 'REQUIRED' }, // from entityId
   { name: 'engineer_id', type: 'INTEGER', mode: 'REQUIRED' }, // from engineerId
   { name: 'title', type: 'STRING', mode: 'REQUIRED' },
-  { name: 'amount', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'amount', type: 'FLOAT', mode: 'REQUIRED' },
   { name: 'price', type: 'FLOAT', mode: 'REQUIRED' },
   { name: 'cost', type: 'FLOAT', mode: 'REQUIRED' },
   { name: 'discount_value', type: 'FLOAT', mode: 'REQUIRED' },
@@ -324,6 +324,7 @@ export const orderOperationsTableSchema = [
 ];
 
 export const orderAttachmentsTableSchema = [
+  { name: 'order_id', type: 'INTEGER', mode: 'REQUIRED' },
   { name: 'created_at', type: 'TIMESTAMP', mode: 'REQUIRED' }, // from millis via TIMESTAMP_MILLIS
   { name: 'created_by_id', type: 'INTEGER', mode: 'REQUIRED' },
   { name: 'filename', type: 'STRING', mode: 'REQUIRED' },
