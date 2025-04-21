@@ -11,6 +11,7 @@ import {
   createOrResetTableByName,
   insertRowsAsStream,
   clearOrdersByIds,
+  loadMultipleTables,
 } from '../bq-utils.mjs';
 import {
   ordersTableSchema,
@@ -25,9 +26,13 @@ import {
   createMultipleRemonlineOrders,
   deleteMultipleRemonlineOrders,
   getMaxOrderModifiedAt,
+  synchronizeRemonlineOrders,
 } from '../bq-queries.mjs';
 
 function convertMsUs(t) {
+  if (!t) {
+    return null;
+  }
   // threshold somewhere between 1e13 and 1e14
   const MICROS_THRESHOLD = 1e11;
   // console.log(
@@ -42,9 +47,9 @@ function convertMsUs(t) {
   }
 }
 async function prepareOrders() {
-  // const modified_at = Date.now() - 1000 * 60 * 60 * 24;
-  const modified_at = convertMsUs(await getMaxOrderModifiedAt());
-  // const modified_at = 1744917651000;
+  // const modified_at = Date.now() - 1000 * 60 * 60 * 24*30; // 10 hours
+  // const modified_at = convertMsUs(await getMaxOrderModifiedAt());
+  const modified_at = 0;
   const { orderCount } = await getOrderCount({ modified_at });
   // const orderCount = 20000;
   const startPage = 1;
@@ -87,7 +92,7 @@ async function prepareOrders() {
   );
   let TTL = 10;
   console.log(
-    `initial download finished with ${failedPages.length} failed pages.${failedPages.length ? `\nstarting to resolve failed pages...\ngiven TTL: ${TTL}` : ''}`
+    `initial download finished with ${failedPages.length} failed pages.${failedPages.length ? `\nstarting to resolve failed pages...\ngiven TTL: ${TTL}` : ''}`, {failedPages}
   );
   do {
     const { orders: tem_orders, failedPages: temp_failedPages } =
@@ -275,6 +280,23 @@ export async function loadRemonlineOrders() {
     ordersCount: orders.length,
     failedPages: failedPages.length,
   });
+
+  const stat = orders.reduce((acc, curr) => {
+    const{id}=curr;
+    if(!acc.has(id)){
+      acc.set(id, 1);
+    }
+    else{
+      acc.set(id, acc.get(id)+1);
+    }
+    return acc;
+  }, new Map());
+
+  console.log(stat, stat.size);
+  const duplicates =[...stat].filter(([key, value]) => value > 1);
+  console.log({duplicates});
+  console.log({duplicateCheck:duplicates.length, ordersCount: orders.length});
+  return;
   const time2 = new Date();
   console.log({ downloadingTime: time2 - time });
   console.log(`parsing orders...`);
@@ -310,75 +332,59 @@ export async function loadRemonlineOrders() {
   // });
   console.log({ reducingTime: time3 - time2 });
   // const stat = handledOrders.reduce((acc, curr) => {
-  //   for (const key in curr) {
-  //     if (acc.has(key)) {
-  //       const a = acc.get(key);
-  //       acc.set(key, { ...a, qty: a.qty + 1 });
-  //     } else {
-  //       acc.set(key, { qty: 1, example: curr[key] });
-  //     }
-  //   }
-
+  //   const{id}=curr;
+    
   //   return acc;
   // }, new Map());
-  // // console.log(stat, stat.size);
+  // console.log(stat, stat.size);
   // console.log(`updating orders to local DB...`);
   // await deleteMultipleRemonlineOrders({ orders: handledOrders });
   // await createMultipleRemonlineOrders({ orders: handledOrders });
   // const lastModifiedAt = await getMaxOrderModifiedAt();
   // console.log({ lastModifiedAt });
+  const localDBResponse = await synchronizeRemonlineOrders({
+    orders: handledOrders,
+  });
   const time4 = new Date();
   console.log({ localDBLoadingTime: time4 - time3 });
 
   console.log(`inserting orders to BQ...`);
   try {
-    await insertRowsAsStream({
-      dataset_id: 'RemOnline',
-      rows: handledOrders,
-      bqTableId: 'orders',
-    });
-    // await clearOrdersByIds({
-    //   bqTableId: 'orders',
-    //   ids: handledOrders.map((item) => item.id),
-    // });
-    await insertRowsAsStream({
-      dataset_id: 'RemOnline',
-      rows: handledOrderParts,
-      bqTableId: 'order_parts',
-    });
-    await insertRowsAsStream({
-      dataset_id: 'RemOnline',
-      rows: handledOrderOperations,
-      bqTableId: 'order_operations',
-    });
-    await insertRowsAsStream({
-      dataset_id: 'RemOnline',
-      rows: handledOrderAttachments,
-      bqTableId: 'order_attachments',
-    });
-    await insertRowsAsStream({
-      dataset_id: 'RemOnline',
-      rows: orders2Resources,
-      bqTableId: 'orders_to_resources',
-    });
-    await insertRowsAsStream({
-      dataset_id: 'RemOnline',
-      rows: handledOrderResources,
-      bqTableId: 'order_resources',
-    });
-    await insertRowsAsStream({
-      dataset_id: 'RemOnline',
-      rows: handledCampaigns,
-      bqTableId: 'campaigns',
+    const dataset_id = 'RemOnline';
+    const jobs = [
+      { dataset_id, table_id: 'orders', rows: handledOrders },
+      { dataset_id, table_id: 'order_parts', rows: handledOrderParts },
+      {
+        dataset_id,
+        table_id: 'order_operations',
+        rows: handledOrderOperations,
+      },
+      {
+        dataset_id,
+        table_id: 'order_attachments',
+        rows: handledOrderAttachments,
+      },
+      { dataset_id, table_id: 'orders_to_resources', rows: orders2Resources },
+      { dataset_id, table_id: 'order_resources', rows: handledOrderResources },
+      { dataset_id, table_id: 'campaigns', rows: handledCampaigns },
+    ];
+
+    await loadMultipleTables({
+      jobs,
+      options: {
+        tableConcurrency: 3, // up to 3 tables at once
+        chunkSize: 5000, // 500 rows per insert call
+      },
     });
   } catch (e) {
     e.errors.forEach((error) => {
       if (error.errors) {
+        console.log('top module error');
         if (error.errors[0].message !== '') {
           console.error(error);
         }
       }
-      // console.log(error)
+      console.log(error);
     });
   }
   const time5 = new Date();

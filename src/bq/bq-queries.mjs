@@ -62,3 +62,59 @@ export async function deleteMultipleRemonlineOrders({ orders }) {
   // returns an array of the deleted rows
   return db.all(sql, ...orderIds);
 }
+
+/**
+ * Synchronize orders in a single transaction:
+ * 1) delete existing records for the given order_ids
+ * 2) insert them again from JSON (returns an array of inserted rows)
+ *
+ * @param {{ orders: { id: number, modified_at?: string }[] }} params
+ */
+export async function synchronizeRemonlineOrders({ orders }) {
+  // Nothing to do if no orders
+  if (!orders.length) return [];
+
+  // Convert to the shape we need for both delete and insert:
+  const ordersArray = orders.map((o) => ({
+    order_id: o.id,
+    modified_at: o.modified_at ?? null,
+  }));
+  const json = JSON.stringify(ordersArray);
+
+  // DELETE using json_each() instead of N placeholders:
+  const deleteSql = `
+   DELETE FROM remonline_orders
+   WHERE order_id IN (
+     SELECT json_extract(value, '$.order_id')
+     FROM json_each(?)
+   )
+ `;
+
+  // INSERT exactly as before:
+  const insertSql = `
+   INSERT INTO remonline_orders (order_id, modified_at)
+   SELECT
+     json_extract(value, '$.order_id'),
+     COALESCE(json_extract(value, '$.modified_at'), CURRENT_TIMESTAMP)
+   FROM json_each(?)
+   RETURNING *
+ `;
+
+  // Wrap both in one transaction
+  await db.exec('BEGIN TRANSACTION');
+  try {
+    // Delete all matching order_ids in one pass
+    await db.run(deleteSql, json);
+
+    // Re‑insert (or insert new) in one pass
+    const insertedRows = await db.all(insertSql, json);
+
+    // Commit if all went well
+    await db.exec('COMMIT');
+    return insertedRows;
+  } catch (err) {
+    // Roll back on any failure
+    await db.exec('ROLLBACK');
+    throw err;
+  }
+}

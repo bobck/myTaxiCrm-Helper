@@ -272,7 +272,114 @@ export async function clearOrdersByIds({ bqTableId, ids }) {
   `;
   const options = {
     query,
-    location: 'US'
+    location: 'US',
   };
   await bigquery.query(options);
+}
+
+/**
+ * Utility functions to batch-insert rows into one or more BigQuery tables in parallel.
+ *
+ * Usage example for single table:
+ *   const rows = [ { name: 'Alice', age: 30 }, { name: 'Bob', age: 25 } ];
+ *   await loadRows('my_dataset', 'my_table', rows);
+ *
+ * Usage example for multiple tables:
+ *   const jobs = [
+ *     { datasetId: 'ds1', tableId: 'table1', rows: rows1 },
+ *     { datasetId: 'ds2', tableId: 'table2', rows: rows2 },
+ *     // ... up to 6 or more tables
+ *   ];
+ *   await loadMultipleTables(jobs, { tableConcurrency: 3, chunkSize: 500 });
+ */
+
+/**
+ * Inserts rows into a single BigQuery table in chunks to respect API limits.
+ * @param {string} dataset_id - BigQuery dataset name.
+ * @param {string} table_id - BigQuery table name.
+ * @param {object[]} rows - Array of row objects to insert.
+ * @param {object} [options]
+ * @param {number} [options.chunkSize=500] - Number of rows per insert call (max ~10,000, recommended ~500).
+ */
+async function loadRows({ dataset_id, table_id, rows, options }) {
+  const dataset = bigquery.dataset(dataset_id);
+  const table = dataset.table(table_id);
+  const { chunkSize } = options;
+
+  console.log(
+    `Starting insert to ${dataset_id}.${table_id}: ${rows.length} rows`
+  );
+  for (let i = 0; i < rows.length; i += chunkSize) {
+    const chunk = rows.slice(i, i + chunkSize);
+    try {
+      // console.log(`inserting chunk :`,chunk)
+      await table.insert(chunk);
+      console.log(
+        `  [${dataset_id}.${table_id}] Inserted rows ${i + 1}–${i + chunk.length}`
+      );
+    } catch (err) {
+      console.error(
+        `  [${dataset_id}.${table_id}] Error inserting rows ${i + 1}–${i + chunk.length}:`
+      );
+      err.errors.forEach((error) => {
+        if (error.errors) {
+          if (error.errors[0].message !== '') {
+            console.error(error);
+          }
+        }
+        // console.log(error);
+      });
+    }
+  }
+}
+
+/**
+ * Loads multiple tables in parallel, with optional concurrency limits.
+ * @param {Array<{dataset_id:string,table_id:string,rows:object[]}>} jobs - List of load jobs.
+ * @param {object} [options]
+ * @param {number} [options.tableConcurrency=jobs.length] - How many tables to load in parallel.
+ * @param {number} [options.chunkSize=500] - Number of rows per insert call for each job.
+ */
+export async function loadMultipleTables({ jobs, options = {} }) {
+  const tableConcurrency = options.tableConcurrency || jobs.length;
+  const chunkSize = options.chunkSize || 500;
+
+  console.log(
+    `Starting parallel load for ${jobs.length} tables (concurrency: ${tableConcurrency})`
+  );
+  // Create a simple concurrency pool
+  const queue = [...jobs];
+  const active = [];
+
+  async function runNext() {
+    if (queue.length === 0) return;
+    const job = queue.shift();
+    const promise = loadRows({
+      dataset_id: job.dataset_id,
+      table_id: job.table_id,
+      rows: job.rows,
+      options: { chunkSize },
+    })
+      .then(() =>
+        console.log(`Completed load for ${job.dataset_id}.${job.table_id}`)
+      )
+      .catch((err) =>
+        console.error(`Failed load for ${job.dataset_id}.${job.table_id}:`, err)
+      );
+    active.push(promise);
+    // When one finishes, remove it and start next
+    promise.finally(() => {
+      active.splice(active.indexOf(promise), 1);
+      runNext();
+    });
+  }
+
+  // Kick off initial batch
+  for (let i = 0; i < tableConcurrency && i < jobs.length; i++) {
+    runNext();
+  }
+
+  // Wait for all to finish
+  await Promise.all(active);
+  console.log('All table loads completed.');
 }

@@ -371,44 +371,33 @@ export async function getOrdersInRange(
   }
 }
 export async function getOrdersByPageIds({ modified_at, pages }) {
-  // if (!(pages instanceof Array)) {
-  //   console.error({
-  //     function: 'getOrdersByPageIds',
-  //     message: 'pages must be an array',
-  //     pages,
-  //   });
-  // }
+  
+
 
   const _orders = [];
 
   const _failedPages = [];
   for (const page of pages) {
+    console.log(`trying to fetch page ${page}. modified_at: ${modified_at}, pages left: ${pages.length - pages.indexOf(page)}`);
     const url = `${process.env.REMONLINE_API}/order/?sort_dir=asc&modified_at[]=${modified_at}page=${page}&token=${process.env.REMONLINE_API_TOKEN}`;
-
     const options = { method: 'GET', headers: { accept: 'application/json' } };
-
+    
     const response = await fetch(url, options);
     let data;
     try {
       data = await response.json();
+      console.log({ url ,status:'done'});
     } catch (e) {
-      // console.error({
-      //   function: 'getOrders',
-      //   page,
-      //   message: 'Error parsing JSON',
-      //   data,
-      //   ordersCount: _orders.length,
-      //   response,
-      // });
-
       _failedPages.push(page);
+      console.log({pages})
 
       return { orders: _orders, failedPages: _failedPages };
     }
 
-    const { data: orders } = data;
-
-    _orders.push(...structuredClone(orders));
+    const { data: fetched_orders } = data;
+    console.log('pushing orders',fetched_orders.map((order) => order.id));
+    _orders.push(...structuredClone(fetched_orders));
+    // console.log(_orders.map((order) => order.id));
   }
 
   return {
