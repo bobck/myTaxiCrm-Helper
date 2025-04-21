@@ -280,9 +280,7 @@ async function handleOrders({ orders }) {
   );
 }
 
-async function clearOrdersInBQ({
-  handledOrders
-}) {
+async function clearOrdersInBQ({ handledOrders }) {
   const order_ids = handledOrders.map((order) => order.id);
   const table_ids = [
     'orders',
@@ -292,11 +290,11 @@ async function clearOrdersInBQ({
     'orders_to_resources',
   ];
   try {
-    const promises=[]
+    const promises = [];
     for (const table_id of table_ids) {
-      promises.push(deleteRowsByOrderId({order_ids,table_id}))
+      promises.push(deleteRowsByOrderId({ order_ids, table_id }));
     }
-    const resp=await Promise.all(promises);
+    const resp = await Promise.all(promises);
     console.log(resp);
   } catch (error) {
     console.error(error);
@@ -403,7 +401,7 @@ export async function loadRemonlineOrders() {
   const time4 = new Date();
   console.log({ localDBLoadingTime: time4 - time3 });
   console.log('clearing orders in BQ...');
-  await clearOrdersInBQ({handledOrders});
+  await clearOrdersInBQ({ handledOrders });
   console.log(`inserting orders to BQ...`);
   await loadOrdersToBQ({
     handledOrders,
