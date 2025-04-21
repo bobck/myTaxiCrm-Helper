@@ -1,11 +1,8 @@
 import {
-  getOrders,
   getOrderCount,
   getOrdersInRange,
   getOrdersByPageIds,
   getEmployees,
-  createClient,
-  postMockOrder,
 } from '../../remonline/remonline.utils.mjs';
 import { remonlineTokenToEnv } from '../../remonline/remonline.api.mjs';
 import {
@@ -27,26 +24,21 @@ import {
   synchronizeRemonlineOrders,
 } from '../bq-queries.mjs';
 
-function convertMsUs(t) {
+function convertMs(t) {
   if (!t) {
     return null;
   }
-  // threshold somewhere between 1e13 and 1e14
   const MICROS_THRESHOLD = 1e11;
-  // console.log(
-  //   `t: ${t} > MICROS_THRESHOLD: ${MICROS_THRESHOLD} : ${t > MICROS_THRESHOLD}`
-  // );
+
   if (t > MICROS_THRESHOLD) {
-    // probably µs: bring it back to ms
     return Math.floor(t / 1000);
   } else {
-    // probably ms: convert to µs
     return t * 1000;
   }
 }
 async function prepareOrders() {
   // const modified_at = Date.now() - 1000 * 60 * 60 * 24*30; // 10 hours
-  const modified_at = convertMsUs(await getMaxOrderModifiedAt());
+  const modified_at = convertMs(await getMaxOrderModifiedAt());
 
   // const modified_at = 1744882028000;
   const { orderCount } = await getOrderCount({ modified_at });
@@ -129,11 +121,6 @@ async function prepareOrders() {
   };
 }
 
-async function prepareOrdersSync() {
-  const { orderCount } = await getOrderCount();
-  const { orders, failedPages } = await getOrders();
-  return { orders, orderCount, failedPages };
-}
 async function handleOrders({ orders }) {
   const employees = await getEmployees();
   const getEmployeeById = ({ id }) => {
@@ -179,14 +166,11 @@ async function handleOrders({ orders }) {
       const handledAttachment = {
         ...item,
         order_id,
-        created_at: convertMsUs(item.created_at),
+        created_at: convertMs(item.created_at),
       };
       arr[index] = handledAttachment;
     });
   };
-  // const assignOrderId = ({ order_id, arr }) => {
-  //   arr.forEach((item) => ({ order_id, ...item }));
-  // };
 
   return orders.reduce(
     (acc, curr, index) => {
@@ -198,13 +182,13 @@ async function handleOrders({ orders }) {
         client_id: curr.client.id,
         created_by,
         asset_id: curr.asset.id,
-        modified_at: convertMsUs(curr.modified_at),
-        created_at: convertMsUs(curr.created_at),
-        done_at: convertMsUs(curr.done_at),
-        scheduled_for: convertMsUs(curr.scheduled_for),
-        warranty_date: convertMsUs(curr.warranty_date),
-        closed_at: convertMsUs(curr.closed_at),
-        estimated_done_at: convertMsUs(curr.estimated_done_at),
+        modified_at: convertMs(curr.modified_at),
+        created_at: convertMs(curr.created_at),
+        done_at: convertMs(curr.done_at),
+        scheduled_for: convertMs(curr.scheduled_for),
+        warranty_date: convertMs(curr.warranty_date),
+        closed_at: convertMs(curr.closed_at),
+        estimated_done_at: convertMs(curr.estimated_done_at),
         custom_fields: JSON.stringify(curr.custom_fields),
         // ...curr.custom_fields,
         order_type_id: curr.order_type.id,
@@ -460,12 +444,6 @@ async function createOrResetOrdersTables() {
 if (process.env.ENV === 'TEST') {
   console.log(`running loadRemonlineOrders in Test mode...`);
   await remonlineTokenToEnv(true);
-  // const modified_at = convertMsUs(await getMaxOrderModifiedAt());
-  // console.log(modified_at);
+
   await loadRemonlineOrders();
-  // await createOrResetOrdersTables();
-  // await createClient();
-  // const data= await postMockOrder();
-  // console.log(data);
 }
-// 1744917651000
