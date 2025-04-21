@@ -331,7 +331,6 @@ async function loadRows({ dataset_id, table_id, rows, options }) {
       });
       // console.error(err)
     }
-
   }
 }
 
@@ -393,24 +392,23 @@ export async function loadMultipleTables({ jobs, options = {} }) {
  * @param {string} table_id  Name of the table (must be in ALLOWED_TABLES)
  * @param {{ id: number }[]} order_ids  Array of { id } objects
  */
-export async function deleteByOrderId({ table_id, orders: order_ids }) {
-
+export async function deleteRowsByOrderId({ table_id, order_ids }) {
   if (!order_ids.length) {
     return;
   }
-  const dataset_id='RemOnline';
+  const dataset_id = 'RemOnline';
   // Build the DELETE statement with the validated table name
   const sql = `
-    DELETE FROM \`${bigquery.projectId}.${dataset_id}.${table_id}\`
-    WHERE order_id IN UNNEST(@order_ids)
+    DELETE FROM \`${process.env.BQ_PROJECT_NAME}.${dataset_id}.${table_id}\`
+    WHERE ${table_id === 'orders' ? 'id' : 'order_id'} IN UNNEST(@order_ids)
   `;
 
   // Submit as a parameterized query job
   const [job] = await bigquery.createQueryJob({
     query: sql,
-    location: bigquery.location,
+    location: 'US',
     params: { order_ids },
-    parameterMode: 'NAMED'
+    parameterMode: 'NAMED',
   });
 
   console.log(`Started delete job ${job.id} on ${table_id}…`);

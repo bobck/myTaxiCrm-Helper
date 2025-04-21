@@ -9,6 +9,7 @@ import { remonlineTokenToEnv } from '../../remonline/remonline.api.mjs';
 import {
   createOrResetTableByName,
   loadMultipleTables,
+  deleteRowsByOrderId,
 } from '../bq-utils.mjs';
 import {
   ordersTableSchema,
@@ -43,7 +44,7 @@ function convertMsUs(t) {
 }
 async function prepareOrders() {
   // const modified_at = Date.now() - 1000 * 60 * 60 * 24*30; // 10 hours
-  const modified_at = convertMsUs(await getMaxOrderModifiedAt() );
+  const modified_at = convertMsUs(await getMaxOrderModifiedAt());
 
   // const modified_at = 1744882028000;
   const { orderCount } = await getOrderCount({ modified_at });
@@ -279,6 +280,28 @@ async function handleOrders({ orders }) {
   );
 }
 
+async function clearOrdersInBQ({
+  handledOrders
+}) {
+  const order_ids = handledOrders.map((order) => order.id);
+  const table_ids = [
+    'orders',
+    'order_operations',
+    'order_attachments',
+    'order_parts',
+    'orders_to_resources',
+  ];
+  try {
+    const promises=[]
+    for (const table_id of table_ids) {
+      promises.push(deleteRowsByOrderId({order_ids,table_id}))
+    }
+    const resp=await Promise.all(promises);
+    console.log(resp);
+  } catch (error) {
+    console.error(error);
+  }
+}
 async function loadOrdersToBQ({
   handledOrders,
   handledOrderParts,
@@ -379,7 +402,8 @@ export async function loadRemonlineOrders() {
   });
   const time4 = new Date();
   console.log({ localDBLoadingTime: time4 - time3 });
-
+  console.log('clearing orders in BQ...');
+  await clearOrdersInBQ({handledOrders});
   console.log(`inserting orders to BQ...`);
   await loadOrdersToBQ({
     handledOrders,
@@ -391,8 +415,8 @@ export async function loadRemonlineOrders() {
     handledCampaigns,
   });
 
-  const time5 = new Date();
-  console.log({ bqLoadingTime: time5 - time4 });
+  const time6 = new Date();
+  console.log({ bqLoadingTime: time6 - time5 });
 }
 async function createOrResetOrdersTables() {
   await createOrResetTableByName({

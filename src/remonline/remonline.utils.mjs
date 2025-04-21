@@ -305,12 +305,12 @@ export async function getOrdersInRange(
   }
 
   const url = `${process.env.REMONLINE_API}/order/?sort_dir=asc&modified_at[]=${modified_at}&page=${current_page}&token=${process.env.REMONLINE_API_TOKEN}`;
- 
+
   // const url = 'https://api.remonline.app/order/?page=1&sort_dir=asc&modified_at[]=1742926803000&token=2c1293a28cfefff0409a40d7f9b837df2cc7ad54';
   // const options = {method: 'GET', headers: {accept: 'application/json'}};
   // console.log(url)
   const options = { method: 'GET', headers: { accept: 'application/json' } };
-  
+
   const response = await fetch(url, options);
   let data;
   try {
@@ -322,7 +322,7 @@ export async function getOrdersInRange(
     return { orders: _orders, failedPages: _failedPages };
     // throw e;
   }
-  
+
   const { success } = data;
   if (!success) {
     const { message, code } = data;
@@ -653,8 +653,6 @@ export async function postMockOrder({
   modified_at,
   auto_park_id,
 }) {
-
-
   const response = await fetch(
     `${process.env.REMONLINE_API}/order/?token=${process.env.REMONLINE_API_TOKEN}`,
     {
