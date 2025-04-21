@@ -644,22 +644,52 @@ export async function getOrdersByLastModificationDate(
   }
   return { orders: _orders };
 }
+export async function createClient() {
+  const url =
+    'https://api.remonline.app/clients/?token=91f43527c11044e51bfb77693c6e6fa7bbaf1eeb';
+  const options = {
+    method: 'POST',
+    headers: { accept: 'application/json', 'content-type': 'application/json' },
+    body: JSON.stringify({
+      first_name: 'test',
+      last_name: 'ofBQ',
+      phone: ['+380777777777'],
+      email: 'axdd2@gmail.com',
+      address: 'kyiv 7 szev',
+      notes: 'testowy akaunt',
+      custom_fields: { f5370833: 'test' }, //'{f5370833:\'test\'}'
+    }),
+  };
 
-export async function postMockOrder({
-  id,
-  id_label,
-  status_id,
-  created_at,
-  modified_at,
-  auto_park_id,
-}) {
+  fetch(url, options)
+    .then((res) => res.json())
+    .then((json) => console.log(json))
+    .catch((err) => console.error(err));
+}
+export async function postMockOrder() {
+  const client_id = 34268974;
+  const branch_id = 112954;
+  const order_type = 185289;
+  const options = {
+    method: 'POST',
+    headers: { accept: 'application/json', 'content-type': 'application/json' },
+    body: JSON.stringify({
+      order_type,
+      branch_id,
+      client_id,
+      malfunction: 'someMalfunction',
+      scheduled_for:2000000000000,
+      custom_fields: {
+        f5294177: 'test',
+        f5294178: 5.0,
+
+      },
+    }),
+  };
+
   const response = await fetch(
     `${process.env.REMONLINE_API}/order/?token=${process.env.REMONLINE_API_TOKEN}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: params,
-    }
+    options
   );
 
   const data = await response.json();
@@ -687,4 +717,5 @@ export async function postMockOrder({
     });
     return;
   }
+  return data;
 }

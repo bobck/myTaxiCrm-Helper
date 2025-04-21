@@ -4,6 +4,8 @@ import {
   getOrdersInRange,
   getOrdersByPageIds,
   getEmployees,
+  createClient,
+  postMockOrder,
 } from '../../remonline/remonline.utils.mjs';
 import { remonlineTokenToEnv } from '../../remonline/remonline.api.mjs';
 import {
@@ -402,6 +404,8 @@ export async function loadRemonlineOrders() {
   console.log({ localDBLoadingTime: time4 - time3 });
   console.log('clearing orders in BQ...');
   await clearOrdersInBQ({ handledOrders });
+  const time5 = new Date();
+  console.log({ clearingTime: time5 - time4 });
   console.log(`inserting orders to BQ...`);
   await loadOrdersToBQ({
     handledOrders,
@@ -460,5 +464,8 @@ if (process.env.ENV === 'TEST') {
   // console.log(modified_at);
   await loadRemonlineOrders();
   // await createOrResetOrdersTables();
+  // await createClient();
+  // const data= await postMockOrder();
+  // console.log(data);
 }
 // 1744917651000
