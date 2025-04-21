@@ -304,18 +304,13 @@ export async function getOrdersInRange(
     modified_at = 0;
   }
 
-  let url;
-
-  if (process.env.ENV !== 'TEST') {
-    url = `${process.env.REMONLINE_API}/order/?sort_dir=asc&modified_at[]=${modified_at - 1000 * 60 * 60}&modified_at[]=${modified_at}&page=${current_page}&token=${process.env.REMONLINE_API_TOKEN}`;
-  } else {
-    url = `${process.env.REMONLINE_API}/order/?sort_dir=asc&modified_at[]=${modified_at}&page=${current_page}&token=${process.env.REMONLINE_API_TOKEN}`;
-  }
+  const url = `${process.env.REMONLINE_API}/order/?sort_dir=asc&modified_at[]=${modified_at}&page=${current_page}&token=${process.env.REMONLINE_API_TOKEN}`;
+ 
   // const url = 'https://api.remonline.app/order/?page=1&sort_dir=asc&modified_at[]=1742926803000&token=2c1293a28cfefff0409a40d7f9b837df2cc7ad54';
   // const options = {method: 'GET', headers: {accept: 'application/json'}};
   // console.log(url)
   const options = { method: 'GET', headers: { accept: 'application/json' } };
-
+  
   const response = await fetch(url, options);
   let data;
   try {
@@ -327,7 +322,7 @@ export async function getOrdersInRange(
     return { orders: _orders, failedPages: _failedPages };
     // throw e;
   }
-
+  
   const { success } = data;
   if (!success) {
     const { message, code } = data;
@@ -346,8 +341,10 @@ export async function getOrdersInRange(
     return;
   }
   const { data: orders, page, count } = data;
+  // console.log({ url,responseLength:orders.length });
 
   _orders.push(...orders.map((order) => structuredClone(order)));
+  // console.log({ ordersLength: _orders.length });
 
   // console.log({ count, page, doneOnPrevPage, leftToFinish })
   // if (process.env.ENV === 'TEST') {
@@ -370,40 +367,66 @@ export async function getOrdersInRange(
     });
   }
 }
-export async function getOrdersByPageIds({ modified_at, pages }) {
-  
 
-
-  const _orders = [];
-
-  const _failedPages = [];
-  for (const page of pages) {
-    console.log(`trying to fetch page ${page}. modified_at: ${modified_at}, pages left: ${pages.length - pages.indexOf(page)}`);
-    const url = `${process.env.REMONLINE_API}/order/?sort_dir=asc&modified_at[]=${modified_at}page=${page}&token=${process.env.REMONLINE_API_TOKEN}`;
-    const options = { method: 'GET', headers: { accept: 'application/json' } };
-    
-    const response = await fetch(url, options);
-    let data;
-    try {
-      data = await response.json();
-      console.log({ url ,status:'done'});
-    } catch (e) {
-      _failedPages.push(page);
-      console.log({pages})
-
-      return { orders: _orders, failedPages: _failedPages };
-    }
-
-    const { data: fetched_orders } = data;
-    console.log('pushing orders',fetched_orders.map((order) => order.id));
-    _orders.push(...structuredClone(fetched_orders));
-    // console.log(_orders.map((order) => order.id));
+export async function getOrdersByPageIds({ modified_at, _orders, pages }) {
+  if (!_orders) {
+    _orders = [];
+  }
+  if (!pages) {
+    pages = [];
+  }
+  if (!modified_at) {
+    modified_at = 0;
   }
 
-  return {
-    orders: _orders.flat(),
-    failedPages: _failedPages,
-  };
+  const current_page = pages.pop();
+
+  const url = `${process.env.REMONLINE_API}/order/?sort_dir=asc&modified_at[]=${modified_at}&page=${current_page}&token=${process.env.REMONLINE_API_TOKEN}`;
+  const options = { method: 'GET', headers: { accept: 'application/json' } };
+
+  const response = await fetch(url, options);
+  let data;
+  try {
+    data = await response.json();
+  } catch (e) {
+    console.error({ failedPage: current_page, response });
+    const _failedPages = [];
+    _failedPages.push(current_page, ...pages);
+    return { orders: _orders, failedPages: _failedPages };
+    // throw e;
+  }
+
+  const { success } = data;
+  if (!success) {
+    const { message, code } = data;
+    const { validation } = message;
+    if (response.status == 403 && code == 101) {
+      // console.info({ function: 'getOrders', message: 'Get new Auth' });
+      pages.push(current_page);
+      await remonlineTokenToEnv(true);
+      return await getOrdersByPageIds({ pages, _orders, modified_at });
+    }
+    console.error({
+      function: 'getOrdersByPageIds',
+      message,
+      validation,
+      status: response.status,
+    });
+    return;
+  }
+  const { data: orders, page, count } = data;
+  // console.log({pushingOrders:orders.map((order) => order.id)})
+  _orders.push(...orders.map((order) => structuredClone(order)));
+
+  if (pages.length === 0) {
+    return { orders: _orders, failedPages: [] };
+  } else {
+    return await getOrdersByPageIds({
+      modified_at,
+      _orders,
+      pages,
+    });
+  }
 }
 export async function getOrderCount({ modified_at }) {
   console.log({ modified_at }, 'getOrderCount');

@@ -48,8 +48,9 @@ function convertMsUs(t) {
 }
 async function prepareOrders() {
   // const modified_at = Date.now() - 1000 * 60 * 60 * 24*30; // 10 hours
-  // const modified_at = convertMsUs(await getMaxOrderModifiedAt());
-  const modified_at = 0;
+  const modified_at = convertMsUs(await getMaxOrderModifiedAt());
+
+  // const modified_at = 0;
   const { orderCount } = await getOrderCount({ modified_at });
   // const orderCount = 20000;
   const startPage = 1;
@@ -59,6 +60,7 @@ async function prepareOrders() {
   // return
   const promises = [];
   console.log({
+    modified_at,
     orderCount,
     requestsPerCall,
     startPage,
@@ -72,6 +74,7 @@ async function prepareOrders() {
     const target_page_pretendent = i + requestsPerCall;
     const target_page =
       target_page_pretendent > pagesCount ? pagesCount : target_page_pretendent;
+    // console.log({message:'promise creation',props:{ modified_at, current_page, target_page }})
     promises.push(getOrdersInRange({ modified_at, current_page, target_page }));
     // console.log('fetching started', { current_page, target_page });
   }
@@ -90,17 +93,37 @@ async function prepareOrders() {
     },
     { orders: [], failedPages: [] }
   );
+  // console.log('after promise all',orders.length, failedPages.length);
   let TTL = 10;
   console.log(
-    `initial download finished with ${failedPages.length} failed pages.${failedPages.length ? `\nstarting to resolve failed pages...\ngiven TTL: ${TTL}` : ''}`, {failedPages}
+    `initial download finished with ${failedPages.length} failed pages.${failedPages.length ? `\nstarting to resolve failed pages...\ngiven TTL: ${TTL}` : ''}`
+    // { failedPages }
   );
-  do {
-    const { orders: tem_orders, failedPages: temp_failedPages } =
+  while (TTL > 0 && failedPages.length > 0) {
+    const { orders: temp_orders, failedPages: temp_failedPages } =
       await getOrdersByPageIds({ modified_at, pages: failedPages });
-    orders.push(...tem_orders);
+    orders.push(...temp_orders);
+    // console.log('failed pages resolved (temp_orders)', temp_orders.length);
+    // console.log('orders after failed pages resolved', orders.length);
     failedPages = structuredClone(temp_failedPages);
-  } while (TTL-- > 0 && failedPages.length > 0);
+    TTL--;
+  }
   console.log('all fails resolved with TTL:', TTL);
+
+  const stat = orders.reduce((acc, curr) => {
+    const { id } = curr;
+    if (!acc.has(id)) {
+      acc.set(id, 1);
+    } else {
+      acc.set(id, acc.get(id) + 1);
+    }
+    return acc;
+  }, new Map());
+  const duplicates = [...stat].filter(([key, value]) => value > 1);
+  console.log(`duplicates: ${duplicates.length}`, duplicates);
+  // const filteredOrders = orders.filter((item) => {
+
+  // })
   return {
     orderCount,
     orders,
@@ -260,95 +283,16 @@ async function handleOrders({ orders }) {
     }
   );
 }
-export async function loadRemonlineOrders() {
-  /**
-   * Average time to load 50 orders is 0.7 sec,
-   * Remonline API has around 113K orders,
-   * via one request we can get 50 orders
-   * 113000 / 50 = 2260 pages
-   * 2260 * 0.7 = 1582 sec
-   * 1582 sec = 26.3 min
-   * so we need to load orders in parallel
-   */
-  const time = new Date();
-  const { orderCount, orders, failedPages } = await prepareOrders();
-  // const { orderCount, orders, failedPages } = await prepareOrdersSync();
-  console.log({
-    time,
-    message: 'loadRemonlineOrders',
-    expectedOrdersCount: orderCount,
-    ordersCount: orders.length,
-    failedPages: failedPages.length,
-  });
 
-  const stat = orders.reduce((acc, curr) => {
-    const{id}=curr;
-    if(!acc.has(id)){
-      acc.set(id, 1);
-    }
-    else{
-      acc.set(id, acc.get(id)+1);
-    }
-    return acc;
-  }, new Map());
-
-  console.log(stat, stat.size);
-  const duplicates =[...stat].filter(([key, value]) => value > 1);
-  console.log({duplicates});
-  console.log({duplicateCheck:duplicates.length, ordersCount: orders.length});
-  return;
-  const time2 = new Date();
-  console.log({ downloadingTime: time2 - time });
-  console.log(`parsing orders...`);
-  const {
-    handledOrders,
-    handledOrderParts,
-    handledOrderOperations,
-    handledOrderAttachments,
-    handledOrderResources,
-    orders2Resources,
-    handledCampaigns,
-  } = await handleOrders({ orders });
-  console.log({
-    handledOrders: handledOrders.length,
-    handledOrderParts: handledOrderParts.length,
-    handledOrderOperations: handledOrderOperations.length,
-    handledOrderAttachments: handledOrderAttachments.length,
-    orders2Resources: orders2Resources.length,
-    handledOrderResources: handledOrderResources.length,
-    handledCampaigns: handledCampaigns.length,
-  });
-  const time3 = new Date();
-  // console.log(handledOrderParts.find((item) => item.taxes.length > 0));
-
-  // console.log({
-  //   handledOrders: handledOrders[0],
-  //   handledOrderParts: handledOrderParts[0],
-  //   handledOrderOperations: handledOrderOperations[0],
-  //   handledOrderAttachments: handledOrderAttachments[0],
-  //   orders2Resources: orders2Resources[0],
-  //   handledOrderResources: handledOrderResources[0],
-  //   handledCampaigns: handledCampaigns[0],
-  // });
-  console.log({ reducingTime: time3 - time2 });
-  // const stat = handledOrders.reduce((acc, curr) => {
-  //   const{id}=curr;
-    
-  //   return acc;
-  // }, new Map());
-  // console.log(stat, stat.size);
-  // console.log(`updating orders to local DB...`);
-  // await deleteMultipleRemonlineOrders({ orders: handledOrders });
-  // await createMultipleRemonlineOrders({ orders: handledOrders });
-  // const lastModifiedAt = await getMaxOrderModifiedAt();
-  // console.log({ lastModifiedAt });
-  const localDBResponse = await synchronizeRemonlineOrders({
-    orders: handledOrders,
-  });
-  const time4 = new Date();
-  console.log({ localDBLoadingTime: time4 - time3 });
-
-  console.log(`inserting orders to BQ...`);
+async function loadOrdersToBQ({
+  handledOrders,
+  handledOrderParts,
+  handledOrderOperations,
+  handledOrderAttachments,
+  handledOrderResources,
+  orders2Resources,
+  handledCampaigns,
+}) {
   try {
     const dataset_id = 'RemOnline';
     const jobs = [
@@ -387,6 +331,71 @@ export async function loadRemonlineOrders() {
       console.log(error);
     });
   }
+}
+export async function loadRemonlineOrders() {
+  /**
+   * Average time to load 50 orders is 0.7 sec,
+   * Remonline API has around 113K orders,
+   * via one request we can get 50 orders
+   * 113000 / 50 = 2260 pages
+   * 2260 * 0.7 = 1582 sec
+   * 1582 sec = 26.3 min
+   * so we need to load orders in parallel
+   */
+  const time = new Date();
+  const { orderCount, orders, failedPages } = await prepareOrders();
+  // const { orderCount, orders, failedPages } = await prepareOrdersSync();
+  console.log({
+    time,
+    message: 'loadRemonlineOrders',
+    expectedOrdersCount: orderCount,
+    ordersCount: orders.length,
+    failedPages: failedPages.length,
+  });
+
+  // return;
+  const time2 = new Date();
+  console.log({ downloadingTime: time2 - time });
+  console.log(`parsing orders...`);
+  const {
+    handledOrders,
+    handledOrderParts,
+    handledOrderOperations,
+    handledOrderAttachments,
+    handledOrderResources,
+    orders2Resources,
+    handledCampaigns,
+  } = await handleOrders({ orders });
+  console.log({
+    handledOrders: handledOrders.length,
+    handledOrderParts: handledOrderParts.length,
+    handledOrderOperations: handledOrderOperations.length,
+    handledOrderAttachments: handledOrderAttachments.length,
+    orders2Resources: orders2Resources.length,
+    handledOrderResources: handledOrderResources.length,
+    handledCampaigns: handledCampaigns.length,
+  });
+  const time3 = new Date();
+
+  console.log({ reducingTime: time3 - time2 });
+
+  await synchronizeRemonlineOrders({
+    orders: handledOrders,
+  });
+  const time4 = new Date();
+  console.log({ localDBLoadingTime: time4 - time3 });
+
+  console.log(`inserting orders to BQ...`);
+  await loadOrdersToBQ({
+    handledOrders,
+    handledOrderParts,
+    handledOrderOperations,
+    handledOrderAttachments,
+    handledOrderResources,
+    orders2Resources,
+    handledCampaigns,
+  });
+
   const time5 = new Date();
   console.log({ bqLoadingTime: time5 - time4 });
 }
@@ -430,7 +439,8 @@ async function createOrResetOrdersTables() {
 if (process.env.ENV === 'TEST') {
   console.log(`running loadRemonlineOrders in Test mode...`);
   await remonlineTokenToEnv(true);
-
+  // const modified_at = convertMsUs(await getMaxOrderModifiedAt());
+  // console.log(modified_at);
   await loadRemonlineOrders();
   // await createOrResetOrdersTables();
 }
