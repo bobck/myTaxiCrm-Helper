@@ -644,3 +644,49 @@ export async function getOrdersByLastModificationDate(
   }
   return { orders: _orders };
 }
+
+export async function postMockOrder({
+  id,
+  id_label,
+  status_id,
+  created_at,
+  modified_at,
+  auto_park_id,
+}) {
+
+
+  const response = await fetch(
+    `${process.env.REMONLINE_API}/order/?token=${process.env.REMONLINE_API_TOKEN}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params,
+    }
+  );
+
+  const data = await response.json();
+  const { success } = data;
+  if (!success) {
+    const { message, code } = data;
+    const { validation } = message;
+    if (response.status == 403 && code == 101) {
+      console.info({ function: 'postMockOrder', message: 'Get new Auth' });
+      await remonlineTokenToEnv(true);
+      return await postMockOrder({
+        id,
+        id_label,
+        status_id,
+        created_at,
+        modified_at,
+        auto_park_id,
+      });
+    }
+    console.error({
+      function: 'postMockOrder',
+      message,
+      validation,
+      status: response.status,
+    });
+    return;
+  }
+}

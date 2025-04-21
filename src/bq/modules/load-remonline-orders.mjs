@@ -4,13 +4,10 @@ import {
   getOrdersInRange,
   getOrdersByPageIds,
   getEmployees,
-  getOrdersByLastModificationDate,
 } from '../../remonline/remonline.utils.mjs';
 import { remonlineTokenToEnv } from '../../remonline/remonline.api.mjs';
 import {
   createOrResetTableByName,
-  insertRowsAsStream,
-  clearOrdersByIds,
   loadMultipleTables,
 } from '../bq-utils.mjs';
 import {
@@ -23,8 +20,6 @@ import {
   campaignsTableSchema,
 } from '../schemas.mjs';
 import {
-  createMultipleRemonlineOrders,
-  deleteMultipleRemonlineOrders,
   getMaxOrderModifiedAt,
   synchronizeRemonlineOrders,
 } from '../bq-queries.mjs';
