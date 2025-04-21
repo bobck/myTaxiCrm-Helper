@@ -43,9 +43,9 @@ function convertMsUs(t) {
 }
 async function prepareOrders() {
   // const modified_at = Date.now() - 1000 * 60 * 60 * 24*30; // 10 hours
-  const modified_at = convertMsUs(await getMaxOrderModifiedAt());
+  const modified_at = convertMsUs(await getMaxOrderModifiedAt() );
 
-  // const modified_at = 0;
+  // const modified_at = 1744882028000;
   const { orderCount } = await getOrderCount({ modified_at });
   // const orderCount = 20000;
   const startPage = 1;

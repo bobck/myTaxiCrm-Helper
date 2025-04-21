@@ -306,17 +306,17 @@ async function loadRows({ dataset_id, table_id, rows, options }) {
   const table = dataset.table(table_id);
   const { chunkSize } = options;
 
-  console.log(
-    `Starting insert to ${dataset_id}.${table_id}: ${rows.length} rows`
-  );
+  // console.log(
+  //   `Starting insert to ${dataset_id}.${table_id}: ${rows.length} rows`
+  // );
   for (let i = 0; i < rows.length; i += chunkSize) {
     const chunk = rows.slice(i, i + chunkSize);
     try {
       // console.log(`inserting chunk :`,chunk)
       await table.insert(chunk);
-      console.log(
-        `  [${dataset_id}.${table_id}] Inserted rows ${i + 1}–${i + chunk.length}`
-      );
+      // console.log(
+      //   `  [${dataset_id}.${table_id}] Inserted rows ${i + 1}–${i + chunk.length}`
+      // );
     } catch (err) {
       console.error(
         `  [${dataset_id}.${table_id}] Error inserting rows ${i + 1}–${i + chunk.length}:`
@@ -327,9 +327,11 @@ async function loadRows({ dataset_id, table_id, rows, options }) {
             console.error(error);
           }
         }
-        // console.log(error);
+        console.log(error);
       });
+      // console.error(err)
     }
+
   }
 }
 
@@ -382,4 +384,37 @@ export async function loadMultipleTables({ jobs, options = {} }) {
   // Wait for all to finish
   await Promise.all(active);
   console.log('All table loads completed.');
+}
+
+/**
+ * Deletes all rows from `datasetId.tableName` whose order_id matches one
+ * of the IDs in `orders`. Runs as a single atomic DML job.
+ *
+ * @param {string} table_id  Name of the table (must be in ALLOWED_TABLES)
+ * @param {{ id: number }[]} order_ids  Array of { id } objects
+ */
+export async function deleteByOrderId({ table_id, orders: order_ids }) {
+
+  if (!order_ids.length) {
+    return;
+  }
+  const dataset_id='RemOnline';
+  // Build the DELETE statement with the validated table name
+  const sql = `
+    DELETE FROM \`${bigquery.projectId}.${dataset_id}.${table_id}\`
+    WHERE order_id IN UNNEST(@order_ids)
+  `;
+
+  // Submit as a parameterized query job
+  const [job] = await bigquery.createQueryJob({
+    query: sql,
+    location: bigquery.location,
+    params: { order_ids },
+    parameterMode: 'NAMED'
+  });
+
+  console.log(`Started delete job ${job.id} on ${table_id}…`);
+  // Wait for completion
+  const [result] = await job.getQueryResults();
+  console.log(`Deleted ${result.totalRows} rows from ${table_id}.`);
 }
