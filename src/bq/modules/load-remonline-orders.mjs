@@ -3,12 +3,13 @@ import {
   getOrdersInRange,
   getOrdersByPageIds,
   getEmployees,
+  postMockOrder,
 } from '../../remonline/remonline.utils.mjs';
 import { remonlineTokenToEnv } from '../../remonline/remonline.api.mjs';
 import {
   createOrResetTableByName,
-  loadMultipleTables,
   deleteRowsByOrderId,
+  loadRowsViaJSONFile,
 } from '../bq-utils.mjs';
 import {
   ordersTableSchema,
@@ -155,7 +156,7 @@ async function handleOrders({ orders }) {
     });
   };
 
-  const parsed_arrays=orders.reduce(
+  const parsed_arrays = orders.reduce(
     (acc, curr, index) => {
       const order_creator = getEmployeeById({ id: curr.created_by_id });
       const created_by = `${order_creator.first_name} ${order_creator.last_name}`;
@@ -202,7 +203,6 @@ async function handleOrders({ orders }) {
       delete order.status;
       delete order.resources;
       delete order.asset;
-      // delete order.custom_fields;
       delete order.order_type;
       delete order.operations;
       delete order.attachments;
@@ -218,7 +218,6 @@ async function handleOrders({ orders }) {
       acc.handledOrderParts.push(...parts);
       acc.handledOrderOperations.push(...operations);
       acc.handledOrderAttachments.push(...attachments);
-    
 
       resources.forEach((item) => {
         acc.orders2Resources.push({ resource_id: item.id, order_id });
@@ -259,8 +258,7 @@ async function clearOrdersInBQ({ handledOrders }) {
     for (const table_id of table_ids) {
       promises.push(deleteRowsByOrderId({ order_ids, table_id }));
     }
-    const resp = await Promise.all(promises);
-    console.log(resp);
+    await Promise.all(promises);
   } catch (error) {
     console.error(error);
   }
@@ -277,40 +275,72 @@ async function loadOrdersToBQ({
   try {
     const dataset_id = 'RemOnline';
     const jobs = [
-      { dataset_id, table_id: 'orders', rows: handledOrders },
-      { dataset_id, table_id: 'order_parts', rows: handledOrderParts },
+      {
+        dataset_id,
+        table_id: 'orders',
+        rows: handledOrders,
+        schema: ordersTableSchema,
+      },
+      {
+        dataset_id,
+        table_id: 'order_parts',
+        rows: handledOrderParts,
+        schema: orderPartsTableSchema,
+      },
       {
         dataset_id,
         table_id: 'order_operations',
         rows: handledOrderOperations,
+        schema: orderOperationsTableSchema,
       },
       {
         dataset_id,
         table_id: 'order_attachments',
         rows: handledOrderAttachments,
+        schema: orderAttachmentsTableSchema,
       },
-      { dataset_id, table_id: 'orders_to_resources', rows: orders2Resources },
-      { dataset_id, table_id: 'order_resources', rows: handledOrderResources },
-      { dataset_id, table_id: 'campaigns', rows: handledCampaigns },
+      {
+        dataset_id,
+        table_id: 'order_resources',
+        rows: handledOrderResources,
+        schema: orderResourcesTableSchema,
+      },
+      {
+        dataset_id,
+        table_id: 'orders_to_resources',
+        rows: orders2Resources,
+        schema: orders2ResourcesTableSchema,
+      },
+      {
+        dataset_id,
+        table_id: 'campaigns',
+        rows: handledCampaigns,
+        schema: campaignsTableSchema,
+      },
     ];
 
-    await loadMultipleTables({
-      jobs,
-      options: {
-        tableConcurrency: 3, // up to 3 tables at once
-        chunkSize: 5000, // 500 rows per insert call
-      },
-    });
+    const promises = jobs.map((job) => {
+      const { dataset_id, table_id, rows, schema } = job;
+      return loadRowsViaJSONFile({
+        dataset_id,
+        table_id,
+        rows,
+        schema,
+      });
+    })
+    await Promise.all(promises);
+    // console.log(responses);
   } catch (e) {
-    e.errors.forEach((error) => {
-      if (error.errors) {
-        console.log('top module error');
-        if (error.errors[0].message !== '') {
-          console.error(error);
-        }
-      }
-      console.log(error);
-    });
+    // e.errors.forEach((error) => {
+    //   if (error.errors) {
+    //     console.log('top module error');
+    //     if (error.errors[0].message !== '') {
+    //       console.error(error);
+    //     }
+    //   }
+    //   console.log(error);
+    // });
+    console.error(e);
   }
 }
 export async function loadRemonlineOrders() {
@@ -356,6 +386,9 @@ export async function loadRemonlineOrders() {
     handledOrderResources: handledOrderResources.length,
     handledCampaigns: handledCampaigns.length,
   });
+  if (handledOrders.length === 0) {
+    return;
+  }
   const time3 = new Date();
 
   console.log({ reducingTime: time3 - time2 });
@@ -425,4 +458,11 @@ if (process.env.ENV === 'TEST') {
   await remonlineTokenToEnv(true);
 
   await loadRemonlineOrders();
+  // const a = await postMockOrder();
+
+  // const b = await postMockOrder();
+
+  // const c = await postMockOrder();
+  // console.log(a, b, c);
+  // // await createOrResetOrdersTables();
 }

@@ -493,3 +493,55 @@ export async function getEmployees() {
   // console.log(data);
   return employees;
 }
+export async function postMockOrder() {
+  const client_id = 34268974;
+  const branch_id = 112954;
+  const order_type = 185289;
+  const options = {
+    method: 'POST',
+    headers: { accept: 'application/json', 'content-type': 'application/json' },
+    body: JSON.stringify({
+      order_type,
+      branch_id,
+      client_id,
+      malfunction: 'someMalfunction',
+      scheduled_for: 2000000000000,
+      custom_fields: {
+        f5294177: 'test',
+        f5294178: 5.0,
+      },
+    }),
+  };
+
+  const response = await fetch(
+    `${process.env.REMONLINE_API}/order/?token=${process.env.REMONLINE_API_TOKEN}`,
+    options
+  );
+
+  const data = await response.json();
+  const { success } = data;
+  if (!success) {
+    const { message, code } = data;
+    const { validation } = message;
+    if (response.status == 403 && code == 101) {
+      console.info({ function: 'postMockOrder', message: 'Get new Auth' });
+      await remonlineTokenToEnv(true);
+      return await postMockOrder({
+        id,
+        id_label,
+        status_id,
+        created_at,
+        modified_at,
+        auto_park_id,
+      });
+    }
+    console.error({
+      function: 'postMockOrder',
+      message,
+      validation,
+      status: response.status,
+    });
+    return;
+  }
+  return data;
+}

@@ -26,9 +26,6 @@ export async function getMaxOrderModifiedAt() {
  * @param {{ orders: { id: number, modified_at?: string }[] }} params
  */
 export async function synchronizeRemonlineOrders({ orders }) {
-  // Nothing to do if no orders
-  if (!orders.length) return [];
-
   // Convert to the shape we need for both delete and insert:
   const ordersArray = orders.map((o) => ({
     order_id: o.id,

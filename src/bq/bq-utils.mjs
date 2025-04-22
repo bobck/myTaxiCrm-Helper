@@ -1,4 +1,6 @@
 import fs from 'fs';
+import path from 'path';
+import os from 'os';
 import { BigQuery } from '@google-cloud/bigquery';
 import { pool } from '../api/pool.mjs';
 import {
@@ -393,9 +395,6 @@ export async function loadMultipleTables({ jobs, options = {} }) {
  * @param {{ id: number }[]} order_ids  Array of { id } objects
  */
 export async function deleteRowsByOrderId({ table_id, order_ids }) {
-  if (!order_ids.length) {
-    return;
-  }
   const dataset_id = 'RemOnline';
   // Build the DELETE statement with the validated table name
   const sql = `
@@ -410,9 +409,33 @@ export async function deleteRowsByOrderId({ table_id, order_ids }) {
     params: { order_ids },
     parameterMode: 'NAMED',
   });
-
-  console.log(`Started delete job ${job.id} on ${table_id}…`);
   // Wait for completion
-  const [result] = await job.getQueryResults();
-  console.log(`Deleted ${result.totalRows} rows from ${table_id}.`);
+  await job.getQueryResults();
+
+}
+
+export async function loadRowsViaJSONFile({
+  dataset_id,
+  table_id,
+  rows,
+  schema,
+}) {
+  const tempFilePath = path.join(
+    os.tmpdir(),
+    `temp_data_${dataset_id}_${table_id}.json`
+  );
+  const jsonString = rows.map(JSON.stringify).join('\n');
+  fs.writeFileSync(tempFilePath, jsonString);
+
+  const metadata = {
+    sourceFormat: 'NEWLINE_DELIMITED_JSON',
+    schema: { fields: schema },
+    autodetect: true,
+  };
+  await bigquery
+    .dataset(dataset_id)
+    .table(table_id)
+    .load(tempFilePath, metadata);
+
+  fs.unlinkSync(tempFilePath);
 }
