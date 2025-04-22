@@ -45,7 +45,7 @@ async function prepareOrders() {
   const { orderCount } = await getOrderCount({ modified_at });
   // const orderCount = 20000;
   const startPage = 1;
-  const requestsPerCall = 5;
+  const requestsPerCall = 50;
   const ordersPerPage = 50;
   const pagesCount = Math.ceil(orderCount / ordersPerPage);
   // return
@@ -390,18 +390,12 @@ export async function loadRemonlineOrders() {
     return;
   }
   const time3 = new Date();
-
   console.log({ reducingTime: time3 - time2 });
 
-  await synchronizeRemonlineOrders({
-    orders: handledOrders,
-  });
-  const time4 = new Date();
-  console.log({ localDBLoadingTime: time4 - time3 });
   console.log('clearing orders in BQ...');
   await clearOrdersInBQ({ handledOrders });
-  const time5 = new Date();
-  console.log({ clearingTime: time5 - time4 });
+  const time4 = new Date();
+  console.log({ clearingTime: time4 - time3 });
   console.log(`inserting orders to BQ...`);
   await loadOrdersToBQ({
     handledOrders,
@@ -413,8 +407,15 @@ export async function loadRemonlineOrders() {
     handledCampaigns,
   });
 
+  const time5 = new Date();
+  console.log({ bqLoadingTime: time5 - time4 });
+  console.log('synchronizing orders in local DB...');
+  await synchronizeRemonlineOrders({
+    orders: handledOrders,
+  });
   const time6 = new Date();
-  console.log({ bqLoadingTime: time6 - time5 });
+  console.log({ localDBLoadingTime: time6 - time5 });
+  console.log(handledOrders)
 }
 async function createOrResetOrdersTables() {
   await createOrResetTableByName({
@@ -464,5 +465,5 @@ if (process.env.ENV === 'TEST') {
 
   // const c = await postMockOrder();
   // console.log(a, b, c);
-  // // await createOrResetOrdersTables();
+  // await createOrResetOrdersTables();
 }
