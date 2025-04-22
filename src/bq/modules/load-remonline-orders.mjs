@@ -127,7 +127,7 @@ async function handleOrders({ orders }) {
     return employees.find((item) => item.id === id);
   };
 
-  const handleOrderParts = ({ order_id, arr }) => {
+  const handleOrderPartsOrOperations = ({ order_id, arr }) => {
     arr.forEach((item, index) => {
       const handledItem = {
         order_id,
@@ -136,23 +136,6 @@ async function handleOrders({ orders }) {
         engineer_id: item.engineerId,
         uom_id: item.uom.id,
       };
-      delete handledItem.entityId;
-      delete handledItem.engineerId;
-      delete handledItem.taxes;
-      delete handledItem.uom;
-      arr[index] = handledItem;
-    });
-  };
-  const handleOrderOperations = ({ order_id, arr }) => {
-    arr.forEach((item, index) => {
-      const handledItem = {
-        order_id,
-        ...item,
-        entity_id: item.entityId,
-        engineer_id: item.engineerId,
-        uom_id: item.uom.id,
-      };
-
       delete handledItem.entityId;
       delete handledItem.engineerId;
       delete handledItem.taxes;
@@ -172,7 +155,7 @@ async function handleOrders({ orders }) {
     });
   };
 
-  return orders.reduce(
+  const parsed_arrays=orders.reduce(
     (acc, curr, index) => {
       const order_creator = getEmployeeById({ id: curr.created_by_id });
       const created_by = `${order_creator.first_name} ${order_creator.last_name}`;
@@ -227,20 +210,15 @@ async function handleOrders({ orders }) {
 
       // order
 
-      handleOrderParts({ order_id, arr: parts });
-      handleOrderOperations({ order_id, arr: operations });
+      handleOrderPartsOrOperations({ order_id, arr: parts });
+      handleOrderPartsOrOperations({ order_id, arr: operations });
       handleAttachments({ order_id, arr: attachments });
 
-      acc.handledOrders = [...acc.handledOrders, order];
-      acc.handledOrderParts = [...acc.handledOrderParts, ...parts];
-      acc.handledOrderOperations = [
-        ...acc.handledOrderOperations,
-        ...operations,
-      ];
-      acc.handledOrderAttachments = [
-        ...acc.handledOrderAttachments,
-        ...attachments,
-      ];
+      acc.handledOrders.push(order);
+      acc.handledOrderParts.push(...parts);
+      acc.handledOrderOperations.push(...operations);
+      acc.handledOrderAttachments.push(...attachments);
+    
 
       resources.forEach((item) => {
         acc.orders2Resources.push({ resource_id: item.id, order_id });
@@ -264,6 +242,7 @@ async function handleOrders({ orders }) {
       handledCampaigns: [],
     }
   );
+  return parsed_arrays;
 }
 
 async function clearOrdersInBQ({ handledOrders }) {
