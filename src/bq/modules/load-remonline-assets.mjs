@@ -1,23 +1,37 @@
-import {getAssets} from '../../remonline/remonline.utils.mjs'
+import { getAssets } from '../../remonline/remonline.utils.mjs';
 
 import { remonlineTokenToEnv } from '../../remonline/remonline.api.mjs';
-
-export async function loadRemonlineAssetsToBQ(){
-    const {assets}= await getAssets();
-    console.log({assets})
-    const stat=assets.reduce((acc, curr) => {
-        const { id } = curr;
-        if (!acc.has(id)) {
-          acc.set(id, 1);
-        } else {
-          acc.set(id, acc.get(id) + 1);
-        }
-        return acc;
-      }, new Map());
-      console.log(stat)
+import {
+  createOrResetTableByName,
+  loadRowsViaJSONFile,
+} from '../bq-utils.mjs';
+import { assetTableSchema } from '../schemas.mjs';
+export async function resetAssetTable() {
+  await createOrResetTableByName({
+    bqTableId: 'assets',
+    schema: assetTableSchema,
+    dataSetId: 'RemOnline',
+  });
 }
 
-if(process.env.ENV==='TEST'){
-    await remonlineTokenToEnv();
-    await loadRemonlineAssetsToBQ();
+export async function loadRemonlineAssetsToBQ() {
+  const { assets } = await getAssets();
+  const handledAssets = assets.map((asset) => {
+    const item = { ...asset, owner_name: asset.owner?.name || asset.owner };
+    delete item.owner;
+    return item
+  });
+  const resp = await loadRowsViaJSONFile({
+    dataset_id: 'RemOnline',
+    table_id: 'assets',
+    rows: handledAssets,
+    schema: assetTableSchema,
+  });
+  console.log(resp);
+}
+
+if (process.env.ENV === 'TEST') {
+  await remonlineTokenToEnv();
+  await loadRemonlineAssetsToBQ();
+//   await resetAssetTable();
 }

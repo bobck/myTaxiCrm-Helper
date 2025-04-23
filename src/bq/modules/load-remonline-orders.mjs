@@ -8,7 +8,7 @@ import {
 import { remonlineTokenToEnv } from '../../remonline/remonline.api.mjs';
 import {
   createOrResetTableByName,
-  deleteRowsByOrderId,
+  deleteRowsByParameter,
   loadRowsViaJSONFile,
 } from '../bq-utils.mjs';
 import {
@@ -29,12 +29,11 @@ import {
   insertCampaignsBatch,
 } from '../bq-queries.mjs';
 
-
 async function prepareOrders() {
-  // const modified_at = Date.now() - 1000 * 60 * 60 * 24*30; // 10 hours
+  // const modified_at = Date.now() - 1000 * 60 * 60 * 24*5; // 10 hours
   const modified_at = await getMaxOrderModifiedAt();
 
-  // const modified_at = 1744882028000;
+  // const modified_at = 1;
   const { orderCount } = await getOrderCount({ modified_at });
   // const orderCount = 20000;
   const startPage = 1;
@@ -116,8 +115,6 @@ async function prepareOrders() {
 }
 
 async function handleOrders({ orders }) {
-
-  
   const existingResourceIds = await getAllResourceIds();
   const existingCampaignIds = await getAllCampaignIds();
 
@@ -160,9 +157,13 @@ async function handleOrders({ orders }) {
   const parsed_arrays = orders.reduce(
     (acc, curr, index) => {
       const ad_campaign = structuredClone(curr.ad_campaign);
+
       const order = {
         ...structuredClone(curr),
         client_id: curr.client.id,
+        client_name:
+          curr.client?.name ||
+          `${curr.client?.first_name} ${curr.client?.last_name}`,
         asset_id: curr.asset.id,
         modified_at: curr.modified_at,
         created_at: curr.created_at,
@@ -171,7 +172,11 @@ async function handleOrders({ orders }) {
         warranty_date: curr.warranty_date,
         closed_at: curr.closed_at,
         estimated_done_at: curr.estimated_done_at,
-        custom_fields: JSON.stringify(curr.custom_fields),
+        custom_fields: JSON.stringify({
+          ...curr.custom_fields,
+          f3369990: curr.asset?.f3369990, //historical milliage handling
+          f3369991: curr.asset?.f3369991,
+        }),
         // ...curr.custom_fields,
         order_type_id: curr.order_type.id,
         status_id: curr.status.id,
@@ -274,6 +279,7 @@ async function handleOrders({ orders }) {
 
 async function clearOrdersInBQ({ handledOrders }) {
   const order_ids = handledOrders.map((order) => order.id);
+  const dataset_id = 'RemOnline';
   const table_ids = [
     'orders',
     'order_operations',
@@ -284,7 +290,14 @@ async function clearOrdersInBQ({ handledOrders }) {
   try {
     const promises = [];
     for (const table_id of table_ids) {
-      promises.push(deleteRowsByOrderId({ order_ids, table_id }));
+      promises.push(
+        deleteRowsByParameter({
+          arrayToDelete: order_ids,
+          parameter: table_id === 'orders' ? 'id' : 'order_id',
+          table_id,
+          dataset_id,
+        })
+      );
     }
     await Promise.all(promises);
   } catch (error) {
@@ -391,8 +404,6 @@ export async function loadRemonlineOrders() {
     ordersCount: orders.length,
     failedPages: failedPages.length,
   });
-
-  // return;
   const time2 = new Date();
   console.log({ downloadingTime: time2 - time });
   console.log(`parsing orders...`);
@@ -405,6 +416,10 @@ export async function loadRemonlineOrders() {
     orders2Resources,
     handledCampaigns,
   } = await handleOrders({ orders });
+  // const f3369990=handledOrders.filter((order)=>!!order.custom_fields.f3369990)
+  // console.log({f3369990})
+  // console.log(handledOrders.map((order)=>({id:order.id,custom_fields:order.custom_fields})))
+  // return ;
   console.log({
     handledOrders: handledOrders.length,
     handledOrderParts: handledOrderParts.length,

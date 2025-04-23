@@ -392,21 +392,20 @@ export async function loadMultipleTables({ jobs, options = {} }) {
  * of the IDs in `orders`. Runs as a single atomic DML job.
  *
  * @param {string} table_id  Name of the table (must be in ALLOWED_TABLES)
- * @param {{ id: number }[]} order_ids  Array of { id } objects
+ * @param {{ id: number }[]} arrayToDelete  Array of { id } objects
  */
-export async function deleteRowsByOrderId({ table_id, order_ids }) {
-  const dataset_id = 'RemOnline';
+export async function deleteRowsByParameter({ dataset_id,table_id,parameter, arrayToDelete }) {
   // Build the DELETE statement with the validated table name
   const sql = `
     DELETE FROM \`${process.env.BQ_PROJECT_NAME}.${dataset_id}.${table_id}\`
-    WHERE ${table_id === 'orders' ? 'id' : 'order_id'} IN UNNEST(@order_ids)
+    WHERE ${parameter} IN UNNEST(@arrayToDelete)
   `;
 
   // Submit as a parameterized query job
   const [job] = await bigquery.createQueryJob({
     query: sql,
     location: 'US',
-    params: { order_ids },
+    params: { arrayToDelete },
     parameterMode: 'NAMED',
   });
   // Wait for completion
@@ -429,7 +428,7 @@ export async function loadRowsViaJSONFile({
   const metadata = {
     sourceFormat: 'NEWLINE_DELIMITED_JSON',
     schema: { fields: schema },
-    autodetect: true,
+    // autodetect: true,
   };
   await bigquery
     .dataset(dataset_id)

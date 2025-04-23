@@ -445,10 +445,10 @@ export async function getOrderCount({ modified_at }) {
     if (response.status == 403 && code == 101) {
       console.info({ function: 'getOrderCount', message: 'Get new Auth' });
       await remonlineTokenToEnv(true);
-      return await getOrderCount({ current_page, _orders, target_page });
+      return await getOrdersByPageIds({ modified_at, _orders, pages });
     }
     console.error({
-      function: 'getOrdersCount',
+      function: 'getOrdersByPageIds',
       message,
       validation,
       status: response.status,
@@ -491,7 +491,7 @@ export async function getEmployees() {
   }
   const { data: employees } = data;
   // console.log(data);
-  return employees;
+  return { employees };
 }
 export async function postMockOrder() {
   const client_id = 34268974;
@@ -519,7 +519,7 @@ export async function postMockOrder() {
     `${process.env.REMONLINE_API}/order/?token=${process.env.REMONLINE_API_TOKEN}`,
     options
   );
-
+  console.log('fetching... ', url);
   const data = await response.json();
   const { success } = data;
   if (!success) {
@@ -582,7 +582,10 @@ export async function getAssets(_page = 1, _assets = []) {
   _assets.push(...structuredClone(assets));
   // return { assets: _assets };
   console.log({ count, page, doneOnPrevPage, leftToFinish });
-  if (page === 3) {
+  // if (page === 3) {
+  //   return { assets: _assets };
+  // }
+  if ((process.env.ENV = 'TEST' && page === 4)) {
     return { assets: _assets };
   }
   if (leftToFinish > 0) {
