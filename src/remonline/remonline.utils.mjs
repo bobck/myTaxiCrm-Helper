@@ -547,3 +547,46 @@ export async function postMockOrder() {
   }
   return data;
 }
+export async function getAssets(_page = 1, _assets = []) {
+  const url = `${process.env.REMONLINE_API}/warehouse/assets?page=${_page}&token=${process.env.REMONLINE_API_TOKEN}`;
+  // const url = `${process.env.REMONLINE_API}/warehouse/assets?token=${process.env.REMONLINE_API_TOKEN}`;
+
+  const options = { method: 'GET', headers: { accept: 'application/json' } };
+
+  const response = await fetch(url, options);
+
+  const data = await response.json();
+  const { success } = data;
+  if (!success) {
+    const { message, code } = data;
+    const { validation } = message;
+    if (response.status == 403 && code == 101) {
+      console.info({ function: 'getAssets', message: 'Get new Auth' });
+      await remonlineTokenToEnv(true);
+      return await getAssets(_page, _assets);
+    }
+    console.error({
+      function: 'getAssets',
+      url,
+      message,
+      validation,
+      status: response.status,
+    });
+    return;
+  }
+  const { data: assets, page, count } = data;
+  const doneOnPrevPage = (page - 1) * 50;
+
+  const leftToFinish = count - doneOnPrevPage - assets.length;
+
+  _assets.push(...structuredClone(assets));
+  // return { assets: _assets };
+  console.log({ count, page, doneOnPrevPage, leftToFinish });
+  if (page === 3) {
+    return { assets: _assets };
+  }
+  if (leftToFinish > 0) {
+    return await getAssets(parseInt(page) + 1, _assets);
+  }
+  return { assets: _assets };
+}
