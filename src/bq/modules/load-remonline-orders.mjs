@@ -29,21 +29,10 @@ import {
   insertCampaignsBatch,
 } from '../bq-queries.mjs';
 
-function convertMs(t) {
-  if (!t) {
-    return null;
-  }
-  const MICROS_THRESHOLD = 1e11;
 
-  if (t > MICROS_THRESHOLD) {
-    return Math.floor(t / 1000);
-  } else {
-    return t * 1000;
-  }
-}
 async function prepareOrders() {
   // const modified_at = Date.now() - 1000 * 60 * 60 * 24*30; // 10 hours
-  const modified_at = convertMs(await getMaxOrderModifiedAt());
+  const modified_at = await getMaxOrderModifiedAt();
 
   // const modified_at = 1744882028000;
   const { orderCount } = await getOrderCount({ modified_at });
@@ -127,10 +116,8 @@ async function prepareOrders() {
 }
 
 async function handleOrders({ orders }) {
-  const employees = await getEmployees();
-  const getEmployeeById = ({ id }) => {
-    return employees.find((item) => item.id === id);
-  };
+
+  
   const existingResourceIds = await getAllResourceIds();
   const existingCampaignIds = await getAllCampaignIds();
 
@@ -164,7 +151,7 @@ async function handleOrders({ orders }) {
       const handledAttachment = {
         ...item,
         order_id,
-        created_at: convertMs(item.created_at),
+        created_at: item.created_at,
       };
       arr[index] = handledAttachment;
     });
@@ -172,25 +159,23 @@ async function handleOrders({ orders }) {
 
   const parsed_arrays = orders.reduce(
     (acc, curr, index) => {
-      const order_creator = getEmployeeById({ id: curr.created_by_id });
-      const created_by = `${order_creator.first_name} ${order_creator.last_name}`;
       const ad_campaign = structuredClone(curr.ad_campaign);
       const order = {
         ...structuredClone(curr),
         client_id: curr.client.id,
-        created_by,
         asset_id: curr.asset.id,
-        modified_at: convertMs(curr.modified_at),
-        created_at: convertMs(curr.created_at),
-        done_at: convertMs(curr.done_at),
-        scheduled_for: convertMs(curr.scheduled_for),
-        warranty_date: convertMs(curr.warranty_date),
-        closed_at: convertMs(curr.closed_at),
-        estimated_done_at: convertMs(curr.estimated_done_at),
+        modified_at: curr.modified_at,
+        created_at: curr.created_at,
+        done_at: curr.done_at,
+        scheduled_for: curr.scheduled_for,
+        warranty_date: curr.warranty_date,
+        closed_at: curr.closed_at,
+        estimated_done_at: curr.estimated_done_at,
         custom_fields: JSON.stringify(curr.custom_fields),
         // ...curr.custom_fields,
         order_type_id: curr.order_type.id,
         status_id: curr.status.id,
+        asset_uid: curr.asset.uid,
       };
       //compaign handling
       const hasCampaign =

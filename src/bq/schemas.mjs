@@ -249,11 +249,11 @@ export const transferProductsTableSchema = [
 ];
 export const ordersTableSchema = [
   { name: 'id', type: 'INTEGER', mode: 'REQUIRED' },
-  { name: 'modified_at', type: 'TIMESTAMP', mode: 'REQUIRED' },
+  { name: 'modified_at', type: 'INTEGER', mode: 'REQUIRED' },
   { name: 'uuid', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'created_at', type: 'TIMESTAMP', mode: 'NULLABLE' },
-  { name: 'done_at', type: 'TIMESTAMP', mode: 'NULLABLE' },
-  { name: 'scheduled_for', type: 'TIMESTAMP', mode: 'NULLABLE' },
+  { name: 'created_at', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'done_at', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'scheduled_for', type: 'INTEGER', mode: 'NULLABLE' },
   { name: 'duration', type: 'INTEGER', mode: 'NULLABLE' },
   { name: 'kindof_good', type: 'STRING', mode: 'NULLABLE' },
   { name: 'serial', type: 'STRING', mode: 'NULLABLE' },
@@ -266,13 +266,13 @@ export const ordersTableSchema = [
   { name: 'payed', type: 'FLOAT', mode: 'NULLABLE' },
   { name: 'missed_payments', type: 'INTEGER', mode: 'NULLABLE' },
   { name: 'warranty_measures', type: 'INTEGER', mode: 'NULLABLE' },
-  { name: 'warranty_date', type: 'TIMESTAMP', mode: 'NULLABLE' },
+  { name: 'warranty_date', type: 'INTEGER', mode: 'NULLABLE' },
   { name: 'urgent', type: 'BOOLEAN', mode: 'NULLABLE' },
   { name: 'discount_sum', type: 'FLOAT', mode: 'NULLABLE' },
   { name: 'custom_fields', type: 'STRING', mode: 'NULLABLE' },
   { name: 'estimated_cost', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'closed_at', type: 'TIMESTAMP', mode: 'NULLABLE' },
-  { name: 'estimated_done_at', type: 'TIMESTAMP', mode: 'NULLABLE' },
+  { name: 'closed_at', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'estimated_done_at', type: 'INTEGER', mode: 'NULLABLE' },
   { name: 'id_label', type: 'STRING', mode: 'NULLABLE' },
   { name: 'price', type: 'FLOAT', mode: 'NULLABLE' },
   { name: 'branch_id', type: 'INTEGER', mode: 'NULLABLE' },
@@ -285,8 +285,8 @@ export const ordersTableSchema = [
   { name: 'brand', type: 'STRING', mode: 'NULLABLE' },
   { name: 'model', type: 'STRING', mode: 'NULLABLE' },
   { name: 'client_id', type: 'INTEGER', mode: 'NULLABLE' },
-  { name: 'created_by', type: 'STRING', mode: 'REQUIRED' },
   { name: 'asset_id', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'asset_uid', type: 'STRING', mode: 'NULLABLE' },
   { name: 'order_type_id', type: 'INTEGER', mode: 'NULLABLE' },
   { name: 'status_id', type: 'INTEGER', mode: 'NULLABLE' },
   { name: 'ad_campaign_id', type: 'INTEGER', mode: 'NULLABLE' },
@@ -312,8 +312,8 @@ export const orderPartsTableSchema = [
 export const orderOperationsTableSchema = [
   { name: 'order_id', type: 'INTEGER', mode: 'REQUIRED' },
   { name: 'id', type: 'INTEGER', mode: 'REQUIRED' },
-  { name: 'entity_id', type: 'INTEGER', mode: 'REQUIRED' }, // from entityId
-  { name: 'engineer_id', type: 'INTEGER', mode: 'REQUIRED' }, // from engineerId
+  { name: 'entity_id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'engineer_id', type: 'INTEGER', mode: 'REQUIRED' },
   { name: 'title', type: 'STRING', mode: 'REQUIRED' },
   { name: 'amount', type: 'FLOAT', mode: 'REQUIRED' },
   { name: 'price', type: 'FLOAT', mode: 'REQUIRED' },
@@ -326,7 +326,7 @@ export const orderOperationsTableSchema = [
 
 export const orderAttachmentsTableSchema = [
   { name: 'order_id', type: 'INTEGER', mode: 'REQUIRED' },
-  { name: 'created_at', type: 'TIMESTAMP', mode: 'REQUIRED' }, // from millis via TIMESTAMP_MILLIS
+  { name: 'created_at', type: 'INTEGER', mode: 'REQUIRED' },
   { name: 'created_by_id', type: 'INTEGER', mode: 'REQUIRED' },
   { name: 'filename', type: 'STRING', mode: 'REQUIRED' },
   { name: 'url', type: 'STRING', mode: 'REQUIRED' },
