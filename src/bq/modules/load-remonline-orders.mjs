@@ -23,6 +23,10 @@ import {
 import {
   getMaxOrderModifiedAt,
   synchronizeRemonlineOrders,
+  getAllCampaignIds,
+  getAllResourceIds,
+  insertOrderResourcesBatch,
+  insertCampaignsBatch,
 } from '../bq-queries.mjs';
 
 function convertMs(t) {
@@ -327,7 +331,7 @@ async function loadOrdersToBQ({
         rows,
         schema,
       });
-    })
+    });
     await Promise.all(promises);
     // console.log(responses);
   } catch (e) {
@@ -415,7 +419,7 @@ export async function loadRemonlineOrders() {
   });
   const time6 = new Date();
   console.log({ localDBLoadingTime: time6 - time5 });
-  console.log(handledOrders)
+  console.log(handledOrders);
 }
 async function createOrResetOrdersTables() {
   await createOrResetTableByName({
@@ -459,11 +463,15 @@ if (process.env.ENV === 'TEST') {
   await remonlineTokenToEnv(true);
 
   await loadRemonlineOrders();
-  // const a = await postMockOrder();
 
-  // const b = await postMockOrder();
-
-  // const c = await postMockOrder();
-  // console.log(a, b, c);
   // await createOrResetOrdersTables();
+
+  // const resources=[{id:4},{id:5},{id:6}];
+  // const campaigns=[{id:4},{id:5},{id:6}];
+  // const insertedResources = await insertOrderResourcesBatch(resources);
+  // const insertedCampaigns = await insertCampaignsBatch(campaigns);
+  // console.log({ insertedResources, insertedCampaigns });
+  // const allResourceIds = await getAllResourceIds();
+  // const allCampaignIds = await getAllCampaignIds();
+  // console.log({ allResourceIds, allCampaignIds });
 }

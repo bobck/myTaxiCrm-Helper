@@ -70,3 +70,50 @@ export async function synchronizeRemonlineOrders({ orders }) {
     throw err;
   }
 }
+export async function getAllCampaignIds() {
+  const sql = /*sql*/ `
+      SELECT id
+        FROM remonline_campaigns
+  `;
+  const rows = await db.all(sql);
+  return rows.map((row) => row.id);
+}
+export async function getAllResourceIds() {
+  const sql = /*sql*/ `
+      SELECT id
+        FROM remonline_order_resources
+  `;
+  const rows = await db.all(sql);
+  return rows.map((row) => row.id);
+}
+export async function insertCampaignsBatch(campaigns) {
+  if (!campaigns || campaigns.length === 0) return [];
+
+  const insertSql = /*sql*/ `
+    INSERT INTO remonline_campaigns (id)
+    SELECT
+      json_extract(value, '$.id')
+    FROM json_each(?)
+    RETURNING *
+  `;
+
+  // `campaigns` should be a JS array of objects like:
+  // [{ id: 1 }, { id: 2 }, { id: 3 }]
+  // We stringify it so json_each(?) can iterate the JSON array.
+  const rows = await db.all(insertSql, JSON.stringify(campaigns));
+  return rows; // Array of inserted campaign rows
+}
+
+export async function insertOrderResourcesBatch(resources) {
+  if (!resources || resources.length === 0) return [];
+
+  const insertSql = /*sql*/ `
+    INSERT INTO remonline_order_resources (id)
+    SELECT
+      json_extract(value, '$.id')
+    FROM json_each(?)
+    RETURNING *
+  `;
+  const rows = await db.all(insertSql, JSON.stringify(resources));
+  return rows; // Array of inserted campaign rows
+}

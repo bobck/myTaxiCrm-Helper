@@ -411,7 +411,6 @@ export async function deleteRowsByOrderId({ table_id, order_ids }) {
   });
   // Wait for completion
   await job.getQueryResults();
-
 }
 
 export async function loadRowsViaJSONFile({
