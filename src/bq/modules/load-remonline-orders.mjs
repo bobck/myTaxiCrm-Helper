@@ -458,12 +458,13 @@ export async function loadRemonlineOrders() {
     orders: handledOrders,
   });
 
-  const insertedResources = await insertOrderResourcesBatch(handledOrderResources);
+  const insertedResources = await insertOrderResourcesBatch(
+    handledOrderResources
+  );
   const insertedCampaigns = await insertCampaignsBatch(handledCampaigns);
   console.log({ insertedResources, insertedCampaigns });
   const time6 = new Date();
   console.log({ localDBLoadingTime: time6 - time5 });
-  console.log(handledOrders);
 }
 async function createOrResetOrdersTables() {
   await createOrResetTableByName({
