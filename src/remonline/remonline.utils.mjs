@@ -497,6 +497,7 @@ export async function postMockOrder() {
   const client_id = 34268974;
   const branch_id = 112954;
   const order_type = 185289;
+  const ad_campaign_id = 301120;
   const options = {
     method: 'POST',
     headers: { accept: 'application/json', 'content-type': 'application/json' },
@@ -510,6 +511,7 @@ export async function postMockOrder() {
         f5294177: 'test',
         f5294178: 5.0,
       },
+      ad_campaign_id,
     }),
   };
 

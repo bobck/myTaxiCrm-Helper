@@ -131,6 +131,16 @@ async function handleOrders({ orders }) {
   const getEmployeeById = ({ id }) => {
     return employees.find((item) => item.id === id);
   };
+  const existingResourceIds = await getAllResourceIds();
+  const existingCampaignIds = await getAllCampaignIds();
+
+  const filterResourcesOrCampaigns = ({ arr, existingIds }) => {
+    const filtered = arr.filter((item) => {
+      const { id } = item;
+      return !existingIds.includes(id);
+    });
+    return filtered;
+  };
 
   const handleOrderPartsOrOperations = ({ order_id, arr }) => {
     arr.forEach((item, index) => {
@@ -233,6 +243,8 @@ async function handleOrders({ orders }) {
         }
       });
 
+      acc.handledCampaigns.push();
+
       return acc;
     },
     {
@@ -245,7 +257,34 @@ async function handleOrders({ orders }) {
       handledCampaigns: [],
     }
   );
-  return parsed_arrays;
+  const {
+    handledOrders,
+    handledOrderParts,
+    handledOrderOperations,
+    handledOrderAttachments,
+    handledOrderResources,
+    orders2Resources,
+    handledCampaigns,
+  } = parsed_arrays;
+
+  const resources = filterResourcesOrCampaigns({
+    arr: handledOrderResources,
+    existingIds: existingResourceIds,
+  });
+  const campaigns = filterResourcesOrCampaigns({
+    arr: handledCampaigns,
+    existingIds: existingCampaignIds,
+  });
+
+  return {
+    handledOrders,
+    handledOrderParts,
+    handledOrderOperations,
+    handledOrderAttachments,
+    handledOrderResources: resources,
+    orders2Resources,
+    handledCampaigns: campaigns,
+  };
 }
 
 async function clearOrdersInBQ({ handledOrders }) {
@@ -390,6 +429,7 @@ export async function loadRemonlineOrders() {
     handledOrderResources: handledOrderResources.length,
     handledCampaigns: handledCampaigns.length,
   });
+
   if (handledOrders.length === 0) {
     return;
   }
@@ -417,6 +457,10 @@ export async function loadRemonlineOrders() {
   await synchronizeRemonlineOrders({
     orders: handledOrders,
   });
+
+  const insertedResources = await insertOrderResourcesBatch(handledOrderResources);
+  const insertedCampaigns = await insertCampaignsBatch(handledCampaigns);
+  console.log({ insertedResources, insertedCampaigns });
   const time6 = new Date();
   console.log({ localDBLoadingTime: time6 - time5 });
   console.log(handledOrders);
@@ -460,9 +504,10 @@ async function createOrResetOrdersTables() {
 }
 if (process.env.ENV === 'TEST') {
   console.log(`running loadRemonlineOrders in Test mode...`);
-  await remonlineTokenToEnv(true);
+  await remonlineTokenToEnv();
 
   await loadRemonlineOrders();
+  // await postMockOrder();
 
   // await createOrResetOrdersTables();
 
