@@ -447,7 +447,7 @@ export async function loadRemonlineOrders() {
     handledOrderResources
   );
   const insertedCampaigns = await insertCampaignsBatch(handledCampaigns);
-  console.log({ insertedResources, insertedCampaigns });
+  // console.log({ insertedResources, insertedCampaigns });
   const time6 = new Date();
   console.log({ localDBLoadingTime: time6 - time5 });
 }
