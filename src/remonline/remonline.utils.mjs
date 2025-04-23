@@ -584,10 +584,10 @@ export async function getAssets(_page = 1, _assets = []) {
   console.log({ count, page, doneOnPrevPage, leftToFinish });
   // if (page === 3) {
   //   return { assets: _assets };
+  // // }
+  // if ((process.env.ENV = 'TEST' && page === 40)) {
+  //   return { assets: _assets };
   // }
-  if ((process.env.ENV = 'TEST' && page === 4)) {
-    return { assets: _assets };
-  }
   if (leftToFinish > 0) {
     return await getAssets(parseInt(page) + 1, _assets);
   }

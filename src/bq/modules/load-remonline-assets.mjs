@@ -1,10 +1,7 @@
 import { getAssets } from '../../remonline/remonline.utils.mjs';
 
 import { remonlineTokenToEnv } from '../../remonline/remonline.api.mjs';
-import {
-  createOrResetTableByName,
-  loadRowsViaJSONFile,
-} from '../bq-utils.mjs';
+import { createOrResetTableByName, loadRowsViaJSONFile } from '../bq-utils.mjs';
 import { assetTableSchema } from '../schemas.mjs';
 export async function resetAssetTable() {
   await createOrResetTableByName({
@@ -17,9 +14,14 @@ export async function resetAssetTable() {
 export async function loadRemonlineAssetsToBQ() {
   const { assets } = await getAssets();
   const handledAssets = assets.map((asset) => {
-    const item = { ...asset, owner_name: asset.owner?.name || asset.owner };
+    // const owner_name= asset.owner?.name || asset.owner //reason { id: 29231319, name: '' }
+    const owner_name =
+      typeof owner === 'string' ? asset.owner : asset.owner?.name;
+    // if (typeof owner_name !== 'string') console.log(owner_name);
+    const item = { ...asset, owner_name };
     delete item.owner;
-    return item
+    // console.log(item)
+    return item;
   });
   const resp = await loadRowsViaJSONFile({
     dataset_id: 'RemOnline',
@@ -32,6 +34,6 @@ export async function loadRemonlineAssetsToBQ() {
 
 if (process.env.ENV === 'TEST') {
   await remonlineTokenToEnv();
-  await loadRemonlineAssetsToBQ();
 //   await resetAssetTable();
+  await loadRemonlineAssetsToBQ();
 }

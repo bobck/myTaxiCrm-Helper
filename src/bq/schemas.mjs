@@ -361,7 +361,7 @@ export const assetTableSchema = [
   { name: 'description', type: 'STRING', mode: 'NULLABLE' },
   { name: 'year', type: 'STRING', mode: 'NULLABLE' },
   { name: 'reg_number', type: 'STRING', mode: 'REQUIRED' },
-  { name: 'owner_name', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'owner_name', type: 'STRING', mode: 'NULLABLE' },
   { name: 'warehouse', type: 'JSON', mode: 'REQUIRED' },
   { name: 'image', type: 'STRING', mode: 'NULLABLE' },
   { name: 'custom_fields', type: 'JSON', mode: 'REQUIRED' },
