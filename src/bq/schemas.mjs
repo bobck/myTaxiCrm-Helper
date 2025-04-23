@@ -379,3 +379,12 @@ export const employeeTableSchema = [
   { name: 'started_work', type: 'INTEGER', mode: 'REQUIRED' },
   { name: 'avatar', type: 'STRING', mode: 'NULLABLE' },
 ];
+export const uomTableSchema = [
+  { name: 'id', type: 'INTEGER' },
+  { name: 'description', type: 'STRING' },
+  { name: 'title', type: 'STRING' },
+  { name: 'uom_type', type: 'STRING' },
+  { name: 'is_imperial', type: 'BOOLEAN' },
+  { name: 'is_system', type: 'BOOLEAN' },
+  { name: 'entity_types', type: 'STRING', mode: 'REPEATED' },
+];

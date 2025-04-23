@@ -593,3 +593,39 @@ export async function getAssets(_page = 1, _assets = []) {
   }
   return { assets: _assets };
 }
+export async function getUOMs() {
+  const url = `${process.env.REMONLINE_API}/catalogs/uoms?token=${process.env.REMONLINE_API_TOKEN}`;
+  
+  const options = { method: 'GET', headers: { accept: 'application/json' } };
+  const response = await fetch(url, options);
+  let data;
+  try {
+    data = await response.json();
+  } catch (e) {
+    console.error({
+      function: 'getUOMs',
+      message: 'Error parsing JSON',
+      data,
+    });
+  }
+  const { success } = data;
+  if (!success) {
+    const { message, code } = data;
+    const { validation } = message;
+    if (response.status == 403 && code == 101) {
+      console.info({ function: 'getUOMs', message: 'Get new Auth' });
+      await remonlineTokenToEnv(true);
+      return await getEmployees();
+    }
+    console.error({
+      function: 'getUOMs',
+      message,
+      validation,
+      status: response.status,
+    });
+    return;
+  }
+  
+  const {uoms,uom_types,entity_types}=data;
+  return {uoms,uom_types,entity_types};
+}
