@@ -11,9 +11,9 @@ const loadSecondaryRemonlineTablesJob = CronJob.from({
   timeZone,
   onTick: async () => {
     try {
-        await loadRemonlineAssetsToBQ()
-        await loadRemonlineEmployeesToBQ()
-        await loadRemonlineUOMsToBQ()
+      await loadRemonlineAssetsToBQ();
+      await loadRemonlineEmployeesToBQ();
+      await loadRemonlineUOMsToBQ();
     } catch (e) {
       console.error('An error occurred while creating transfers tables');
       console.error(e.errors[0]);

@@ -1,4 +1,3 @@
-
 import { getEmployees } from '../../remonline/remonline.utils.mjs';
 
 import { remonlineTokenToEnv } from '../../remonline/remonline.api.mjs';
@@ -25,5 +24,5 @@ export async function loadRemonlineEmployeesToBQ() {
 if (process.env.ENV === 'TEST') {
   await remonlineTokenToEnv(true);
   await loadRemonlineEmployeesToBQ();
-    // await resetEmployeeTable();
+  // await resetEmployeeTable();
 }

@@ -10,7 +10,7 @@ export async function resetAssetTable() {
     dataSetId: 'RemOnline',
   });
 }
-const mapAssets=({assets})=>{
+const mapAssets = ({ assets }) => {
   const handledAssets = assets.map((asset) => {
     // const owner_name= asset.owner?.name || asset.owner //reason { id: 29231319, name: '' }
     const owner_name =
@@ -21,11 +21,11 @@ const mapAssets=({assets})=>{
     // console.log(item)
     return item;
   });
-  return {handledAssets}
-}
+  return { handledAssets };
+};
 export async function loadRemonlineAssetsToBQ() {
   const { assets } = await getAssets();
-  const {handledAssets} = mapAssets({assets})
+  const { handledAssets } = mapAssets({ assets });
   const resp = await loadRowsViaJSONFile({
     dataset_id: 'RemOnline',
     table_id: 'assets',
@@ -37,6 +37,6 @@ export async function loadRemonlineAssetsToBQ() {
 
 if (process.env.ENV === 'TEST') {
   await remonlineTokenToEnv();
-//   await resetAssetTable();
+  //   await resetAssetTable();
   await loadRemonlineAssetsToBQ();
 }

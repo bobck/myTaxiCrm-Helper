@@ -595,7 +595,7 @@ export async function getAssets(_page = 1, _assets = []) {
 }
 export async function getUOMs() {
   const url = `${process.env.REMONLINE_API}/catalogs/uoms?token=${process.env.REMONLINE_API_TOKEN}`;
-  
+
   const options = { method: 'GET', headers: { accept: 'application/json' } };
   const response = await fetch(url, options);
   let data;
@@ -625,7 +625,7 @@ export async function getUOMs() {
     });
     return;
   }
-  
-  const {uoms,uom_types,entity_types}=data;
-  return {uoms,uom_types,entity_types};
+
+  const { uoms, uom_types, entity_types } = data;
+  return { uoms, uom_types, entity_types };
 }
