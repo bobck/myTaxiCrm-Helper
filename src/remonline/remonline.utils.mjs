@@ -31,11 +31,7 @@ export async function saveSidRow({
   return { result };
 }
 
-export async function getOrdersByIdLabels(
-  { idLabels, ids },
-  _page = 1,
-  _orders = []
-) {
+export async function getOrders({ idLabels, ids }, _page = 1, _orders = []) {
   let idLabelsUrl = '';
   if (idLabels) {
     for (let idLabel of idLabels) {
@@ -76,7 +72,7 @@ export async function getOrdersByIdLabels(
     if (response.status == 403 && code == 101) {
       console.info({ function: 'getOrders', message: 'Get new Auth' });
       await remonlineTokenToEnv(true);
-      return await getOrdersByIdLabels({ idLabels, ids }, _page, _orders);
+      return await getOrders({ idLabels, ids }, _page, _orders);
     }
 
     console.error({
@@ -99,11 +95,7 @@ export async function getOrdersByIdLabels(
   // console.log({ count, page, doneOnPrevPage, leftTofinish })
 
   if (leftTofinish > 0) {
-    return await getOrdersByIdLabels(
-      { idLabels, ids },
-      parseInt(page) + 1,
-      _orders
-    );
+    return await getOrders({ idLabels, ids }, parseInt(page) + 1, _orders);
   }
 
   return { orders: _orders };
