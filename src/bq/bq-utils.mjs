@@ -349,7 +349,7 @@ export async function loadRowsViaJSONFile({
     try {
       await unlink(tempFilePath);
     } catch (unlinkErr) {
-      console.warn(`⚠️ Failed to delete temp file: ${tempFilePath}`, unlinkErr);
+      console.warn(`Failed to delete temp file: ${tempFilePath}`, unlinkErr);
     }
   }
 }
