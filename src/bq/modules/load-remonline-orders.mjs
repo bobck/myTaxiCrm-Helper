@@ -2,6 +2,7 @@ import {
   getOrderCount,
   getOrdersInRange,
   getOrdersByPageIds,
+  getOrders,
 } from '../../remonline/remonline.utils.mjs';
 import { remonlineTokenToEnv } from '../../remonline/remonline.api.mjs';
 import {
@@ -27,7 +28,7 @@ import {
   insertCampaignsBatch,
 } from '../bq-queries.mjs';
 
-async function prepareOrders() {
+async function prepareOrdersInParallel() {
   // const modified_at = Date.now() - 1000 * 60 * 60 * 24*5; // 10 hours
   const modified_at = await getMaxOrderModifiedAt();
 
@@ -91,25 +92,29 @@ async function prepareOrders() {
   }
   console.log('all fails resolved with TTL:', TTL);
 
-  const stat = orders.reduce((acc, curr) => {
-    const { id } = curr;
-    if (!acc.has(id)) {
-      acc.set(id, 1);
-    } else {
-      acc.set(id, acc.get(id) + 1);
-    }
-    return acc;
-  }, new Map());
-  const duplicates = [...stat].filter(([key, value]) => value > 1);
-  console.log(`duplicates: ${duplicates.length}`, duplicates);
-  // const filteredOrders = orders.filter((item) => {
+  // const stat = orders.reduce((acc, curr) => {
+  //   const { id } = curr;
+  //   if (!acc.has(id)) {
+  //     acc.set(id, 1);
+  //   } else {
+  //     acc.set(id, acc.get(id) + 1);
+  //   }
+  //   return acc;
+  // }, new Map());
+  // const duplicates = [...stat].filter(([key, value]) => value > 1);
+  // console.log(`duplicates: ${duplicates.length}`, duplicates);
 
-  // })
   return {
     orderCount,
     orders,
     failedPages,
   };
+}
+async function prepareOrderSequentially() {
+  const modified_at = await getMaxOrderModifiedAt();
+  const { orderCount } = await getOrderCount({ modified_at });
+  const { orders } = await getOrders({ modified_at });
+  return { orders, orderCount, failedPages: [] };
 }
 
 async function parseOrdersToSeparateTables({ orders }) {
@@ -216,8 +221,6 @@ async function parseOrdersToSeparateTables({ orders }) {
       const status_id = status.id;
       const asset_uid = asset?.uid;
 
-      
-
       const handled_order = {
         id,
         uuid,
@@ -260,7 +263,7 @@ async function parseOrdersToSeparateTables({ orders }) {
         custom_fields,
         order_type_id,
         status_id,
-        asset_uid
+        asset_uid,
       };
       //compaign handling
       const hasCampaign =
@@ -269,7 +272,9 @@ async function parseOrdersToSeparateTables({ orders }) {
         Object.keys(ad_campaign).length > 0;
       if (hasCampaign) {
         handled_order.ad_campaign_id = ad_campaign.id;
-        if (!acc.handledCampaigns.some((i) => i.id === order_clone.ad_campaign.id)) {
+        if (
+          !acc.handledCampaigns.some((i) => i.id === order_clone.ad_campaign.id)
+        ) {
           acc.handledCampaigns.push(ad_campaign);
         }
       }
@@ -457,8 +462,8 @@ export async function loadRemonlineOrders() {
    * so we need to load orders in parallel
    */
   const time = new Date();
-  const { orderCount, orders, failedPages } = await prepareOrders();
-  // const { orderCount, orders, failedPages } = await prepareOrdersSync();
+  // const { orderCount, orders, failedPages } = await prepareOrders();
+  const { orderCount, orders, failedPages } = await prepareOrderSequentially();
   console.log({
     time,
     message: 'loadRemonlineOrders',

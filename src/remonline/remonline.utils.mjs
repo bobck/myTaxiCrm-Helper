@@ -31,7 +31,11 @@ export async function saveSidRow({
   return { result };
 }
 
-export async function getOrders({ idLabels, ids }, _page = 1, _orders = []) {
+export async function getOrders(
+  { idLabels, ids, modified_at },
+  _page = 1,
+  _orders = []
+) {
   let idLabelsUrl = '';
   if (idLabels) {
     for (let idLabel of idLabels) {
@@ -45,9 +49,12 @@ export async function getOrders({ idLabels, ids }, _page = 1, _orders = []) {
       idUrl += `&ids[]=${id}`;
     }
   }
+  const modified_at_url = modified_at
+    ? `&sort_dir=asc&modified_at[]=${modified_at}`
+    : '';
 
   const response = await fetch(
-    `${process.env.REMONLINE_API}/order/?token=${process.env.REMONLINE_API_TOKEN}&page=${_page}${idLabelsUrl}${idUrl}`
+    `${process.env.REMONLINE_API}/order/?token=${process.env.REMONLINE_API_TOKEN}&page=${_page}${idLabelsUrl}${idUrl}${modified_at_url}`
   );
 
   if (
@@ -88,13 +95,13 @@ export async function getOrders({ idLabels, ids }, _page = 1, _orders = []) {
 
   const doneOnPrevPage = (page - 1) * 50;
 
-  const leftTofinish = count - doneOnPrevPage - orders.length;
+  const leftToFinish = count - doneOnPrevPage - orders.length;
 
   _orders.push(...orders);
 
   // console.log({ count, page, doneOnPrevPage, leftTofinish })
 
-  if (leftTofinish > 0) {
+  if (leftToFinish > 0) {
     return await getOrders({ idLabels, ids }, parseInt(page) + 1, _orders);
   }
 
