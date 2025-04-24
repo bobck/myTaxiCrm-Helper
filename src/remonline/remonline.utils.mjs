@@ -53,9 +53,9 @@ export async function getOrders(
     ? `&sort_dir=asc&modified_at[]=${modified_at}`
     : '';
 
-  const response = await fetch(
-    `${process.env.REMONLINE_API}/order/?token=${process.env.REMONLINE_API_TOKEN}&page=${_page}${idLabelsUrl}${idUrl}${modified_at_url}`
-  );
+  const url = `${process.env.REMONLINE_API}/order/?token=${process.env.REMONLINE_API_TOKEN}&page=${_page}${idLabelsUrl}${idUrl}${modified_at_url}`;
+
+  const response = await fetch(url);
 
   if (
     response.status == 414 ||
