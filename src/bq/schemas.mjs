@@ -251,7 +251,7 @@ export const ordersTableSchema = [
   { name: 'id', type: 'INTEGER', mode: 'REQUIRED' },
   { name: 'modified_at', type: 'INTEGER', mode: 'REQUIRED' },
   { name: 'uuid', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'created_at', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'created_at', type: 'INTEGER', mode: 'REQUIRED' },
   { name: 'done_at', type: 'INTEGER', mode: 'NULLABLE' },
   { name: 'scheduled_for', type: 'INTEGER', mode: 'NULLABLE' },
   { name: 'duration', type: 'INTEGER', mode: 'NULLABLE' },

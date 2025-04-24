@@ -5,7 +5,7 @@ import { createOrResetTableByName, loadRowsViaJSONFile } from '../bq-utils.mjs';
 import { employeeTableSchema } from '../schemas.mjs';
 export async function resetEmployeeTable() {
   await createOrResetTableByName({
-    bqTableId: 'employees',
+    bqTableId: 'remonline_employees',
     schema: employeeTableSchema,
     dataSetId: 'RemOnline',
   });
@@ -15,7 +15,7 @@ export async function loadRemonlineEmployeesToBQ() {
   const { employees } = await getEmployees();
   const resp = await loadRowsViaJSONFile({
     dataset_id: 'RemOnline',
-    table_id: 'employees',
+    table_id: 'remonline_employees',
     rows: employees,
     schema: employeeTableSchema,
   });
