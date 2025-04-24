@@ -1,4 +1,5 @@
 import fs from 'fs';
+import { writeFile, unlink } from 'fs/promises';
 import path from 'path';
 import os from 'os';
 import { BigQuery } from '@google-cloud/bigquery';
@@ -329,18 +330,26 @@ export async function loadRowsViaJSONFile({
     os.tmpdir(),
     `temp_data_${dataset_id}_${table_id}.json`
   );
-  const jsonString = rows.map(JSON.stringify).join('\n');
-  fs.writeFileSync(tempFilePath, jsonString);
+  try {
+    const jsonString = rows.map(JSON.stringify).join('\n');
+    await writeFile(tempFilePath, jsonString);
 
-  const metadata = {
-    sourceFormat: 'NEWLINE_DELIMITED_JSON',
-    schema: { fields: schema },
-    // autodetect: true,
-  };
-  await bigquery
-    .dataset(dataset_id)
-    .table(table_id)
-    .load(tempFilePath, metadata);
-
-  fs.unlinkSync(tempFilePath);
+    const metadata = {
+      sourceFormat: 'NEWLINE_DELIMITED_JSON',
+      schema: { fields: schema },
+      // autodetect: true,
+    };
+    await bigquery
+      .dataset(dataset_id)
+      .table(table_id)
+      .load(tempFilePath, metadata);
+  } catch (err) {
+    throw err;
+  } finally {
+    try {
+      await unlink(tempFilePath);
+    } catch (unlinkErr) {
+      console.warn(`⚠️ Failed to delete temp file: ${tempFilePath}`, unlinkErr);
+    }
+  }
 }
