@@ -2,8 +2,6 @@ import {
   getOrderCount,
   getOrdersInRange,
   getOrdersByPageIds,
-  getEmployees,
-  postMockOrder,
 } from '../../remonline/remonline.utils.mjs';
 import { remonlineTokenToEnv } from '../../remonline/remonline.api.mjs';
 import {
@@ -282,27 +280,24 @@ async function clearOrdersInBQ({ handledOrders }) {
   const dataset_id = 'RemOnline';
   const table_ids = [
     'orders',
-    'order_operations',
-    'order_attachments',
-    'order_parts',
+    'orders_operations',
+    'orders_attachments',
+    'orders_parts',
     'orders_to_resources',
   ];
-  try {
-    const promises = [];
-    for (const table_id of table_ids) {
-      promises.push(
-        deleteRowsByParameter({
-          arrayToDelete: order_ids,
-          parameter: table_id === 'orders' ? 'id' : 'order_id',
-          table_id,
-          dataset_id,
-        })
-      );
-    }
-    await Promise.all(promises);
-  } catch (error) {
-    console.error(error);
+
+  const promises = [];
+  for (const table_id of table_ids) {
+    promises.push(
+      deleteRowsByParameter({
+        arrayToDelete: order_ids,
+        parameter: table_id === 'orders' ? 'id' : 'order_id',
+        table_id,
+        dataset_id,
+      })
+    );
   }
+  await Promise.all(promises);
 }
 async function loadOrdersToBQ({
   handledOrders,
@@ -324,25 +319,25 @@ async function loadOrdersToBQ({
       },
       {
         dataset_id,
-        table_id: 'order_parts',
+        table_id: 'orders_parts',
         rows: handledOrderParts,
         schema: orderPartsTableSchema,
       },
       {
         dataset_id,
-        table_id: 'order_operations',
+        table_id: 'orders_operations',
         rows: handledOrderOperations,
         schema: orderOperationsTableSchema,
       },
       {
         dataset_id,
-        table_id: 'order_attachments',
+        table_id: 'orders_attachments',
         rows: handledOrderAttachments,
         schema: orderAttachmentsTableSchema,
       },
       {
         dataset_id,
-        table_id: 'order_resources',
+        table_id: 'orders_resources',
         rows: handledOrderResources,
         schema: orderResourcesTableSchema,
       },
@@ -354,7 +349,7 @@ async function loadOrdersToBQ({
       },
       {
         dataset_id,
-        table_id: 'campaigns',
+        table_id: 'orders_campaigns',
         rows: handledCampaigns,
         schema: campaignsTableSchema,
       },
@@ -404,6 +399,9 @@ export async function loadRemonlineOrders() {
     ordersCount: orders.length,
     failedPages: failedPages.length,
   });
+  if (orders.length === 0) {
+    return;
+  }
   const time2 = new Date();
   console.log({ downloadingTime: time2 - time });
   console.log(`parsing orders...`);
@@ -416,10 +414,7 @@ export async function loadRemonlineOrders() {
     orders2Resources,
     handledCampaigns,
   } = await handleOrders({ orders });
-  // const f3369990=handledOrders.filter((order)=>!!order.custom_fields.f3369990)
-  // console.log({f3369990})
-  // console.log(handledOrders.map((order)=>({id:order.id,custom_fields:order.custom_fields})))
-  // return ;
+
   console.log({
     handledOrders: handledOrders.length,
     handledOrderParts: handledOrderParts.length,
@@ -430,14 +425,16 @@ export async function loadRemonlineOrders() {
     handledCampaigns: handledCampaigns.length,
   });
 
-  if (handledOrders.length === 0) {
-    return;
-  }
   const time3 = new Date();
   console.log({ reducingTime: time3 - time2 });
 
   console.log('clearing orders in BQ...');
-  await clearOrdersInBQ({ handledOrders });
+  try {
+    await clearOrdersInBQ({ handledOrders });
+  } catch (error) {
+    console.error(error);
+    return;
+  }
   const time4 = new Date();
   console.log({ clearingTime: time4 - time3 });
   console.log(`inserting orders to BQ...`);
@@ -473,17 +470,17 @@ async function createOrResetOrdersTables() {
     dataSetId: 'RemOnline',
   });
   await createOrResetTableByName({
-    bqTableId: 'order_parts',
+    bqTableId: 'orders_parts',
     schema: orderPartsTableSchema,
     dataSetId: 'RemOnline',
   });
   await createOrResetTableByName({
-    bqTableId: 'order_operations',
+    bqTableId: 'orders_operations',
     schema: orderOperationsTableSchema,
     dataSetId: 'RemOnline',
   });
   await createOrResetTableByName({
-    bqTableId: 'order_attachments',
+    bqTableId: 'orders_attachments',
     schema: orderAttachmentsTableSchema,
     dataSetId: 'RemOnline',
   });
@@ -493,31 +490,20 @@ async function createOrResetOrdersTables() {
     dataSetId: 'RemOnline',
   });
   await createOrResetTableByName({
-    bqTableId: 'order_resources',
+    bqTableId: 'orders_resources',
     schema: orderResourcesTableSchema,
     dataSetId: 'RemOnline',
   });
   await createOrResetTableByName({
-    bqTableId: 'campaigns',
+    bqTableId: 'orders_campaigns',
     schema: campaignsTableSchema,
     dataSetId: 'RemOnline',
   });
 }
 if (process.env.ENV === 'TEST') {
   console.log(`running loadRemonlineOrders in Test mode...`);
-  await remonlineTokenToEnv();
+  await remonlineTokenToEnv(true);
 
   await loadRemonlineOrders();
-  // await postMockOrder();
-
   // await createOrResetOrdersTables();
-
-  // const resources=[{id:4},{id:5},{id:6}];
-  // const campaigns=[{id:4},{id:5},{id:6}];
-  // const insertedResources = await insertOrderResourcesBatch(resources);
-  // const insertedCampaigns = await insertCampaignsBatch(campaigns);
-  // console.log({ insertedResources, insertedCampaigns });
-  // const allResourceIds = await getAllResourceIds();
-  // const allCampaignIds = await getAllCampaignIds();
-  // console.log({ allResourceIds, allCampaignIds });
 }
