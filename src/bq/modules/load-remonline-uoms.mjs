@@ -10,10 +10,7 @@ export async function resetUOMTable() {
     dataSetId: 'RemOnline',
   });
 }
-
-export async function loadRemonlineUOMsToBQ() {
-  const { uoms, uom_types, entity_types } = await getUOMs();
-  // console.log(JSON.stringify({uoms,uom_types,entity_types}))
+const mapUOMs = ({ uoms, uom_types, entity_types }) => {
   const handled_uoms = uoms.map((uom) => {
     return {
       ...uom,
@@ -21,14 +18,17 @@ export async function loadRemonlineUOMsToBQ() {
       entity_types: uom.entity_types.map((id) => entity_types[id] || id),
     };
   });
-  console.log(handled_uoms);
+  return { handled_uoms };
+};
+export async function loadRemonlineUOMsToBQ() {
+  const { uoms, uom_types, entity_types } = await getUOMs();
+  const { handled_uoms } = mapUOMs({ uoms, uom_types, entity_types });
   await loadRowsViaJSONFile({
-    dataset_id: "RemOnline",
-    table_id: "uoms",
+    dataset_id: 'RemOnline',
+    table_id: 'uoms',
     rows: handled_uoms,
-    schema:uomTableSchema,
+    schema: uomTableSchema,
   });
-  
 }
 
 if (process.env.ENV === 'TEST') {

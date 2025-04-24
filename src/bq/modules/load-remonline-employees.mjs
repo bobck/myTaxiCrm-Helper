@@ -14,19 +14,12 @@ export async function resetEmployeeTable() {
 
 export async function loadRemonlineEmployeesToBQ() {
   const { employees } = await getEmployees();
-  console.log(employees)
-//   const handledAssets = employees.map((employee) => {
-//     const item = { ...employee, owner_name: employee.owner?.name || employee.owner };
-//     delete item.owner;
-//     return item;
-//   });
   const resp = await loadRowsViaJSONFile({
     dataset_id: 'RemOnline',
     table_id: 'employees',
     rows: employees,
     schema: employeeTableSchema,
   });
-  console.log(resp);
 }
 
 if (process.env.ENV === 'TEST') {
