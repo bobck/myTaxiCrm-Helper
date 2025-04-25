@@ -76,7 +76,6 @@ async function parseOrdersToSeparateTables({ orders }) {
     });
   };
 
- 
   const mapRemonlineOrderOperations = ({ order_id, operations }) => {
     // Use map to create a new array with transformed operation objects
     return operations.map((operation) => {
@@ -89,11 +88,11 @@ async function parseOrdersToSeparateTables({ orders }) {
         discount_value,
         warranty,
         warranty_period,
-        entityId, 
+        entityId,
         engineerId,
-        uom, 
-        } = operation; 
-       const handledOperation = {
+        uom,
+      } = operation;
+      const handledOperation = {
         order_id,
         id,
         title,
@@ -113,12 +112,7 @@ async function parseOrdersToSeparateTables({ orders }) {
 
   const mapRemonlineOrderAttachments = ({ order_id, attachments }) => {
     return attachments.map((attachment) => {
-       const {
-        created_at,
-        created_by_id,
-        filename,
-        url
-      } = attachment;
+      const { created_at, created_by_id, filename, url } = attachment;
       const handledAttachment = {
         order_id,
         created_at,
@@ -131,8 +125,7 @@ async function parseOrdersToSeparateTables({ orders }) {
   };
 
   const parsed_arrays = orders.reduce(
-    (acc, curr, index) => {
-      const order_clone = structuredClone(curr);
+    (acc, curr_order, index) => {
       const {
         id,
         uuid,
@@ -179,13 +172,13 @@ async function parseOrdersToSeparateTables({ orders }) {
         operations,
         attachments,
         ad_campaign,
-      } = order_clone;
+      } = curr_order;
       const client_id = client.id;
       const client_name =
         client?.name || `${client?.first_name} ${client?.last_name}`;
       const asset_id = asset?.id;
       const custom_fields = JSON.stringify({
-        ...order_clone.custom_fields,
+        ...curr_order.custom_fields,
         f3369990: asset?.f3369990, //historical millage handling
         f3369991: asset?.f3369991,
       });
@@ -253,9 +246,15 @@ async function parseOrdersToSeparateTables({ orders }) {
 
       const { id: order_id } = handled_order;
 
-      const handledParts=mapRemonlineOrderParts({ order_id, parts });
-      const handledOperations=mapRemonlineOrderOperations({ order_id, operations });
-      const handledAttachments=mapRemonlineOrderAttachments({ order_id, attachments });
+      const handledParts = mapRemonlineOrderParts({ order_id, parts });
+      const handledOperations = mapRemonlineOrderOperations({
+        order_id,
+        operations,
+      });
+      const handledAttachments = mapRemonlineOrderAttachments({
+        order_id,
+        attachments,
+      });
 
       acc.handledOrders.push(handled_order);
       acc.handledOrderParts.push(...handledParts);
