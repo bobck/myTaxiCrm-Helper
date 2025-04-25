@@ -29,17 +29,12 @@ import {
 } from '../bq-queries.mjs';
 
 async function prepareOrdersInParallel() {
-  // const modified_at = Date.now() - 1000 * 60 * 60 * 24*5; // 10 hours
   const modified_at = await getMaxOrderModifiedAt();
-
-  // const modified_at = 1;
   const { orderCount } = await getOrderCount({ modified_at });
-  // const orderCount = 20000;
   const startPage = 1;
   const requestsPerCall = 50;
   const ordersPerPage = 50;
   const pagesCount = Math.ceil(orderCount / ordersPerPage);
-  // return
   const promises = [];
   console.log({
     modified_at,
@@ -49,24 +44,16 @@ async function prepareOrdersInParallel() {
     pagesCount,
     ordersPerPage,
   });
-  // return;
   console.log('downloading orders...');
   for (let i = startPage; i <= pagesCount; i += requestsPerCall + 1) {
     const current_page = i;
     const target_page_candidate = i + requestsPerCall;
     const target_page =
       target_page_candidate > pagesCount ? pagesCount : target_page_candidate;
-    // console.log({message:'promise creation',props:{ modified_at, current_page, target_page }})
     promises.push(getOrdersInRange({ modified_at, current_page, target_page }));
-    // console.log('fetching started', { current_page, target_page });
   }
-  console.log(
-    `orders downloading has been initiated in ${promises.length} parallel threads...`
-  );
   const results = await Promise.all(promises);
 
-  console.log('orders downloading has been finished');
-  // const orders = results.flat();
   let { orders, failedPages } = results.reduce(
     (acc, curr) => {
       acc.orders.push(...curr.orders);
@@ -75,35 +62,14 @@ async function prepareOrdersInParallel() {
     },
     { orders: [], failedPages: [] }
   );
-  // console.log('after promise all',orders.length, failedPages.length);
   let TTL = 10;
-  console.log(
-    `initial download finished with ${failedPages.length} failed pages.${failedPages.length ? `\nstarting to resolve failed pages...\ngiven TTL: ${TTL}` : ''}`
-    // { failedPages }
-  );
   while (TTL > 0 && failedPages.length > 0) {
     const { orders: temp_orders, failedPages: temp_failedPages } =
       await getOrdersByPageIds({ modified_at, pages: failedPages });
     orders.push(...temp_orders);
-    // console.log('failed pages resolved (temp_orders)', temp_orders.length);
-    // console.log('orders after failed pages resolved', orders.length);
     failedPages = structuredClone(temp_failedPages);
     TTL--;
   }
-  console.log('all fails resolved with TTL:', TTL);
-
-  // const stat = orders.reduce((acc, curr) => {
-  //   const { id } = curr;
-  //   if (!acc.has(id)) {
-  //     acc.set(id, 1);
-  //   } else {
-  //     acc.set(id, acc.get(id) + 1);
-  //   }
-  //   return acc;
-  // }, new Map());
-  // const duplicates = [...stat].filter(([key, value]) => value > 1);
-  // console.log(`duplicates: ${duplicates.length}`, duplicates);
-
   return {
     orderCount,
     orders,
@@ -214,7 +180,7 @@ async function parseOrdersToSeparateTables({ orders }) {
       const asset_id = asset?.id;
       const custom_fields = JSON.stringify({
         ...order_clone.custom_fields,
-        f3369990: asset?.f3369990, //historical milliage handling
+        f3369990: asset?.f3369990, //historical millage handling
         f3369991: asset?.f3369991,
       });
       const order_type_id = order_type.id;
@@ -265,7 +231,7 @@ async function parseOrdersToSeparateTables({ orders }) {
         status_id,
         asset_uid,
       };
-      //compaign handling
+      //campaign handling
       const hasCampaign =
         typeof ad_campaign === 'object' &&
         ad_campaign !== null &&
@@ -280,8 +246,6 @@ async function parseOrdersToSeparateTables({ orders }) {
       }
 
       const { id: order_id } = handled_order;
-
-      // order
 
       mapRemonlineOrderItems({ order_id, arr: parts });
       mapRemonlineOrderItems({ order_id, arr: operations });
@@ -439,28 +403,10 @@ async function loadOrdersToBQ({
     await Promise.all(promises);
     // console.log(responses);
   } catch (e) {
-    // e.errors.forEach((error) => {
-    //   if (error.errors) {
-    //     console.log('top module error');
-    //     if (error.errors[0].message !== '') {
-    //       console.error(error);
-    //     }
-    //   }
-    //   console.log(error);
-    // });
     console.error(e);
   }
 }
 export async function loadRemonlineOrders() {
-  /**
-   * Average time to load 50 orders is 0.7 sec,
-   * Remonline API has around 113K orders,
-   * via one request we can get 50 orders
-   * 113000 / 50 = 2260 pages
-   * 2260 * 0.7 = 1582 sec
-   * 1582 sec = 26.3 min
-   * so we need to load orders in parallel
-   */
   const time = new Date();
   // const { orderCount, orders, failedPages } = await prepareOrdersInParallel();
   const { orderCount, orders, failedPages } = await prepareOrderSequentially();
