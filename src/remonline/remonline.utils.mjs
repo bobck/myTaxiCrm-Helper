@@ -99,10 +99,14 @@ export async function getOrders(
 
   _orders.push(...orders);
 
-  console.log({ count, page, doneOnPrevPage, leftToFinish })
+  console.log({ count, page, doneOnPrevPage, leftToFinish });
 
   if (leftToFinish > 0) {
-    return await getOrders({ idLabels, ids, modified_at }, parseInt(page) + 1, _orders);
+    return await getOrders(
+      { idLabels, ids, modified_at },
+      parseInt(page) + 1,
+      _orders
+    );
   }
 
   return { orders: _orders };
