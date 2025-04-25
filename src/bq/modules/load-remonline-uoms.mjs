@@ -22,6 +22,11 @@ const mapUOMs = ({ uoms, uom_types, entity_types }) => {
 };
 export async function loadRemonlineUOMsToBQ() {
   const { uoms, uom_types, entity_types } = await getUOMs();
+  console.log({
+    time: new Date(),
+    message: 'loadRemonlineUOMsToBQ',
+    uomsCount: uoms.length,
+  });
   const { handled_uoms } = mapUOMs({ uoms, uom_types, entity_types });
   await loadRowsViaJSONFile({
     dataset_id: 'RemOnline',
