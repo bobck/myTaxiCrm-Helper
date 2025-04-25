@@ -49,7 +49,6 @@ export async function synchronizeRemonlineOrders({ orders }) {
      json_extract(value, '$.order_id'),
      COALESCE(json_extract(value, '$.modified_at'), CURRENT_TIMESTAMP)
    FROM json_each(?)
-   RETURNING *
  `;
 
   // Wrap both in one transaction
@@ -94,7 +93,6 @@ export async function insertCampaignsBatch(campaigns) {
     SELECT
       json_extract(value, '$.id')
     FROM json_each(?)
-    RETURNING *
   `;
 
   // `campaigns` should be a JS array of objects like:
@@ -112,7 +110,6 @@ export async function insertOrderResourcesBatch(resources) {
     SELECT
       json_extract(value, '$.id')
     FROM json_each(?)
-    RETURNING *
   `;
   const rows = await db.all(insertSql, JSON.stringify(resources));
   return rows; // Array of inserted campaign rows

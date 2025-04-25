@@ -361,7 +361,6 @@ export async function loadRowsViaJSONFile({
       schema: { fields: schema },
       // autodetect: true,
     };
-    throw new Error('mock error');
     await bigquery
       .dataset(dataset_id)
       .table(table_id)
@@ -370,7 +369,7 @@ export async function loadRowsViaJSONFile({
     const info = {
       dataset_id,
       table_id,
-      date:new Date(),
+      date: new Date(),
     };
     throw { info, error };
   } finally {

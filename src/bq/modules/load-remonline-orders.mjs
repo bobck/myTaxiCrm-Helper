@@ -337,7 +337,6 @@ async function clearOrdersInBQ({ handledOrders }) {
     );
   }
   const results = await Promise.allSettled(promises);
-  console.log(results);
   const failedTablesInfo = results.filter(
     (result) => result.status === 'rejected'
   );
@@ -410,7 +409,6 @@ async function loadOrdersToBQ({
     });
   });
   const results = await Promise.allSettled(promises);
-  console.log(results);
   const failedTablesInfo = results.filter(
     (result) => result.status === 'rejected'
   );
@@ -509,6 +507,6 @@ if (process.env.ENV === 'TEST') {
   await remonlineTokenToEnv(true);
 
   await loadRemonlineOrders();
-  
+
   // await createOrResetOrdersTables();
 }
