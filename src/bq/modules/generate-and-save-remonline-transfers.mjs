@@ -46,9 +46,9 @@ export async function generateAndSaveTransfers() {
     'fetching transfers...\nwait please it could take few minutes...'
   );
   for (const [index, branch] of branches.entries()) {
-    if (process.env.ENV === 'TEST' && index !== branches.length - 1) {
-      continue;
-    }
+    // if (process.env.ENV === 'TEST' && index !== branches.length - 1) {
+    //   continue;
+    // }
     const { id: branch_id } = branch;
     const { transfers } = await getTransfers({ branch_id });
     transfersWithProducts.push(...transfers);
@@ -59,6 +59,7 @@ export async function generateAndSaveTransfers() {
   try {
     if (transfers.length > 0) {
       await insertRowsAsStream({
+        dataset_id:'RemOnline',
         rows: transfers,
         bqTableId: 'transfers',
       });
@@ -66,6 +67,7 @@ export async function generateAndSaveTransfers() {
     }
     if (products.length > 0) {
       await insertRowsAsStream({
+         dataset_id:'RemOnline',
         rows: products,
         bqTableId: 'transfers_products',
       });
