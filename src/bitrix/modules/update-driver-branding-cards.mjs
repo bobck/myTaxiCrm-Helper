@@ -47,7 +47,7 @@ export async function updateDriverBrandingCards() {
     if (typeof dbcard !== 'object') {
       continue;
     }
-    if(Object.keys(dbcard).length === 0){
+    if (Object.keys(dbcard).length === 0) {
       continue;
     }
     if (Number(dbcard.total_trips) >= Number(total_trips)) {
