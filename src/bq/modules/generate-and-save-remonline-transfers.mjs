@@ -59,7 +59,7 @@ export async function generateAndSaveTransfers() {
   try {
     if (transfers.length > 0) {
       await insertRowsAsStream({
-        dataset_id:'RemOnline',
+        dataset_id: 'RemOnline',
         rows: transfers,
         bqTableId: 'transfers',
       });
@@ -67,7 +67,7 @@ export async function generateAndSaveTransfers() {
     }
     if (products.length > 0) {
       await insertRowsAsStream({
-         dataset_id:'RemOnline',
+        dataset_id: 'RemOnline',
         rows: products,
         bqTableId: 'transfers_products',
       });

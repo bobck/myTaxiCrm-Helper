@@ -31,7 +31,7 @@ export async function generateDriversWithFuelCardReport({ date }) {
 }
 
 export async function insertRowsAsStream({ dataset_id, rows, bqTableId }) {
-  console.log({dataset_id, rowsCount:rows.length,bqTableId})
+  console.log({ dataset_id, rowsCount: rows.length, bqTableId });
   await bigquery
     .dataset(dataset_id || process.env.BQ_DATASET_ID)
     .table(bqTableId)
