@@ -12,26 +12,24 @@ import {
   orderAttachmentsTableSchema,
   orders2ResourcesTableSchema,
   orderResourcesTableSchema,
-  campaignsTableSchema,
 } from '../schemas.mjs';
 import {
   getMaxOrderModifiedAt,
   synchronizeRemonlineOrders,
-  getAllCampaignIds,
   getAllResourceIds,
   insertOrderResourcesBatch,
-  insertCampaignsBatch,
 } from '../bq-queries.mjs';
 
 async function prepareOrderSequentially() {
   const modified_at = await getMaxOrderModifiedAt();
-  const { orders, count } = await getOrders({ modified_at });
+  const sort_dir = 'asc';
+  const { orders, count } = await getOrders({ modified_at, sort_dir });
   return { orders, orderCount: count, modified_at };
 }
 
 async function parseOrdersToSeparateTables({ orders }) {
   const existingResourceIds = await getAllResourceIds();
-  const existingCampaignIds = await getAllCampaignIds();
+  // const existingCampaignIds = await getAllCampaignIds();
 
   const filterResourcesOrCampaigns = ({ arr, existingIds }) => {
     const filtered = arr.filter((item) => {
@@ -41,31 +39,94 @@ async function parseOrdersToSeparateTables({ orders }) {
     return filtered;
   };
   // mapper for parts and operations
-  const mapRemonlineOrderItems = ({ order_id, arr }) => {
-    arr.forEach((item, index) => {
-      const handledItem = {
+  const mapRemonlineOrderParts = ({ order_id, parts }) => {
+    return parts.map((part, index) => {
+      const {
+        id,
+        title,
+        amount,
+        price,
+        cost,
+        discount_value,
+        code,
+        article,
+        warranty,
+        warranty_period,
+        entityId,
+        engineerId,
+        uom,
+      } = prat;
+      const handledPart = {
         order_id,
-        ...item,
-        entity_id: item.entityId,
-        engineer_id: item.engineerId,
-        uom_id: item.uom.id,
+        id,
+        title,
+        amount,
+        price,
+        cost,
+        discount_value,
+        code,
+        article,
+        warranty,
+        warranty_period,
+        entity_id: entityId,
+        engineer_id: engineerId,
+        uom_id: uom.id,
       };
-      delete handledItem.entityId;
-      delete handledItem.engineerId;
-      delete handledItem.taxes;
-      delete handledItem.uom;
-      arr[index] = handledItem;
+      return handledPart;
     });
   };
 
-  const mapAttachments = ({ order_id, arr }) => {
-    arr.forEach((item, index) => {
-      const handledAttachment = {
-        ...item,
+ 
+  const mapRemonlineOrderOperations = ({ order_id, operations }) => {
+    // Use map to create a new array with transformed operation objects
+    return operations.map((operation) => {
+      const {
+        id,
+        title,
+        amount,
+        price,
+        cost,
+        discount_value,
+        warranty,
+        warranty_period,
+        entityId, 
+        engineerId,
+        uom, 
+        } = operation; 
+       const handledOperation = {
         order_id,
-        created_at: item.created_at,
+        id,
+        title,
+        amount,
+        price,
+        cost,
+        discount_value,
+        warranty,
+        warranty_period,
+        entity_id: entityId,
+        engineer_id: engineerId,
+        uom_id: uom?.id,
       };
-      arr[index] = handledAttachment;
+      return handledOperation;
+    });
+  };
+
+  const mapRemonlineOrderAttachments = ({ order_id, attachments }) => {
+    return attachments.map((attachment) => {
+       const {
+        created_at,
+        created_by_id,
+        filename,
+        url
+      } = attachment;
+      const handledAttachment = {
+        order_id,
+        created_at,
+        created_by_id,
+        filename,
+        url,
+      };
+      return handledAttachment;
     });
   };
 
@@ -73,7 +134,6 @@ async function parseOrdersToSeparateTables({ orders }) {
     (acc, curr, index) => {
       const order_clone = structuredClone(curr);
       const {
-        // Fields from ordersTableSchema
         id,
         uuid,
         created_at,
@@ -184,23 +244,23 @@ async function parseOrdersToSeparateTables({ orders }) {
         Object.keys(ad_campaign).length > 0;
       if (hasCampaign) {
         handled_order.ad_campaign_id = ad_campaign.id;
-        if (
-          !acc.handledCampaigns.some((i) => i.id === order_clone.ad_campaign.id)
-        ) {
-          acc.handledCampaigns.push(ad_campaign);
-        }
+        // if (
+        //   !acc.handledCampaigns.some((i) => i.id === order_clone.ad_campaign.id)
+        // ) {
+        //   acc.handledCampaigns.push(ad_campaign);
+        // }
       }
 
       const { id: order_id } = handled_order;
 
-      mapRemonlineOrderItems({ order_id, arr: parts });
-      mapRemonlineOrderItems({ order_id, arr: operations });
-      mapAttachments({ order_id, arr: attachments });
+      const handledParts=mapRemonlineOrderParts({ order_id, parts });
+      const handledOperations=mapRemonlineOrderOperations({ order_id, operations });
+      const handledAttachments=mapRemonlineOrderAttachments({ order_id, attachments });
 
       acc.handledOrders.push(handled_order);
-      acc.handledOrderParts.push(...parts);
-      acc.handledOrderOperations.push(...operations);
-      acc.handledOrderAttachments.push(...attachments);
+      acc.handledOrderParts.push(...handledParts);
+      acc.handledOrderOperations.push(...handledOperations);
+      acc.handledOrderAttachments.push(...handledAttachments);
 
       resources.forEach((item) => {
         acc.orders2Resources.push({ resource_id: item.id, order_id });
@@ -212,8 +272,6 @@ async function parseOrdersToSeparateTables({ orders }) {
         }
       });
 
-      acc.handledCampaigns.push();
-
       return acc;
     },
     {
@@ -223,7 +281,7 @@ async function parseOrdersToSeparateTables({ orders }) {
       handledOrderAttachments: [],
       handledOrderResources: [],
       orders2Resources: [],
-      handledCampaigns: [],
+      // handledCampaigns: [],
     }
   );
   const {
@@ -233,7 +291,7 @@ async function parseOrdersToSeparateTables({ orders }) {
     handledOrderAttachments,
     handledOrderResources,
     orders2Resources,
-    handledCampaigns,
+    // handledCampaigns,
   } = parsed_arrays;
 
   //filtering resources and campaigns because they are common for many orders
@@ -241,10 +299,10 @@ async function parseOrdersToSeparateTables({ orders }) {
     arr: handledOrderResources,
     existingIds: existingResourceIds,
   });
-  const campaigns = filterResourcesOrCampaigns({
-    arr: handledCampaigns,
-    existingIds: existingCampaignIds,
-  });
+  // const campaigns = filterResourcesOrCampaigns({
+  //   arr: handledCampaigns,
+  //   existingIds: existingCampaignIds,
+  // });
 
   return {
     handledOrders,
@@ -253,7 +311,7 @@ async function parseOrdersToSeparateTables({ orders }) {
     handledOrderAttachments,
     handledOrderResources: resources,
     orders2Resources,
-    handledCampaigns: campaigns,
+    // handledCampaigns: campaigns,
   };
 }
 
@@ -288,7 +346,7 @@ async function loadOrdersToBQ({
   handledOrderAttachments,
   handledOrderResources,
   orders2Resources,
-  handledCampaigns,
+  // handledCampaigns,
 }) {
   try {
     const dataset_id = 'RemOnline';
@@ -329,12 +387,12 @@ async function loadOrdersToBQ({
         rows: orders2Resources,
         schema: orders2ResourcesTableSchema,
       },
-      {
-        dataset_id,
-        table_id: 'orders_campaigns',
-        rows: handledCampaigns,
-        schema: campaignsTableSchema,
-      },
+      // {
+      //   dataset_id,
+      //   table_id: 'orders_campaigns',
+      //   rows: handledCampaigns,
+      //   schema: campaignsTableSchema,
+      // },
     ];
 
     const promises = jobs.map((job) => {
@@ -365,9 +423,6 @@ export async function loadRemonlineOrders() {
   if (orders.length === 0) {
     return;
   }
-  // const time2 = new Date();
-  // console.log({ downloadingTime: time2 - time });
-  console.log(`parsing orders...`);
   const {
     handledOrders,
     handledOrderParts,
@@ -375,32 +430,15 @@ export async function loadRemonlineOrders() {
     handledOrderAttachments,
     handledOrderResources,
     orders2Resources,
-    handledCampaigns,
+    // handledCampaigns,
   } = await parseOrdersToSeparateTables({ orders });
 
-  console.log({
-    handledOrders: handledOrders.length,
-    handledOrderParts: handledOrderParts.length,
-    handledOrderOperations: handledOrderOperations.length,
-    handledOrderAttachments: handledOrderAttachments.length,
-    orders2Resources: orders2Resources.length,
-    handledOrderResources: handledOrderResources.length,
-    handledCampaigns: handledCampaigns.length,
-  });
-
-  // const time3 = new Date();
-  // console.log({ reducingTime: time3 - time2 });
-
-  console.log('clearing orders in BQ...');
   try {
     await clearOrdersInBQ({ handledOrders });
   } catch (error) {
     console.error(error);
     return;
   }
-  const time4 = new Date();
-  // console.log({ clearingTime: time4 - time3 });
-  console.log(`inserting orders to BQ...`);
   await loadOrdersToBQ({
     handledOrders,
     handledOrderParts,
@@ -408,22 +446,15 @@ export async function loadRemonlineOrders() {
     handledOrderAttachments,
     handledOrderResources,
     orders2Resources,
-    handledCampaigns,
+    // handledCampaigns,
   });
 
-  // const time5 = new Date();
-  // console.log({ bqLoadingTime: time5 - time4 });
-  console.log('synchronizing orders in local DB...');
   await synchronizeRemonlineOrders({
     orders: handledOrders,
   });
 
-  const insertedResources = await insertOrderResourcesBatch(
-    handledOrderResources
-  );
-  const insertedCampaigns = await insertCampaignsBatch(handledCampaigns);
-  // const time6 = new Date();
-  // console.log({ localDBLoadingTime: time6 - time5 });
+  await insertOrderResourcesBatch(handledOrderResources);
+  // await insertCampaignsBatch(handledCampaigns);
 }
 async function createOrResetOrdersTables() {
   await createOrResetTableByName({
@@ -456,11 +487,11 @@ async function createOrResetOrdersTables() {
     schema: orderResourcesTableSchema,
     dataSetId: 'RemOnline',
   });
-  await createOrResetTableByName({
-    bqTableId: 'orders_campaigns',
-    schema: campaignsTableSchema,
-    dataSetId: 'RemOnline',
-  });
+  // await createOrResetTableByName({
+  //   bqTableId: 'orders_campaigns',
+  //   schema: campaignsTableSchema,
+  //   dataSetId: 'RemOnline',
+  // });
 }
 if (process.env.ENV === 'TEST') {
   console.log(`running loadRemonlineOrders in Test mode...`);

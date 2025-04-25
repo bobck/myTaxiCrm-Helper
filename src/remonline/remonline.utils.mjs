@@ -31,7 +31,7 @@ export async function saveSidRow({
 }
 
 export async function getOrders(
-  { idLabels, ids, modified_at },
+  { idLabels, ids, modified_at, sort_dir },
   _page = 1,
   _orders = []
 ) {
@@ -48,11 +48,10 @@ export async function getOrders(
       idUrl += `&ids[]=${id}`;
     }
   }
-  const modified_at_url = modified_at
-    ? `&sort_dir=asc&modified_at[]=${modified_at}`
-    : '';
+  const sort_dir_url = sort_dir ? `&sort_dir=${sort_dir}` : '';
+  const modified_at_url = modified_at ? `&modified_at[]=${modified_at}` : '';
 
-  const url = `${process.env.REMONLINE_API}/order/?token=${process.env.REMONLINE_API_TOKEN}&page=${_page}${idLabelsUrl}${idUrl}${modified_at_url}`;
+  const url = `${process.env.REMONLINE_API}/order/?token=${process.env.REMONLINE_API_TOKEN}&page=${_page}${idLabelsUrl}${idUrl}${sort_dir_url}${modified_at_url}`;
 
   const response = await fetch(url);
 
@@ -102,7 +101,7 @@ export async function getOrders(
 
   if (leftToFinish > 0) {
     return await getOrders(
-      { idLabels, ids, modified_at },
+      { idLabels, ids, modified_at, sort_dir },
       parseInt(page) + 1,
       _orders
     );
