@@ -420,7 +420,6 @@ export async function updateDealPayOff({ id, ufCrmField, amount }) {
 
 export async function createBitrixDriverBrandingCards({ cards }) {
   let batchObj = {};
-
   for (let card of cards) {
     const {
       driver_id,
@@ -432,10 +431,11 @@ export async function createBitrixDriverBrandingCards({ cards }) {
       weekNumber,
       year,
       total_trips,
+      contact_id,
     } = card;
-
     const params = {
       entityTypeId: '1138',
+      'fields[CONTACT_ID]': contact_id,
       'fields[title]': driver_name,
       'fields[STAGE_ID]': stage_id,
       'fields[ufCrm54_1738757291]': driver_name,
@@ -451,7 +451,6 @@ export async function createBitrixDriverBrandingCards({ cards }) {
 
   const { result: resp, time } = await bitrix.batch(batchObj);
   const { result: itemObj } = resp;
-
   return itemObj;
 }
 
@@ -567,4 +566,20 @@ export async function updateBitrixFiredDebtorDriversCards({ cards }) {
   const { result: itemObj } = resp;
 
   return itemObj;
+}
+
+export async function findContactsByPhonesObjectReturned({ drivers }) {
+  const batchObj = {};
+
+  for (let driver of drivers) {
+    const params = {
+      entity_type: 'CONTACT',
+      type: 'PHONE',
+      'values[]': driver.phone,
+    };
+    batchObj[driver.driver_id] = { method: 'crm.duplicate.findbycomm', params };
+  }
+  const { result: temp_result } = await bitrix.batch(batchObj);
+  const { result } = temp_result;
+  return result;
 }

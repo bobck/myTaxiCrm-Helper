@@ -266,6 +266,42 @@ export async function generatePolandBookkeepingReport({
   const { rows } = result;
   return { rows };
 }
+export async function getBrandedLicencePlateNumbersFromBQ({
+  existingBrandedLicencePlateNumbers,
+}) {
+  // the check is necessary because the BQ does not support null or undefined in the IN clause
+  // and the query will fail if the array is empty
+  const areBrandedLicencePlateNumbersEmpty =
+    existingBrandedLicencePlateNumbers === undefined ||
+    existingBrandedLicencePlateNumbers === null ||
+    existingBrandedLicencePlateNumbers.length === 0;
+  const query = areBrandedLicencePlateNumbersEmpty
+    ? /*sql*/ `SELECT numbner as licence_plate_number FROM \`up-statistics.DB.brand_cars_status_list\` where approved_brand_type='BOLT'`
+    : /*sql*/ `
+    SELECT numbner AS licence_plate_number
+    FROM \`up-statistics.DB.brand_cars_status_list\`
+    WHERE approved_brand_type = 'BOLT'
+      AND numbner NOT IN UNNEST(@existingNumbers)
+  `;
+  const options = {
+    query,
+    location: 'US',
+  };
+  if (!areBrandedLicencePlateNumbersEmpty) {
+    options.params = { existingNumbers: existingBrandedLicencePlateNumbers };
+  }
+  //the response from BQ is an array with rows array as first element, and payload data next
+  //this is the reason why here is array destructuring
+  const [rows] = await bigquery.query(options);
+
+  //the array mapping is required because the response has the shape[{ licence_plate_number: 'SOMEPLATENUMBER777' }]
+  const brandedLicencePlateNumbers = rows.map(
+    (row) => row.licence_plate_number
+  );
+
+  return { brandedLicencePlateNumbers };
+}
+
 export async function clearOrdersByIds({ bqTableId, ids }) {
   // Turn [1,2,3] → "1, 2, 3"
   const idsList = ids.join(', ');
