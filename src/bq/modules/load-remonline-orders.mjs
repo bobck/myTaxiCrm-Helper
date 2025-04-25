@@ -53,9 +53,9 @@ async function prepareOrdersInParallel() {
   console.log('downloading orders...');
   for (let i = startPage; i <= pagesCount; i += requestsPerCall + 1) {
     const current_page = i;
-    const target_page_pretendent = i + requestsPerCall;
+    const target_page_candidate = i + requestsPerCall;
     const target_page =
-      target_page_pretendent > pagesCount ? pagesCount : target_page_pretendent;
+      target_page_candidate > pagesCount ? pagesCount : target_page_candidate;
     // console.log({message:'promise creation',props:{ modified_at, current_page, target_page }})
     promises.push(getOrdersInRange({ modified_at, current_page, target_page }));
     // console.log('fetching started', { current_page, target_page });
@@ -462,7 +462,7 @@ export async function loadRemonlineOrders() {
    * so we need to load orders in parallel
    */
   const time = new Date();
-  // const { orderCount, orders, failedPages } = await prepareOrders();
+  // const { orderCount, orders, failedPages } = await prepareOrdersInParallel();
   const { orderCount, orders, failedPages } = await prepareOrderSequentially();
   console.log({
     time,
