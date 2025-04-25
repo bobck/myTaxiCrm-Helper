@@ -82,7 +82,7 @@ export async function getOrders(
     }
 
     console.error({
-      function: 'getOrdersByIdLabels',
+      function: 'getOrders',
       message,
       validation,
       status: response.status,
