@@ -352,37 +352,37 @@ async function loadOrdersToBQ({
     const jobs = [
       {
         dataset_id,
-        table_id: 'orders2',
+        table_id: 'orders',
         rows: handledOrders,
         schema: ordersTableSchema,
       },
       {
         dataset_id,
-        table_id: 'orders_parts2',
+        table_id: 'orders_parts',
         rows: handledOrderParts,
         schema: orderPartsTableSchema,
       },
       {
         dataset_id,
-        table_id: 'orders_operations2',
+        table_id: 'orders_operations',
         rows: handledOrderOperations,
         schema: orderOperationsTableSchema,
       },
       {
         dataset_id,
-        table_id: 'orders_attachments2',
+        table_id: 'orders_attachments',
         rows: handledOrderAttachments,
         schema: orderAttachmentsTableSchema,
       },
       {
         dataset_id,
-        table_id: 'orders_resources2',
+        table_id: 'orders_resources',
         rows: handledOrderResources,
         schema: orderResourcesTableSchema,
       },
       {
         dataset_id,
-        table_id: 'orders_to_resources2',
+        table_id: 'orders_to_resources',
         rows: orders2Resources,
         schema: orders2ResourcesTableSchema,
       },
