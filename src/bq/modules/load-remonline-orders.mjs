@@ -55,7 +55,7 @@ async function parseOrdersToSeparateTables({ orders }) {
         entityId,
         engineerId,
         uom,
-      } = prat;
+      } = part;
       const handledPart = {
         order_id,
         id,
@@ -352,37 +352,37 @@ async function loadOrdersToBQ({
     const jobs = [
       {
         dataset_id,
-        table_id: 'orders',
+        table_id: 'orders2',
         rows: handledOrders,
         schema: ordersTableSchema,
       },
       {
         dataset_id,
-        table_id: 'orders_parts',
+        table_id: 'orders_parts2',
         rows: handledOrderParts,
         schema: orderPartsTableSchema,
       },
       {
         dataset_id,
-        table_id: 'orders_operations',
+        table_id: 'orders_operations2',
         rows: handledOrderOperations,
         schema: orderOperationsTableSchema,
       },
       {
         dataset_id,
-        table_id: 'orders_attachments',
+        table_id: 'orders_attachments2',
         rows: handledOrderAttachments,
         schema: orderAttachmentsTableSchema,
       },
       {
         dataset_id,
-        table_id: 'orders_resources',
+        table_id: 'orders_resources2',
         rows: handledOrderResources,
         schema: orderResourcesTableSchema,
       },
       {
         dataset_id,
-        table_id: 'orders_to_resources',
+        table_id: 'orders_to_resources2',
         rows: orders2Resources,
         schema: orders2ResourcesTableSchema,
       },
@@ -403,8 +403,8 @@ async function loadOrdersToBQ({
         schema,
       });
     });
-    await Promise.all(promises);
-    // console.log(responses);
+    const results=await Promise.allSettled(promises);
+    console.log(results);
   } catch (e) {
     console.error(e);
   }
