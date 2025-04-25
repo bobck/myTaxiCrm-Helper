@@ -453,7 +453,7 @@ export async function loadRemonlineOrders() {
   } catch (errors) {
     for (const err of errors) {
       const { reason } = err;
-      console.error({ status: err.status, ...reason });
+      console.error({ status: err.status, reason });
     }
     return;
   }
