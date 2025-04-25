@@ -44,7 +44,12 @@ export async function updateDriverBrandingCards() {
       driver_id,
       branding_process_id,
     });
-
+    if (typeof dbcard !== 'object') {
+      continue;
+    }
+    if(Object.keys(dbcard).length === 0){
+      continue;
+    }
     if (Number(dbcard.total_trips) >= Number(total_trips)) {
       continue;
     }
