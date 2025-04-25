@@ -1,9 +1,4 @@
-import {
-  getOrderCount,
-  getOrdersInRange,
-  getOrdersByPageIds,
-  getOrders,
-} from '../../remonline/remonline.utils.mjs';
+import { getOrders } from '../../remonline/remonline.utils.mjs';
 import { remonlineTokenToEnv } from '../../remonline/remonline.api.mjs';
 import {
   createOrResetTableByName,
@@ -28,59 +23,10 @@ import {
   insertCampaignsBatch,
 } from '../bq-queries.mjs';
 
-async function prepareOrdersInParallel() {
-  const modified_at = await getMaxOrderModifiedAt();
-  const { orderCount } = await getOrderCount({ modified_at });
-  const startPage = 1;
-  const requestsPerCall = 50;
-  const ordersPerPage = 50;
-  const pagesCount = Math.ceil(orderCount / ordersPerPage);
-  const promises = [];
-  console.log({
-    modified_at,
-    orderCount,
-    requestsPerCall,
-    startPage,
-    pagesCount,
-    ordersPerPage,
-  });
-  console.log('downloading orders...');
-  for (let i = startPage; i <= pagesCount; i += requestsPerCall + 1) {
-    const current_page = i;
-    const target_page_candidate = i + requestsPerCall;
-    const target_page =
-      target_page_candidate > pagesCount ? pagesCount : target_page_candidate;
-    promises.push(getOrdersInRange({ modified_at, current_page, target_page }));
-  }
-  const results = await Promise.all(promises);
-
-  let { orders, failedPages } = results.reduce(
-    (acc, curr) => {
-      acc.orders.push(...curr.orders);
-      acc.failedPages.push(...curr.failedPages);
-      return acc;
-    },
-    { orders: [], failedPages: [] }
-  );
-  let TTL = 10;
-  while (TTL > 0 && failedPages.length > 0) {
-    const { orders: temp_orders, failedPages: temp_failedPages } =
-      await getOrdersByPageIds({ modified_at, pages: failedPages });
-    orders.push(...temp_orders);
-    failedPages = structuredClone(temp_failedPages);
-    TTL--;
-  }
-  return {
-    orderCount,
-    orders,
-    failedPages,
-  };
-}
 async function prepareOrderSequentially() {
   const modified_at = await getMaxOrderModifiedAt();
-  const { orderCount } = await getOrderCount({ modified_at });
-  const { orders } = await getOrders({ modified_at });
-  return { orders, orderCount, failedPages: [] };
+  const { orders, count } = await getOrders({ modified_at });
+  return { orders, orderCount: count, modified_at };
 }
 
 async function parseOrdersToSeparateTables({ orders }) {
@@ -408,20 +354,19 @@ async function loadOrdersToBQ({
 }
 export async function loadRemonlineOrders() {
   const time = new Date();
-  // const { orderCount, orders, failedPages } = await prepareOrdersInParallel();
-  const { orderCount, orders, failedPages } = await prepareOrderSequentially();
+  const { orderCount, orders, modified_at } = await prepareOrderSequentially();
   console.log({
     time,
     message: 'loadRemonlineOrders',
     expectedOrdersCount: orderCount,
     ordersCount: orders.length,
-    failedPages: failedPages.length,
+    modified_at,
   });
   if (orders.length === 0) {
     return;
   }
-  const time2 = new Date();
-  console.log({ downloadingTime: time2 - time });
+  // const time2 = new Date();
+  // console.log({ downloadingTime: time2 - time });
   console.log(`parsing orders...`);
   const {
     handledOrders,
@@ -443,8 +388,8 @@ export async function loadRemonlineOrders() {
     handledCampaigns: handledCampaigns.length,
   });
 
-  const time3 = new Date();
-  console.log({ reducingTime: time3 - time2 });
+  // const time3 = new Date();
+  // console.log({ reducingTime: time3 - time2 });
 
   console.log('clearing orders in BQ...');
   try {
@@ -454,7 +399,7 @@ export async function loadRemonlineOrders() {
     return;
   }
   const time4 = new Date();
-  console.log({ clearingTime: time4 - time3 });
+  // console.log({ clearingTime: time4 - time3 });
   console.log(`inserting orders to BQ...`);
   await loadOrdersToBQ({
     handledOrders,
@@ -466,8 +411,8 @@ export async function loadRemonlineOrders() {
     handledCampaigns,
   });
 
-  const time5 = new Date();
-  console.log({ bqLoadingTime: time5 - time4 });
+  // const time5 = new Date();
+  // console.log({ bqLoadingTime: time5 - time4 });
   console.log('synchronizing orders in local DB...');
   await synchronizeRemonlineOrders({
     orders: handledOrders,
@@ -477,9 +422,8 @@ export async function loadRemonlineOrders() {
     handledOrderResources
   );
   const insertedCampaigns = await insertCampaignsBatch(handledCampaigns);
-  // console.log({ insertedResources, insertedCampaigns });
-  const time6 = new Date();
-  console.log({ localDBLoadingTime: time6 - time5 });
+  // const time6 = new Date();
+  // console.log({ localDBLoadingTime: time6 - time5 });
 }
 async function createOrResetOrdersTables() {
   await createOrResetTableByName({

@@ -301,27 +301,13 @@ export async function getBrandedLicencePlateNumbersFromBQ({
 
   return { brandedLicencePlateNumbers };
 }
-
-export async function clearOrdersByIds({ bqTableId, ids }) {
-  // Turn [1,2,3] → "1, 2, 3"
-  const idsList = ids.join(', ');
-  const query = `
-    DELETE FROM \`${process.env.BQ_PROJECT_NAME}.RemOnline.${bqTableId}\`
-    WHERE id IN (${idsList})
-  `;
-  const options = {
-    query,
-    location: 'US',
-  };
-  await bigquery.query(options);
-}
-
 /**
  * Deletes all rows from `datasetId.tableName` whose order_id matches one
  * of the IDs in `orders`. Runs as a single atomic DML job.
- *
+ * @param {string} dataset_id dataset id
  * @param {string} table_id  Name of the table (must be in ALLOWED_TABLES)
  * @param {{ id: number }[]} arrayToDelete  Array of { id } objects
+ * @param {string} parameter A column which is going to be used as filtering parameter for arrayToDelete
  */
 export async function deleteRowsByParameter({
   dataset_id,
