@@ -336,7 +336,7 @@ export async function deleteRowsByParameter({
       dataset_id,
       table_id,
       parameter,
-      date: Date.now(),
+      date: new Date(),
     };
     throw { info, error };
   }
@@ -361,12 +361,18 @@ export async function loadRowsViaJSONFile({
       schema: { fields: schema },
       // autodetect: true,
     };
+    throw new Error('mock error');
     await bigquery
       .dataset(dataset_id)
       .table(table_id)
       .load(tempFilePath, metadata);
-  } catch (err) {
-    throw err;
+  } catch (error) {
+    const info = {
+      dataset_id,
+      table_id,
+      date:new Date(),
+    };
+    throw { info, error };
   } finally {
     try {
       await unlink(tempFilePath);

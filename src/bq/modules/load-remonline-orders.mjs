@@ -336,7 +336,14 @@ async function clearOrdersInBQ({ handledOrders }) {
       })
     );
   }
-  await Promise.all(promises);
+  const results = await Promise.allSettled(promises);
+  console.log(results);
+  const failedTablesInfo = results.filter(
+    (result) => result.status === 'rejected'
+  );
+  if (failedTablesInfo.length > 0) {
+    throw failedTablesInfo;
+  }
 }
 async function loadOrdersToBQ({
   handledOrders,
@@ -347,66 +354,68 @@ async function loadOrdersToBQ({
   orders2Resources,
   // handledCampaigns,
 }) {
-  try {
-    const dataset_id = 'RemOnline';
-    const jobs = [
-      {
-        dataset_id,
-        table_id: 'orders',
-        rows: handledOrders,
-        schema: ordersTableSchema,
-      },
-      {
-        dataset_id,
-        table_id: 'orders_parts',
-        rows: handledOrderParts,
-        schema: orderPartsTableSchema,
-      },
-      {
-        dataset_id,
-        table_id: 'orders_operations',
-        rows: handledOrderOperations,
-        schema: orderOperationsTableSchema,
-      },
-      {
-        dataset_id,
-        table_id: 'orders_attachments',
-        rows: handledOrderAttachments,
-        schema: orderAttachmentsTableSchema,
-      },
-      {
-        dataset_id,
-        table_id: 'orders_resources',
-        rows: handledOrderResources,
-        schema: orderResourcesTableSchema,
-      },
-      {
-        dataset_id,
-        table_id: 'orders_to_resources',
-        rows: orders2Resources,
-        schema: orders2ResourcesTableSchema,
-      },
-      // {
-      //   dataset_id,
-      //   table_id: 'orders_campaigns',
-      //   rows: handledCampaigns,
-      //   schema: campaignsTableSchema,
-      // },
-    ];
+  const dataset_id = 'RemOnline';
+  const jobs = [
+    {
+      dataset_id,
+      table_id: 'orders',
+      rows: handledOrders,
+      schema: ordersTableSchema,
+    },
+    {
+      dataset_id,
+      table_id: 'orders_parts',
+      rows: handledOrderParts,
+      schema: orderPartsTableSchema,
+    },
+    {
+      dataset_id,
+      table_id: 'orders_operations',
+      rows: handledOrderOperations,
+      schema: orderOperationsTableSchema,
+    },
+    {
+      dataset_id,
+      table_id: 'orders_attachments',
+      rows: handledOrderAttachments,
+      schema: orderAttachmentsTableSchema,
+    },
+    {
+      dataset_id,
+      table_id: 'orders_resources',
+      rows: handledOrderResources,
+      schema: orderResourcesTableSchema,
+    },
+    {
+      dataset_id,
+      table_id: 'orders_to_resources',
+      rows: orders2Resources,
+      schema: orders2ResourcesTableSchema,
+    },
+    // {
+    //   dataset_id,
+    //   table_id: 'orders_campaigns',
+    //   rows: handledCampaigns,
+    //   schema: campaignsTableSchema,
+    // },
+  ];
 
-    const promises = jobs.map((job) => {
-      const { dataset_id, table_id, rows, schema } = job;
-      return loadRowsViaJSONFile({
-        dataset_id,
-        table_id,
-        rows,
-        schema,
-      });
+  const promises = jobs.map((job) => {
+    const { dataset_id, table_id, rows, schema } = job;
+    return loadRowsViaJSONFile({
+      dataset_id,
+      table_id,
+      rows,
+      schema,
     });
-    const results=await Promise.allSettled(promises);
-    console.log(results);
-  } catch (e) {
-    console.error(e);
+  });
+  const results = await Promise.allSettled(promises);
+  console.log(results);
+  const failedTablesInfo = results.filter(
+    (result) => result.status === 'rejected'
+  );
+  if (failedTablesInfo.length > 0) {
+    throw failedTablesInfo;
   }
 }
 export async function loadRemonlineOrders() {
@@ -434,19 +443,22 @@ export async function loadRemonlineOrders() {
 
   try {
     await clearOrdersInBQ({ handledOrders });
-  } catch (error) {
-    console.error(error);
+    await loadOrdersToBQ({
+      handledOrders,
+      handledOrderParts,
+      handledOrderOperations,
+      handledOrderAttachments,
+      handledOrderResources,
+      orders2Resources,
+      // handledCampaigns,
+    });
+  } catch (errors) {
+    for (const err of errors) {
+      const { reason } = err;
+      console.error({ status: err.status, ...reason });
+    }
     return;
   }
-  await loadOrdersToBQ({
-    handledOrders,
-    handledOrderParts,
-    handledOrderOperations,
-    handledOrderAttachments,
-    handledOrderResources,
-    orders2Resources,
-    // handledCampaigns,
-  });
 
   await synchronizeRemonlineOrders({
     orders: handledOrders,
@@ -497,5 +509,6 @@ if (process.env.ENV === 'TEST') {
   await remonlineTokenToEnv(true);
 
   await loadRemonlineOrders();
+  
   // await createOrResetOrdersTables();
 }
