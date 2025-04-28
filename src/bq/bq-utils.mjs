@@ -30,9 +30,9 @@ export async function generateDriversWithFuelCardReport({ date }) {
   return { rows };
 }
 
-export async function insertRowsAsStream({ rows, bqTableId }) {
+export async function insertRowsAsStream({ dataset_id, rows, bqTableId }) {
   await bigquery
-    .dataset(process.env.BQ_DATASET_ID)
+    .dataset(dataset_id || process.env.BQ_DATASET_ID)
     .table(bqTableId)
     .insert(rows);
 }
