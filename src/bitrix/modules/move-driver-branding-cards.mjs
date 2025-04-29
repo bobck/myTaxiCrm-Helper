@@ -50,7 +50,10 @@ export async function moveDriverBrandingCards() {
       driver_id,
       branding_process_id,
     });
-    if (!dbcard) {
+    if (typeof dbcard !== 'object') {
+      continue;
+    }
+    if (Object.keys(dbcard).length === 0) {
       continue;
     }
     const stage_id = `DT1138_62:${computeBrandingCardFinishedStage({ total_trips, auto_park_id })}`;
