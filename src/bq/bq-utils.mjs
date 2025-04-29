@@ -1,4 +1,7 @@
 import fs from 'fs';
+import { writeFile, unlink } from 'fs/promises';
+import path from 'path';
+import os from 'os';
 import { BigQuery } from '@google-cloud/bigquery';
 import { pool } from '../api/pool.mjs';
 import {
@@ -297,4 +300,83 @@ export async function getBrandedLicencePlateNumbersFromBQ({
   );
 
   return { brandedLicencePlateNumbers };
+}
+/**
+ * Deletes all rows from `datasetId.tableName` whose order_id matches one
+ * of the IDs in `orders`. Runs as a single atomic DML job.
+ * @param {string} dataset_id dataset id
+ * @param {string} table_id  Name of the table (must be in ALLOWED_TABLES)
+ * @param {{ id: number }[]} arrayToDelete  Array of { id } objects
+ * @param {string} parameter A column which is going to be used as filtering parameter for arrayToDelete
+ */
+export async function deleteRowsByParameter({
+  dataset_id,
+  table_id,
+  parameter,
+  arrayToDelete,
+}) {
+  try {
+    // Build the DELETE statement with the validated table name
+    const sql = `
+        DELETE FROM \`${process.env.BQ_PROJECT_NAME}.${dataset_id}.${table_id}\`
+        WHERE ${parameter} IN UNNEST(@arrayToDelete)
+      `;
+
+    // Submit as a parameterized query job
+    const [job] = await bigquery.createQueryJob({
+      query: sql,
+      location: 'US',
+      params: { arrayToDelete },
+      parameterMode: 'NAMED',
+    });
+    // Wait for completion
+    await job.getQueryResults();
+  } catch (error) {
+    const info = {
+      dataset_id,
+      table_id,
+      parameter,
+      date: new Date(),
+    };
+    throw { info, error };
+  }
+}
+
+export async function loadRowsViaJSONFile({
+  dataset_id,
+  table_id,
+  rows,
+  schema,
+}) {
+  const tempFilePath = path.join(
+    os.tmpdir(),
+    `temp_data_${dataset_id}_${table_id}.json`
+  );
+  try {
+    const jsonString = rows.map(JSON.stringify).join('\n');
+    await writeFile(tempFilePath, jsonString);
+
+    const metadata = {
+      sourceFormat: 'NEWLINE_DELIMITED_JSON',
+      schema: { fields: schema },
+      // autodetect: true,
+    };
+    await bigquery
+      .dataset(dataset_id)
+      .table(table_id)
+      .load(tempFilePath, metadata);
+  } catch (error) {
+    const info = {
+      dataset_id,
+      table_id,
+      date: new Date(),
+    };
+    throw { info, error };
+  } finally {
+    try {
+      await unlink(tempFilePath);
+    } catch (unlinkErr) {
+      console.warn(`Failed to delete temp file: ${tempFilePath}`, unlinkErr);
+    }
+  }
 }
