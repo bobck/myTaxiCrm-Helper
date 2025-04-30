@@ -2,8 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import { DateTime } from 'luxon';
-import { openSShTunnel } from '../../../../ssh.mjs';
-import{getDealsByStageEnteredDate} from '../../../bitrix/bitrix.utils.mjs';
 import {
   getWorkingDriversWithHistoryStatus,
   polandAutoParksIds,
@@ -32,9 +30,6 @@ export async function saveWorkingDriversWithHistoryStatus(manualDate) {
   });
 
   const { rows } = await getWorkingDriversWithHistoryStatus({ date });
-  console.log(rows);
-  console.log({ getWorkingDriversWithHistoryStatus: rows.length });
-  return;
   if (rows.length == 0) {
     return;
   }
@@ -109,8 +104,4 @@ export async function saveWorkingDriversWithHistoryStatus(manualDate) {
 if (process.env.ENV == 'TEST') {
   // await createOrResetTableByName({ bqTableId, schema: workingDriversTableSchema })
 
-  // await openSShTunnel;
-  // await saveWorkingDriversWithHistoryStatus('2025-04-28');
-  const a= await getDealsByStageEnteredDate({stage_id: 'C40:WON', date: '2025-04-28',category_id: 40});
-  console.log(a);
 }

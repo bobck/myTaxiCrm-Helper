@@ -599,187 +599,136 @@ export async function findContactsByPhonesObjectReturned({ drivers }) {
 //  * @returns {Promise<Array|null>} A promise that resolves to an array of deal objects,
 //  * or null if an error occurs. Might return an empty array if no deals match.
 //  */
-// export async function getDealsByStageEnteredDate(
-//   { stage_id, date, category_id },
-//   options = {}
-// ) {
-//   // --- Input Validation ---
-//   if (!stage_id || !date || category_id === undefined || category_id === null) {
-//     console.error(
-//       'Error: stage_id, date, and category_id are required parameters.'
-//     );
-//     return null;
-//   }
+export async function getDealsIdsByStageEnteredDate(
+  { stage_id, date, category_id },
+  options = {}
+) {
+  console.log({ args: arguments[0] });
+  // --- Input Validation ---
+  if (!stage_id || !date || category_id === undefined || category_id === null) {
+    console.error(
+      'Error: stage_id, date, and category_id are required parameters.'
+    );
+    return null;
+  }
 
-//   // --- Date Processing ---
-//   let targetDate;
-//   try {
-//     targetDate = new Date(date);
-//     if (isNaN(targetDate.getTime())) throw new Error('Invalid date format');
-//   } catch (e) {
-//     console.error(`Error processing date: ${e.message}`);
-//     return null;
-//   }
-//   targetDate.setUTCHours(0, 0, 0, 0);
-//   const startDateISO = targetDate.toISOString();
-//   const endDate = new Date(targetDate);
-//   endDate.setUTCDate(targetDate.getUTCDate() + 1);
-//   const endDateISO = endDate.toISOString();
+  // --- Date Processing ---
+  let targetDate;
+  try {
+    targetDate = new Date(date);
+    if (isNaN(targetDate.getTime())) throw new Error('Invalid date format');
+  } catch (e) {
+    console.error(`Error processing date: ${e.message}`);
+    return null;
+  }
+  targetDate.setUTCHours(0, 0, 0, 0);
+  const startDateISO = targetDate.toISOString();
+  const endDate = new Date(targetDate);
+  endDate.setUTCDate(targetDate.getUTCDate() + 1);
+  const endDateISO = endDate.toISOString();
 
-//   console.log(
-//     `Searching history for deals entering stage '${stage_id}' between ${startDateISO} and ${endDateISO}`
-//   );
+  console.log(
+    `Searching history for deals entering stage '${stage_id}' between ${startDateISO} and ${endDateISO}`
+  );
 
-//   // --- Step 1: Query Stage History ---
-//   const matchingDealIds = new Set(); // Use a Set to store unique deal IDs
-//   let start = 0;
-//   const batchSize = 50; // Max results per call
+  // --- Step 1: Query Stage History ---
+  const matchingDealIds = new Set(); // Use a Set to store unique deal IDs
 
-//   try {
-//     while (true) {
-//       const historyParams = {
-//         entityTypeId: 2,
-//         filter: {
-//           OWNER_TYPE_ID: 2, // 2 = Deal entity type
-//           STAGE_ID: stage_id, // Stage the deal moved TO
-//           '>=CREATED_TIME': startDateISO, // History record created >= start of day
-//           '<CREATED_TIME': endDateISO, // History record created < start of next day
-//           // TYPE_ID: 1 // Type 1 is often 'Creation', check if needed for stage changes specifically if results are noisy
-//         },
-//         select: ['OWNER_ID'], // Only need the Deal ID from history
-//         order: { ID: 'ASC' }, // Consistent order for pagination
-//         start: start,
-//       };
+  try {
+    const requestParams = {
+      entityTypeId: 2,
+      order: { ID: 'ASC' },
+      filter: {
+        STAGE_ID: stage_id, // Stage the deal moved TO
+        '>=CREATED_TIME': startDateISO, // History record created >= start of day
+        '<CREATED_TIME': endDateISO,
+      },
+      select: ['OWNER_ID'], // Only need the Deal ID from history
+    };
 
-//       console.log(`Calling crm.stagehistory.list (start: ${start})...`);
-//       const historyResponse = await bitrix.call(
-//         'crm.stagehistory.list',
-//         historyParams
-//       );
-//       // cnosole.log(`crm.stagehistory.list response:`, historyResponse);
-//       const historyRecords = historyResponse.result || [];
+    console.log(`Calling crm.stagehistory.list (start: ${start})...`);
+    const historyResponse = await bitrix.call(
+      'crm.stagehistory.list',
+      requestParams
+    );
+    // cnosole.log(`crm.stagehistory.list response:`, historyResponse);
+    const historyRecords = historyResponse.result.items || [];
 
-//       if (historyRecords.length === 0) {
-//         break; // No more history records found
-//       }
+    console.log();
+    historyRecords.forEach((record) => matchingDealIds.add(record.OWNER_ID));
 
-//       historyRecords.forEach((record) => matchingDealIds.add(record.OWNER_ID));
-
-//       // Check if we need to fetch the next page
-//       if (!historyResponse.next || historyRecords.length < batchSize) {
-//         break; // Reached the end
-//       }
-
-//       start = historyResponse.next; // Set the start for the next iteration
-//     }
-//   } catch (error) {
-//     console.error('Error fetching stage history from Bitrix24:', error.message);
-//     if (error.response && error.response.data) {
-//       console.error('Bitrix Error Details:', error.response.data);
-//     }
-//     return null; // Indicate failure
-//   }
-
-//   // --- Step 2: Check if any Deal IDs were found ---
-//   if (matchingDealIds.size === 0) {
-//     console.log(
-//       'No deals found that entered the specified stage on the specified date.'
-//     );
-//     return []; // Return empty array, not null, as the query succeeded but found nothing
-//   }
-
-//   const dealIdArray = Array.from(matchingDealIds);
-//   console.log(
-//     `Found ${dealIdArray.length} potential deal IDs from history. Verifying current state...`
-//   );
-
-//   // --- Step 3: Verify Current State & Category of Deals ---
-//   const finalMatchingDeals = [];
-//   start = 0; // Reset pagination for deal list call if needed (though ID filter might limit this)
-
-//   // Bitrix ID filter often limited ~50-100 IDs per call. If more, need to batch.
-//   // For simplicity here, assume dealIdArray fits in one call or handle batching if needed.
-//   if (dealIdArray.length > 50) {
-//     console.warn(
-//       `Warning: Fetching details for ${dealIdArray.length} deals. Consider batching crm.deal.list calls if this fails or is too slow.`
-//     );
-//     // Add batching logic here if necessary
-//   }
-
-//   try {
-//     // We might need multiple calls if dealIdArray is very large,
-//     // but let's try one first as filtering by ID array might be efficient.
-//     // Simple implementation without batching deal list for now:
-//     const dealParams = {
-//       filter: {
-//         ID: dealIdArray, // Filter by the IDs found in history
-//         STAGE_ID: stage_id, // Ensure deal is STILL in this stage
-//         CATEGORY_ID: category_id, // Ensure deal is in the correct category
-//       },
-//       select: options.select || [
-//         'ID',
-//         'TITLE',
-//         'STAGE_ID',
-//         'CATEGORY_ID',
-//         'DATE_MODIFY',
-//       ], // Get desired fields
-//       // start: start // Needed if batching deal list calls
-//     };
-
-//     console.log(`Calling crm.deal.list to verify current state...`);
-//     const dealResponse = await bitrix.call('crm.deal.list', dealParams);
-//     const currentDeals = dealResponse.result || [];
-
-//     // Note: crm.deal.list might return deals in a different order than the ID array.
-//     // The filters ensure we only get deals that currently match.
-//     finalMatchingDeals.push(...currentDeals);
-
-//     // Basic pagination check for crm.deal.list (less likely when filtering by specific IDs but possible)
-//     if (dealResponse.next) {
-//       console.warn(
-//         `Warning: Pagination detected in crm.deal.list result when filtering by ID. Needs handling if not all deals were returned.`
-//       );
-//     }
-
-//     console.log(
-//       `Found ${finalMatchingDeals.length} deals that entered stage '${stage_id}' on ${targetDate.toISOString().slice(0, 10)} and are currently in stage '${stage_id}' and category '${category_id}'.`
-//     );
-//     return finalMatchingDeals;
-//   } catch (error) {
-//     console.error('Error fetching deal details from Bitrix24:', error.message);
-//     if (error.response && error.response.data) {
-//       console.error('Bitrix Error Details:', error.response.data);
-//     }
-//     return null; // Indicate failure
-//   }
-// }
-
-export async function getDealsByStageEnteredDate({
+    start = historyResponse.next; // Set the start for the next iteration
+  } catch (error) {
+    console.error('Error fetching stage history from Bitrix24:', error.message);
+    if (error.response && error.response.data) {
+      console.error('Bitrix Error Details:', error.response.data);
+    }
+    return null; // Indicate failure
+  }
+  return { matchingDealIds }; // Return the Set of matching deal IDs
+}
+export async function getDealsByIdsVerifyingStageConstancy({
+  matchingDealIds,
   stage_id,
-  date,
   category_id,
 }) {
-  console.log({ arguments });
-  const url = `https://${process.env.BITRIX_PORTAL_HOST}/rest/${process.env.BITRIX_USER_ID}/${process.env.BITRIX_API_KEY}/crm.stagehistory.list`;
+  // --- Step 2: Check if any Deal IDs were found ---
 
-  // --- Request Data ---
-  const requestData = {
-    entityTypeId: 2,
-    order: { ID: 'ASC' },
-    filter: { OWNER_ID: 2},
-    select: ['ID', 'STAGE_ID', 'CREATED_TIME'],
-  };
+  const dealIdArray = Array.from(matchingDealIds);
+  console.log(
+    `Found ${dealIdArray.length} potential deal IDs from history. Verifying current state...`
+  );
 
-  // --- Fetch Options ---
-  const options = {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-    },
-    body: JSON.stringify(requestData), // Convert JS object to JSON string
-  };
-  const response = await fetch(url, options);
-  const { result } = await response.json();
-  return result;
+  // --- Step 3: Verify Current State & Category of Deals ---
+  const finalMatchingDeals = [];
+  // Bitrix ID filter often limited ~50-100 IDs per call. If more, need to batch.
+  // For simplicity here, assume dealIdArray fits in one call or handle batching if needed.
+  if (dealIdArray.length > 50) {
+    console.warn(
+      `Warning: Fetching details for ${dealIdArray.length} deals. Consider batching crm.deal.list calls if this fails or is too slow.`
+    );
+    // Add batching logic here if necessary
+  }
+
+  try {
+    // We might need multiple calls if dealIdArray is very large,
+    // but let's try one first as filtering by ID array might be efficient.
+    // Simple implementation without batching deal list for now:
+    const dealParams = {
+      filter: {
+        ID: dealIdArray,
+        STAGE_ID: stage_id, // Ensure deal is STILL in this stage
+        CATEGORY_ID: category_id,
+      },
+      select: [
+        'ID',
+        'SOURCE_ID',
+        'STAGE_ID',
+        'UF_CRM_1527615815',
+        'UF_CRM_1722203030883',
+      ], // Get desired fields
+    };
+
+    console.log(`Calling crm.deal.list to verify current state...`);
+    const dealResponse = await bitrix.call('crm.deal.list', dealParams);
+    const currentDeals = dealResponse.result.items || [];
+
+    // Basic pagination check for crm.deal.list (less likely when filtering by specific IDs but possible)
+    if (dealResponse.next) {
+      console.warn(
+        `Warning: Pagination detected in crm.deal.list result when filtering by ID. Needs handling if not all deals were returned.`
+      );
+    }
+
+    console.log(
+      `Found ${currentDeals.length} deals that entered stage '${stage_id}' on ${targetDate.toISOString().slice(0, 10)} and are currently in stage '${stage_id}' and category '${category_id}'.`
+    );
+    return currentDeals;
+  } catch (error) {
+    console.error('Error fetching deal details from Bitrix24:', error.message);
+    if (error.response && error.response.data) {
+      console.error('Bitrix Error Details:', error.response.data);
+    }
+    return null; // Indicate failure
+  }
 }
