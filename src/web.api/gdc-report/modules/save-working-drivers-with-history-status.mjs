@@ -30,11 +30,11 @@ export async function saveWorkingDriversWithHistoryStatus(manualDate) {
     message: 'saveWorkingDriversWithHistoryStatus',
   });
 
+  console.log({ getWorkingDriversWithHistoryStatus: rows.length });
   const { rows } = await getWorkingDriversWithHistoryStatus({ date });
   if (rows.length == 0) {
     return;
   }
-  console.log({ getWorkingDriversWithHistoryStatus: rows.length });
   const jsonData = [];
 
   for (let row of rows) {
