@@ -599,9 +599,11 @@ export async function findContactsByPhonesObjectReturned({ drivers }) {
 //  * @returns {Promise<Array|null>} A promise that resolves to an array of deal objects,
 //  * or null if an error occurs. Might return an empty array if no deals match.
 //  */
-export async function getDealsIdsByStageEnteredDate(
-  { stage_id, date, category_id }
-) {
+export async function getDealsIdsByStageEnteredDate({
+  stage_id,
+  date,
+  category_id,
+}) {
   // --- Input Validation ---
   if (!stage_id || !date || category_id === undefined || category_id === null) {
     console.error(
@@ -653,7 +655,6 @@ export async function getDealsIdsByStageEnteredDate(
 
     console.log();
     historyRecords.forEach((record) => matchingDealIds.add(record.OWNER_ID));
-
   } catch (error) {
     console.error('Error fetching stage history from Bitrix24:', error.message);
     if (error.response && error.response.data) {
@@ -678,7 +679,6 @@ export async function getDealsByIdsVerifyingStageConstancy({
   }
 
   try {
-  
     const dealParams = {
       filter: {
         ID: dealIdArray,
@@ -696,7 +696,6 @@ export async function getDealsByIdsVerifyingStageConstancy({
 
     console.log(`Calling crm.deal.list to verify current state...`);
     const dealResponse = await bitrix.call('crm.deal.list', dealParams);
-    console.log({dealResponse});
     const currentDeals = dealResponse.result || [];
 
     // Basic pagination check for crm.deal.list (less likely when filtering by specific IDs but possible)

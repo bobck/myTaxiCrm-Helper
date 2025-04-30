@@ -4,20 +4,27 @@ import {
   getDealsByIdsVerifyingStageConstancy,
 } from '../../../bitrix/bitrix.utils.mjs';
 
-export async function getAndSaveClosedPolishBitrixDealStages(manualDate) {
+import {
+  clearTableByDate,
+  loadRowsViaJSONFile,
+  createOrResetTableByName,
+} from '../../../bq/bq-utils.mjs';
+import { closedPolishBitrixDealsTableSchema } from '../../../bq/schemas.mjs';
+
+const table_id = 'closed_polish_bitrix_deals';
+const dataset_id = 'DB';
+export async function getAndSaveClosedPolishBitrixDeals(manualDate) {
   const date =
-    manualDate ||
-    DateTime.now()
-      .setZone('Europe/Kyiv')
-      .minus({ days: 1 })
-      .toFormat('yyyy-MM-dd');
+    manualDate || DateTime.now().setZone('Europe/Kyiv').toFormat('yyyy-MM-dd');
   console.log({
     time: new Date(),
     date,
     message: 'getAndSaveClosedPolishBitrixDealStages',
   });
   const category_id = '40';
-  const stage_ids = ['C40:WON', 'C40:UC_TFNPUX'];
+  const new_driver_stage = 'C40:WON'; // Прийняв авто
+  const fired_stage = 'C40:UC_TFNPUX'; // Звільнився
+  const stage_ids = [new_driver_stage, fired_stage];
   const deals = [];
   for (const stage_id of stage_ids) {
     const { matchingDealIds } = await getDealsIdsByStageEnteredDate({
@@ -50,9 +57,20 @@ export async function getAndSaveClosedPolishBitrixDealStages(manualDate) {
       is_rescheduled: UF_CRM_1722203030883 == '1',
       date,
     };
-  }); 
-  console.log(jsonData);
+  });
+  await clearTableByDate({ bqTableId: table_id, date });
+  await loadRowsViaJSONFile({
+    table_id,
+    dataset_id,
+    rows: jsonData,
+    schema: closedPolishBitrixDealsTableSchema,
+  });
 }
 if (process.env.ENV === 'TEST') {
-  await getAndSaveClosedPolishBitrixDealStages();
+  await getAndSaveClosedPolishBitrixDeals();
+  // await createOrResetTableByName({
+  //   bqTableId:table_id,
+  //   datasetId: dataset_id,
+  //   schema: closedPolishBitrixDealsTableSchema,
+  // });
 }
