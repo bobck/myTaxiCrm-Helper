@@ -53,7 +53,9 @@
     "remonlineAssetsToBQManual": "ENV=TEST node -r dotenv/config src/bq/modules/load-remonline-assets.mjs",
     "remonlineEmployeesToBQManual": "ENV=TEST node -r dotenv/config src/bq/modules/load-remonline-employees.mjs",
     "remonlineUOMsToBQManual": "ENV=TEST node -r dotenv/config src/bq/modules/load-remonline-uoms.mjs",
-    "saveWorkingDriversManual": "ENV=TEST node -r dotenv/config src/web.api/gdc-report/modules/save-working-drivers-with-history-status.mjs"
+    "saveWorkingDriversManual": "ENV=TEST node -r dotenv/config src/web.api/gdc-report/modules/save-working-drivers-with-history-status.mjs",
+
+    "getAndSaveClosedPolishBitrixDealStagesManual": "ENV=TEST node -r dotenv/config src/web.api/gdc-report/modules/get-and-save-closed-polish-bitrix-deal-stages.mjs"
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",

@@ -600,10 +600,8 @@ export async function findContactsByPhonesObjectReturned({ drivers }) {
 //  * or null if an error occurs. Might return an empty array if no deals match.
 //  */
 export async function getDealsIdsByStageEnteredDate(
-  { stage_id, date, category_id },
-  options = {}
+  { stage_id, date, category_id }
 ) {
-  console.log({ args: arguments[0] });
   // --- Input Validation ---
   if (!stage_id || !date || category_id === undefined || category_id === null) {
     console.error(
@@ -646,7 +644,6 @@ export async function getDealsIdsByStageEnteredDate(
       select: ['OWNER_ID'], // Only need the Deal ID from history
     };
 
-    console.log(`Calling crm.stagehistory.list (start: ${start})...`);
     const historyResponse = await bitrix.call(
       'crm.stagehistory.list',
       requestParams
@@ -657,7 +654,6 @@ export async function getDealsIdsByStageEnteredDate(
     console.log();
     historyRecords.forEach((record) => matchingDealIds.add(record.OWNER_ID));
 
-    start = historyResponse.next; // Set the start for the next iteration
   } catch (error) {
     console.error('Error fetching stage history from Bitrix24:', error.message);
     if (error.response && error.response.data) {
@@ -675,25 +671,14 @@ export async function getDealsByIdsVerifyingStageConstancy({
   // --- Step 2: Check if any Deal IDs were found ---
 
   const dealIdArray = Array.from(matchingDealIds);
-  console.log(
-    `Found ${dealIdArray.length} potential deal IDs from history. Verifying current state...`
-  );
-
-  // --- Step 3: Verify Current State & Category of Deals ---
-  const finalMatchingDeals = [];
-  // Bitrix ID filter often limited ~50-100 IDs per call. If more, need to batch.
-  // For simplicity here, assume dealIdArray fits in one call or handle batching if needed.
   if (dealIdArray.length > 50) {
     console.warn(
       `Warning: Fetching details for ${dealIdArray.length} deals. Consider batching crm.deal.list calls if this fails or is too slow.`
     );
-    // Add batching logic here if necessary
   }
 
   try {
-    // We might need multiple calls if dealIdArray is very large,
-    // but let's try one first as filtering by ID array might be efficient.
-    // Simple implementation without batching deal list for now:
+  
     const dealParams = {
       filter: {
         ID: dealIdArray,
@@ -711,7 +696,8 @@ export async function getDealsByIdsVerifyingStageConstancy({
 
     console.log(`Calling crm.deal.list to verify current state...`);
     const dealResponse = await bitrix.call('crm.deal.list', dealParams);
-    const currentDeals = dealResponse.result.items || [];
+    console.log({dealResponse});
+    const currentDeals = dealResponse.result || [];
 
     // Basic pagination check for crm.deal.list (less likely when filtering by specific IDs but possible)
     if (dealResponse.next) {
@@ -719,10 +705,6 @@ export async function getDealsByIdsVerifyingStageConstancy({
         `Warning: Pagination detected in crm.deal.list result when filtering by ID. Needs handling if not all deals were returned.`
       );
     }
-
-    console.log(
-      `Found ${currentDeals.length} deals that entered stage '${stage_id}' on ${targetDate.toISOString().slice(0, 10)} and are currently in stage '${stage_id}' and category '${category_id}'.`
-    );
     return currentDeals;
   } catch (error) {
     console.error('Error fetching deal details from Bitrix24:', error.message);
