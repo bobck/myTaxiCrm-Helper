@@ -103,5 +103,4 @@ export async function saveWorkingDriversWithHistoryStatus(manualDate) {
 
 if (process.env.ENV == 'TEST') {
   // await createOrResetTableByName({ bqTableId, schema: workingDriversTableSchema })
-
 }
