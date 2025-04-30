@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import { DateTime } from 'luxon';
+
 import {
   getWorkingDriversWithHistoryStatus,
   polandAutoParksIds,
@@ -33,7 +34,7 @@ export async function saveWorkingDriversWithHistoryStatus(manualDate) {
   if (rows.length == 0) {
     return;
   }
-
+  console.log({ getWorkingDriversWithHistoryStatus: rows.length });
   const jsonData = [];
 
   for (let row of rows) {
@@ -103,4 +104,5 @@ export async function saveWorkingDriversWithHistoryStatus(manualDate) {
 
 if (process.env.ENV == 'TEST') {
   // await createOrResetTableByName({ bqTableId, schema: workingDriversTableSchema })
+  saveWorkingDriversWithHistoryStatus();
 }

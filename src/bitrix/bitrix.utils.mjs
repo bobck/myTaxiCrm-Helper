@@ -583,22 +583,7 @@ export async function findContactsByPhonesObjectReturned({ drivers }) {
   const { result } = temp_result;
   return result;
 }
-// --- Assume 'bitrix' client is already initialized somewhere in your code ---
-// const { Bitrix } = require('2bad/bitrix');
-// const bitrix = new Bitrix('YOUR_WEBHOOK_URL'); // Ensure this is done with appropriate permissions (crm, timeline/stagehistory)
-// /**
-//  * Fetches Bitrix24 deals that moved into a specific stage on a specific date
-//  * and are currently still in that stage and category.
-//  *
-//  * @param {object} params - The parameters object.
-//  * @param {string|number} params.stage_id - The target stage ID the deal moved INTO (e.g., 'C4:EXECUTING').
-//  * @param {string|Date} params.date - The target date (string 'YYYY-MM-DD' or a Date object) when the move occurred.
-//  * @param {string|number} params.category_id - The deal pipeline category ID the deal must currently belong to.
-//  * @param {object} [options] - Optional parameters.
-//  * @param {string[]} [options.select=['ID', 'TITLE', 'STAGE_ID', 'CATEGORY_ID', 'DATE_MODIFY']] - Deal fields to retrieve in the final step.
-//  * @returns {Promise<Array|null>} A promise that resolves to an array of deal objects,
-//  * or null if an error occurs. Might return an empty array if no deals match.
-//  */
+
 export async function getDealsIdsByStageEnteredDate({
   stage_id,
   date,
