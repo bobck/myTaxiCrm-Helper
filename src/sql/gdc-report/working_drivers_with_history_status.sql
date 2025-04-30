@@ -2,6 +2,8 @@ SELECT
 	DISTINCT ON
 	(d.id)
 	d.id,
+	d.phone,
+	d.full_name,
 	d.auto_park_id,
 	deh.created_at AS start_working_at,
 	dehl.created_at AS temporary_leave_at,
