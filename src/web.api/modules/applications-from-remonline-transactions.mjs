@@ -164,6 +164,7 @@ export async function createCRMApplicationsFromRemonlineTransaction() {
             created_at,
             cashboxId,
             contractorId,
+            remonlineCashboxId
           });
           break;
         }
