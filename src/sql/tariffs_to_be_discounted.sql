@@ -34,7 +34,7 @@ SELECT
 --   tr.is_rate_in_percent,
   tr."from",
   tr.to,
-  tr.rate,
+  tr.rate_percent AS rate,
   ltct.last_created_at
 FROM
   tariffs t
