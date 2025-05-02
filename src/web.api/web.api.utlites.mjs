@@ -629,3 +629,12 @@ export async function getHandledCashBlockRulesInfo({ fired_drivers_ids }) {
   const { rows, rowCount } = result;
   return { rows };
 }
+
+export async function verifyIfBoltIdCorrect({ phone }) {
+  const sql = fs
+    .readFileSync('src/sql/verify-if-bolt-id-correct.sql')
+    .toString();
+  const result = await pool.query(sql, [phone]);
+  const { rows, rowCount } = result;
+  return { rows };
+}
