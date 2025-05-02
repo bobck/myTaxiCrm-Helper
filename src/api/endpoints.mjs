@@ -146,6 +146,7 @@ export async function initApi({ pool }) {
 
   app.post('/verify', async (req, res) => {
     const { driver_id, phone, bolt_id } = req.query;
+    console.log({ message: 'POST: verify', query: req.query });
     const filteredPhone = String(phone).replaceAll(/[^0-9]/g, '');
     const isUkrainianPhone = filteredPhone.startsWith('380');
     const isPolishPhone = filteredPhone.startsWith('48');
@@ -173,7 +174,12 @@ export async function initApi({ pool }) {
         },
       });
     }
-    // const {rows}= await verifyIfBoltIdCorrect({phone})
+    const phoneReadyToQuery = `%${handledPhone}%`;
+    const { rows } = await verifyIfBoltIdCorrect({
+      phone: phoneReadyToQuery,
+      bolt_id,
+    });
+    console.log({ rows });
     res.status(200).json({
       status: 'ok',
       s: {
@@ -181,7 +187,7 @@ export async function initApi({ pool }) {
         phone: handledPhone,
         isUkrainianPhone,
         isPolishPhone,
-        //  rows
+        rows,
       },
     });
   });

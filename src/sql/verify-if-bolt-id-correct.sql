@@ -2,4 +2,4 @@ SELECT dti.external_id, d.full_name, d.phone
 FROM drivers_to_integrations dti 
 join drivers d on d.id=dti.driver_id 
 where dti.integration_type='BOLT' 
-and d.phone like '%937163797%'
+and d.phone like $1
