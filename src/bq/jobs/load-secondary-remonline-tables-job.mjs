@@ -15,7 +15,9 @@ const loadSecondaryRemonlineTablesJob = CronJob.from({
       await loadRemonlineEmployeesToBQ();
       await loadRemonlineUOMsToBQ();
     } catch (e) {
-      console.error('An error occurred while loading secondary tables job tables');
+      console.error(
+        'An error occurred while loading secondary tables job tables'
+      );
       console.error(e);
     }
   },
