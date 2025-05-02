@@ -143,6 +143,13 @@ export async function initApi({ pool }) {
     return res.status(200).json({ status: 'ok' });
   });
 
+  app.post('/verify/driver/:id', async (req, res) => {
+    const { params } = req;
+    const { id } = params;
+    console.log({ message: 'GET: verify/driver/:id', params });
+    res.status(200).json({ status: 'ok', handled_id: { id } });
+  });
+
   app.listen(3000);
 
   console.log({
