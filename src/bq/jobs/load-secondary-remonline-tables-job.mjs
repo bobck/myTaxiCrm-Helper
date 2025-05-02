@@ -15,8 +15,8 @@ const loadSecondaryRemonlineTablesJob = CronJob.from({
       await loadRemonlineEmployeesToBQ();
       await loadRemonlineUOMsToBQ();
     } catch (e) {
-      console.error('An error occurred while creating transfers tables');
-      console.error(e.errors[0]);
+      console.error('An error occurred while loading secondary tables job tables');
+      console.error(e);
     }
   },
 });
