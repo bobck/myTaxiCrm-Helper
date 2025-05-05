@@ -3,7 +3,7 @@ import { queryHandler } from './modules/queryHandler.mjs';
 import {
   referralAddHandler,
   referralValidationHandler,
-  referralApprovalHandler
+  referralApprovalHandler,
 } from './modules/referralHandlers.mjs';
 import { boltIdVerificationHandler } from './modules/boltIdVerification.mjs';
 export async function initApi({ pool }) {
@@ -16,9 +16,9 @@ export async function initApi({ pool }) {
 
   app.post('/referral-add', referralAddHandler);
 
-  app.post('/referral-approval',referralApprovalHandler);
+  app.post('/referral-approval', referralApprovalHandler);
 
-  app.post('/verify',boltIdVerificationHandler );
+  app.post('/verify', boltIdVerificationHandler);
 
   app.listen(3000);
 

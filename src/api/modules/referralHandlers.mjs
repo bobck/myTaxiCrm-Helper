@@ -1,4 +1,3 @@
-import { pool } from '../pool.mjs';
 import { DateTime } from 'luxon';
 import { referralValidadion } from '../../bitrix/modules/referral-validation.mjs';
 import {
@@ -10,7 +9,6 @@ import {
   completeBitrixTaskById,
   addCommentToEntity,
 } from '../../bitrix/bitrix.utils.mjs';
-import { verifyIfBoltIdCorrect } from '../../web.api/web.api.utlites.mjs';
 
 export const referralValidationHandler = async (req, res) => {
   const { query } = req;
