@@ -592,7 +592,9 @@ export async function updateRequestedDriver({ bitrix_deal_id, payload }) {
   const params = {
     id: bitrix_deal_id,
     entityTypeId: '1132',
-    'fields[STAGE_ID]': 'DT1132_60:NEW',
+    // 'fields[STAGE_ID]': 'DT1132_60:NEW', //листи на відправлення
+
+    'fields[STAGE_ID]': 'DT1132_60:UC_7W6FFZ', //Заявка на відправку листа
   };
   if (bolt_id) {
     params['fields[ufCrm52_1738324675]'] = bolt_id;
@@ -625,4 +627,3 @@ export async function updateRequestedDriver({ bitrix_deal_id, payload }) {
 //   console.log(response);
 //   return response;
 // }
-
