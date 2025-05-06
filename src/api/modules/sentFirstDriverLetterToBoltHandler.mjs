@@ -5,9 +5,10 @@ import {
 } from '../endpoints-utils.mjs';
 export const sentFirstDriverLetterToBolt = async (req, res) => {
   try {
-    const { phone, bolt_id, city_id, bitrix_card_id } = req.query;
+    const { phone, bolt_id: req_bolt_id, city_id, bitrix_card_id } = req.query;
     console.log({ message: 'POST: verify', query: req.query });
     const verificatedPhone = handleDriverPhone({ phone });
+    const updatePayload = {bitrix_card_id};
 
     if (verificatedPhone.code === 400) {
       throw verificatedPhone;
@@ -15,7 +16,7 @@ export const sentFirstDriverLetterToBolt = async (req, res) => {
     const { phoneReadyToQuery } = verificatedPhone;
     const { rows } = await getAllBoltIdsByDriverPhone({
       phone: phoneReadyToQuery,
-      bolt_id,
+      bolt_id: req_bolt_id,
     });
     if (!rows || rows.length === 0) {
       throw {
@@ -24,23 +25,29 @@ export const sentFirstDriverLetterToBolt = async (req, res) => {
         message: 'Bolt ID not found',
       };
     }
-    const { driver_id, auto_park_id } = rows[rows.length - 1];
-    const { checkResult } = await checkIfDriverStaysInTheSameCity({
+    const [driver] = rows;
+    const { driver_id, auto_park_id, external_id: bolt_id } = driver;
+    const { checkResult, actualCityId} = await checkIfDriverStaysInTheSameCity({
       driver_id,
       auto_park_id,
       city_id,
     });
-
-    console.log(checkResult);
-
-    // console.log({ rows });
+    if(!checkResult && actualCityId) {
+      updatePayload.city_id = actualCityId;
+    }
+    if(bolt_id !== req_bolt_id) {
+      updatePayload.bolt_id = bolt_id;
+    }
+    
     res.status(200).json({
       status: 'ok',
       data: {
         driver_id,
+
         checkResult,
         phone: phoneReadyToQuery,
-        rows,
+        bolt_id,
+        // rows,
       },
     });
   } catch (error) {
