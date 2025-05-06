@@ -5,7 +5,7 @@ import {
   referralValidationHandler,
   referralApprovalHandler,
 } from './modules/referralHandlers.mjs';
-import { boltIdVerificationHandler } from './modules/boltIdVerification.mjs';
+import { sentFirstDriverLetterToBolt } from './modules/sentFirstDriverLetterToBoltHandler.mjs';
 export async function initApi({ pool }) {
   const app = express();
   app.use(express.json());
@@ -18,9 +18,9 @@ export async function initApi({ pool }) {
 
   app.post('/referral-approval', referralApprovalHandler);
 
-  app.post('/verify', boltIdVerificationHandler);
+  app.post('/sent-first-driver-letter-to-bolt', sentFirstDriverLetterToBolt);
 
-  app.listen(3000);
+  app.listen(3000, '0.0.0.0');
 
   console.log({
     message: 'Express listening',

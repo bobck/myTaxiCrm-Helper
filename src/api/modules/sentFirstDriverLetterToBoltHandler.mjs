@@ -3,9 +3,9 @@ import {
   handleDriverPhone,
   checkIfDriverStaysInTheSameCity,
 } from '../endpoints-utils.mjs';
-export const boltIdVerificationHandler = async (req, res) => {
+export const sentFirstDriverLetterToBolt = async (req, res) => {
   try {
-    const { phone, bolt_id, city_id } = req.query;
+    const { phone, bolt_id, city_id, bitrix_card_id } = req.query;
     console.log({ message: 'POST: verify', query: req.query });
     const verificatedPhone = handleDriverPhone({ phone });
 
@@ -17,6 +17,13 @@ export const boltIdVerificationHandler = async (req, res) => {
       phone: phoneReadyToQuery,
       bolt_id,
     });
+    if (!rows || rows.length === 0) {
+      throw {
+        code: 400,
+        status: 'error',
+        message: 'Bolt ID not found',
+      };
+    }
     const { driver_id, auto_park_id } = rows[0];
     const { checkResult } = await checkIfDriverStaysInTheSameCity({
       driver_id,
