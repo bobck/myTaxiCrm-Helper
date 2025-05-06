@@ -763,7 +763,7 @@ export async function createBoltDriverToBan({
   bitrix_deal_id,
   phone,
 }) {
-  const sql = /*sql*/`
+  const sql = /*sql*/ `
       INSERT INTO bolt_drivers_to_ban (driver_id, bolt_id, bitrix_deal_id, phone)
       VALUES (?, ?, ?, ?);
   `;
@@ -777,7 +777,7 @@ export async function createBoltDriverToBan({
  * @returns {Promise<Object>} - A promise that resolves with an object indicating success (e.g., { changes: 1 }).
  */
 export async function setFirstLetterSent({ driver_id }) {
-  const sql = /*sql*/`
+  const sql = /*sql*/ `
       UPDATE bolt_drivers_to_ban
       SET is_first_letter_sent = TRUE,
           updated_at = CURRENT_TIMESTAMP
@@ -793,7 +793,7 @@ export async function setFirstLetterSent({ driver_id }) {
  * @returns {Promise<Object>} - A promise that resolves with an object indicating success (e.g., { changes: 1 }).
  */
 export async function setSecondLetterSent({ driver_id }) {
-  const sql = /*sql*/`
+  const sql = /*sql*/ `
       UPDATE bolt_drivers_to_ban
       SET is_second_letter_sent = TRUE,
           updated_at = CURRENT_TIMESTAMP
@@ -809,7 +809,7 @@ export async function setSecondLetterSent({ driver_id }) {
  * @returns {Promise<Object>} - A promise that resolves with an object indicating success (e.g., { changes: 1 }).
  */
 export async function banBoltDriver({ driver_id }) {
-  const sql = /*sql*/`
+  const sql = /*sql*/ `
       UPDATE bolt_drivers_to_ban
       SET is_banned = TRUE,
           updated_at = CURRENT_TIMESTAMP
@@ -823,7 +823,7 @@ export async function banBoltDriver({ driver_id }) {
  * @returns {Promise<Array<Object>>} - A promise that resolves with an array of driver records.
  */
 export async function getBoltDriversFirstLetterSent() {
-  const sql = /*sql*/`
+  const sql = /*sql*/ `
       SELECT driver_id, bolt_id, bitrix_deal_id, phone, is_banned, is_first_letter_sent, is_second_letter_sent, created_at, updated_at
       FROM bolt_drivers_to_ban
       WHERE is_first_letter_sent = TRUE;
@@ -838,7 +838,7 @@ export async function getBoltDriversFirstLetterSent() {
  * @returns {Promise<Object|null>} - A promise that resolves with the driver record or null if not found.
  */
 export async function getBoltDriverById({ driver_id }) {
-  const sql = /*sql*/`
+  const sql = /*sql*/ `
       SELECT driver_id, bolt_id, bitrix_deal_id, phone, is_banned, is_first_letter_sent, is_second_letter_sent, created_at, updated_at
       FROM bolt_drivers_to_ban
       WHERE driver_id = ?;

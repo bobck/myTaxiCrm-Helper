@@ -583,3 +583,16 @@ export async function findContactsByPhonesObjectReturned({ drivers }) {
   const { result } = temp_result;
   return result;
 }
+export async function updateRequestedDriver({bitrix_deal_id, payload}) {
+  // const response = await bitrix.call('crm.deal.update', {
+  //   id: bitrix_deal_id,
+  //   'fields[UF_CRM_1714048836815]': payload.city_id,
+  //   'fields[UF_CRM_1714048883273]': payload.bolt_id,
+  // });
+  // const { result } = response;
+  // return result;
+  console.log('updateRequestedDriver ...', {
+    bitrix_deal_id,
+    payload,
+  });
+}

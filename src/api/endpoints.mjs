@@ -6,6 +6,7 @@ import {
   referralApprovalHandler,
 } from './modules/referralHandlers.mjs';
 import { sentFirstDriverLetterToBolt } from './modules/sentFirstDriverLetterToBoltHandler.mjs';
+import boltRouter from './routes/bolt.router.mjs';
 export async function initApi({ pool }) {
   const app = express();
   app.use(express.json());
@@ -19,6 +20,7 @@ export async function initApi({ pool }) {
   app.post('/referral-approval', referralApprovalHandler);
 
   app.post('/sent-first-driver-letter-to-bolt', sentFirstDriverLetterToBolt);
+  app.use('/bolt', boltRouter);
 
   app.listen(3000, process.env.API_HOST, () => {
     console.log(`Server is running on address: ${process.env.API_HOST}:3000`);
