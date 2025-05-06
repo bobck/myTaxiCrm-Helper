@@ -21,16 +21,17 @@ export const boltIdVerificationHandler = async (req, res) => {
     console.log({ rows });
     res.status(200).json({
       status: 'ok',
-      s: {
+      data: {
         driver_id,
-        phone: handledPhone,
-        isUkrainianPhone,
-        isPolishPhone,
+        phone: phoneReadyToQuery,
         rows,
       },
     });
   } catch (error) {
     const { code, status, ...err } = error;
+    if (!code) {
+      throw error;
+    }
     res.status(code).json({
       status,
       err,
