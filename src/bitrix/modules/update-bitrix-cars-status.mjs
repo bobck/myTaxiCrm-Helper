@@ -4,14 +4,41 @@ import {
   updateCarStatusAndBrnad,
 } from '../bitrix.utils.mjs';
 
-if (process.env.ENV == 'TEST') {
+function transliterateUkrainianPlateChar(char) {
+  const map = {
+    А: 'A',
+    В: 'B',
+    Е: 'E',
+    І: 'I',
+    К: 'K',
+    М: 'M',
+    Н: 'H',
+    О: 'O',
+    Р: 'P',
+    С: 'C',
+    Т: 'T',
+    Х: 'X',
+  };
+  return map[char] || char; // Return mapped char or original if not in map (e.g., numbers)
+}
+
+function transliterateUkrainianPlate(plateNumber) {
+  return plateNumber.split('').map(transliterateUkrainianPlateChar).join('');
+}
+
+export async function updateBitrixCarsStatus() {
   const bitrixResponse = await getCardIdsFromSpecialEntity({
     entityTypeId: 138,
   });
-  // // const bitrixResponse2=await getAllSpecialEntityRows(138)
-//   console.log(bitrixResponse, bitrixResponse.length);
-
-  // console.log(bitrixResponse2,bitrixResponse2.length)
-  // const bitrixResp=await updateCarStatusAndBrnad({status:7004,brand:'Присутнє',bitrix_card_id:9092})
-  // console.log(bitrixResp)
+  console.log({ bitrixResponse: bitrixResponse.length });
+  const transliteratedCards = bitrixResponse.map(
+    ({ id, ufCrm4_1654801473656: license_plate }) => ({
+      id,
+      license_plate: transliterateUkrainianPlate(license_plate),
+    })
+  );
+  
+}
+if (process.env.ENV == 'TEST') {
+  await updateBitrixCarsStatus();
 }

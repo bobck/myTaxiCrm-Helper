@@ -583,29 +583,37 @@ export async function findContactsByPhonesObjectReturned({ drivers }) {
   const { result } = temp_result;
   return result;
 }
-export async function getCardIdsFromSpecialEntity({entityTypeId}) {
+export async function getCardIdsFromSpecialEntity({ entityTypeId }) {
   try {
     let doneAtAll = 0;
     let doneAtPrevious = 0;
     const pageSize = 50;
-    const items=[];
-    do{
+    const items = [];
+    do {
       const { result } = await bitrix.call('crm.item.list', {
         entityTypeId,
-        start:doneAtAll+1,
-        select: ['ID','TITLE','ufCrm4_1744703234']
-      }) ;
+        start: doneAtAll + 1,
+        select: [
+          'ID',
+          // 'TITLE',
+          // 'ufCrm4_1744703234',
+          'ufCrm4_1654801473656',// license plate
+        ],
+      });
       items.push(...result.items);
       doneAtAll += result.items.length;
       doneAtPrevious = result.items.length;
-      console.log({doneAtAll, doneAtPrevious})
-      console.log({firstId:result.items[0].id,lastId: result.items[result.items.length-1].id});
-    }while (doneAtPrevious>=pageSize&&doneAtAll<200);
+      console.log({ doneAtAll, doneAtPrevious });
+      console.log({
+        firstId: result.items[0].id,
+        lastId: result.items[result.items.length - 1].id,
+      });
+    } while (doneAtPrevious >= pageSize && doneAtAll < 200);
     // console.log('Retrieved cards:', items);
-    
+
     // // Map the result to extract only the ID from each card (or CRM item)
     // const cardIds = result.map(item => item.ID);
-    
+
     // console.log('Retrieved card IDs:', cardIds);
     return items;
   } catch (error) {
@@ -617,11 +625,11 @@ export async function getCardIdsFromSpecialEntity({entityTypeId}) {
 export async function getAllSpecialEntityRows(entityTypeId) {
   // Define how many rows to request per call. Many Bitrix methods default to 50.
   const pageSize = 50;
-  
+
   // If you already know approximately how many rows to expect,
   // you can calculate the number of pages. For example, for 2K rows:
-  const totalPages = Math.ceil(2000 / pageSize);  // This gives ~40 pages
-  
+  const totalPages = Math.ceil(2000 / pageSize); // This gives ~40 pages
+
   // Build the batch command object.
   const batchCommands = {};
   for (let i = 0; i < totalPages; i++) {
@@ -632,15 +640,15 @@ export async function getAllSpecialEntityRows(entityTypeId) {
         entityTypeId,
         start: i * pageSize,
         // Select the fields you need, for example, ID and your custom field.
-        select: ['ID', 'TITLE']
-      }
+        select: ['ID', 'TITLE'],
+      },
     ];
   }
-  
+
   try {
     // Call the 'batch' method with the commands. All commands execute in one request.
     const { result } = await bitrix.call('batch', { cmd: batchCommands });
-    
+
     // Merge the pages
     let allRows = [];
     for (let i = 0; i < totalPages; i++) {
@@ -657,13 +665,17 @@ export async function getAllSpecialEntityRows(entityTypeId) {
   }
 }
 
-export async function updateCarStatusAndBrnad({status,brand,bitrix_card_id}){
-  console.log({status,brand,bitrix_card_id})
+export async function updateCarStatusAndBrnad({
+  status,
+  brand,
+  bitrix_card_id,
+}) {
+  console.log({ status, brand, bitrix_card_id });
   const response = await bitrix.call('crm.item.update', {
     id: bitrix_card_id,
-    entityTypeId:'138',
-    'fields[ufCrm4_1744703234]': status,//UF_CRM_4_1744703234
-    'fields[ufCrm4_1741607811]': brand,//UF_CRM_4_1741607811
+    entityTypeId: '138',
+    'fields[ufCrm4_1744703234]': status, //UF_CRM_4_1744703234
+    'fields[ufCrm4_1741607811]': brand, //UF_CRM_4_1741607811
   });
   const { result } = response;
   return result;
