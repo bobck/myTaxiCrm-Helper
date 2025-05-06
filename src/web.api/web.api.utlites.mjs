@@ -630,9 +630,9 @@ export async function getHandledCashBlockRulesInfo({ fired_drivers_ids }) {
   return { rows };
 }
 
-export async function verifyIfBoltIdCorrect({ phone }) {
+export async function getAllBoltIdsByDriverPhone({ phone }) {
   const sql = fs
-    .readFileSync('src/sql/verify-if-bolt-id-correct.sql')
+    .readFileSync('src/sql/get_all_bolt_ids_by_driver_phone.sql')
     .toString();
   const result = await pool.query(sql, [phone]);
   const { rows, rowCount } = result;

@@ -20,7 +20,9 @@ export async function initApi({ pool }) {
 
   app.post('/sent-first-driver-letter-to-bolt', sentFirstDriverLetterToBolt);
 
-  app.listen(3000, '0.0.0.0');
+  app.listen(3000, process.env.API_HOST, () => {
+    console.log(`Server is running on address: ${process.env.API_HOST}:3000`);
+  });
 
   console.log({
     message: 'Express listening',

@@ -1,5 +1,5 @@
 import { cityListWithAssignedBy } from '../bitrix/bitrix.constants.mjs';
-import { verifyIfBoltIdCorrect } from '../web.api/web.api.utlites.mjs';
+import { getAllBoltIdsByDriverPhone } from '../web.api/web.api.utlites.mjs';
 
 export const checkIfDriverStaysInTheSameCity = async ({
   driver_id,

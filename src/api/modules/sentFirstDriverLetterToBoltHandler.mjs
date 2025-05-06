@@ -1,4 +1,4 @@
-import { verifyIfBoltIdCorrect } from '../../web.api/web.api.utlites.mjs';
+import { getAllBoltIdsByDriverPhone } from '../../web.api/web.api.utlites.mjs';
 import {
   handleDriverPhone,
   checkIfDriverStaysInTheSameCity,
@@ -13,7 +13,7 @@ export const sentFirstDriverLetterToBolt = async (req, res) => {
       throw verificatedPhone;
     }
     const { phoneReadyToQuery } = verificatedPhone;
-    const { rows } = await verifyIfBoltIdCorrect({
+    const { rows } = await getAllBoltIdsByDriverPhone({
       phone: phoneReadyToQuery,
       bolt_id,
     });
@@ -24,7 +24,7 @@ export const sentFirstDriverLetterToBolt = async (req, res) => {
         message: 'Bolt ID not found',
       };
     }
-    const { driver_id, auto_park_id } = rows[0];
+    const { driver_id, auto_park_id } = rows[rows.length - 1];
     const { checkResult } = await checkIfDriverStaysInTheSameCity({
       driver_id,
       auto_park_id,
