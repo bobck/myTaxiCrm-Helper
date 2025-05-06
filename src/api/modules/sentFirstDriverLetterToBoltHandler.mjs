@@ -15,13 +15,13 @@ export const sentFirstDriverLetterToBolt = async (req, res) => {
       bitrix_deal_id,
     } = req.query;
     console.log({ message: 'POST: verify', query: req.query });
-    const verificatedPhone = handleDriverPhone({ phone: req_phone });
+    const verifiedPhone = handleDriverPhone({ phone: req_phone });
     const updatePayload = { bitrix_deal_id };
 
-    if (verificatedPhone.code === 400) {
-      throw verificatedPhone;
+    if (verifiedPhone.code === 400) {
+      throw verifiedPhone;
     }
-    const { phoneReadyToQuery } = verificatedPhone;
+    const { phoneReadyToQuery } = verifiedPhone;
     const { rows } = await getAllBoltIdsByDriverPhone({
       phone: phoneReadyToQuery,
       bolt_id: req_bolt_id,
@@ -54,12 +54,12 @@ export const sentFirstDriverLetterToBolt = async (req, res) => {
       bitrix_deal_id,
       bolt_id,
     });
-    await createBoltDriverToBan({
-      driver_id,
-      phone,
-      bitrix_deal_id,
-      bolt_id,
-    });
+    // await createBoltDriverToBan({
+    //   driver_id,
+    //   phone,
+    //   bitrix_deal_id,
+    //   bolt_id,
+    // });
     await updateRequestedDriver({
       bitrix_deal_id,
       payload: updatePayload,
