@@ -1,48 +1,39 @@
 import { verifyIfBoltIdCorrect } from '../../web.api/web.api.utlites.mjs';
-
+import {
+  handleDriverPhone,
+  checkIfDriverStaysInTheSameCity,
+} from '../endpoints-utils.mjs';
 export const boltIdVerificationHandler = async (req, res) => {
-  const { driver_id, phone, bolt_id } = req.query;
-  console.log({ message: 'POST: verify', query: req.query });
-  const filteredPhone = String(phone).replaceAll(/[^0-9]/g, '');
-  const isUkrainianPhone = filteredPhone.startsWith('380');
-  const isPolishPhone = filteredPhone.startsWith('48');
-  let handledPhone;
-  if (isUkrainianPhone) {
-    handledPhone = filteredPhone.slice(3);
-  } else if (isPolishPhone) {
-    handledPhone = filteredPhone.slice(2);
-  } else {
-    res.status(400).json({
-      status: 'error',
-      error: {
-        message: 'Phone number is not valid. It should be Ukrainian or Polish',
-        phone,
+  try {
+    const { driver_id, phone, bolt_id, city_id } = req.query;
+    console.log({ message: 'POST: verify', query: req.query });
+    const verificatedPhone = handleDriverPhone({ phone });
+
+    if (verificatedPhone.code === 400) {
+      throw verificatedPhone;
+    }
+    const { phoneReadyToQuery } = verificatedPhone;
+    const { rows } = await verifyIfBoltIdCorrect({
+      phone: phoneReadyToQuery,
+      bolt_id,
+    });
+
+    console.log({ rows });
+    res.status(200).json({
+      status: 'ok',
+      s: {
+        driver_id,
+        phone: handledPhone,
+        isUkrainianPhone,
+        isPolishPhone,
+        rows,
       },
     });
-  }
-  if (handledPhone.length !== 9) {
-    res.status(400).json({
-      status: 'error',
-      error: {
-        message: 'Phone number length is not valid.',
-        phone,
-      },
+  } catch (error) {
+    const { code, status, ...err } = error;
+    res.status(code).json({
+      status,
+      err,
     });
   }
-  const phoneReadyToQuery = `%${handledPhone}%`;
-  const { rows } = await verifyIfBoltIdCorrect({
-    phone: phoneReadyToQuery,
-    bolt_id,
-  });
-  console.log({ rows });
-  res.status(200).json({
-    status: 'ok',
-    s: {
-      driver_id,
-      phone: handledPhone,
-      isUkrainianPhone,
-      isPolishPhone,
-      rows,
-    },
-  });
 };
