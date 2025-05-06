@@ -3,12 +3,19 @@ import {
   handleDriverPhone,
   checkIfDriverStaysInTheSameCity,
 } from '../endpoints-utils.mjs';
+import { createBoltDriverToBan } from '../../bitrix/bitrix.queries.mjs';
+// import {createBoltDriverToBank} from '../../bitrix';
 export const sentFirstDriverLetterToBolt = async (req, res) => {
   try {
-    const { phone, bolt_id: req_bolt_id, city_id, bitrix_card_id } = req.query;
+    const {
+      phone: req_phone,
+      bolt_id: req_bolt_id,
+      city_id,
+      bitrix_deal_id,
+    } = req.query;
     console.log({ message: 'POST: verify', query: req.query });
-    const verificatedPhone = handleDriverPhone({ phone });
-    const updatePayload = {bitrix_card_id};
+    const verificatedPhone = handleDriverPhone({ phone: req_phone });
+    const updatePayload = { bitrix_deal_id };
 
     if (verificatedPhone.code === 400) {
       throw verificatedPhone;
@@ -26,19 +33,33 @@ export const sentFirstDriverLetterToBolt = async (req, res) => {
       };
     }
     const [driver] = rows;
-    const { driver_id, auto_park_id, external_id: bolt_id } = driver;
-    const { checkResult, actualCityId} = await checkIfDriverStaysInTheSameCity({
-      driver_id,
-      auto_park_id,
-      city_id,
-    });
-    if(!checkResult && actualCityId) {
+    const { driver_id, auto_park_id, external_id: bolt_id, phone } = driver;
+    const { checkResult, actualCityId } = await checkIfDriverStaysInTheSameCity(
+      {
+        driver_id,
+        auto_park_id,
+        city_id,
+      }
+    );
+    if (!checkResult) {
       updatePayload.city_id = actualCityId;
     }
-    if(bolt_id !== req_bolt_id) {
+    if (bolt_id !== req_bolt_id) {
       updatePayload.bolt_id = bolt_id;
     }
-    
+    console.log('inserting....', {
+      driver_id,
+      phone,
+      bitrix_deal_id,
+      bolt_id,
+    });
+    await createBoltDriverToBan({
+      driver_id,
+      phone,
+      bitrix_deal_id,
+      bolt_id,
+    });
+
     res.status(200).json({
       status: 'ok',
       data: {
@@ -47,6 +68,7 @@ export const sentFirstDriverLetterToBolt = async (req, res) => {
         checkResult,
         phone: phoneReadyToQuery,
         bolt_id,
+        updatePayload,
         // rows,
       },
     });

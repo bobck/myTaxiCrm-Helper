@@ -17,7 +17,7 @@ exports.setup = function (options, seedLink) {
 exports.up = function (db, callback) {
   const sql = /*sql*/ `
       CREATE TABLE bolt_drivers_to_ban (
-          driver_id TEXT PRIMARY KEY,
+          driver_id TEXT NOT NULL PRIMARY KEY,
           bolt_id TEXT NOT NULL,
           bitrix_deal_id INTEGER NOT NULL,
           phone TEXT NOT NULL,

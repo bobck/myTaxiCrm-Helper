@@ -10,9 +10,16 @@ export const checkIfDriverStaysInTheSameCity = async ({
     (city) => city.boltVerificationId === city_id
   );
   const checkResult = auto_park_id === matchedCity?.auto_park_id;
-  console.log({ checkResult, matchedCity });
-  const actualCityId = matchedCity?.boltVerificationId;
-  return { checkResult, actualCityId};
+  let actualCityId = matchedCity?.boltVerificationId;
+  if (matchedCity) {
+    return { checkResult, actualCityId };
+  }
+  const actualCity = cityListWithAssignedBy.find(
+    (city) => city.auto_park_id === auto_park_id
+  );
+  actualCityId = actualCity?.boltVerificationId;
+
+  return { checkResult, actualCityId };
 };
 export const handleDriverPhone = ({ phone }) => {
   const filteredPhone = String(phone).replaceAll(/[^0-9]/g, '');
