@@ -747,3 +747,101 @@ export async function getFiredDebtorDriverByDriverId({ driver_id }) {
     `;
   return db.get(sql, driver_id);
 }
+
+/**
+ * Creates a new entry in the bolt_drivers_to_ban table.
+ * @param {Object} params - The parameters for the new driver.
+ * @param {string} params.driver_id - The unique ID of the driver.
+ * @param {string} params.bolt_id - The Bolt ID of the driver.
+ * @param {number} params.bitrix_deal_id - The Bitrix deal ID associated with the driver.
+ * @param {string} params.phone - The phone number of the driver.
+ * @returns {Promise<Object>} - A promise that resolves with an object indicating success (e.g., { changes: 1, lastID: ... } if supported by the driver).
+ */
+export async function createBoltDriverToBan({
+  driver_id,
+  bolt_id,
+  bitrix_deal_id,
+  phone,
+}) {
+  const sql = /*sql*/`
+      INSERT INTO bolt_drivers_to_ban (driver_id, bolt_id, bitrix_deal_id, phone)
+      VALUES (?, ?, ?, ?);
+  `;
+  return db.run(sql, driver_id, bolt_id, bitrix_deal_id, phone);
+}
+
+/**
+ * Sets the is_first_letter_sent flag to true for a specific driver.
+ * @param {Object} params - The parameters for updating the driver.
+ * @param {string} params.driver_id - The ID of the driver to update.
+ * @returns {Promise<Object>} - A promise that resolves with an object indicating success (e.g., { changes: 1 }).
+ */
+export async function setFirstLetterSent({ driver_id }) {
+  const sql = /*sql*/`
+      UPDATE bolt_drivers_to_ban
+      SET is_first_letter_sent = TRUE,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE driver_id = ?;
+  `;
+  return db.run(sql, driver_id);
+}
+
+/**
+ * Sets the is_second_letter_sent flag to true for a specific driver.
+ * @param {Object} params - The parameters for updating the driver.
+ * @param {string} params.driver_id - The ID of the driver to update.
+ * @returns {Promise<Object>} - A promise that resolves with an object indicating success (e.g., { changes: 1 }).
+ */
+export async function setSecondLetterSent({ driver_id }) {
+  const sql = /*sql*/`
+      UPDATE bolt_drivers_to_ban
+      SET is_second_letter_sent = TRUE,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE driver_id = ?;
+  `;
+  return db.run(sql, driver_id);
+}
+
+/**
+ * Sets the is_banned flag to true for a specific driver.
+ * @param {Object} params - The parameters for banning the driver.
+ * @param {string} params.driver_id - The ID of the driver to ban.
+ * @returns {Promise<Object>} - A promise that resolves with an object indicating success (e.g., { changes: 1 }).
+ */
+export async function banBoltDriver({ driver_id }) {
+  const sql = /*sql*/`
+      UPDATE bolt_drivers_to_ban
+      SET is_banned = TRUE,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE driver_id = ?;
+  `;
+  return db.run(sql, driver_id);
+}
+
+/**
+ * Retrieves all drivers for whom the first letter has been sent.
+ * @returns {Promise<Array<Object>>} - A promise that resolves with an array of driver records.
+ */
+export async function getBoltDriversFirstLetterSent() {
+  const sql = /*sql*/`
+      SELECT driver_id, bolt_id, bitrix_deal_id, phone, is_banned, is_first_letter_sent, is_second_letter_sent, created_at, updated_at
+      FROM bolt_drivers_to_ban
+      WHERE is_first_letter_sent = TRUE;
+  `;
+  return db.all(sql);
+}
+
+/**
+ * Retrieves a specific driver by their driver_id.
+ * @param {Object} params - The parameters for fetching the driver.
+ * @param {string} params.driver_id - The ID of the driver.
+ * @returns {Promise<Object|null>} - A promise that resolves with the driver record or null if not found.
+ */
+export async function getBoltDriverById({ driver_id }) {
+  const sql = /*sql*/`
+      SELECT driver_id, bolt_id, bitrix_deal_id, phone, is_banned, is_first_letter_sent, is_second_letter_sent, created_at, updated_at
+      FROM bolt_drivers_to_ban
+      WHERE driver_id = ?;
+  `;
+  return db.get(sql, driver_id);
+}
