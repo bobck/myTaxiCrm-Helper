@@ -7,7 +7,7 @@ export const checkIfDriverStaysInTheSameCity = async ({
   auto_park_id,
 }) => {
   const matchedCity = cityListWithAssignedBy.find(
-    (city) => city.brandingId === city_id
+    (city) => city.boltVerificationId === city_id
   );
   const checkResult = auto_park_id === matchedCity.auto_park_id;
   console.log({ checkResult, matchedCity });

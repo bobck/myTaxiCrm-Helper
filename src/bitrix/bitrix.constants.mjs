@@ -6,7 +6,7 @@ export const cityListWithAssignedBy = [
     brandingId: '3780',
     cityName: 'Київ',
     supportCityId: '3058',
-    boltVerificationId:'7018',
+    boltVerificationId: '7018',
   },
   {
     assignedBy: '50222',
@@ -14,7 +14,7 @@ export const cityListWithAssignedBy = [
     cityId: '91',
     brandingId: '3780',
     cityName: 'Київ usa',
-    boltVerificationId:'7018',
+    boltVerificationId: '7018',
   },
   {
     assignedBy: '106546',
@@ -23,7 +23,7 @@ export const cityListWithAssignedBy = [
     brandingId: '3748',
     cityName: 'Харків',
     supportCityId: '3060',
-    boltVerificationId:'7020',
+    boltVerificationId: '7020',
   },
   {
     assignedBy: '46926',
@@ -32,7 +32,7 @@ export const cityListWithAssignedBy = [
     brandingId: '3788',
     cityName: 'Одеса',
     supportCityId: '3062',
-    boltVerificationId:'7022',
+    boltVerificationId: '7022',
   },
   {
     assignedBy: '50222',
@@ -41,7 +41,7 @@ export const cityListWithAssignedBy = [
     brandingId: '3786',
     cityName: 'Дніпро',
     supportCityId: '3064',
-    boltVerificationId:'7024',
+    boltVerificationId: '7024',
   },
   {
     assignedBy: '106546',
@@ -50,7 +50,7 @@ export const cityListWithAssignedBy = [
     brandingId: '3756',
     cityName: 'Львів',
     supportCityId: '3066',
-    boltVerificationId:'7026',
+    boltVerificationId: '7026',
   },
   {
     assignedBy: '50222',
@@ -59,7 +59,7 @@ export const cityListWithAssignedBy = [
     brandingId: '3784',
     cityName: 'Запоріжжя',
     supportCityId: '3068',
-    boltVerificationId:'7028',
+    boltVerificationId: '7028',
   },
   {
     assignedBy: '46926',
@@ -68,7 +68,7 @@ export const cityListWithAssignedBy = [
     brandingId: '3764',
     cityName: 'Вінниця',
     supportCityId: '3070',
-    boltVerificationId:'7030',
+    boltVerificationId: '7030',
   },
   {
     assignedBy: '46926',
@@ -77,7 +77,7 @@ export const cityListWithAssignedBy = [
     brandingId: '3782',
     cityName: 'Чернігів',
     supportCityId: '3072',
-    boltVerificationId:'7032',
+    boltVerificationId: '7032',
   },
   {
     assignedBy: '46926',
@@ -86,7 +86,7 @@ export const cityListWithAssignedBy = [
     brandingId: '3760',
     cityName: 'Суми',
     supportCityId: '3074',
-    boltVerificationId:'7034',
+    boltVerificationId: '7034',
   },
   {
     assignedBy: '106546',
@@ -95,7 +95,7 @@ export const cityListWithAssignedBy = [
     brandingId: '3776',
     cityName: 'Полтава',
     supportCityId: '3076',
-    boltVerificationId:'7036',
+    boltVerificationId: '7036',
   },
   {
     assignedBy: '50222',
@@ -104,7 +104,7 @@ export const cityListWithAssignedBy = [
     brandingId: '3750',
     cityName: 'Івано-Франківськ',
     supportCityId: '3078',
-    boltVerificationId:'7038',
+    boltVerificationId: '7038',
   },
   {
     assignedBy: '106546',
@@ -113,7 +113,7 @@ export const cityListWithAssignedBy = [
     brandingId: '3792',
     cityName: 'Кривий Ріг',
     supportCityId: '3082',
-    boltVerificationId:'7042',
+    boltVerificationId: '7042',
   },
   {
     assignedBy: '46926',
@@ -122,7 +122,7 @@ export const cityListWithAssignedBy = [
     brandingId: '3778',
     cityName: 'Хмельницький',
     supportCityId: '3084',
-    boltVerificationId:'7044',
+    boltVerificationId: '7044',
   },
   {
     assignedBy: '106546',
@@ -131,7 +131,7 @@ export const cityListWithAssignedBy = [
     brandingId: '3752',
     cityName: 'Житомир',
     supportCityId: '3086',
-    boltVerificationId:'7046',
+    boltVerificationId: '7046',
   },
   {
     assignedBy: '46926',
@@ -140,7 +140,7 @@ export const cityListWithAssignedBy = [
     brandingId: '3790',
     cityName: 'Рівне',
     supportCityId: '3088',
-    boltVerificationId:'7048',
+    boltVerificationId: '7048',
   },
   {
     assignedBy: '50222',
@@ -149,7 +149,7 @@ export const cityListWithAssignedBy = [
     brandingId: '3754',
     cityName: 'Чернівці',
     supportCityId: '3090',
-    boltVerificationId:'7050',
+    boltVerificationId: '7050',
   },
   {
     assignedBy: '50222',
@@ -157,7 +157,7 @@ export const cityListWithAssignedBy = [
     cityId: '403',
     brandingId: '3754',
     cityName: 'Чернівці usa',
-    boltVerificationId:'7040',
+    boltVerificationId: '7040',
   },
   {
     assignedBy: '50222',
@@ -166,7 +166,7 @@ export const cityListWithAssignedBy = [
     brandingId: '3762',
     cityName: 'Тернопіль',
     supportCityId: '3092',
-    boltVerificationId:'7052',
+    boltVerificationId: '7052',
   },
   {
     assignedBy: '46926',
@@ -175,7 +175,7 @@ export const cityListWithAssignedBy = [
     brandingId: '3758',
     cityName: 'Луцьк',
     supportCityId: '3096',
-    boltVerificationId:'7056',
+    boltVerificationId: '7056',
   },
   {
     assignedBy: '106546',
@@ -184,7 +184,7 @@ export const cityListWithAssignedBy = [
     brandingId: '3770',
     cityName: 'Ужгород',
     supportCityId: '3100',
-    boltVerificationId:'7060',
+    boltVerificationId: '7060',
   },
   {
     assignedBy: '106546',
@@ -192,7 +192,7 @@ export const cityListWithAssignedBy = [
     cityId: '413',
     brandingId: '3770',
     cityName: 'Ужгород usa',
-    boltVerificationId:'7060',
+    boltVerificationId: '7060',
   },
   {
     assignedBy: '106546',
@@ -200,7 +200,7 @@ export const cityListWithAssignedBy = [
     cityId: '467',
     brandingId: '3774',
     cityName: 'Черкаси',
-    boltVerificationId:'7068',
+    boltVerificationId: '7068',
     supportCityId: '3108',
   },
   {
@@ -210,7 +210,7 @@ export const cityListWithAssignedBy = [
     brandingId: '3768',
     cityName: 'Каменець-Подільский',
     supportCityId: '3110',
-    boltVerificationId:'7070',
+    boltVerificationId: '7070',
   },
   {
     assignedBy: '106546',
@@ -219,7 +219,7 @@ export const cityListWithAssignedBy = [
     brandingId: '3766',
     cityName: 'Мукачево',
     supportCityId: '3118',
-    boltVerificationId:'7076',
+    boltVerificationId: '7076',
   },
   {
     assignedBy: '106546',
@@ -227,7 +227,7 @@ export const cityListWithAssignedBy = [
     cityId: '1362',
     brandingId: '3766',
     cityName: 'Мукачево usa',
-    boltVerificationId:'7076',
+    boltVerificationId: '7076',
   },
   {
     assignedBy: '',
@@ -236,7 +236,7 @@ export const cityListWithAssignedBy = [
     brandingId: '3772',
     cityName: 'Краків',
     supportCityId: '3124',
-    boltVerificationId:'7082',
+    boltVerificationId: '7082',
   },
   {
     assignedBy: '',
@@ -245,10 +245,9 @@ export const cityListWithAssignedBy = [
     brandingId: '3794',
     cityName: 'Варшава',
     supportCityId: '3122',
-    boltVerificationId:'7080',
+    boltVerificationId: '7080',
   },
 ];
-
 
 export const specialBrandingCities = [
   {

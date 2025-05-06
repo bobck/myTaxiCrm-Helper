@@ -18,7 +18,7 @@ export const boltIdVerificationHandler = async (req, res) => {
       bolt_id,
     });
     const { driver_id, auto_park_id } = rows[0];
-    const { checkResult } = checkIfDriverStaysInTheSameCity({
+    const { checkResult } =await checkIfDriverStaysInTheSameCity({
       driver_id,
       auto_park_id,
       city_id,
