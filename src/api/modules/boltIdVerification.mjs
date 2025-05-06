@@ -5,7 +5,7 @@ import {
 } from '../endpoints-utils.mjs';
 export const boltIdVerificationHandler = async (req, res) => {
   try {
-    const { driver_id, phone, bolt_id, city_id } = req.query;
+    const { phone, bolt_id, city_id } = req.query;
     console.log({ message: 'POST: verify', query: req.query });
     const verificatedPhone = handleDriverPhone({ phone });
 
@@ -17,12 +17,21 @@ export const boltIdVerificationHandler = async (req, res) => {
       phone: phoneReadyToQuery,
       bolt_id,
     });
+    const { driver_id, auto_park_id } = rows[0];
+    const { checkResult } = checkIfDriverStaysInTheSameCity({
+      driver_id,
+      auto_park_id,
+      city_id,
+    });
 
-    console.log({ rows });
+    console.log(checkResult);
+
+    // console.log({ rows });
     res.status(200).json({
       status: 'ok',
       data: {
         driver_id,
+        checkResult,
         phone: phoneReadyToQuery,
         rows,
       },

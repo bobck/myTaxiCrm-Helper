@@ -4,8 +4,14 @@ import { verifyIfBoltIdCorrect } from '../web.api/web.api.utlites.mjs';
 export const checkIfDriverStaysInTheSameCity = async ({
   driver_id,
   city_id,
+  auto_park_id,
 }) => {
-    
+  const matchedCity = cityListWithAssignedBy.find(
+    (city) => city.brandingId === city_id
+  );
+  const checkResult = auto_park_id === matchedCity.auto_park_id;
+  console.log({checkResult,matchedCity})
+  return { checkResult };
 };
 export const handleDriverPhone = ({ phone }) => {
   const filteredPhone = String(phone).replaceAll(/[^0-9]/g, '');
