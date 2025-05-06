@@ -3,7 +3,6 @@ import {
   handleDriverPhone,
   checkIfDriverStaysInTheSameCity,
 } from '../endpoints-utils.mjs';
-import { createBoltDriverToBan } from '../../bitrix/bitrix.queries.mjs';
 import { updateRequestedDriver } from '../../bitrix/bitrix.utils.mjs';
 // import {createBoltDriverToBank} from '../../bitrix';
 export const sentFirstDriverLetterToBolt = async (req, res) => {

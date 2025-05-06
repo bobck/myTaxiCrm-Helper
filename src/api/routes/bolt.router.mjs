@@ -4,7 +4,6 @@ import express from 'express';
 import { sentFirstDriverLetterToBolt } from '../modules/sentFirstDriverLetterToBoltHandler.mjs';
 const boltRouter = express.Router();
 const lettersRouter = express.Router();
-const approveRouter = express.Router();
 const banConfirmRouter = express.Router();
 
 // This will handle POST requests to /bolt/letters/
