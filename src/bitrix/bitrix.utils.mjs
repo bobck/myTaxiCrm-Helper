@@ -583,21 +583,31 @@ export async function findContactsByPhonesObjectReturned({ drivers }) {
   const { result } = temp_result;
   return result;
 }
-export async function getCardIdsFromSpecialEntity(entityTypeId) {
+export async function getCardIdsFromSpecialEntity({entityTypeId}) {
   try {
-    // Call the universal list method for the specified entity type.
-    // We only select the 'ID' field.
-    const { result } = await bitrix.call('crm.item.list', {
-      entityTypeId,
-      start:1831,
-      select: ['ID','TITLE','ufCrm4_1744703234']
-    });
+    let doneAtAll = 0;
+    let doneAtPrevious = 0;
+    const pageSize = 50;
+    const items=[];
+    do{
+      const { result } = await bitrix.call('crm.item.list', {
+        entityTypeId,
+        start:doneAtAll+1,
+        select: ['ID','TITLE','ufCrm4_1744703234']
+      }) ;
+      items.push(...result.items);
+      doneAtAll += result.items.length;
+      doneAtPrevious = result.items.length;
+      console.log({doneAtAll, doneAtPrevious})
+      console.log({firstId:result.items[0].id,lastId: result.items[result.items.length-1].id});
+    }while (doneAtPrevious>=pageSize&&doneAtAll<200);
+    // console.log('Retrieved cards:', items);
     
     // // Map the result to extract only the ID from each card (or CRM item)
     // const cardIds = result.map(item => item.ID);
     
     // console.log('Retrieved card IDs:', cardIds);
-    return result.items;
+    return items;
   } catch (error) {
     console.error('Error retrieving cards from entity:', error);
     throw error;
