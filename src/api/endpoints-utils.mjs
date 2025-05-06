@@ -10,7 +10,7 @@ export const checkIfDriverStaysInTheSameCity = async ({
     (city) => city.brandingId === city_id
   );
   const checkResult = auto_park_id === matchedCity.auto_park_id;
-  console.log({checkResult,matchedCity})
+  console.log({ checkResult, matchedCity });
   return { checkResult };
 };
 export const handleDriverPhone = ({ phone }) => {
