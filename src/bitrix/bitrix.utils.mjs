@@ -583,3 +583,47 @@ export async function findContactsByPhonesObjectReturned({ drivers }) {
   const { result } = temp_result;
   return result;
 }
+export async function updateRequestedDriver({ bitrix_deal_id, payload }) {
+  console.log('updateRequestedDriver ...', {
+    bitrix_deal_id,
+    payload,
+  });
+  const { city_id, bolt_id } = payload;
+  const params = {
+    id: bitrix_deal_id,
+    entityTypeId: '1132',
+    // 'fields[STAGE_ID]': 'DT1132_60:NEW', //листи на відправлення
+
+    'fields[STAGE_ID]': 'DT1132_60:UC_7W6FFZ', //Заявка на відправку листа
+  };
+  if (bolt_id) {
+    params['fields[ufCrm52_1738324675]'] = bolt_id;
+  }
+  if (city_id) {
+    params['fields[ufCrm52_1738326821]'] = city_id;
+  }
+  const response = await bitrix.call('crm.item.update', params);
+  console.log(response);
+  return response;
+}
+// export async function updateRequestedDriver({ bitrix_deal_id, payload }) {
+//   console.log('updateRequestedDriver ...', {
+//     bitrix_deal_id,
+//     payload,
+//   });
+//   const { city_id, bolt_id } = payload;
+//   const params = {
+//     id: bitrix_deal_id,
+//     entityTypeId: '1132',
+//     'fields[STAGE_ID]': 'DT1132_60:NEW',
+//   };
+//   if (bolt_id) {
+//     params['fields[ufCrm52_1738324675]'] = bolt_id;
+//   }
+//   if (city_id) {
+//     params['fields[ufCrm52_1738326821]'] = city_id;
+//   }
+//   const response = await bitrix.call('crm.deal.update', params);
+//   console.log(response);
+//   return response;
+// }
