@@ -298,3 +298,14 @@ export async function getBrandedLicencePlateNumbersFromBQ({
 
   return { brandedLicencePlateNumbers };
 }
+export async function getBrandStickers() {
+  console.log('downloading brand stickers...');
+  const query = `SELECT bs.brand, bs.number FROM \`up-statistics.DB.brand_sticker\` bs order by bs.number asc LIMIT 10;`;
+  const options = {
+    query,
+    location: 'US',
+  };
+
+  const [rows] = await bigquery.query(options);
+  return rows;
+}

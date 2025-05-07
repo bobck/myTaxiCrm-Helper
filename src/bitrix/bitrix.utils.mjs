@@ -597,7 +597,7 @@ export async function getCardIdsFromSpecialEntity({ entityTypeId }) {
           'ID',
           // 'TITLE',
           // 'ufCrm4_1744703234',
-          'ufCrm4_1654801473656',// license plate
+          'ufCrm4_1654801473656', // license plate
         ],
       });
       items.push(...result.items);
@@ -608,7 +608,10 @@ export async function getCardIdsFromSpecialEntity({ entityTypeId }) {
         firstId: result.items[0].id,
         lastId: result.items[result.items.length - 1].id,
       });
-    } while (doneAtPrevious >= pageSize && doneAtAll < 200);
+    } while (
+      doneAtPrevious >= pageSize
+      && doneAtAll < 200
+    );
     // console.log('Retrieved cards:', items);
 
     // // Map the result to extract only the ID from each card (or CRM item)
