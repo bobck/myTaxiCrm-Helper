@@ -603,21 +603,15 @@ export async function getCardIdsFromSpecialEntity({ entityTypeId }) {
       items.push(...result.items);
       doneAtAll += result.items.length;
       doneAtPrevious = result.items.length;
-      console.log({ doneAtAll, doneAtPrevious });
-      console.log({
-        firstId: result.items[0].id,
-        lastId: result.items[result.items.length - 1].id,
-      });
+      // console.log({ doneAtAll, doneAtPrevious });
+      // console.log({
+      //   firstId: result.items[0].id,
+      //   lastId: result.items[result.items.length - 1].id,
+      // });
     } while (
       doneAtPrevious >= pageSize
-      && doneAtAll < 200
+      // && doneAtAll < 200
     );
-    // console.log('Retrieved cards:', items);
-
-    // // Map the result to extract only the ID from each card (or CRM item)
-    // const cardIds = result.map(item => item.ID);
-
-    // console.log('Retrieved card IDs:', cardIds);
     return items;
   } catch (error) {
     console.error('Error retrieving cards from entity:', error);
@@ -625,61 +619,20 @@ export async function getCardIdsFromSpecialEntity({ entityTypeId }) {
   }
 }
 
-export async function getAllSpecialEntityRows(entityTypeId) {
-  // Define how many rows to request per call. Many Bitrix methods default to 50.
-  const pageSize = 50;
-
-  // If you already know approximately how many rows to expect,
-  // you can calculate the number of pages. For example, for 2K rows:
-  const totalPages = Math.ceil(2000 / pageSize); // This gives ~40 pages
-
-  // Build the batch command object.
-  const batchCommands = {};
-  for (let i = 0; i < totalPages; i++) {
-    // Each batch command calls crm.item.list with a different "start" offset.
-    batchCommands[`cmd_${i}`] = [
-      'crm.item.list',
-      {
-        entityTypeId,
-        start: i * pageSize,
-        // Select the fields you need, for example, ID and your custom field.
-        select: ['ID', 'TITLE'],
-      },
-    ];
+export async function updateCarStatusAndBrand({ items }) {
+  const batchObj = {};
+  for (let item of items) {
+    const { carStatus, brandSticker, id } = item;
+    const params = {
+      id,
+      entityTypeId: '138',
+      'fields[ufCrm4_1744703234]': carStatus, //UF_CRM_4_1744703234
+      'fields[ufCrm4_1741607811]': brandSticker, //UF_CRM_4_1741607811
+    };
+    batchObj[id] = { method: 'crm.item.update', params };
   }
 
-  try {
-    // Call the 'batch' method with the commands. All commands execute in one request.
-    const { result } = await bitrix.call('batch', { cmd: batchCommands });
-
-    // Merge the pages
-    let allRows = [];
-    for (let i = 0; i < totalPages; i++) {
-      const cmdResult = result[`cmd_${i}`];
-      if (cmdResult && cmdResult.result && cmdResult.result.length) {
-        allRows = allRows.concat(cmdResult.result);
-      }
-    }
-    console.log('Retrieved rows:', allRows);
-    return allRows;
-  } catch (error) {
-    console.error('Error retrieving rows in batch:', error);
-    throw error;
-  }
-}
-
-export async function updateCarStatusAndBrnad({
-  status,
-  brand,
-  bitrix_card_id,
-}) {
-  console.log({ status, brand, bitrix_card_id });
-  const response = await bitrix.call('crm.item.update', {
-    id: bitrix_card_id,
-    entityTypeId: '138',
-    'fields[ufCrm4_1744703234]': status, //UF_CRM_4_1744703234
-    'fields[ufCrm4_1741607811]': brand, //UF_CRM_4_1741607811
-  });
-  const { result } = response;
+  const { result: temp_result } = await bitrix.batch(batchObj);
+  const { result } = temp_result;
   return result;
 }

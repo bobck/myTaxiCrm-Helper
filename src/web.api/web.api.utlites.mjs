@@ -629,7 +629,7 @@ export async function getHandledCashBlockRulesInfo({ fired_drivers_ids }) {
   const { rows, rowCount } = result;
   return { rows };
 }
-export async function getActualCarStatuses() {
+export async function getActualCarStatuses( ) {
   const sql = fs.readFileSync('src/sql/get_actual_car_statuses.sql').toString();
   const result = await pool.query(sql);
   const { rows, rowCount } = result;
