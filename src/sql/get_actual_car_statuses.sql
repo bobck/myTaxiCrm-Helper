@@ -10,8 +10,8 @@ LEFT JOIN (
     FROM
         schedule s_inner
     WHERE
-        s_inner.event_period_start <= CURRENT_DATE
-        AND s_inner.event_period_end >= CURRENT_DATE
+        s_inner.event_period_start <= (CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Kyiv')::DATE
+        AND s_inner.event_period_end >= (CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Kyiv')::DATE
         AND s_inner.is_latest_version = TRUE
         AND s_inner.is_deleted = FALSE
 ) s ON s.car_id = c.id
