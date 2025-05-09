@@ -107,8 +107,7 @@ const joinData = ({ bitrixCards, carStatuses, brandStickers }) => {
     }
     if (brandSticker) {
       item.brandSticker = brandSticker.brand;
-    }
-    if (brandSticker === undefined) {
+    } else if (brandSticker === undefined) {
       item.brandSticker = null;
     }
 
@@ -148,24 +147,14 @@ export async function updateBitrixCarStatus() {
     carStatuses: handledCarStatuses,
     brandStickers: handledBrandStickers,
   });
+  
   const chunkedData = chunkArray(joinedData, CHUNK_SIZE);
-  //   console.log({ chunkedData: chunkedData.length });
   for (const chunk of chunkedData) {
     const result = await updateCarStatusAndBrand({ items: chunk });
-    console.log({ result });
   }
 }
 if (process.env.ENV == 'TEST') {
   await openSShTunnel;
   await updateBitrixCarStatus();
-  //   await updateCarStatusAndBrand({
-  //     items: [
-  //       {
-  //         id: 9092,
-  //         licensePlate: 'AA6716EM',
-  //         carStatus: 7002,
-  //         brandSticker: 4042,
-  //       },
-  //     ],
-  //   });
+  
 }

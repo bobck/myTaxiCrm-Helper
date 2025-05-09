@@ -382,7 +382,6 @@ export async function loadRowsViaJSONFile({
   }
 }
 export async function getBrandStickers() {
-  console.log('downloading brand stickers...');
   const query = `SELECT bs.brand, bs.number FROM \`up-statistics.DB.brand_sticker\` bs order by bs.number asc ;`;
   const options = {
     query,
