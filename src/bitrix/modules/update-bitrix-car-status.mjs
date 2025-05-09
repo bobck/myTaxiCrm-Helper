@@ -3,7 +3,6 @@ import {
   updateCarStatusAndBrand,
   chunkArray,
 } from '../bitrix.utils.mjs';
-import { getBrandStickers } from '../../bq/bq-utils.mjs';
 import { getActualCarStatuses } from '../../web.api/web.api.utlites.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
 const CHUNK_SIZE = 5; // chunk size only 5 because of bitrix data hurt risks
@@ -79,36 +78,18 @@ const mapBitrixProps = ({ item }) => {
     default:
       copyItem.carStatus = 7014;
   }
-  switch (brandSticker) {
-    case null:
-      copyItem.brandSticker = 4044;
-      break;
-    case '?':
-      copyItem.brandSticker = 6976;
-      break;
-    default:
-      copyItem.brandSticker = 4042;
-  }
   return copyItem;
 };
-const joinData = ({ bitrixCards, carStatuses, brandStickers }) => {
+const joinData = ({ bitrixCards, carStatuses}) => {
   const joinedData = bitrixCards.map((bitrixCard) => {
     const carStatus = carStatuses.find(
       (carStatus) => carStatus.licensePlate === bitrixCard.licensePlate
-    );
-    const brandSticker = brandStickers.find(
-      (brandSticker) => brandSticker.licensePlate === bitrixCard.licensePlate
     );
     const item = { ...bitrixCard };
     if (carStatus) {
       item.carStatus = carStatus.event_type;
     } else if (carStatus === undefined) {
       item.carStatus = null;
-    }
-    if (brandSticker) {
-      item.brandSticker = brandSticker.brand;
-    } else if (brandSticker === undefined) {
-      item.brandSticker = null;
     }
 
     return mapBitrixProps({ item });
@@ -137,17 +118,11 @@ export async function updateBitrixCarStatus() {
     arr: actualCarStatuses,
     licensePlateParam: 'license_plate',
   });
-  const brandStickers = await getBrandStickers();
-  const handledBrandStickers = transliterationMapper({
-    arr: brandStickers,
-    licensePlateParam: 'number',
-  });
   const joinedData = joinData({
     bitrixCards: handledBitrixCards,
     carStatuses: handledCarStatuses,
-    brandStickers: handledBrandStickers,
   });
-
+  
   const chunkedData = chunkArray(joinedData, CHUNK_SIZE);
   for (const chunk of chunkedData) {
     const result = await updateCarStatusAndBrand({ items: chunk });

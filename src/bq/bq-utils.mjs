@@ -381,13 +381,3 @@ export async function loadRowsViaJSONFile({
     }
   }
 }
-export async function getBrandStickers() {
-  const query = `SELECT bs.brand, bs.number FROM \`up-statistics.DB.brand_sticker\` bs order by bs.number asc ;`;
-  const options = {
-    query,
-    location: 'US',
-  };
-
-  const [rows] = await bigquery.query(options);
-  return rows;
-}
