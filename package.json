@@ -5,9 +5,9 @@
   "main": "app.js",
   "scripts": {
     "dev": "node -r dotenv/config app.mjs",
-    "createBrandingCardsManual": "ENV=TEST BRANDING_CARDS_COUNT=15 CHUNK_SIZE=7 node -r dotenv/config src/bitrix/modules/create-driver-branding-cards.mjs",
-    "updateBrandingCardsManual": "ENV=TEST BRANDING_CARDS_COUNT=15 CHUNK_SIZE=7 node -r dotenv/config src/bitrix/modules/update-driver-branding-cards.mjs",
-    "moveBrandingCardsManual": "ENV=TEST BRANDING_CARDS_COUNT=15 CHUNK_SIZE=7 node -r dotenv/config src/bitrix/modules/move-driver-branding-cards.mjs",
+    "createBrandingCardsManual": "ENV=TEST BRANDING_CARDS_COUNT=3 CHUNK_SIZE=3 node -r dotenv/config src/bitrix/modules/create-driver-branding-cards.mjs",
+    "updateBrandingCardsManual": "ENV=TEST BRANDING_CARDS_COUNT=3 CHUNK_SIZE=3 node -r dotenv/config src/bitrix/modules/update-driver-branding-cards.mjs",
+    "moveBrandingCardsManual": "ENV=TEST BRANDING_CARDS_COUNT=3 CHUNK_SIZE=3 node -r dotenv/config src/bitrix/modules/move-driver-branding-cards.mjs",
     "update_plan": "ENV=TEST node -r dotenv/config src/sheets/modules/get-and-save-current-plan.mjs",
     "notification": "ENV=TEST node -r dotenv/config src/telegram/modules/rooms-notification.mjs",
     "savesid": "ENV=TEST node -r dotenv/config src/remonline/modules/save-sid-list.mjs",
@@ -49,7 +49,12 @@
     "migrate:up": "db-migrate up",
     "createFiredDebtorDriversCardsManual": "ENV=TEST DEBTOR_DRIVERS_CARDS_COUNT=15 CHUNK_SIZE=8 node -r dotenv/config src/bitrix/modules/create-fired-debtor-driver-cards.mjs",
     "updateFiredDebtorDriversCardsManual": "ENV=TEST CHUNK_SIZE=8 node -r dotenv/config src/bitrix/modules/update-fired-debtor-driver-cards.mjs",
+    "remonlineOrdersToBQManual": "ENV=TEST node -r dotenv/config src/bq/modules/load-remonline-orders.mjs",
+    "remonlineAssetsToBQManual": "ENV=TEST node -r dotenv/config src/bq/modules/load-remonline-assets.mjs",
+    "remonlineEmployeesToBQManual": "ENV=TEST node -r dotenv/config src/bq/modules/load-remonline-employees.mjs",
+    "remonlineUOMsToBQManual": "ENV=TEST node -r dotenv/config src/bq/modules/load-remonline-uoms.mjs",
     "updateBitrixCarsStatusManual": "ENV=TEST node -r dotenv/config src/bitrix/modules/update-bitrix-cars-status.mjs"
+
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",

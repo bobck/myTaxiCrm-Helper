@@ -9,6 +9,8 @@ import {
   transfersTableSchema,
 } from '../schemas.mjs';
 
+const dataset_id = 'RemOnline';
+
 const splitTransfers = ({ transfersWithProducts }) =>
   transfersWithProducts.reduce(
     (acc, transfer) => {
@@ -46,9 +48,6 @@ export async function generateAndSaveTransfers() {
     'fetching transfers...\nwait please it could take few minutes...'
   );
   for (const [index, branch] of branches.entries()) {
-    if (process.env.ENV === 'TEST' && index !== branches.length - 1) {
-      continue;
-    }
     const { id: branch_id } = branch;
     const { transfers } = await getTransfers({ branch_id });
     transfersWithProducts.push(...transfers);
@@ -59,6 +58,7 @@ export async function generateAndSaveTransfers() {
   try {
     if (transfers.length > 0) {
       await insertRowsAsStream({
+        dataset_id,
         rows: transfers,
         bqTableId: 'transfers',
       });
@@ -66,6 +66,7 @@ export async function generateAndSaveTransfers() {
     }
     if (products.length > 0) {
       await insertRowsAsStream({
+        dataset_id,
         rows: products,
         bqTableId: 'transfers_products',
       });
@@ -83,12 +84,12 @@ export async function resetTransfersTables() {
   await createOrResetTableByName({
     bqTableId: 'transfers',
     schema: transfersTableSchema,
-    dataSetId: 'RemOnline',
+    dataSetId: dataset_id,
   });
   await createOrResetTableByName({
     bqTableId: 'transfers_products',
     schema: transferProductsTableSchema,
-    dataSetId: 'RemOnline',
+    dataSetId: dataset_id,
   });
   console.log('the schemes have been generated successfully.');
 }
