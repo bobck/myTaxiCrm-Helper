@@ -1,7 +1,7 @@
 SELECT
 	DISTINCT ON
 	(d.id)
-	d.full_name,
+	d.id,
 	d.auto_park_id,
 	deh.created_at AS start_working_at,
 	dehl.created_at AS temporary_leave_at,
