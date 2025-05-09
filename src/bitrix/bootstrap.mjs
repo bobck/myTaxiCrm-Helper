@@ -21,6 +21,7 @@ import { updateBrandingCardsJob } from './jobs/update-driver-branding-cards-job.
 import { moveBrandingCardsJob } from './jobs/move-driver-branding-cards-job.mjs';
 import { updateFiredDebtorDriversCardsJob } from './jobs/update-fired-debtor-driver-cards-job.mjs';
 import { createFiredDebtorDriversCardsJob } from './jobs/create-fired-debtor-driver-cards-job.mjs';
+import { updateBitrixCarStatusJob } from './jobs/update-bitrix-car-status-job.mjs';
 
 export function bitrixJobs() {
   try {
@@ -47,6 +48,7 @@ export function bitrixJobs() {
     updateBrandingCardsJob.start();
     createFiredDebtorDriversCardsJob.start();
     updateFiredDebtorDriversCardsJob.start();
+    updateBitrixCarStatusJob.start();
     console.log('Bitrix Jobs has been started');
   } catch (error) {
     console.error({
@@ -78,6 +80,7 @@ export function bitrixJobs() {
     updateBrandingCardsJob.stop();
     createFiredDebtorDriversCardsJob.stop();
     updateFiredDebtorDriversCardsJob.stop();
+    updateBitrixCarStatusJob.stop();
     bitrixJobs();
   }
 }
