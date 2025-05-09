@@ -147,7 +147,7 @@ export async function updateBitrixCarStatus() {
     carStatuses: handledCarStatuses,
     brandStickers: handledBrandStickers,
   });
-  
+
   const chunkedData = chunkArray(joinedData, CHUNK_SIZE);
   for (const chunk of chunkedData) {
     const result = await updateCarStatusAndBrand({ items: chunk });
@@ -156,5 +156,4 @@ export async function updateBitrixCarStatus() {
 if (process.env.ENV == 'TEST') {
   await openSShTunnel;
   await updateBitrixCarStatus();
-  
 }
