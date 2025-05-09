@@ -80,7 +80,7 @@ const mapBitrixProps = ({ item }) => {
   }
   return copyItem;
 };
-const joinData = ({ bitrixCards, carStatuses}) => {
+const joinData = ({ bitrixCards, carStatuses }) => {
   const joinedData = bitrixCards.map((bitrixCard) => {
     const carStatus = carStatuses.find(
       (carStatus) => carStatus.licensePlate === bitrixCard.licensePlate
@@ -122,7 +122,7 @@ export async function updateBitrixCarStatus() {
     bitrixCards: handledBitrixCards,
     carStatuses: handledCarStatuses,
   });
-  
+
   const chunkedData = chunkArray(joinedData, CHUNK_SIZE);
   for (const chunk of chunkedData) {
     const result = await updateCarStatusAndBrand({ items: chunk });
