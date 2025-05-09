@@ -59,17 +59,17 @@ export async function getAndSaveClosedPolishBitrixDeals(manualDate) {
     if (matchingDealIds.size === 0) {
       continue;
     }
-    // const dealsByIds = await getDealsByIdsVerifyingStageConstancy({
-    //   matchingDealIds,
-    //   category_id,
-    //   stage_id,
-    // });
-    // if (dealsByIds.length === 0) {
-    //   continue;
-    // }
-    // deals.push(...dealsByIds);
+    const dealsByIds = await getDealsByIdsVerifyingStageConstancy({
+      matchingDealIds,
+      category_id,
+      stage_id,
+    });
+    if (dealsByIds.length === 0) {
+      continue;
+    }
+    deals.push(...dealsByIds);
   }
-  return;
+
   const jsonData = deals.map((deal) => {
     const { ID, SOURCE_ID, STAGE_ID, UF_CRM_1527615815, UF_CRM_1722203030883 } =
       deal;

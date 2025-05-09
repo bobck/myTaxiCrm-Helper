@@ -610,7 +610,7 @@ export async function getDealsIdsByStageEnteredDate({
 
   try {
     const requestParams = {
-      entityTypeId:dealEntityTypeId,
+      entityTypeId: dealEntityTypeId,
       order: { ID: 'ASC' },
       filter: {
         STAGE_ID: stage_id, // Stage the deal moved TO
@@ -634,7 +634,7 @@ export async function getDealsIdsByStageEnteredDate({
     }
     return null; // Indicate failure
   }
-  return { matchingDealIds }; 
+  return { matchingDealIds };
 }
 export async function getDealsByIdsVerifyingStageConstancy({
   matchingDealIds,
@@ -644,11 +644,6 @@ export async function getDealsByIdsVerifyingStageConstancy({
   // --- Step 2: Check if any Deal IDs were found ---
 
   const dealIdArray = Array.from(matchingDealIds);
-  if (dealIdArray.length > 50) {
-    console.warn(
-      `Warning: Fetching details for ${dealIdArray.length} deals. Consider batching crm.deal.list calls if this fails or is too slow.`
-    );
-  }
 
   try {
     const dealParams = {
@@ -666,16 +661,12 @@ export async function getDealsByIdsVerifyingStageConstancy({
       ], // Get desired fields
     };
 
-    console.log(`Calling crm.deal.list to verify current state...`);
     const dealResponse = await bitrix.call('crm.deal.list', dealParams);
     const currentDeals = dealResponse.result || [];
 
-    // Basic pagination check for crm.deal.list (less likely when filtering by specific IDs but possible)
-    if (dealResponse.next) {
-      console.warn(
-        `Warning: Pagination detected in crm.deal.list result when filtering by ID. Needs handling if not all deals were returned.`
-      );
-    }
+    // TODO: Handle pagination if needed
+    // Note: Bitrix24 API may return a "next" field in the response if there are more pages
+
     return currentDeals;
   } catch (error) {
     console.error('Error fetching deal details from Bitrix24:', error.message);
