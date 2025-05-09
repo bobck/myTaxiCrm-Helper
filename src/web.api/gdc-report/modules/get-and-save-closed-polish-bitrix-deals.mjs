@@ -48,14 +48,17 @@ export async function getAndSaveClosedPolishBitrixDeals(manualDate) {
   const endDateISO = endDate.toISOString();
 
   for (const stage_id of stage_ids) {
-    const { matchingDealIds } = await getDealsIdsByStageEnteredDate({
+    const matchingDealIds = new Set();
+    const { historyRecords } = await getDealsIdsByStageEnteredDate({
       startDateISO,
       endDateISO,
       category_id,
       stage_id,
       dealEntityTypeId,
     });
-    console.log(matchingDealIds);
+
+    historyRecords.forEach((record) => matchingDealIds.add(record.OWNER_ID));
+
     if (matchingDealIds.size === 0) {
       continue;
     }

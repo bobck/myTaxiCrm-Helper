@@ -605,9 +605,6 @@ export async function getDealsIdsByStageEnteredDate({
     return null;
   }
 
-  // --- Step 1: Query Stage History ---
-  const matchingDealIds = new Set(); // Use a Set to store unique deal IDs
-
   try {
     const requestParams = {
       entityTypeId: dealEntityTypeId,
@@ -626,7 +623,7 @@ export async function getDealsIdsByStageEnteredDate({
     );
     const historyRecords = historyResponse.result.items || [];
 
-    historyRecords.forEach((record) => matchingDealIds.add(record.OWNER_ID));
+    return { historyRecords };
   } catch (error) {
     console.error('Error fetching stage history from Bitrix24:', error.message);
     if (error.response && error.response.data) {
@@ -634,7 +631,7 @@ export async function getDealsIdsByStageEnteredDate({
     }
     return null; // Indicate failure
   }
-  return { matchingDealIds };
+ 
 }
 export async function getDealsByIdsVerifyingStageConstancy({
   matchingDealIds,
