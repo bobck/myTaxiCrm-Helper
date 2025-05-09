@@ -15,8 +15,10 @@ const resetSecondaryRemonlineTablesJob = CronJob.from({
       await resetAssetTable();
       await resetEmployeeTable();
     } catch (e) {
-      console.error('An error occurred while creating transfers tables');
-      console.error(e.errors[0]);
+      console.error(
+        'An error occurred while resetting secondary tables job tables'
+      );
+      console.error(e);
     }
   },
 });

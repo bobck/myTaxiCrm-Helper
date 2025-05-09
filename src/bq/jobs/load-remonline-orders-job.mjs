@@ -12,7 +12,7 @@ const loadRemonlineOrdersJob = CronJob.from({
       await loadRemonlineOrders();
     } catch (e) {
       console.error('An error occurred while uploading order tables');
-      console.error(e.errors[0]);
+      console.error(e);
     }
   },
 });
