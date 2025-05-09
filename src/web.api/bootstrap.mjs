@@ -16,7 +16,7 @@ import { saveCarUsageReportJob } from './gdc-report/jobs/save-car-usage-report-j
 import { inflowOutflowDriversReportJob } from './inflow-outflow-drivers-report/jobs/inflow-outflow-drivers-report-job.mjs';
 import { upToDateCurrentDateGDCReportJob } from './gdc-report/jobs/up-to-date-current-date.mjs';
 import { saveRepairAndAccidentCarsReportJob } from './jobs/save-repair-and-accident-cars-job.mjs';
-import{getAndSaveClosedPolishBitrixDealsJob} from './gdc-report/jobs/get-and-save-closed-polish-bitrix-deals-job.mjs'
+import { getAndSaveClosedPolishBitrixDealsJob } from './gdc-report/jobs/get-and-save-closed-polish-bitrix-deals-job.mjs';
 
 export function driversCustomTariffJobs() {
   try {
