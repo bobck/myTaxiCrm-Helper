@@ -380,6 +380,7 @@ export async function loadRowsViaJSONFile({
       console.warn(`Failed to delete temp file: ${tempFilePath}`, unlinkErr);
     }
   }
+}
 export async function getBrandStickers() {
   console.log('downloading brand stickers...');
   const query = `SELECT bs.brand, bs.number FROM \`up-statistics.DB.brand_sticker\` bs order by bs.number asc ;`;

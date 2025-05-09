@@ -54,7 +54,6 @@
     "remonlineEmployeesToBQManual": "ENV=TEST node -r dotenv/config src/bq/modules/load-remonline-employees.mjs",
     "remonlineUOMsToBQManual": "ENV=TEST node -r dotenv/config src/bq/modules/load-remonline-uoms.mjs",
     "updateBitrixCarsStatusManual": "ENV=TEST node -r dotenv/config src/bitrix/modules/update-bitrix-cars-status.mjs"
-
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",
