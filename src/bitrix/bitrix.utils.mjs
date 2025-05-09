@@ -585,43 +585,32 @@ export async function findContactsByPhonesObjectReturned({ drivers }) {
 }
 
 export async function getDealsIdsByStageEnteredDate({
-  stage_id,
-  date,
+  startDateISO,
+  endDateISO,
   category_id,
+  stage_id,
+  dealEntityTypeId,
 }) {
   // --- Input Validation ---
-  if (!stage_id || !date || category_id === undefined || category_id === null) {
+  if (
+    !stage_id ||
+    !endDateISO ||
+    !startDateISO ||
+    category_id === undefined ||
+    category_id === null
+  ) {
     console.error(
       'Error: stage_id, date, and category_id are required parameters.'
     );
     return null;
   }
 
-  // --- Date Processing ---
-  let targetDate;
-  try {
-    targetDate = new Date(date);
-    if (isNaN(targetDate.getTime())) throw new Error('Invalid date format');
-  } catch (e) {
-    console.error(`Error processing date: ${e.message}`);
-    return null;
-  }
-  targetDate.setUTCHours(0, 0, 0, 0);
-  const startDateISO = targetDate.toISOString();
-  const endDate = new Date(targetDate);
-  endDate.setUTCDate(targetDate.getUTCDate() + 1);
-  const endDateISO = endDate.toISOString();
-
-  console.log(
-    `Searching history for deals entering stage '${stage_id}' between ${startDateISO} and ${endDateISO}`
-  );
-
   // --- Step 1: Query Stage History ---
   const matchingDealIds = new Set(); // Use a Set to store unique deal IDs
 
   try {
     const requestParams = {
-      entityTypeId: 2,
+      entityTypeId:dealEntityTypeId,
       order: { ID: 'ASC' },
       filter: {
         STAGE_ID: stage_id, // Stage the deal moved TO
@@ -635,10 +624,8 @@ export async function getDealsIdsByStageEnteredDate({
       'crm.stagehistory.list',
       requestParams
     );
-    // cnosole.log(`crm.stagehistory.list response:`, historyResponse);
     const historyRecords = historyResponse.result.items || [];
 
-    console.log();
     historyRecords.forEach((record) => matchingDealIds.add(record.OWNER_ID));
   } catch (error) {
     console.error('Error fetching stage history from Bitrix24:', error.message);
@@ -647,7 +634,7 @@ export async function getDealsIdsByStageEnteredDate({
     }
     return null; // Indicate failure
   }
-  return { matchingDealIds }; // Return the Set of matching deal IDs
+  return { matchingDealIds }; 
 }
 export async function getDealsByIdsVerifyingStageConstancy({
   matchingDealIds,

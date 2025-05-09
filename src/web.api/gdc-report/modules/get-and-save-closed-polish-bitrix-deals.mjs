@@ -13,9 +13,14 @@ import { closedPolishBitrixDealsTableSchema } from '../../../bq/schemas.mjs';
 
 const table_id = 'closed_polish_bitrix_deals';
 const dataset_id = 'DB';
+const dealEntityTypeId = 2; // 2 - deal entity type id
 export async function getAndSaveClosedPolishBitrixDeals(manualDate) {
   const date =
-    manualDate || DateTime.now().setZone('Europe/Kyiv').toFormat('yyyy-MM-dd');
+    manualDate ||
+    DateTime.now()
+      .minus({ days: 1 })
+      .setZone('Europe/Kyiv')
+      .toFormat('yyyy-MM-dd');
   console.log({
     time: new Date(),
     date,
@@ -26,26 +31,45 @@ export async function getAndSaveClosedPolishBitrixDeals(manualDate) {
   const fired_stage = 'C40:UC_TFNPUX'; // Звільнився
   const stage_ids = [new_driver_stage, fired_stage];
   const deals = [];
+
+  // --- Date Processing ---
+  let targetDate;
+  try {
+    targetDate = new Date(date);
+    if (isNaN(targetDate.getTime())) throw new Error('Invalid date format');
+  } catch (e) {
+    console.error(`Error processing date: ${e.message}`);
+    return null;
+  }
+  targetDate.setUTCHours(0, 0, 0, 0);
+  const startDateISO = targetDate.toISOString();
+  const endDate = new Date(targetDate);
+  endDate.setUTCDate(targetDate.getUTCDate() + 1);
+  const endDateISO = endDate.toISOString();
+
   for (const stage_id of stage_ids) {
     const { matchingDealIds } = await getDealsIdsByStageEnteredDate({
-      date,
+      startDateISO,
+      endDateISO,
       category_id,
       stage_id,
+      dealEntityTypeId,
     });
     console.log(matchingDealIds);
     if (matchingDealIds.size === 0) {
       continue;
     }
-    const dealsByIds = await getDealsByIdsVerifyingStageConstancy({
-      matchingDealIds,
-      category_id,
-      stage_id,
-    });
-    if (dealsByIds.length === 0) {
-      continue;
-    }
-    deals.push(...dealsByIds);
+    // const dealsByIds = await getDealsByIdsVerifyingStageConstancy({
+    //   matchingDealIds,
+    //   category_id,
+    //   stage_id,
+    // });
+    // if (dealsByIds.length === 0) {
+    //   continue;
+    // }
+    // deals.push(...dealsByIds);
   }
+  return;
   const jsonData = deals.map((deal) => {
     const { ID, SOURCE_ID, STAGE_ID, UF_CRM_1527615815, UF_CRM_1722203030883 } =
       deal;
