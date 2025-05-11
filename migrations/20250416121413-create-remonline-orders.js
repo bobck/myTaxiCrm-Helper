@@ -14,7 +14,7 @@ exports.up = function (db, callback) {
   const sql = `
       CREATE TABLE remonline_orders (
           order_id INTEGER PRIMARY KEY,
-          modified_at TIMESTAMP NOT NULL,
+          modified_at TIMESTAMP NOT NULL
       );
   `;
   db.runSql(sql, callback);
