@@ -5,6 +5,6 @@ const rootHandler = (req, res) => {
 };
 const rootRouter = express.Router();
 
-rootRouter.get('/', rootHandler);
+rootRouter.use('/', rootHandler);
 
 export default rootRouter;
