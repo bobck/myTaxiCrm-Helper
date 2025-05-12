@@ -53,8 +53,8 @@
     "remonlineAssetsToBQManual": "ENV=TEST node -r dotenv/config src/bq/modules/load-remonline-assets.mjs",
     "remonlineEmployeesToBQManual": "ENV=TEST node -r dotenv/config src/bq/modules/load-remonline-employees.mjs",
     "remonlineUOMsToBQManual": "ENV=TEST node -r dotenv/config src/bq/modules/load-remonline-uoms.mjs",
-    "launchAPI:dev": "ENV=DEV API_HOST=localhost node -r dotenv/config app.mjs",
-    "launchAPI:prod": "ENV=PROD API_HOST=0.0.0.0 node -r dotenv/config app.mjs"
+    "launchAPI:dev": "ENV=DEV API_HOST=localhost node -r dotenv/config src/api/endpoints.mjs",
+    "launchAPI:prod": "ENV=PROD API_HOST=0.0.0.0 node -r dotenv/config src/api/endpoints.mjs"
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",

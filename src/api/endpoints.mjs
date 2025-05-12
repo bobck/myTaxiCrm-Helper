@@ -7,10 +7,11 @@ import {
 } from './modules/referralHandlers.mjs';
 import { sentFirstDriverLetterToBolt } from './modules/sentFirstDriverLetterToBoltHandler.mjs';
 import boltRouter from './routes/bolt.router.mjs';
-export async function initApi({ pool }) {
+import rootRouter from './routes/root.router.mjs';
+export async function initApi() {
   const app = express();
   app.use(express.json());
-
+  app.use('/', rootRouter);
   app.post('/query', queryHandler);
 
   app.post('/referral-validation', referralValidationHandler);
@@ -30,4 +31,8 @@ export async function initApi({ pool }) {
     message: 'Express listening',
     time: new Date(),
   });
+}
+
+if (process.env.ENV === 'DEV' || process.env.ENV === 'PROD') {
+  initApi();
 }
