@@ -773,33 +773,27 @@ export async function createBoltDriverToBan({
 /**
  * Sets the is_first_letter_sent flag to true for a specific driver.
  * @param {Object} params - The parameters for updating the driver.
- * @param {string} params.driver_id - The ID of the driver to update.
+ * @param {string} params.bitrix_deal_id - The ID of the driver to update.
  * @returns {Promise<Object>} - A promise that resolves with an object indicating success (e.g., { changes: 1 }).
  */
-export async function setFirstLetterSent({ driver_id }) {
+export async function setLetterApprovedByDealId({
+  bitrix_deal_id: input,
+  letter_id,
+}) {
+  const column =
+    letter_id === 1 ? 'is_first_letter_sent' : 'is_second_letter_sent';
   const sql = /*sql*/ `
       UPDATE bolt_drivers_to_ban
-      SET is_first_letter_sent = TRUE,
+      SET ${column} = 1,  -- Using 0 for FALSE in SQLite
           updated_at = CURRENT_TIMESTAMP
-      WHERE driver_id = ?;
+      WHERE bitrix_deal_id = ?
+      RETURNING bitrix_deal_id; -- This will only return if a row was actually updated
   `;
-  return db.run(sql, driver_id);
-}
-
-/**
- * Sets the is_second_letter_sent flag to true for a specific driver.
- * @param {Object} params - The parameters for updating the driver.
- * @param {string} params.driver_id - The ID of the driver to update.
- * @returns {Promise<Object>} - A promise that resolves with an object indicating success (e.g., { changes: 1 }).
- */
-export async function setSecondLetterSent({ driver_id }) {
-  const sql = /*sql*/ `
-      UPDATE bolt_drivers_to_ban
-      SET is_second_letter_sent = TRUE,
-          updated_at = CURRENT_TIMESTAMP
-      WHERE driver_id = ?;
-  `;
-  return db.run(sql, driver_id);
+  //will return a bitrix id if the record has been found and successfully updated,
+  //undefied in case of failure
+  const returnedRow = (await db.get(sql, input)) || {};
+  const { bitrix_deal_id } = returnedRow;
+  return { bitrix_deal_id };
 }
 
 /**

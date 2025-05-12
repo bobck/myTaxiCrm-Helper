@@ -3,7 +3,7 @@ import express from 'express';
 
 import { sentFirstDriverLetterToBolt } from '../modules/sentFirstDriverLetterToBoltHandler.mjs';
 import { approveBoltDriverBanHandler } from '../modules/approveBoltDriverBanHandler.mjs';
-import { approveFirstDriverLetterToBoltHandler } from '../modules/approveFirstDriverLetterToBoltHandler.mjs';
+import { approveDriverLetterToBoltHandler } from '../modules/approveDriverLetterToBoltHandler.mjs';
 import { approveSecondDriverLetterToBoltHandler } from '../modules/approveSecondDriverLetterToBoltHandler.mjs';
 import { boltAuthorizationMiddleware } from '../middleware/bolt.middlewares.mjs';
 
@@ -18,8 +18,7 @@ lettersRouter.post('/sent/second', (req, res) => {
   res.status(200).json({ message: 'Second letter sent' });
 });
 
-lettersRouter.post('/approve/first', approveFirstDriverLetterToBoltHandler);
-lettersRouter.post('/approve/second', approveSecondDriverLetterToBoltHandler);
+lettersRouter.post('/approve/:letter_id', approveDriverLetterToBoltHandler);
 
 banConfirmRouter.post('/confirmBan', approveBoltDriverBanHandler);
 

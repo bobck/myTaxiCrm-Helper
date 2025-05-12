@@ -4,7 +4,7 @@ import {
   checkIfDriverStaysInTheSameCity,
 } from '../endpoints-utils.mjs';
 import { updateRequestedDriver } from '../../bitrix/bitrix.utils.mjs';
-// import {createBoltDriverToBank} from '../../bitrix';
+import { createBoltDriverToBan } from '../../bitrix/bitrix.queries.mjs';
 export const sentFirstDriverLetterToBolt = async (req, res) => {
   try {
     const {
@@ -53,12 +53,12 @@ export const sentFirstDriverLetterToBolt = async (req, res) => {
       bitrix_deal_id,
       bolt_id,
     });
-    // await createBoltDriverToBan({
-    //   driver_id,
-    //   phone,
-    //   bitrix_deal_id,
-    //   bolt_id,
-    // });
+    await createBoltDriverToBan({
+      driver_id,
+      phone,
+      bitrix_deal_id,
+      bolt_id,
+    });
     await updateRequestedDriver({
       bitrix_deal_id,
       payload: updatePayload,

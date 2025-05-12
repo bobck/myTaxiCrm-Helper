@@ -2,7 +2,7 @@ import { cityListWithAssignedBy } from '../bitrix/bitrix.constants.mjs';
 import { getAllBoltIdsByDriverPhone } from '../web.api/web.api.utlites.mjs';
 import { api_status_codes } from './api.constants.mjs';
 
-const { SUCCESS_AUTH, BAD_REQUEST, MISSING_API_KEY } = api_status_codes;
+const { OK: SUCCESS_AUTH, BAD_REQUEST, MISSING_API_KEY } = api_status_codes;
 export const checkIfDriverStaysInTheSameCity = async ({
   driver_id,
   city_id,
