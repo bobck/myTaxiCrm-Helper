@@ -23,9 +23,7 @@ export const approveDriverLetterToBoltHandler = async (req, res) => {
       .json({ message: `bitrix_deal_id:${bitrix_deal_id} wasnt found` });
     return;
   }
-  res
-    .status(OK)
-    .json({
-      message: `bitrix_deal_id:${bitrix_deal_id} letter_id:${letter_id} letter has been approved`,
-    });
+  res.status(OK).json({
+    message: `bitrix_deal_id:${bitrix_deal_id} letter_id:${letter_id} letter has been approved`,
+  });
 };
