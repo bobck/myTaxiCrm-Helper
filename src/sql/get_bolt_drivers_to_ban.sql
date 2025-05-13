@@ -37,6 +37,6 @@ ON ar.driver_id = d.id
     JOIN drivers_to_integrations dti
     ON ar.driver_id = dti.driver_id
     AND dti.integration_type = 'BOLT'
-WHERE dti.external_id IS NOT NULL
+WHERE dti.external_id IS NOT NULL AND d.id = ANY($4)
     AND (cs.total_payable_to_driver - cs.total_debt)<0
 ORDER BY d.id;

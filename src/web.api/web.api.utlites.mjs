@@ -639,9 +639,9 @@ export async function getAllBoltIdsByDriverPhone({ phone }) {
   return { rows };
 }
 
-export async function getBoltDriversToBan({ period_from, weekNumber, year }) {
+export async function getBoltDriversToBan({ period_from, weekNumber, year, driver_ids }) {
   const sql = fs.readFileSync('src/sql/get_bolt_drivers_to_ban.sql').toString();
-  const result = await pool.query(sql, [period_from, weekNumber, year]);
+  const result = await pool.query(sql, [period_from, weekNumber, year,driver_ids]);
   const { rows, rowCount } = result;
   return { rows };
 }

@@ -6,7 +6,9 @@ import { DateTime } from 'luxon';
 import {
   getBoltDriverBanReqByDriverId,
   insertBoltDriverBanReq,
+  getALLBoltDriversToBan,
 } from '../bitrix.queries.mjs';
+
 const Seven_days_without_trips_message_type = 3430;
 const debtorState = 3434;
 const notDebtorState = 3436;
@@ -15,7 +17,6 @@ function getCityBrandingId(auto_park_id) {
 }
 function computeQueryParams() {
   const today = DateTime.local().startOf('day');
-
   const lowerBound = today.minus({ days: 8 });
   // Return the dates formatted as ISO strings (YYYY-MM-DD) for PostgreSQL
   return {
@@ -26,7 +27,10 @@ function computeQueryParams() {
 }
 export const createBoltDriversToBan = async () => {
   const queryParams = computeQueryParams();
-  const { rows } = await getBoltDriversToBan(queryParams);
+  const driversToBan = await getALLBoltDriversToBan(queryParams);
+  const driver_ids = driversToBan.map((driver) => driver.driver_id);
+
+  const { rows } = await getBoltDriversToBan({ ...queryParams, driver_ids });
   if (rows.length === 0) {
     console.error('No any drivers to ban found.');
     return;

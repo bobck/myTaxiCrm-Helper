@@ -839,3 +839,14 @@ export async function getBoltDriverById({ driver_id }) {
   `;
   return db.get(sql, driver_id);
 }
+/**
+ * Retrieves all drivers to be banned.
+ * @returns {Promise<Array<Object>>} - A promise that resolves with an array of driver records.
+ */
+export async function getALLBoltDriversToBan() {
+  const sql = /*sql*/ `
+      SELECT driver_id, bolt_id, bitrix_deal_id, phone, is_banned, is_first_letter_sent, is_second_letter_sent
+      FROM bolt_drivers_to_ban;
+  `;
+  return db.all(sql);
+}
