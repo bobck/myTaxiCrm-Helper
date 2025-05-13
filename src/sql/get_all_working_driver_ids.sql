@@ -1,0 +1,1 @@
+SELECT d.id as driver_id from drivers d WHERE d.inner_status = 'WORKING' 

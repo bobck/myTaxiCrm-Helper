@@ -629,3 +629,11 @@ export async function getHandledCashBlockRulesInfo({ fired_drivers_ids }) {
   const { rows, rowCount } = result;
   return { rows };
 }
+export async function getAllWorkingDriverIds() {
+  const sql = fs
+    .readFileSync('src/sql/get_all_working_driver_ids.sql')
+    .toString();
+  const result = await pool.query(sql);
+  const { rows, rowCount } = result;
+  return { rows };
+}
