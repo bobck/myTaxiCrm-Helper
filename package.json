@@ -56,7 +56,6 @@
     "saveWorkingDriversManual": "ENV=TEST node -r dotenv/config src/web.api/gdc-report/modules/save-working-drivers-with-history-status.mjs",
     "getAndSaveClosedPolishBitrixDealsManual": "ENV=TEST node -r dotenv/config src/web.api/gdc-report/modules/get-and-save-closed-polish-bitrix-deals.mjs",
     "createBoltDriversBanCardsManual": "ENV=TEST BOLT_DRIVERS_BAN_CARDS=17 CHUNK_SIZE=11 node -r dotenv/config src/bitrix/modules/create-bolt-drivers-to-ban.mjs"
-
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",
