@@ -1,4 +1,7 @@
 import fs from 'fs';
+import { writeFile, unlink } from 'fs/promises';
+import path from 'path';
+import os from 'os';
 import { BigQuery } from '@google-cloud/bigquery';
 import { pool } from '../api/pool.mjs';
 import {
@@ -30,9 +33,9 @@ export async function generateDriversWithFuelCardReport({ date }) {
   return { rows };
 }
 
-export async function insertRowsAsStream({ rows, bqTableId }) {
+export async function insertRowsAsStream({ dataset_id, rows, bqTableId }) {
   await bigquery
-    .dataset(process.env.BQ_DATASET_ID)
+    .dataset(dataset_id || process.env.BQ_DATASET_ID)
     .table(bqTableId)
     .insert(rows);
 }
@@ -262,4 +265,118 @@ export async function generatePolandBookkeepingReport({
   const result = await pool.query(sqlp, [periodFrom, periodTo, autoParkId]);
   const { rows } = result;
   return { rows };
+}
+export async function getBrandedLicencePlateNumbersFromBQ({
+  existingBrandedLicencePlateNumbers,
+}) {
+  // the check is necessary because the BQ does not support null or undefined in the IN clause
+  // and the query will fail if the array is empty
+  const areBrandedLicencePlateNumbersEmpty =
+    existingBrandedLicencePlateNumbers === undefined ||
+    existingBrandedLicencePlateNumbers === null ||
+    existingBrandedLicencePlateNumbers.length === 0;
+  const query = areBrandedLicencePlateNumbersEmpty
+    ? /*sql*/ `SELECT numbner as licence_plate_number FROM \`up-statistics.DB.brand_cars_status_list\` where approved_brand_type='BOLT'`
+    : /*sql*/ `
+    SELECT numbner AS licence_plate_number
+    FROM \`up-statistics.DB.brand_cars_status_list\`
+    WHERE approved_brand_type = 'BOLT'
+      AND numbner NOT IN UNNEST(@existingNumbers)
+  `;
+  const options = {
+    query,
+    location: 'US',
+  };
+  if (!areBrandedLicencePlateNumbersEmpty) {
+    options.params = { existingNumbers: existingBrandedLicencePlateNumbers };
+  }
+  //the response from BQ is an array with rows array as first element, and payload data next
+  //this is the reason why here is array destructuring
+  const [rows] = await bigquery.query(options);
+
+  //the array mapping is required because the response has the shape[{ licence_plate_number: 'SOMEPLATENUMBER777' }]
+  const brandedLicencePlateNumbers = rows.map(
+    (row) => row.licence_plate_number
+  );
+
+  return { brandedLicencePlateNumbers };
+}
+/**
+ * Deletes all rows from `datasetId.tableName` whose order_id matches one
+ * of the IDs in `orders`. Runs as a single atomic DML job.
+ * @param {string} dataset_id dataset id
+ * @param {string} table_id  Name of the table (must be in ALLOWED_TABLES)
+ * @param {{ id: number }[]} arrayToDelete  Array of { id } objects
+ * @param {string} parameter A column which is going to be used as filtering parameter for arrayToDelete
+ */
+export async function deleteRowsByParameter({
+  dataset_id,
+  table_id,
+  parameter,
+  arrayToDelete,
+}) {
+  try {
+    // Build the DELETE statement with the validated table name
+    const sql = `
+        DELETE FROM \`${process.env.BQ_PROJECT_NAME}.${dataset_id}.${table_id}\`
+        WHERE ${parameter} IN UNNEST(@arrayToDelete)
+      `;
+
+    // Submit as a parameterized query job
+    const [job] = await bigquery.createQueryJob({
+      query: sql,
+      location: 'US',
+      params: { arrayToDelete },
+      parameterMode: 'NAMED',
+    });
+    // Wait for completion
+    await job.getQueryResults();
+  } catch (error) {
+    const info = {
+      dataset_id,
+      table_id,
+      parameter,
+      date: new Date(),
+    };
+    throw { info, error };
+  }
+}
+
+export async function loadRowsViaJSONFile({
+  dataset_id,
+  table_id,
+  rows,
+  schema,
+}) {
+  const tempFilePath = path.join(
+    os.tmpdir(),
+    `temp_data_${dataset_id}_${table_id}.json`
+  );
+  try {
+    const jsonString = rows.map(JSON.stringify).join('\n');
+    await writeFile(tempFilePath, jsonString);
+
+    const metadata = {
+      sourceFormat: 'NEWLINE_DELIMITED_JSON',
+      schema: { fields: schema },
+      // autodetect: true,
+    };
+    await bigquery
+      .dataset(dataset_id)
+      .table(table_id)
+      .load(tempFilePath, metadata);
+  } catch (error) {
+    const info = {
+      dataset_id,
+      table_id,
+      date: new Date(),
+    };
+    throw { info, error };
+  } finally {
+    try {
+      await unlink(tempFilePath);
+    } catch (unlinkErr) {
+      console.warn(`Failed to delete temp file: ${tempFilePath}`, unlinkErr);
+    }
+  }
 }

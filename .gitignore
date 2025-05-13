@@ -1,9 +1,11 @@
 /.DS_Store
 /.env
-.idea/
 .test/
+.idea/
+.vscode/
 /id_rsa
 /node_modules
+/package-lock.json
 main.db
 src/cron/.DS_Store
 src/.DS_Store
@@ -13,3 +15,4 @@ token.json
 src/remonline/.DS_Store
 main.db-journal
 _main.db
+extensions.txt

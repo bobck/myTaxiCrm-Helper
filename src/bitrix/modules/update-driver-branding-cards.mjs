@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon';
 import {
+  getBrandedLicencePlateNumbersByBrandingProcessId,
   getBrandingProcessByWeekNumber,
   getCrmBrandingCardByDriverId,
   updateBrandingCardByDriverId,
@@ -8,7 +9,7 @@ import {
   chunkArray,
   updateBitrixDriverBrandingCards,
 } from '../bitrix.utils.mjs';
-import { getBrandingCardsInfo } from '../../web.api/web.api.utlites.mjs';
+import { getBrandingCarsInfo } from '../../web.api/web.api.utlites.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
 import { computeBrandingCardInProgressStage } from '../bitrix.business-entity.mjs';
 
@@ -18,36 +19,35 @@ export async function updateDriverBrandingCards() {
     weekNumber: today.weekNumber,
     year: today.year,
   });
-  const {
+
+  const { period_from, id: branding_process_id } = brandingProcess;
+
+  const { brandedLicencePlateNumbers } =
+    await getBrandedLicencePlateNumbersByBrandingProcessId({
+      branding_process_id,
+    });
+
+  const { rows } = await getBrandingCarsInfo({
+    brandedLicencePlateNumbers,
     period_from,
-    period_to,
-    weekNumber,
-    year,
-    id: branding_process_id,
-  } = brandingProcess;
-  const { rows } = await getBrandingCardsInfo({
-    period_from,
-    period_to,
+  });
+  console.log({
+    time: new Date(),
+    message: 'updateDriverBrandingCards',
+    updateDriverBrandingCards: rows.length,
   });
   const processedCards = [];
 
   for (const [index, row] of rows.entries()) {
-    if (
-      process.env.ENV === 'TEST' &&
-      index === Number(process.env.BRANDING_CARDS_COUNT)
-    ) {
-      break;
-    }
     const { driver_id, total_trips, auto_park_id } = row;
     const dbcard = await getCrmBrandingCardByDriverId({
       driver_id,
       branding_process_id,
     });
-
-    if (!dbcard) {
-      console.error(
-        `Absent driver card while updating driver_id: ${driver_id}, year:${year}, weekNumber:${weekNumber} `
-      );
+    if (typeof dbcard !== 'object') {
+      continue;
+    }
+    if (Object.keys(dbcard).length === 0) {
       continue;
     }
     if (Number(dbcard.total_trips) >= Number(total_trips)) {

@@ -1,12 +1,14 @@
-import { getBrandingCardsInfo } from '../../web.api/web.api.utlites.mjs';
+import { getBrandingCarsInfo } from '../../web.api/web.api.utlites.mjs';
 import {
   createBrandingProcess,
-  getCrmBrandingCardByDriverId,
   insertBrandingCard,
+  getBrandingProcessByWeekNumber,
+  getBrandedLicencePlateNumbersByBrandingProcessId,
 } from '../bitrix.queries.mjs';
 import {
   chunkArray,
   createBitrixDriverBrandingCards,
+  findContactsByPhonesObjectReturned,
 } from '../bitrix.utils.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
 import {
@@ -14,7 +16,7 @@ import {
   computePeriodBounds,
 } from '../bitrix.business-entity.mjs';
 import { cityListWithAssignedBy as cityList } from '../bitrix.constants.mjs';
-
+import { getBrandedLicencePlateNumbersFromBQ } from '../../bq/bq-utils.mjs';
 function getCityBrandingId({ auto_park_id }) {
   const matchingCity = cityList.find(
     (obj) => obj.auto_park_id === auto_park_id
@@ -22,14 +24,27 @@ function getCityBrandingId({ auto_park_id }) {
   const { brandingId: cityBrandingId } = matchingCity;
   return { cityBrandingId };
 }
-export async function createDriverBrandingCards() {
-  const bounds = computePeriodBounds();
-  const brandingProcess = await createBrandingProcess({
-    year: bounds.upperBound.year,
-    weekNumber: bounds.upperBound.weekNumber,
-    period_from: bounds.lowerBound.toISODate(),
-    period_to: bounds.upperBound.toISODate(),
+
+async function getBrandingProcess() {
+  const { weekNumber, year, period_from, period_to } = computePeriodBounds();
+  const brandingProcess = await getBrandingProcessByWeekNumber({
+    weekNumber,
+    year,
   });
+  if (brandingProcess) {
+    return { brandingProcess };
+  }
+  const newbrandingProcess = await createBrandingProcess({
+    year,
+    weekNumber,
+    period_from,
+    period_to,
+  });
+  return { brandingProcess: newbrandingProcess };
+}
+export async function createDriverBrandingCards() {
+  const { brandingProcess } = await getBrandingProcess();
+
   const {
     period_from,
     period_to,
@@ -37,10 +52,27 @@ export async function createDriverBrandingCards() {
     weekNumber,
     year,
   } = brandingProcess;
-  const { rows } = await getBrandingCardsInfo({ period_from, period_to });
-
+  const { brandedLicencePlateNumbers: existingBrandedLicencePlateNumbers } =
+    await getBrandedLicencePlateNumbersByBrandingProcessId({
+      branding_process_id,
+    });
+  const { brandedLicencePlateNumbers } =
+    await getBrandedLicencePlateNumbersFromBQ({
+      existingBrandedLicencePlateNumbers,
+    });
+  if (brandedLicencePlateNumbers.length === 0) {
+    return;
+  }
+  const { rows } = await getBrandingCarsInfo({
+    brandedLicencePlateNumbers,
+    period_from,
+  });
+  console.log({
+    time: new Date(),
+    message: 'createDriverBrandingCards',
+    createDriverBrandingCards: rows.length,
+  });
   if (rows.length === 0) {
-    console.error('No rows found for branding cards found.');
     return;
   }
 
@@ -53,18 +85,14 @@ export async function createDriverBrandingCards() {
       break;
     }
 
-    const { driver_id, driver_name, phone, auto_park_id, total_trips } = row;
-
-    const dbcard = await getCrmBrandingCardByDriverId({
+    const {
       driver_id,
-      branding_process_id,
-    });
-    if (dbcard) {
-      console.error(
-        `Present driver card while creating driver_id:${driver_id}, year:${year}, weekNumber:${weekNumber}`
-      );
-      continue;
-    }
+      driver_name,
+      phone,
+      auto_park_id,
+      total_trips,
+      license_plate,
+    } = row;
 
     const { cityBrandingId } = getCityBrandingId({ auto_park_id });
     const stage_id = `DT1138_62:${computeBrandingCardInProgressStage({ total_trips, auto_park_id })}`;
@@ -80,6 +108,7 @@ export async function createDriverBrandingCards() {
       year,
       cityBrandingId,
       auto_park_id,
+      license_plate,
     };
     processedCards.push(card);
   }
@@ -87,10 +116,28 @@ export async function createDriverBrandingCards() {
     processedCards,
     Number(process.env.CHUNK_SIZE) || 7
   );
+
+  //chunk extension with contact_ids
+  for (const [index, chunk] of chunkedProcessedCards.entries()) {
+    const contact_ids = await findContactsByPhonesObjectReturned({
+      drivers: chunk,
+    });
+    for (const card of chunk) {
+      const { driver_id } = card;
+      const contact_id = contact_ids[driver_id];
+      if (contact_id instanceof Array) {
+        card.contact_id = null;
+        continue;
+      }
+      card.contact_id = contact_id.CONTACT[0];
+    }
+  }
+  //bitrix card creation
   for (const [index, chunk] of chunkedProcessedCards.entries()) {
     const bitrixRespObj = await createBitrixDriverBrandingCards({
       cards: chunk,
     });
+
     const handledResponseArr = [];
     for (const driver_id in bitrixRespObj) {
       const { id } = bitrixRespObj[driver_id]['item'];
@@ -100,21 +147,29 @@ export async function createDriverBrandingCards() {
         driver_id: matchingCard.driver_id,
         total_trips: matchingCard.total_trips,
         auto_park_id: matchingCard.auto_park_id,
+        license_plate: matchingCard.license_plate,
       });
     }
+    //sqlite insertion
     for (const respElement of handledResponseArr) {
-      const { driver_id, total_trips, bitrix_card_id, auto_park_id } =
-        respElement;
+      const {
+        driver_id,
+        total_trips,
+        bitrix_card_id,
+        auto_park_id,
+        license_plate,
+      } = respElement;
       await insertBrandingCard({
         driver_id,
         total_trips,
         bitrix_card_id,
         branding_process_id,
         auto_park_id,
+        license_plate,
       });
     }
   }
-
+  // console.log(processedCards);
   console.log(
     `${processedCards.length} branding cards creation has been finished.`
   );

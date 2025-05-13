@@ -3,6 +3,7 @@ import fs from 'fs';
 import { setTimeout } from 'timers/promises';
 import { pool } from './../api/pool.mjs';
 import { globalLimiter } from './bottleneck.mjs';
+import { UkrainianBrandingAutoParkIds } from '../bitrix/bitrix.constants.mjs';
 
 async function makeCRMRequest({ body }) {
   const response = await fetch(process.env.WEB_API_ENDPOINT, {
@@ -589,9 +590,42 @@ export async function getWorkingDriversById({ driversIds }) {
   return { rows };
 }
 
-export async function getBrandingCardsInfo({ period_from, period_to }) {
-  const sql = fs.readFileSync('src/sql/get-branding-cards-info.sql').toString();
-  const result = await pool.query(sql, [period_from, period_to]);
+export async function getBrandingCarsInfo({
+  brandedLicencePlateNumbers,
+  period_from,
+}) {
+  const sql = fs.readFileSync('src/sql/get-branding-cars-info.sql').toString();
+  const result = await pool.query(sql, [
+    brandedLicencePlateNumbers,
+    period_from,
+  ]);
+  const { rows, rowCount } = result;
+  return { rows };
+}
+export async function getDriverBalances({ driver_ids }) {
+  const sql = fs.readFileSync('src/sql/get_driver_balances.sql').toString();
+  const result = await pool.query(sql, [driver_ids]);
+  const { rows, rowCount } = result;
+  return { rows };
+}
+export async function getFiredDebtorDriversInfo({
+  fired_debtor_drivers_with_existing_bitrix_cards,
+}) {
+  const sql = fs
+    .readFileSync('src/sql/get_fired_debtor_drivers.sql')
+    .toString();
+  const result = await pool.query(sql, [
+    UkrainianBrandingAutoParkIds,
+    fired_debtor_drivers_with_existing_bitrix_cards,
+  ]);
+  const { rows, rowCount } = result;
+  return { rows };
+}
+export async function getHandledCashBlockRulesInfo({ fired_drivers_ids }) {
+  const sql = fs
+    .readFileSync('src/sql/get_handled_cash_block_rules.sql')
+    .toString();
+  const result = await pool.query(sql, [fired_drivers_ids]);
   const { rows, rowCount } = result;
   return { rows };
 }

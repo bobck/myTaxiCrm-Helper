@@ -30,7 +30,11 @@ export async function saveSidRow({
   return { result };
 }
 
-export async function getOrders({ idLabels, ids }, _page = 1, _orders = []) {
+export async function getOrders(
+  { idLabels, ids, modified_at, sort_dir },
+  _page = 1,
+  _orders = []
+) {
   let idLabelsUrl = '';
   if (idLabels) {
     for (let idLabel of idLabels) {
@@ -44,10 +48,12 @@ export async function getOrders({ idLabels, ids }, _page = 1, _orders = []) {
       idUrl += `&ids[]=${id}`;
     }
   }
+  const sort_dir_url = sort_dir ? `&sort_dir=${sort_dir}` : '';
+  const modified_at_url = modified_at ? `&modified_at[]=${modified_at}` : '';
 
-  const response = await fetch(
-    `${process.env.REMONLINE_API}/order/?token=${process.env.REMONLINE_API_TOKEN}&page=${_page}${idLabelsUrl}${idUrl}`
-  );
+  const url = `${process.env.REMONLINE_API}/order/?token=${process.env.REMONLINE_API_TOKEN}&page=${_page}${idLabelsUrl}${idUrl}${sort_dir_url}${modified_at_url}`;
+
+  const response = await fetch(url);
 
   if (
     response.status == 414 ||
@@ -87,17 +93,21 @@ export async function getOrders({ idLabels, ids }, _page = 1, _orders = []) {
 
   const doneOnPrevPage = (page - 1) * 50;
 
-  const leftTofinish = count - doneOnPrevPage - orders.length;
+  const leftToFinish = count - doneOnPrevPage - orders.length;
 
   _orders.push(...orders);
 
-  // console.log({ count, page, doneOnPrevPage, leftTofinish })
+  console.log({ count, page, doneOnPrevPage, leftToFinish });
 
-  if (leftTofinish > 0) {
-    return await getOrders({ idLabels, ids }, parseInt(page) + 1, _orders);
+  if (leftToFinish > 0) {
+    return await getOrders(
+      { idLabels, ids, modified_at, sort_dir },
+      parseInt(page) + 1,
+      _orders
+    );
   }
 
-  return { orders: _orders };
+  return { orders: _orders, count };
 }
 
 export async function changeOrderStatus({ id, statusId }) {
@@ -240,7 +250,7 @@ export async function getTransfers({ branch_id }, _page = 1, _transfers = []) {
     const { message, code } = data;
     const { validation } = message;
     if (response.status == 403 && code == 101) {
-      console.info({ function: 'getOrders', message: 'Get new Auth' });
+      console.info({ function: 'getTransfers', message: 'Get new Auth' });
       await remonlineTokenToEnv(true);
       return await getTransfers({ branch_id }, _page, _transfers);
     }
@@ -269,4 +279,114 @@ export async function getTransfers({ branch_id }, _page = 1, _transfers = []) {
     return await getTransfers({ branch_id }, parseInt(page) + 1, _transfers);
   }
   return { transfers: _transfers };
+}
+export async function getEmployees() {
+  const url = `${process.env.REMONLINE_API}/employees/?token=${process.env.REMONLINE_API_TOKEN}`;
+  const options = { method: 'GET', headers: { accept: 'application/json' } };
+  const response = await fetch(url, options);
+  let data;
+  try {
+    data = await response.json();
+  } catch (e) {
+    console.error({
+      function: 'getEmpoyees',
+      message: 'Error parsing JSON',
+      data,
+    });
+  }
+  const { success } = data;
+  if (!success) {
+    const { message, code } = data;
+    const { validation } = message;
+    if (response.status == 403 && code == 101) {
+      console.info({ function: 'getEmployees', message: 'Get new Auth' });
+      await remonlineTokenToEnv(true);
+      return await getEmployees();
+    }
+    console.error({
+      function: 'getEmployees',
+      message,
+      validation,
+      status: response.status,
+    });
+    return;
+  }
+  const { data: employees } = data;
+  // console.log(data);
+  return { employees };
+}
+export async function getAssets(_page = 1, _assets = []) {
+  const url = `${process.env.REMONLINE_API}/warehouse/assets?page=${_page}&token=${process.env.REMONLINE_API_TOKEN}`;
+  // const url = `${process.env.REMONLINE_API}/warehouse/assets?token=${process.env.REMONLINE_API_TOKEN}`;
+
+  const options = { method: 'GET', headers: { accept: 'application/json' } };
+
+  const response = await fetch(url, options);
+
+  const data = await response.json();
+  const { success } = data;
+  if (!success) {
+    const { message, code } = data;
+    const { validation } = message;
+    if (response.status == 403 && code == 101) {
+      console.info({ function: 'getAssets', message: 'Get new Auth' });
+      await remonlineTokenToEnv(true);
+      return await getAssets(_page, _assets);
+    }
+    console.error({
+      function: 'getAssets',
+      url,
+      message,
+      validation,
+      status: response.status,
+    });
+    return;
+  }
+  const { data: assets, page, count } = data;
+  const doneOnPrevPage = (page - 1) * 50;
+
+  const leftToFinish = count - doneOnPrevPage - assets.length;
+
+  _assets.push(...structuredClone(assets));
+  console.log({ count, page, doneOnPrevPage, leftToFinish });
+  if (leftToFinish > 0) {
+    return await getAssets(parseInt(page) + 1, _assets);
+  }
+  return { assets: _assets };
+}
+export async function getUOMs() {
+  const url = `${process.env.REMONLINE_API}/catalogs/uoms?token=${process.env.REMONLINE_API_TOKEN}`;
+
+  const options = { method: 'GET', headers: { accept: 'application/json' } };
+  const response = await fetch(url, options);
+  let data;
+  try {
+    data = await response.json();
+  } catch (e) {
+    console.error({
+      function: 'getUOMs',
+      message: 'Error parsing JSON',
+      data,
+    });
+  }
+  const { success } = data;
+  if (!success) {
+    const { message, code } = data;
+    const { validation } = message;
+    if (response.status == 403 && code == 101) {
+      console.info({ function: 'getUOMs', message: 'Get new Auth' });
+      await remonlineTokenToEnv(true);
+      return await getEmployees();
+    }
+    console.error({
+      function: 'getUOMs',
+      message,
+      validation,
+      status: response.status,
+    });
+    return;
+  }
+
+  const { uoms, uom_types, entity_types } = data;
+  return { uoms, uom_types, entity_types };
 }

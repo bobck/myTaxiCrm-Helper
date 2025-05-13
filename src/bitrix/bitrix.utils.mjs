@@ -420,7 +420,6 @@ export async function updateDealPayOff({ id, ufCrmField, amount }) {
 
 export async function createBitrixDriverBrandingCards({ cards }) {
   let batchObj = {};
-
   for (let card of cards) {
     const {
       driver_id,
@@ -432,10 +431,11 @@ export async function createBitrixDriverBrandingCards({ cards }) {
       weekNumber,
       year,
       total_trips,
+      contact_id,
     } = card;
-
     const params = {
       entityTypeId: '1138',
+      'fields[CONTACT_ID]': contact_id,
       'fields[title]': driver_name,
       'fields[STAGE_ID]': stage_id,
       'fields[ufCrm54_1738757291]': driver_name,
@@ -451,7 +451,6 @@ export async function createBitrixDriverBrandingCards({ cards }) {
 
   const { result: resp, time } = await bitrix.batch(batchObj);
   const { result: itemObj } = resp;
-
   return itemObj;
 }
 
@@ -475,30 +474,46 @@ export async function updateBitrixDriverBrandingCards({ cards }) {
   //
   return itemObj;
 }
-export async function createBanBoltDriverCards({ cards }) {
-  let batchObj = {};
+export async function createBitrixFiredDebtorDriversCards({ cards }) {
+  const batchObj = {};
 
-  for (let card of cards) {
+  for (const card of cards) {
     const {
+      stage_id,
       driver_id,
       full_name,
-      cityId,
-      bolt_id,
-      debt,
-      messageType,
-      isDebtorState,
+      cityBrandingId,
+      cs_current_week,
+      cs_current_year,
+      current_week_total_deposit,
+      current_week_total_debt,
+      current_week_balance,
+      fire_date,
+      is_balance_enabled,
+      balance_activation_value,
+      is_deposit_enabled,
+      deposit_activation_value,
     } = card;
-
+    // Индивидуальные условия -> UF_CRM_64_1741780398
+    // Комментарий -> UF_CRM_64_1741782814
+    // Дата обработки -> UF_CRM_64_1741782917
+    // Число активации блокировки депозита -  UF_CRM_64_1742373572
     const params = {
-      entityTypeId: '1132',
+      entityTypeId: '1162',
       'fields[title]': full_name,
-      'fields[STAGE_ID]': 'DT1132_60:NEW',
-      'fields[ufCrm52_1738324741]': full_name,
-      'fields[ufCrm52_1738324675]': bolt_id,
-      'fields[ufCrm52_1738324546]': messageType,
-      'fields[ufCrm52_1738739843]': isDebtorState,
-      'fields[ufCrm52_1738837120]': debt,
-      'fields[ufCrm52_1738326821]': cityId,
+      'fields[STAGE_ID]': stage_id,
+      'fields[ufCrm64_1741780227]': full_name,
+      'fields[ufCrm64_1741780126]': cityBrandingId,
+      'fields[ufCrm64_1741780303]': fire_date,
+      'fields[ufCrm64_1741785328]': current_week_balance,
+      'fields[ufCrm64_1741786347]': current_week_total_deposit,
+      'fields[ufCrm64_1741786515]': current_week_total_debt,
+      'fields[ufCrm64_1741780627]': cs_current_week,
+      'fields[ufCrm64_1741780703]': cs_current_year,
+      'fields[ufCrm64_1742373272]': is_balance_enabled,
+      'fields[ufCrm64_1742373369]': balance_activation_value,
+      'fields[ufCrm64_1742373461]': is_deposit_enabled,
+      'fields[ufCrm64_1742373572]': deposit_activation_value,
     };
     batchObj[driver_id] = { method: 'crm.item.add', params };
   }
@@ -507,4 +522,167 @@ export async function createBanBoltDriverCards({ cards }) {
   const { result: itemObj } = resp;
 
   return itemObj;
+}
+export async function updateBitrixFiredDebtorDriversCards({ cards }) {
+  const batchObj = {};
+
+  for (const card of cards) {
+    const {
+      bitrix_card_id,
+      stage_id,
+      driver_id,
+      cs_current_week,
+      cs_current_year,
+      current_week_balance,
+      current_week_total_deposit,
+      current_week_total_debt,
+      is_balance_enabled,
+      balance_activation_value,
+      is_deposit_enabled,
+      deposit_activation_value,
+    } = card;
+    // Индивидуальные условия -> UF_CRM_64_1741780398
+    // Комментарий -> UF_CRM_64_1741782814
+    // Дата обработки -> UF_CRM_64_1741782917
+    // Число активации блокировки депозита -  UF_CRM_64_1742373572
+    const params = {
+      id: bitrix_card_id,
+      entityTypeId: '1162',
+      'fields[STAGE_ID]': stage_id,
+      'fields[ufCrm64_1741785328]': current_week_balance,
+      'fields[ufCrm64_1741786347]': current_week_total_deposit,
+      'fields[ufCrm64_1741786515]': current_week_total_debt,
+      'fields[ufCrm64_1741780627]': cs_current_week,
+      'fields[ufCrm64_1741780703]': cs_current_year,
+      'fields[ufCrm64_1742373272]': is_balance_enabled,
+      'fields[ufCrm64_1742373369]': balance_activation_value,
+      'fields[ufCrm64_1742373461]': is_deposit_enabled,
+      'fields[ufCrm64_1742373572]': deposit_activation_value,
+    };
+    batchObj[driver_id] = { method: 'crm.item.update', params };
+  }
+
+  const { result: resp, time } = await bitrix.batch(batchObj);
+  const { result: itemObj } = resp;
+
+  return itemObj;
+}
+
+export async function findContactsByPhonesObjectReturned({ drivers }) {
+  const batchObj = {};
+
+  for (let driver of drivers) {
+    const params = {
+      entity_type: 'CONTACT',
+      type: 'PHONE',
+      'values[]': driver.phone,
+    };
+    batchObj[driver.driver_id] = { method: 'crm.duplicate.findbycomm', params };
+  }
+  const { result: temp_result } = await bitrix.batch(batchObj);
+  const { result } = temp_result;
+  return result;
+}
+
+export async function getDealsIdsByStageEnteredDate({
+  startDateISO,
+  endDateISO,
+  category_id,
+  stage_id,
+  dealEntityTypeId,
+}) {
+  // --- Input Validation ---
+  if (
+    !stage_id ||
+    !endDateISO ||
+    !startDateISO ||
+    category_id === undefined ||
+    category_id === null
+  ) {
+    console.error(
+      'Error: stage_id, date, and category_id are required parameters.'
+    );
+    return null;
+  }
+
+  try {
+    const requestParams = {
+      entityTypeId: dealEntityTypeId,
+      order: { ID: 'ASC' },
+      filter: {
+        STAGE_ID: stage_id, // Stage the deal moved TO
+        '>=CREATED_TIME': startDateISO, // History record created >= start of day
+        '<CREATED_TIME': endDateISO,
+      },
+      select: ['OWNER_ID'], // Only need the Deal ID from history
+    };
+
+    const historyResponse = await bitrix.call(
+      'crm.stagehistory.list',
+      requestParams
+    );
+    const historyRecords = historyResponse.result.items || [];
+
+    return { historyRecords };
+  } catch (error) {
+    console.error('Error fetching stage history from Bitrix24:', error.message);
+    if (error.response && error.response.data) {
+      console.error('Bitrix Error Details:', error.response.data);
+    }
+    return null; // Indicate failure
+  }
+}
+export async function getDealsByIdsVerifyingStageConstancy({
+  matchingDealIds,
+  stage_id,
+  category_id,
+}) {
+  // --- Step 2: Check if any Deal IDs were found ---
+
+  const dealIdArray = Array.from(matchingDealIds);
+
+  try {
+    const dealParams = {
+      filter: {
+        ID: dealIdArray,
+        STAGE_ID: stage_id, // Ensure deal is STILL in this stage
+        CATEGORY_ID: category_id,
+      },
+      select: [
+        'ID',
+        'SOURCE_ID',
+        'STAGE_ID',
+        'UF_CRM_1527615815',
+        'UF_CRM_1722203030883',
+      ], // Get desired fields
+    };
+
+    const dealResponse = await bitrix.call('crm.deal.list', dealParams);
+    const currentDeals = dealResponse.result || [];
+
+    // TODO: Handle pagination if needed
+    // Note: Bitrix24 API may return a "next" field in the response if there are more pages
+
+    return currentDeals;
+  } catch (error) {
+    console.error('Error fetching deal details from Bitrix24:', error.message);
+    if (error.response && error.response.data) {
+      console.error('Bitrix Error Details:', error.response.data);
+    }
+    return null; // Indicate failure
+  }
+}
+
+export async function getBoltDriverBanReqByDriverId({ driver_id }) {
+  const sql = `SELECT debt, bitrix_card_id, driver_id FROM bolt_driver_ban_requests WHERE driver_id = ?`;
+  return db.get(sql, [driver_id]);
+}
+
+export async function insertBoltDriverBanReq({
+  debt,
+  bitrix_card_id,
+  driver_id,
+}) {
+  const sql = `INSERT INTO bolt_driver_ban_requests (debt, bitrix_card_id, driver_id) VALUES (?, ?, ?)`;
+  return db.run(sql, [debt, bitrix_card_id, driver_id]);
 }

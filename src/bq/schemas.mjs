@@ -247,3 +247,152 @@ export const transferProductsTableSchema = [
   { name: 'uom_title', type: 'STRING', mode: 'REQUIRED' },
   { name: 'transfer_id', type: 'INTEGER', mode: 'REQUIRED' },
 ];
+export const ordersTableSchema = [
+  { name: 'id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'modified_at', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'uuid', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'created_at', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'done_at', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'scheduled_for', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'duration', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'kindof_good', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'serial', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'packagelist', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'appearance', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'malfunction', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'manager_notes', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'engineer_notes', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'resume', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'payed', type: 'FLOAT', mode: 'NULLABLE' },
+  { name: 'missed_payments', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'warranty_measures', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'warranty_date', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'urgent', type: 'BOOLEAN', mode: 'NULLABLE' },
+  { name: 'discount_sum', type: 'FLOAT', mode: 'NULLABLE' },
+  { name: 'custom_fields', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'estimated_cost', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'closed_at', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'estimated_done_at', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'id_label', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'price', type: 'FLOAT', mode: 'NULLABLE' },
+  { name: 'branch_id', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'overdue', type: 'BOOLEAN', mode: 'NULLABLE' },
+  { name: 'status_overdue', type: 'BOOLEAN', mode: 'NULLABLE' },
+  { name: 'manager_id', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'engineer_id', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'created_by_id', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'closed_by_id', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'brand', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'model', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'client_id', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'client_name', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'asset_id', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'asset_uid', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'order_type_id', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'status_id', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'ad_campaign_id', type: 'INTEGER', mode: 'NULLABLE' },
+];
+
+export const orderPartsTableSchema = [
+  { name: 'order_id', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'id', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'entity_id', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'engineer_id', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'title', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'amount', type: 'FLOAT', mode: 'REQUIRED' },
+  { name: 'price', type: 'FLOAT', mode: 'NULLABLE' },
+  { name: 'cost', type: 'FLOAT', mode: 'NULLABLE' },
+  { name: 'discount_value', type: 'FLOAT', mode: 'NULLABLE' },
+  { name: 'code', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'article', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'warranty', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'warranty_period', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'uom_id', type: 'INTEGER', mode: 'NULLABLE' },
+];
+
+export const orderOperationsTableSchema = [
+  { name: 'order_id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'entity_id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'engineer_id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'title', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'amount', type: 'FLOAT', mode: 'REQUIRED' },
+  { name: 'price', type: 'FLOAT', mode: 'REQUIRED' },
+  { name: 'cost', type: 'FLOAT', mode: 'REQUIRED' },
+  { name: 'discount_value', type: 'FLOAT', mode: 'REQUIRED' },
+  { name: 'warranty', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'warranty_period', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'uom_id', type: 'INTEGER', mode: 'REQUIRED' },
+];
+
+export const orderAttachmentsTableSchema = [
+  { name: 'order_id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'created_at', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'created_by_id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'filename', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'url', type: 'STRING', mode: 'REQUIRED' },
+];
+
+export const orders2ResourcesTableSchema = [
+  { name: 'resource_id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'order_id', type: 'INTEGER', mode: 'REQUIRED' },
+];
+
+export const orderResourcesTableSchema = [
+  { name: 'id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'name', type: 'STRING', mode: 'REQUIRED' },
+];
+
+export const campaignsTableSchema = [
+  { name: 'id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'name', type: 'STRING', mode: 'REQUIRED' },
+];
+export const assetTableSchema = [
+  { name: 'id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'uid', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'title', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'color', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'state', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'cost', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'group', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'brand', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'model', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'modification', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'description', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'year', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'reg_number', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'owner_name', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'warehouse', type: 'JSON', mode: 'REQUIRED' },
+  { name: 'image', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'custom_fields', type: 'JSON', mode: 'REQUIRED' },
+];
+export const employeeTableSchema = [
+  { name: 'id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'email', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'first_name', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'last_name', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'notes', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'phone', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'deleted', type: 'BOOLEAN', mode: 'REQUIRED' },
+  { name: 'position', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'created_at', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'started_work', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'avatar', type: 'STRING', mode: 'NULLABLE' },
+];
+export const uomTableSchema = [
+  { name: 'id', type: 'INTEGER' },
+  { name: 'description', type: 'STRING' },
+  { name: 'title', type: 'STRING' },
+  { name: 'uom_type', type: 'STRING' },
+  { name: 'is_imperial', type: 'BOOLEAN' },
+  { name: 'is_system', type: 'BOOLEAN' },
+  { name: 'entity_types', type: 'STRING', mode: 'REPEATED' },
+];
+export const closedPolishBitrixDealsTableSchema = [
+  { name: 'id', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'source_id', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'city_id', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'stage_id', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'is_rescheduled', type: 'BOOLEAN', mode: 'REQUIRED' },
+  { name: 'date', type: 'DATE', mode: 'REQUIRED' },
+];
