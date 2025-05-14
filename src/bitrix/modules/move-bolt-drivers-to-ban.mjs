@@ -44,18 +44,32 @@ function processDBCard({ driver_id, driversToBan }) {
     is_first_letter_sent,
     is_second_letter_sent,
   } = dbcard;
+  if (is_banned) {
+    console.log(`driver ${driver_id} is already banned`);
+    return { bitrix_deal_id: null };
+  }
+  if (!is_first_letter_sent) {
+    console.log(`driver ${driver_id} hasn't received first letter approvement`);
+    return { bitrix_deal_id: null };
+  }
+  if (is_second_letter_sent) {
+    console.log(`driver ${driver_id} has already received second letter approvement`);
+    return { bitrix_deal_id: null };
+  }
+
   return { bitrix_deal_id };
 }
 export const moveBoltDriversToBan = async () => {
   const queryParams = computeQueryParams();
   const driversToBan = await getALLBoltDriversToBan(queryParams);
   const driver_ids = driversToBan.map((driver) => driver.driver_id);
-
+  console.log({ driversToBan });
   const { rows } = await getBoltDriversToBan({ ...queryParams, driver_ids });
   if (rows.length === 0) {
     console.error('No any drivers to ban found.');
     return;
   }
+  console.log({ rows });
 
   const processedCards = [];
   for (const [index, row] of rows.entries()) {
@@ -84,6 +98,7 @@ export const moveBoltDriversToBan = async () => {
     };
     processedCards.push(card);
   }
+  console.log({ processedCards });
   const chunkedProcessedCards = chunkArray(
     processedCards,
     Number(process.env.CHUNK_SIZE) || 10
@@ -92,28 +107,10 @@ export const moveBoltDriversToBan = async () => {
     const bitrixRespObj = await updateRequestedDrivers({
       cards: chunk,
     });
-    console.log( bitrixRespObj );
-    return;
-    const handledResponseArr = [];
-    for (const driver_id in bitrixRespObj) {
-      const { id } = bitrixRespObj[driver_id]['item'];
-      const matchingCard = chunk.find((c) => c.driver_id === driver_id);
-      //{ bitrix_card_id, debt, driver_id }
-      handledResponseArr.push({
-        bitrix_card_id: id,
-        driver_id: matchingCard.driver_id,
-        debt: matchingCard.debt,
-      });
-    }
-    for (const respElement of handledResponseArr) {
-      const { bitrix_card_id, debt, driver_id } = respElement;
-      await insertBoltDriverBanReq({
-        driver_id,
-        bitrix_card_id,
-        debt,
-      });
-    }
-    //  console.log(`chunk ${index} with ${chunk.length} has been successfully uploaded`)
+ 
+   
+    
+     console.log(`chunk ${index} with ${chunk.length} has been successfully uploaded`)
   }
 
   console.log(

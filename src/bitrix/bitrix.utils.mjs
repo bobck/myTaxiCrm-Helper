@@ -690,9 +690,9 @@ export async function updateRequestedDrivers({ cards }) {
     const params = {
       id: bitrix_deal_id,
       entityTypeId: '1132',
-      // 'fields[STAGE_ID]': 'DT1132_60:NEW', //листи на відправлення
+      'fields[STAGE_ID]': 'DT1132_60:NEW', //листи на відправлення
 
-      'fields[STAGE_ID]': 'DT1132_60:UC_7W6FFZ', //Заявка на відправку листа
+      // 'fields[STAGE_ID]': 'DT1132_60:UC_7W6FFZ', //Заявка на відправку листа
     };
     if (bolt_id) {
       params['fields[ufCrm52_1738324675]'] = bolt_id;
@@ -711,10 +711,9 @@ export async function updateRequestedDrivers({ cards }) {
     }
     batchObj[driver_id] = { method: 'crm.item.update', params };
   }
-
   const { result: resp, time } = await bitrix.batch(batchObj);
   const { result: itemObj } = resp;
-
+  console.log('got batch response', itemObj);
   return itemObj;
 }
 export async function createBanBoltDriverCards({ cards }) {

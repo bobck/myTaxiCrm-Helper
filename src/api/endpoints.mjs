@@ -19,8 +19,6 @@ export async function initApi() {
   app.post('/referral-add', referralAddHandler);
 
   app.post('/referral-approval', referralApprovalHandler);
-
-  app.post('/sent-first-driver-letter-to-bolt', sentFirstDriverLetterToBolt);
   app.use('/bolt', boltRouter);
   app.use('/', rootRouter);
 
