@@ -695,24 +695,57 @@ export async function updateRequestedDriver({ bitrix_deal_id, payload }) {
   console.log(response);
   return response;
 }
-// export async function updateRequestedDriver({ bitrix_deal_id, payload }) {
-//   console.log('updateRequestedDriver ...', {
-//     bitrix_deal_id,
-//     payload,
-//   });
-//   const { city_id, bolt_id } = payload;
-//   const params = {
-//     id: bitrix_deal_id,
-//     entityTypeId: '1132',
-//     'fields[STAGE_ID]': 'DT1132_60:NEW',
-//   };
-//   if (bolt_id) {
-//     params['fields[ufCrm52_1738324675]'] = bolt_id;
-//   }
-//   if (city_id) {
-//     params['fields[ufCrm52_1738326821]'] = city_id;
-//   }
-//   const response = await bitrix.call('crm.deal.update', params);
-//   console.log(response);
-//   return response;
-// }
+export async function updateRequestedDriver({ bitrix_deal_id, payload }) {
+  console.log('updateRequestedDriver ...', {
+    bitrix_deal_id,
+    payload,
+  });
+  const { city_id, bolt_id } = payload;
+  const params = {
+    id: bitrix_deal_id,
+    entityTypeId: '1132',
+    'fields[STAGE_ID]': 'DT1132_60:NEW',
+  };
+  if (bolt_id) {
+    params['fields[ufCrm52_1738324675]'] = bolt_id;
+  }
+  if (city_id) {
+    params['fields[ufCrm52_1738326821]'] = city_id;
+  }
+  const response = await bitrix.call('crm.deal.update', params);
+  console.log(response);
+  return response;
+}
+export async function createBanBoltDriverCards({ cards }) {
+  let batchObj = {};
+
+  for (let card of cards) {
+    const {
+      driver_id,
+      full_name,
+      cityId,
+      bolt_id,
+      debt,
+      messageType,
+      isDebtorState,
+    } = card;
+
+    const params = {
+      entityTypeId: '1132',
+      'fields[title]': full_name,
+      'fields[STAGE_ID]': 'DT1132_60:NEW',
+      'fields[ufCrm52_1738324741]': full_name,
+      'fields[ufCrm52_1738324675]': bolt_id,
+      'fields[ufCrm52_1738324546]': messageType,
+      'fields[ufCrm52_1738739843]': isDebtorState,
+      'fields[ufCrm52_1738837120]': debt,
+      'fields[ufCrm52_1738326821]': cityId,
+    };
+    batchObj[driver_id] = { method: 'crm.item.add', params };
+  }
+
+  const { result: resp, time } = await bitrix.batch(batchObj);
+  const { result: itemObj } = resp;
+
+  return itemObj;
+}

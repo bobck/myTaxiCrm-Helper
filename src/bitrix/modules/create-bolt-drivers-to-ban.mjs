@@ -1,9 +1,6 @@
 import { getBoltDriversToBan } from '../../web.api/web.api.utlites.mjs';
 import { cityListWithAssignedBy as cityList } from '../bitrix.constants.mjs';
-import {
-  chunkArray,
-  createBanBoltDriverCards
-} from '../bitrix.utils.mjs';
+import { chunkArray, createBanBoltDriverCards } from '../bitrix.utils.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
 import { DateTime } from 'luxon';
 import {
