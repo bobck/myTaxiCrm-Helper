@@ -1,5 +1,5 @@
 import express from 'express';
-import {openSShTunnel}from'../../ssh.mjs'
+import { openSShTunnel } from '../../ssh.mjs';
 import { queryHandler } from './modules/queryHandler.mjs';
 import {
   referralAddHandler,

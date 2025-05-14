@@ -709,7 +709,7 @@ export async function updateRequestedDrivers({ cards }) {
     if (messageType) {
       params['fields[ufCrm52_1738324546]'] = messageType;
     }
-    
+
     batchObj[driver_id] = { method: 'crm.item.update', params };
   }
   const { result: resp, time } = await bitrix.batch(batchObj);

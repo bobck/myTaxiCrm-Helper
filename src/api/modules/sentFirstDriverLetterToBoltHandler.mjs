@@ -22,12 +22,12 @@ export const sentFirstDriverLetterToBolt = async (req, res) => {
     }
     const { phoneReadyToQuery } = verifiedPhone;
     console.log('phoneReadyToQuery', phoneReadyToQuery);
-  
+
     const { rows } = await getAllBoltIdsByDriverPhone({
       phone: phoneReadyToQuery,
       bolt_id: req_bolt_id,
     });
-  
+
     console.log('rows', rows);
     if (!rows || rows.length === 0) {
       throw {
@@ -69,7 +69,7 @@ export const sentFirstDriverLetterToBolt = async (req, res) => {
         ...updatePayload,
       },
     ];
-    
+
     await updateRequestedDrivers({
       cards,
     });
@@ -92,7 +92,7 @@ export const sentFirstDriverLetterToBolt = async (req, res) => {
     if (!code) {
       throw error;
     }
-    console.log({code})
+    console.log({ code });
     res.status(code).json({
       status,
       err,

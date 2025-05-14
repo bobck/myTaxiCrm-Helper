@@ -53,7 +53,9 @@ function processDBCard({ driver_id, driversToBan }) {
     return { bitrix_deal_id: null };
   }
   if (is_second_letter_approved) {
-    console.log(`driver ${driver_id} has already received second letter approvement`);
+    console.log(
+      `driver ${driver_id} has already received second letter approvement`
+    );
     return { bitrix_deal_id: null };
   }
 
@@ -107,10 +109,10 @@ export const moveBoltDriversToBan = async () => {
     const bitrixRespObj = await updateRequestedDrivers({
       cards: chunk,
     });
- 
-   
-    
-     console.log(`chunk ${index} with ${chunk.length} has been successfully uploaded`)
+
+    console.log(
+      `chunk ${index} with ${chunk.length} has been successfully uploaded`
+    );
   }
 
   console.log(
