@@ -21,9 +21,8 @@ exports.up = function (db, callback) {
           bolt_id TEXT NOT NULL,
           bitrix_deal_id INTEGER NOT NULL,
           phone TEXT NOT NULL,
-          is_banned BOOLEAN NOT NULL DEFAULT FALSE,
-          is_first_letter_sent BOOLEAN NOT NULL DEFAULT FALSE,
-          is_second_letter_sent BOOLEAN NOT NULL DEFAULT FALSE,
+          is_first_letter_approved BOOLEAN NOT NULL DEFAULT FALSE,
+          is_second_letter_approved BOOLEAN NOT NULL DEFAULT FALSE,
           created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       );

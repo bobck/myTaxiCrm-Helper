@@ -12,8 +12,8 @@ const banConfirmRouter = express.Router();
 boltRouter.use(boltAuthorizationMiddleware);
 
 // This will handle POST requests to /bolt/letters/
-lettersRouter.post('/sent/first', sentFirstDriverLetterToBolt);
-lettersRouter.post('/sent/second', (req, res) => {
+lettersRouter.post('/sent/1', sentFirstDriverLetterToBolt);
+lettersRouter.post('/sent/2', (req, res) => {
   res.status(200).json({ message: 'Second letter sent' });
 });
 

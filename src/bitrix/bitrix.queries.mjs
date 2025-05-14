@@ -771,7 +771,7 @@ export async function insertBoltDriverToBan({
 }
 
 /**
- * Sets the is_first_letter_sent flag to true for a specific driver.
+ * Sets the is_first_letter_approved flag to true for a specific driver.
  * @param {Object} params - The parameters for updating the driver.
  * @param {string} params.bitrix_deal_id - The ID of the driver to update.
  * @returns {Promise<Object>} - A promise that resolves with an object indicating success (e.g., { changes: 1 }).
@@ -781,7 +781,7 @@ export async function setLetterApprovedByDealId({
   letter_id,
 }) {
   const column =
-    letter_id === 1 ? 'is_first_letter_sent' : 'is_second_letter_sent';
+    letter_id === 1 ? 'is_first_letter_approved' : 'is_second_letter_approved';
   const sql = /*sql*/ `
       UPDATE bolt_drivers_to_ban
       SET ${column} = 1,  -- Using 0 for FALSE in SQLite
@@ -818,9 +818,9 @@ export async function banBoltDriver({ driver_id }) {
  */
 export async function getBoltDriversFirstLetterSent() {
   const sql = /*sql*/ `
-      SELECT driver_id, bolt_id, bitrix_deal_id, phone, is_banned, is_first_letter_sent, is_second_letter_sent, created_at, updated_at
+      SELECT driver_id, bolt_id, bitrix_deal_id, phone, is_banned, is_first_letter_approved, is_second_letter_approved, created_at, updated_at
       FROM bolt_drivers_to_ban
-      WHERE is_first_letter_sent = TRUE;
+      WHERE is_first_letter_approved = TRUE;
   `;
   return db.all(sql);
 }
@@ -833,7 +833,7 @@ export async function getBoltDriversFirstLetterSent() {
  */
 export async function getBoltDriverById({ driver_id }) {
   const sql = /*sql*/ `
-      SELECT driver_id, bolt_id, bitrix_deal_id, phone, is_banned, is_first_letter_sent, is_second_letter_sent, created_at, updated_at
+      SELECT driver_id, bolt_id, bitrix_deal_id, phone, is_banned, is_first_letter_approved, is_second_letter_approved, created_at, updated_at
       FROM bolt_drivers_to_ban
       WHERE driver_id = ?;
   `;
@@ -845,7 +845,7 @@ export async function getBoltDriverById({ driver_id }) {
  */
 export async function getALLBoltDriversToBan() {
   const sql = /*sql*/ `
-      SELECT driver_id, bolt_id, bitrix_deal_id, phone, is_banned, is_first_letter_sent, is_second_letter_sent
+      SELECT driver_id, bolt_id, bitrix_deal_id, phone, is_banned, is_first_letter_approved, is_second_letter_approved
       FROM bolt_drivers_to_ban;
   `;
   return db.all(sql);
