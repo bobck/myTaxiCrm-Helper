@@ -1,6 +1,7 @@
 import { Bitrix, Method } from '@2bad/bitrix';
 import fs from 'fs';
 import { pool } from './../api/pool.mjs';
+import { bitrixCrmDealListLimiter } from './bottleneck.mjs';
 const bitrix = Bitrix(
   `https://${process.env.BITRIX_PORTAL_HOST}/rest/${process.env.BITRIX_USER_ID}/${process.env.BITRIX_API_KEY}/`
 );
@@ -75,7 +76,10 @@ export async function findContactsByPhones({ drivers }) {
   return result;
 }
 
-export async function findDealByContact({ drivers, category_id }) {
+export const findDealByContact = bitrixCrmDealListLimiter.wrap(async function ({
+  drivers,
+  category_id,
+}) {
   let batchObj = {};
 
   for (let driver of drivers) {
@@ -94,7 +98,7 @@ export async function findDealByContact({ drivers, category_id }) {
   const { result, time } = await bitrix.batch(batchObj);
 
   return result;
-}
+});
 
 export async function updateDealsOpportunity({ drivers }) {
   let batchObj = {};
@@ -148,25 +152,27 @@ export async function getLeadsByCreateDateAndSourceId({ date, sourceId }) {
   return result;
 }
 
-export async function getDealsByInterviewDate({ date, CATEGORY_ID }) {
-  const response = await bitrix.deals.list({
-    filter: {
-      '>=UF_CRM_1608302466359': `${date}T00:00:00`,
-      '<=UF_CRM_1608302466359': `${date}T23:59:59`,
-      CATEGORY_ID: CATEGORY_ID,
-    },
-    select: [
-      'ID',
-      'SOURCE_ID',
-      'STAGE_ID',
-      'UF_CRM_1527615815',
-      'UF_CRM_1722203030883',
-    ],
-  });
+export const getDealsByInterviewDate = bitrixCrmDealListLimiter.wrap(
+  async function ({ date, CATEGORY_ID }) {
+    const response = await bitrix.deals.list({
+      filter: {
+        '>=UF_CRM_1608302466359': `${date}T00:00:00`,
+        '<=UF_CRM_1608302466359': `${date}T23:59:59`,
+        CATEGORY_ID: CATEGORY_ID,
+      },
+      select: [
+        'ID',
+        'SOURCE_ID',
+        'STAGE_ID',
+        'UF_CRM_1527615815',
+        'UF_CRM_1722203030883',
+      ],
+    });
 
-  const { result } = response;
-  return result;
-}
+    const { result } = response;
+    return result;
+  }
+);
 
 export async function getDealsByClosedDate({ date }) {
   const response = await bitrix.deals.list({
@@ -189,30 +195,34 @@ export async function getDealsByClosedDate({ date }) {
   return result;
 }
 
-export async function getDealsRescheduled() {
-  const response = await bitrix.deals.list({
-    filter: {
-      CATEGORY_ID: '3',
-      STAGE_ID: 'C3:5',
-    },
-    select: ['ID', 'SOURCE_ID', 'UF_CRM_1527615815'],
-  });
+export const getDealsRescheduled = bitrixCrmDealListLimiter.wrap(
+  async function () {
+    const response = await bitrix.deals.list({
+      filter: {
+        CATEGORY_ID: '3',
+        STAGE_ID: 'C3:5',
+      },
+      select: ['ID', 'SOURCE_ID', 'UF_CRM_1527615815'],
+    });
 
-  const { result } = response;
-  return result;
-}
+    const { result } = response;
+    return result;
+  }
+);
 
-export async function getManifoldDeals() {
-  const response = await bitrix.deals.list({
-    filter: {
-      CATEGORY_ID: '42',
-    },
-    select: ['*', 'UF_CRM_1527615815'],
-  });
+export const getManifoldDeals = bitrixCrmDealListLimiter.wrap(
+  async function () {
+    const response = await bitrix.deals.list({
+      filter: {
+        CATEGORY_ID: '42',
+      },
+      select: ['*', 'UF_CRM_1527615815'],
+    });
 
-  const { result } = response;
-  return result;
-}
+    const { result } = response;
+    return result;
+  }
+);
 
 export async function getDeals({ ids }) {
   let batchObj = {};
@@ -367,7 +377,9 @@ export async function getDtpDebtTransactions({ createdAt }) {
   return { rows };
 }
 
-export async function getDtpDealById({ id }) {
+export const getDtpDealById = bitrixCrmDealListLimiter.wrap(async function ({
+  id,
+}) {
   const response = await bitrix.deals.list({
     filter: {
       ID: id,
@@ -383,7 +395,7 @@ export async function getDtpDealById({ id }) {
 
   const { result, total } = response;
   return { result, total };
-}
+});
 
 export async function addCommentToDtpDeal({ id, comment }) {
   const response = await bitrix.call('crm.timeline.comment.add', {
@@ -632,43 +644,47 @@ export async function getDealsIdsByStageEnteredDate({
     return null; // Indicate failure
   }
 }
-export async function getDealsByIdsVerifyingStageConstancy({
-  matchingDealIds,
-  stage_id,
-  category_id,
-}) {
-  // --- Step 2: Check if any Deal IDs were found ---
+export const getDealsByIdsVerifyingStageConstancy =
+  bitrixCrmDealListLimiter.wrap(async function ({
+    matchingDealIds,
+    stage_id,
+    category_id,
+  }) {
+    // --- Step 2: Check if any Deal IDs were found ---
 
-  const dealIdArray = Array.from(matchingDealIds);
+    const dealIdArray = Array.from(matchingDealIds);
 
-  try {
-    const dealParams = {
-      filter: {
-        ID: dealIdArray,
-        STAGE_ID: stage_id, // Ensure deal is STILL in this stage
-        CATEGORY_ID: category_id,
-      },
-      select: [
-        'ID',
-        'SOURCE_ID',
-        'STAGE_ID',
-        'UF_CRM_1527615815',
-        'UF_CRM_1722203030883',
-      ], // Get desired fields
-    };
+    try {
+      const dealParams = {
+        filter: {
+          ID: dealIdArray,
+          STAGE_ID: stage_id, // Ensure deal is STILL in this stage
+          CATEGORY_ID: category_id,
+        },
+        select: [
+          'ID',
+          'SOURCE_ID',
+          'STAGE_ID',
+          'UF_CRM_1527615815',
+          'UF_CRM_1722203030883',
+        ], // Get desired fields
+      };
 
-    const dealResponse = await bitrix.call('crm.deal.list', dealParams);
-    const currentDeals = dealResponse.result || [];
+      const dealResponse = await bitrix.call('crm.deal.list', dealParams);
+      const currentDeals = dealResponse.result || [];
 
-    // TODO: Handle pagination if needed
-    // Note: Bitrix24 API may return a "next" field in the response if there are more pages
+      // TODO: Handle pagination if needed
+      // Note: Bitrix24 API may return a "next" field in the response if there are more pages
 
-    return currentDeals;
-  } catch (error) {
-    console.error('Error fetching deal details from Bitrix24:', error.message);
-    if (error.response && error.response.data) {
-      console.error('Bitrix Error Details:', error.response.data);
+      return currentDeals;
+    } catch (error) {
+      console.error(
+        'Error fetching deal details from Bitrix24:',
+        error.message
+      );
+      if (error.response && error.response.data) {
+        console.error('Bitrix Error Details:', error.response.data);
+      }
+      return null; // Indicate failure
     }
-    return null; // Indicate failure
-  }
-}
+  });
