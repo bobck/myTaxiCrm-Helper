@@ -712,7 +712,6 @@ export async function updateRequestedDrivers({ cards }) {
     batchObj[driver_id] = { method: 'crm.item.update', params };
   }
 
-  return batchObj;
   const { result: resp, time } = await bitrix.batch(batchObj);
   const { result: itemObj } = resp;
 

@@ -3,8 +3,8 @@ import {
   handleDriverPhone,
   checkIfDriverStaysInTheSameCity,
 } from '../endpoints-utils.mjs';
-import { updateRequestedDriver } from '../../bitrix/bitrix.utils.mjs';
-import { createBoltDriverToBan } from '../../bitrix/bitrix.queries.mjs';
+import { updateRequestedDrivers } from '../../bitrix/bitrix.utils.mjs';
+import { insertBoltDriverToBan } from '../../bitrix/bitrix.queries.mjs';
 export const sentFirstDriverLetterToBolt = async (req, res) => {
   try {
     const {
@@ -21,10 +21,14 @@ export const sentFirstDriverLetterToBolt = async (req, res) => {
       throw verifiedPhone;
     }
     const { phoneReadyToQuery } = verifiedPhone;
+    console.log('phoneReadyToQuery', phoneReadyToQuery);
+  
     const { rows } = await getAllBoltIdsByDriverPhone({
       phone: phoneReadyToQuery,
       bolt_id: req_bolt_id,
     });
+  
+    console.log('rows', rows);
     if (!rows || rows.length === 0) {
       throw {
         code: 400,
@@ -53,15 +57,21 @@ export const sentFirstDriverLetterToBolt = async (req, res) => {
       bitrix_deal_id,
       bolt_id,
     });
-    await createBoltDriverToBan({
+    await insertBoltDriverToBan({
       driver_id,
       phone,
       bitrix_deal_id,
       bolt_id,
     });
-    await updateRequestedDriver({
-      bitrix_deal_id,
-      payload: updatePayload,
+    const cards = [
+      {
+        bitrix_deal_id,
+        ...updatePayload,
+      },
+    ];
+    
+    await updateRequestedDrivers({
+      cards,
     });
 
     res.status(200).json({
@@ -77,10 +87,12 @@ export const sentFirstDriverLetterToBolt = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error('Error in sentFirstDriverLetterToBolt', error);
     const { code, status, ...err } = error;
     if (!code) {
       throw error;
     }
+    console.log({code})
     res.status(code).json({
       status,
       err,

@@ -4,7 +4,6 @@ import express from 'express';
 import { sentFirstDriverLetterToBolt } from '../modules/sentFirstDriverLetterToBoltHandler.mjs';
 import { approveBoltDriverBanHandler } from '../modules/approveBoltDriverBanHandler.mjs';
 import { approveDriverLetterToBoltHandler } from '../modules/approveDriverLetterToBoltHandler.mjs';
-import { approveSecondDriverLetterToBoltHandler } from '../modules/approveSecondDriverLetterToBoltHandler.mjs';
 import { boltAuthorizationMiddleware } from '../middleware/bolt.middlewares.mjs';
 
 const boltRouter = express.Router();

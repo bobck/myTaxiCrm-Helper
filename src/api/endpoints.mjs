@@ -1,4 +1,5 @@
 import express from 'express';
+import {openSShTunnel}from'../../ssh.mjs'
 import { queryHandler } from './modules/queryHandler.mjs';
 import {
   referralAddHandler,
@@ -34,5 +35,6 @@ export async function initApi() {
 }
 
 if (process.env.ENV === 'DEV' || process.env.ENV === 'PROD') {
+  await openSShTunnel;
   initApi();
 }

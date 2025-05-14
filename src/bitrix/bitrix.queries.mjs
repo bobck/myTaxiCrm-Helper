@@ -757,7 +757,7 @@ export async function getFiredDebtorDriverByDriverId({ driver_id }) {
  * @param {string} params.phone - The phone number of the driver.
  * @returns {Promise<Object>} - A promise that resolves with an object indicating success (e.g., { changes: 1, lastID: ... } if supported by the driver).
  */
-export async function createBoltDriverToBan({
+export async function insertBoltDriverToBan({
   driver_id,
   bolt_id,
   bitrix_deal_id,
