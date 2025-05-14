@@ -26,7 +26,7 @@ function computeQueryParams() {
     year: today.year,
   };
 }
-export const createBoltDriversToBan = async () => {
+export const moveBoltDriversToBan = async () => {
   const queryParams = computeQueryParams();
   const driversToBan = await getALLBoltDriversToBan(queryParams);
   const driver_ids = driversToBan.map((driver) => driver.driver_id);
@@ -46,7 +46,7 @@ export const createBoltDriversToBan = async () => {
       console.log('testing has been ended');
       break;
     }
-    const { driver_id, auto_park_id, full_name, bolt_id, driver_balance } = row;
+    const { driver_id, driver_balance } = row;
 
     const dbcard = driversToBan.find((card) => card.driver_id === driver_id);
 
@@ -57,16 +57,12 @@ export const createBoltDriversToBan = async () => {
     ) {
       continue;
     }
-
-    const cityId = getCityBrandingId(auto_park_id);
     const debt = String(-1 * driver_balance);
-
+    // const isDebtorState = debt>0 ? debtorState : notDebtorState;
     const card = {
       driver_id,
-      full_name,
-      bolt_id,
-      cityId,
       debt,
+      // isDebtorState,
       isDebtorState: debtorState,
       messageType: Seven_days_without_trips_message_type,
     };
@@ -113,5 +109,5 @@ if (process.env.ENV === 'TEST') {
   );
   await openSShTunnel;
 
-  await createBoltDriversToBan();
+  await moveBoltDriversToBan();
 }

@@ -22,9 +22,6 @@ WITH aggregated_reports AS (
 )
 SELECT DISTINCT ON (d.id)
     d.id AS driver_id,
-    d.auto_park_id,
-    d.full_name,
-    dti.external_id AS bolt_id,
     (cs.total_payable_to_driver - cs.total_debt) AS driver_balance
 FROM aggregated_reports ar
     JOIN drivers d

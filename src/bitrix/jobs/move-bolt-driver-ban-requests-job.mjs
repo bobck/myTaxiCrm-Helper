@@ -1,15 +1,15 @@
 import { CronJob } from 'cron';
-import { createBoltDriversToBan } from '../modules/create-bolt-drivers-to-ban.mjs';
+import { moveBoltDriversToBan } from '../modules/move-bolt-drivers-to-ban.mjs';
 
 const cronTime = '0 8 * * *'; // Runs every day at 8:00 AM
 const timeZone = 'Europe/Kiev';
 
-const createBoltDriverBanRequestsJob = CronJob.from({
+const moveBoltDriverBanRequestsJob = CronJob.from({
   cronTime,
   timeZone,
   onTick: async () => {
     try {
-      await createBoltDriversToBan();
+      await moveBoltDriversToBan();
     } catch (error) {
       console.error('Error occurred in onTick createBoltDriverBanRequests');
       console.error({ time: new Date(), error });
@@ -17,4 +17,4 @@ const createBoltDriverBanRequestsJob = CronJob.from({
   },
 });
 
-export { createBoltDriverBanRequestsJob };
+export { moveBoltDriverBanRequestsJob };
