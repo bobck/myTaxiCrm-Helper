@@ -672,28 +672,51 @@ export async function getDealsByIdsVerifyingStageConstancy({
     return null; // Indicate failure
   }
 }
-export async function updateRequestedDriver({ bitrix_deal_id, payload }) {
-  console.log('updateRequestedDriver ...', {
-    bitrix_deal_id,
-    payload,
+export async function updateRequestedDrivers({ cards }) {
+  console.log('updateRequestedDrivers ...', {
+    cards: cards.length,
   });
-  const { city_id, bolt_id } = payload;
-  const params = {
-    id: bitrix_deal_id,
-    entityTypeId: '1132',
-    // 'fields[STAGE_ID]': 'DT1132_60:NEW', //листи на відправлення
+  const batchObj = {};
+  for (const card of cards) {
+    const {
+      driver_id,
+      debt,
+      isDebtorState,
+      messageType,
+      bitrix_deal_id,
+      city_id,
+      bolt_id,
+    } = card;
+    const params = {
+      id: bitrix_deal_id,
+      entityTypeId: '1132',
+      // 'fields[STAGE_ID]': 'DT1132_60:NEW', //листи на відправлення
 
-    'fields[STAGE_ID]': 'DT1132_60:UC_7W6FFZ', //Заявка на відправку листа
-  };
-  if (bolt_id) {
-    params['fields[ufCrm52_1738324675]'] = bolt_id;
+      'fields[STAGE_ID]': 'DT1132_60:UC_7W6FFZ', //Заявка на відправку листа
+    };
+    if (bolt_id) {
+      params['fields[ufCrm52_1738324675]'] = bolt_id;
+    }
+    if (city_id) {
+      params['fields[ufCrm52_1738326821]'] = city_id;
+    }
+    if (debt) {
+      params['fields[ufCrm52_1738837120]'] = debt;
+    }
+    if (isDebtorState) {
+      params['fields[ufCrm52_1738739843]'] = isDebtorState;
+    }
+    if (messageType) {
+      params['fields[ufCrm52_1738324546]'] = messageType;
+    }
+    batchObj[driver_id] = { method: 'crm.item.update', params };
   }
-  if (city_id) {
-    params['fields[ufCrm52_1738326821]'] = city_id;
-  }
-  const response = await bitrix.call('crm.item.update', params);
-  console.log(response);
-  return response;
+
+  return batchObj;
+  const { result: resp, time } = await bitrix.batch(batchObj);
+  const { result: itemObj } = resp;
+
+  return itemObj;
 }
 export async function createBanBoltDriverCards({ cards }) {
   let batchObj = {};

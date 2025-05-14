@@ -1,6 +1,6 @@
 import { getBoltDriversToBan } from '../../web.api/web.api.utlites.mjs';
 import { cityListWithAssignedBy as cityList } from '../bitrix.constants.mjs';
-import { chunkArray, createBanBoltDriverCards } from '../bitrix.utils.mjs';
+import { chunkArray, updateRequestedDrivers } from '../bitrix.utils.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
 import { DateTime } from 'luxon';
 import {
@@ -26,6 +26,26 @@ function computeQueryParams() {
     year: today.year,
   };
 }
+function processDBCard({ driver_id, driversToBan }) {
+  const dbcard = driversToBan.find((card) => card.driver_id === driver_id);
+
+  if (
+    dbcard === undefined ||
+    dbcard === null
+    // ||typeof dbcard === 'object'&& Object.keys(dbcard).length === 0
+  ) {
+    return { bitrix_deal_id: null };
+  }
+  const {
+    bolt_id,
+    bitrix_deal_id,
+    phone,
+    is_banned,
+    is_first_letter_sent,
+    is_second_letter_sent,
+  } = dbcard;
+  return { bitrix_deal_id };
+}
 export const moveBoltDriversToBan = async () => {
   const queryParams = computeQueryParams();
   const driversToBan = await getALLBoltDriversToBan(queryParams);
@@ -48,18 +68,14 @@ export const moveBoltDriversToBan = async () => {
     }
     const { driver_id, driver_balance } = row;
 
-    const dbcard = driversToBan.find((card) => card.driver_id === driver_id);
-
-    if (
-      dbcard === undefined ||
-      dbcard === null
-      // ||typeof dbcard === 'object'&& Object.keys(dbcard).length === 0
-    ) {
-      continue;
-    }
     const debt = String(-1 * driver_balance);
     // const isDebtorState = debt>0 ? debtorState : notDebtorState;
+    const { bitrix_deal_id } = processDBCard({ driver_id, driversToBan });
+    if (bitrix_deal_id === null) {
+      continue;
+    }
     const card = {
+      bitrix_deal_id,
       driver_id,
       debt,
       // isDebtorState,
@@ -73,9 +89,11 @@ export const moveBoltDriversToBan = async () => {
     Number(process.env.CHUNK_SIZE) || 10
   );
   for (const [index, chunk] of chunkedProcessedCards.entries()) {
-    const bitrixRespObj = await createBanBoltDriverCards({
+    const bitrixRespObj = await updateRequestedDrivers({
       cards: chunk,
     });
+    console.log( bitrixRespObj );
+    return;
     const handledResponseArr = [];
     for (const driver_id in bitrixRespObj) {
       const { id } = bitrixRespObj[driver_id]['item'];
