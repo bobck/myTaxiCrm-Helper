@@ -1,11 +1,15 @@
 import { getBoltDriversToBan } from '../../web.api/web.api.utlites.mjs';
 import { cityListWithAssignedBy as cityList } from '../bitrix.constants.mjs';
-import { chunkArray, createBanBoltDriverCards } from '../bitrix.utils.mjs';
+import {
+  chunkArray,
+  createBanBoltDriverCards
+} from '../bitrix.utils.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
 import { DateTime } from 'luxon';
 import {
-  getBoltDriverBanReqByDriverId,
-  insertBoltDriverBanReq,
+  // getBoltDriverBanReqByDriverId,
+  // insertBoltDriverBanReq,
+  // getALLBoltDriversToBan,
   getALLBoltDriversToBan,
 } from '../bitrix.queries.mjs';
 
@@ -35,6 +39,7 @@ export const createBoltDriversToBan = async () => {
     console.error('No any drivers to ban found.');
     return;
   }
+
   const processedCards = [];
   for (const [index, row] of rows.entries()) {
     if (
@@ -46,14 +51,19 @@ export const createBoltDriversToBan = async () => {
     }
     const { driver_id, auto_park_id, full_name, bolt_id, driver_balance } = row;
 
-    const dbcard = await getBoltDriverBanReqByDriverId({ driver_id });
+    const dbcard = driversToBan.find((card) => card.driver_id === driver_id);
 
-    if (dbcard) {
+    if (
+      dbcard === undefined ||
+      dbcard === null
+      // ||typeof dbcard === 'object'&& Object.keys(dbcard).length === 0
+    ) {
       continue;
     }
 
     const cityId = getCityBrandingId(auto_park_id);
     const debt = String(-1 * driver_balance);
+
     const card = {
       driver_id,
       full_name,
