@@ -635,3 +635,10 @@ export async function getActualCarStatuses() {
   const { rows, rowCount } = result;
   return { rows };
 }
+export async function getAutoParks() {
+  const sql =
+    "select id from auto_parks ap where id not in ('ba51442a-e03a-46ca-b563-4d0a5fce88c4','545d8430-54a2-47d8-bc29-9b32c302d396','034c4a4e-577e-45f8-9360-0631bf78ed4b','e1d0aec6-205b-4d78-ab2a-52280ce52844','f31826a1-b2b8-458b-ae86-c628d9699a7b','b1568692-e6c2-4b20-9aa9-dd4a292d668e','499e334b-8916-42ab-b41a-0f0b979d6f69')";
+  const result = await pool.query(sql);
+  const { rows, rowCount } = result;
+  return { rows };
+}

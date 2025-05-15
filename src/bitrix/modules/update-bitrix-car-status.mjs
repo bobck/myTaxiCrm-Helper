@@ -3,7 +3,10 @@ import {
   updateCarStatusAndBrand,
   chunkArray,
 } from '../bitrix.utils.mjs';
-import { getActualCarStatuses } from '../../web.api/web.api.utlites.mjs';
+import {
+  getActualCarStatuses,
+  getAutoParks,
+} from '../../web.api/web.api.utlites.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
 const CHUNK_SIZE = 5; // chunk size only 5 because of bitrix data hurt risks
 const transliterateCyrillicToLatinChar = (char) => {
@@ -124,11 +127,16 @@ export async function updateBitrixCarStatus() {
   });
 
   const chunkedData = chunkArray(joinedData, CHUNK_SIZE);
+  console.log(chunkedData)
+  return;
   for (const chunk of chunkedData) {
     const result = await updateCarStatusAndBrand({ items: chunk });
   }
 }
 if (process.env.ENV == 'TEST') {
   await openSShTunnel;
+  // const { rows } = await getAutoParks();
+  // const ids=rows.map((autopark)=>autopark.id)
+  // console.log(ids);
   await updateBitrixCarStatus();
 }
