@@ -583,6 +583,95 @@ export async function findContactsByPhonesObjectReturned({ drivers }) {
   const { result } = temp_result;
   return result;
 }
+
+export async function getDealsIdsByStageEnteredDate({
+  startDateISO,
+  endDateISO,
+  category_id,
+  stage_id,
+  dealEntityTypeId,
+}) {
+  // --- Input Validation ---
+  if (
+    !stage_id ||
+    !endDateISO ||
+    !startDateISO ||
+    category_id === undefined ||
+    category_id === null
+  ) {
+    console.error(
+      'Error: stage_id, date, and category_id are required parameters.'
+    );
+    return null;
+  }
+
+  try {
+    const requestParams = {
+      entityTypeId: dealEntityTypeId,
+      order: { ID: 'ASC' },
+      filter: {
+        STAGE_ID: stage_id, // Stage the deal moved TO
+        '>=CREATED_TIME': startDateISO, // History record created >= start of day
+        '<CREATED_TIME': endDateISO,
+      },
+      select: ['OWNER_ID'], // Only need the Deal ID from history
+    };
+
+    const historyResponse = await bitrix.call(
+      'crm.stagehistory.list',
+      requestParams
+    );
+    const historyRecords = historyResponse.result.items || [];
+
+    return { historyRecords };
+  } catch (error) {
+    console.error('Error fetching stage history from Bitrix24:', error.message);
+    if (error.response && error.response.data) {
+      console.error('Bitrix Error Details:', error.response.data);
+    }
+    return null; // Indicate failure
+  }
+}
+export async function getDealsByIdsVerifyingStageConstancy({
+  matchingDealIds,
+  stage_id,
+  category_id,
+}) {
+  // --- Step 2: Check if any Deal IDs were found ---
+
+  const dealIdArray = Array.from(matchingDealIds);
+
+  try {
+    const dealParams = {
+      filter: {
+        ID: dealIdArray,
+        STAGE_ID: stage_id, // Ensure deal is STILL in this stage
+        CATEGORY_ID: category_id,
+      },
+      select: [
+        'ID',
+        'SOURCE_ID',
+        'STAGE_ID',
+        'UF_CRM_1527615815',
+        'UF_CRM_1722203030883',
+      ], // Get desired fields
+    };
+
+    const dealResponse = await bitrix.call('crm.deal.list', dealParams);
+    const currentDeals = dealResponse.result || [];
+
+    // TODO: Handle pagination if needed
+    // Note: Bitrix24 API may return a "next" field in the response if there are more pages
+
+    return currentDeals;
+  } catch (error) {
+    console.error('Error fetching deal details from Bitrix24:', error.message);
+    if (error.response && error.response.data) {
+      console.error('Bitrix Error Details:', error.response.data);
+    }
+    return null; // Indicate failure
+  }
+}
 export async function getCardIdsFromSpecialEntity({ entityTypeId }) {
   try {
     let doneAtAll = 0;

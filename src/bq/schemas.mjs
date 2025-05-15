@@ -388,3 +388,11 @@ export const uomTableSchema = [
   { name: 'is_system', type: 'BOOLEAN' },
   { name: 'entity_types', type: 'STRING', mode: 'REPEATED' },
 ];
+export const closedPolishBitrixDealsTableSchema = [
+  { name: 'id', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'source_id', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'city_id', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'stage_id', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'is_rescheduled', type: 'BOOLEAN', mode: 'REQUIRED' },
+  { name: 'date', type: 'DATE', mode: 'REQUIRED' },
+];

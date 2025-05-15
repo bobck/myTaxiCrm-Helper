@@ -1,7 +1,7 @@
 import { CronJob } from 'cron';
 import { accrueDebtToDeal } from '../modules/accrue-debt-to-deal.mjs';
 
-const cronTime = '*/30 * * * *';
+const cronTime = '*/55 * * * *';
 
 const timeZone = 'Europe/Kiev';
 
