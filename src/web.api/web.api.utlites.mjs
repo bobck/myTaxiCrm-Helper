@@ -629,3 +629,29 @@ export async function getHandledCashBlockRulesInfo({ fired_drivers_ids }) {
   const { rows, rowCount } = result;
   return { rows };
 }
+
+export async function getAllBoltIdsByDriverPhone({ phone }) {
+  const sql = fs
+    .readFileSync('src/sql/get_all_bolt_ids_by_driver_phone.sql')
+    .toString();
+  const result = await pool.query(sql, [phone]);
+  const { rows, rowCount } = result;
+  return { rows };
+}
+
+export async function getBoltDriversToBan({
+  period_from,
+  weekNumber,
+  year,
+  driver_ids,
+}) {
+  const sql = fs.readFileSync('src/sql/get_bolt_drivers_to_ban.sql').toString();
+  const result = await pool.query(sql, [
+    period_from,
+    weekNumber,
+    year,
+    driver_ids,
+  ]);
+  const { rows, rowCount } = result;
+  return { rows };
+}
