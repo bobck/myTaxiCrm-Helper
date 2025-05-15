@@ -10,6 +10,6 @@ export const boltAuthorizationMiddleware = (req, res, next) => {
     res.status(code).json({ status, message });
     return;
   }
-  console.log(`successfull authorization under api key ${api_key}`);
+  console.log(`successful authorization under api key ${api_key}`);
   next();
 };
