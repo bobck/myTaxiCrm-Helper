@@ -127,8 +127,7 @@ export async function updateBitrixCarStatus() {
   });
 
   const chunkedData = chunkArray(joinedData, CHUNK_SIZE);
-  console.log(chunkedData)
-  return;
+
   for (const chunk of chunkedData) {
     const result = await updateCarStatusAndBrand({ items: chunk });
   }
