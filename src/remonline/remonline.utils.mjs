@@ -171,7 +171,7 @@ export async function getCashboxTransactions(
     throw await response.text();
   }
 
-  if (response.status == 403) {
+  if (response.status == 403 || response.status == 401) {
     console.info({
       function: 'getCashboxTransactions',
       message: 'Get new Auth',
