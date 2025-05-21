@@ -37,7 +37,7 @@ export async function accrueDebtToDeal() {
       dtp_deal_id,
       sum,
     } = transactions;
-    
+
     const { result: dealArray } = await getDtpDealById({ id: dtp_deal_id });
     const [deal] = dealArray;
 
