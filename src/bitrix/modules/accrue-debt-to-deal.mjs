@@ -7,22 +7,26 @@ import {
 import {
   getDtpAccrueDebtTransactions,
   markDtpDebtTransactionsAsSync,
+  getDtpAccrueDebtTransactionsHumanIds,
+  getDtpAccrueDebtTransactionByHumanId,
 } from '../bitrix.queries.mjs';
 
 export async function accrueDebtToDeal() {
-  const { dtpAccrueDebtTransactions } = await getDtpAccrueDebtTransactions();
-
+  const { human_ids: human_ids_JSON_ARR } =
+    await getDtpAccrueDebtTransactionsHumanIds();
+  const human_ids = human_ids_JSON_ARR.map((json) => json.human_id);
   console.log({
     time: new Date(),
     message: 'accrueDebtToDeal',
-    dtpAccrueDebtTransactions: dtpAccrueDebtTransactions.length,
+    dtpAccrueDebtTransactions: human_ids.length,
   });
 
-  for (let transactions of dtpAccrueDebtTransactions) {
+  for (const human_id of human_ids) {
+    console.log(human_id);
+    continue;
     const {
       auto_park_id,
       driver_id,
-      human_id,
       purpose,
       added_by_user_name,
       dtp_deal_id,

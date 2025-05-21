@@ -599,6 +599,27 @@ export async function getDtpAccrueDebtTransactions() {
   const dtpAccrueDebtTransactions = await db.all(sql);
   return { dtpAccrueDebtTransactions };
 }
+export async function getDtpAccrueDebtTransactionsHumanIds() {
+  const sql = `SELECT human_id from dtp_debt_transactions 
+                where is_valid is true
+                and is_synchronised is false`;
+  const human_ids = await db.all(sql);
+  return { human_ids };
+}
+
+export async function getDtpAccrueDebtTransactionByHumanId({human_id}) {
+  const sql = `SELECT auto_park_id,
+                        driver_id,
+                        purpose,
+                        added_by_user_name,
+                        dtp_deal_id,
+                        sum
+                    from dtp_debt_transactions 
+                where is_valid is true
+                and is_synchronised is false`;
+  const dtpAccrueDebtTransaction = await db.run(sql);
+  return { dtpAccrueDebtTransaction };
+}
 
 export async function markDtpDebtTransactionsAsSync({ human_id }) {
   const sql = `UPDATE dtp_debt_transactions SET is_synchronised = true WHERE human_id = ?`;
