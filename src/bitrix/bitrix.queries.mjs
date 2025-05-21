@@ -607,7 +607,7 @@ export async function getDtpAccrueDebtTransactionsHumanIds() {
   return { human_ids };
 }
 
-export async function getDtpAccrueDebtTransactionByHumanId({human_id}) {
+export async function getDtpAccrueDebtTransactionByHumanId({ human_id }) {
   const sql = `SELECT auto_park_id,
                         driver_id,
                         purpose,
@@ -616,8 +616,9 @@ export async function getDtpAccrueDebtTransactionByHumanId({human_id}) {
                         sum
                     from dtp_debt_transactions 
                 where is_valid is true
-                and is_synchronised is false`;
-  const dtpAccrueDebtTransaction = await db.run(sql);
+                and is_synchronised is false
+                and human_id=?`;
+  const dtpAccrueDebtTransaction = await db.get(sql, human_id);
   return { dtpAccrueDebtTransaction };
 }
 

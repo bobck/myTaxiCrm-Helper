@@ -22,8 +22,14 @@ export async function accrueDebtToDeal() {
   });
 
   for (const human_id of human_ids) {
-    console.log(human_id);
-    continue;
+    const { dtpAccrueDebtTransaction: transaction } =
+      await getDtpAccrueDebtTransactionByHumanId({
+        human_id,
+      });
+    //
+    // Может быть переименуем transactions => transaction? в единичном числе лучше выглядит
+    //
+    const transactions = { ...transaction, human_id };
     const {
       auto_park_id,
       driver_id,
@@ -32,7 +38,6 @@ export async function accrueDebtToDeal() {
       dtp_deal_id,
       sum,
     } = transactions;
-
     const { result: dealArray } = await getDtpDealById({ id: dtp_deal_id });
     const [deal] = dealArray;
 
