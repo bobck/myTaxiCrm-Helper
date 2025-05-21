@@ -1,8 +1,19 @@
 import { Bitrix, Method } from '@2bad/bitrix';
 import fs from 'fs';
 import { pool } from './../api/pool.mjs';
+import { bitrixCrmDealsListLimiter } from './bottleneck.mjs';
 const bitrix = Bitrix(
   `https://${process.env.BITRIX_PORTAL_HOST}/rest/${process.env.BITRIX_USER_ID}/${process.env.BITRIX_API_KEY}/`
+);
+const batchCRMDealsListLimited = bitrixCrmDealsListLimiter.wrap(
+  async ({ batchObj }) => {
+    return await bitrix.batch(batchObj);
+  }
+);
+const bitrix_crm_deals_list_limited = bitrixCrmDealsListLimiter.wrap(
+  async ({ params }) => {
+    return await bitrix.deals.list(params);
+  }
 );
 
 export async function getFreshFiredDrivers({ unixCreatedAt }) {
@@ -91,7 +102,7 @@ export async function findDealByContact({ drivers, category_id }) {
     }
   }
 
-  const { result, time } = await bitrix.batch(batchObj);
+  const { result, time } = await batchCRMDealsListLimited({ batchObj });
 
   return result;
 }
@@ -149,7 +160,7 @@ export async function getLeadsByCreateDateAndSourceId({ date, sourceId }) {
 }
 
 export async function getDealsByInterviewDate({ date, CATEGORY_ID }) {
-  const response = await bitrix.deals.list({
+  const params = {
     filter: {
       '>=UF_CRM_1608302466359': `${date}T00:00:00`,
       '<=UF_CRM_1608302466359': `${date}T23:59:59`,
@@ -162,14 +173,15 @@ export async function getDealsByInterviewDate({ date, CATEGORY_ID }) {
       'UF_CRM_1527615815',
       'UF_CRM_1722203030883',
     ],
-  });
+  };
+  const response = await bitrix_crm_deals_list_limited({ params });
 
   const { result } = response;
   return result;
 }
 
 export async function getDealsByClosedDate({ date }) {
-  const response = await bitrix.deals.list({
+  const params = {
     filter: {
       '>=CLOSEDATE': `${date}T00:00:00`,
       '<=CLOSEDATE': `${date}T23:59:59`,
@@ -183,32 +195,35 @@ export async function getDealsByClosedDate({ date }) {
       'UF_CRM_1527615815',
       'UF_CRM_1725629985727',
     ],
-  });
+  };
+  const response = await bitrix_crm_deals_list_limited({ params });
 
   const { result } = response;
   return result;
 }
 
 export async function getDealsRescheduled() {
-  const response = await bitrix.deals.list({
+  const params = {
     filter: {
       CATEGORY_ID: '3',
       STAGE_ID: 'C3:5',
     },
     select: ['ID', 'SOURCE_ID', 'UF_CRM_1527615815'],
-  });
+  };
+  const response = await bitrix_crm_deals_list_limited({ params });
 
   const { result } = response;
   return result;
 }
 
 export async function getManifoldDeals() {
-  const response = await bitrix.deals.list({
+  const params = {
     filter: {
       CATEGORY_ID: '42',
     },
     select: ['*', 'UF_CRM_1527615815'],
-  });
+  };
+  const response = await bitrix_crm_deals_list_limited(params);
 
   const { result } = response;
   return result;
@@ -368,7 +383,7 @@ export async function getDtpDebtTransactions({ createdAt }) {
 }
 
 export async function getDtpDealById({ id }) {
-  const response = await bitrix.deals.list({
+  const params = {
     filter: {
       ID: id,
       CATEGORY_ID: `19`,
@@ -379,7 +394,8 @@ export async function getDtpDealById({ id }) {
       'UF_CRM_1654075624',
       'UF_CRM_1654075693',
     ],
-  });
+  };
+  const response = await bitrix_crm_deals_list_limited({ params });
 
   const { result, total } = response;
   return { result, total };
@@ -657,7 +673,9 @@ export async function getDealsByIdsVerifyingStageConstancy({
       ], // Get desired fields
     };
 
-    const dealResponse = await bitrix.call('crm.deal.list', dealParams);
+    const dealResponse = await bitrix_crm_deals_list_limited({
+      params: dealParams,
+    });
     const currentDeals = dealResponse.result || [];
 
     // TODO: Handle pagination if needed
