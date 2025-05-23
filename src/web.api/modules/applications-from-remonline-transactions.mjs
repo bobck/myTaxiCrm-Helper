@@ -48,7 +48,12 @@ export async function createCRMApplicationsFromRemonlineTransaction() {
           description,
           created_at,
         } = transaction;
-
+        if (value > 99_999_999.99 || value < -99_999_999.99) {
+          console.error(
+            `the value:${value} is out of float[numeric(10,2)] range which is [-99_999_999.99; 99_999_999.99]`
+          );
+          continue;
+        }
         const toBeSkipped = /^\*\*\*/.test(description.replaceAll(' ', ''));
 
         if (toBeSkipped) {
