@@ -33,7 +33,7 @@ export async function accrueDebtToDeal() {
     const [deal] = dealArray;
 
     if (dealArray.length == 0) {
-      console.error({
+      console.log({
         message: 'accrueDebtToDeal missed deal',
         dtp_deal_id,
       });
