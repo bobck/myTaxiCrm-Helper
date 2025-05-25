@@ -43,14 +43,6 @@ async function getBrandingProcess() {
   return { brandingProcess: newbrandingProcess };
 }
 
-async function debug({ rows }) {
-  const resp = rows.filter(
-    (driver) =>
-      !cityList.find((city) => city.auto_park_id === driver.auto_park_id)
-  );
-  console.log({ resp });
-} //3804
-
 export async function createDriverBrandingCards() {
   const { brandingProcess } = await getBrandingProcess();
 
@@ -85,8 +77,6 @@ export async function createDriverBrandingCards() {
     return;
   }
 
-  await debug({ rows });
-  return;
   const processedCards = [];
   for (const [index, row] of rows.entries()) {
     if (
