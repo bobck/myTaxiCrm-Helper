@@ -42,7 +42,6 @@ async function getBrandingProcess() {
   });
   return { brandingProcess: newbrandingProcess };
 }
-
 export async function createDriverBrandingCards() {
   const { brandingProcess } = await getBrandingProcess();
 
@@ -182,9 +181,4 @@ if (process.env.ENV === 'TEST') {
   );
   await openSShTunnel;
   await createDriverBrandingCards();
-
-  // const filter = cityList.filter((city) => {
-  //   return !Object.hasOwn(city, 'brandingId');
-  // });
-  // console.log({ filter });
 }
