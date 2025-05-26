@@ -747,3 +747,29 @@ export async function getFiredDebtorDriverByDriverId({ driver_id }) {
     `;
   return db.get(sql, driver_id);
 }
+export async function getBoltDriverBanReqByDriverId({ driver_id }) {
+  const sql = `SELECT debt, bitrix_card_id, driver_id FROM bolt_driver_ban_requests WHERE driver_id = ?`;
+  return db.get(sql, [driver_id]);
+}
+
+export async function insertBoltDriverBanReq({
+  debt,
+  bitrix_card_id,
+  driver_id,
+}) {
+  const sql = `INSERT INTO bolt_driver_ban_requests (debt, bitrix_card_id, driver_id) VALUES (?, ?, ?)`;
+  return db.run(sql, [debt, bitrix_card_id, driver_id]);
+}
+export async function getBoltDriverBanReqByDriverId({ driver_id }) {
+  const sql = `SELECT debt, bitrix_card_id, driver_id FROM bolt_driver_ban_requests WHERE driver_id = ?`;
+  return db.get(sql, [driver_id]);
+}
+
+export async function insertBoltDriverBanReq({
+  debt,
+  bitrix_card_id,
+  driver_id,
+}) {
+  const sql = `INSERT INTO bolt_driver_ban_requests (debt, bitrix_card_id, driver_id) VALUES (?, ?, ?)`;
+  return db.run(sql, [debt, bitrix_card_id, driver_id]);
+}
