@@ -150,7 +150,7 @@ export async function createCRMApplicationsFromRemonlineTransaction() {
               status: 'PAYED',
             });
           } catch (e) {
-            console.error({
+            console.log({
               date: new Date(),
               message: e?.message,
               applicationId,
