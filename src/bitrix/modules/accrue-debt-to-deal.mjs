@@ -32,6 +32,14 @@ export async function accrueDebtToDeal() {
     const { result: dealArray } = await getDtpDealById({ id: dtp_deal_id });
     const [deal] = dealArray;
 
+    if (dealArray.length == 0) {
+      console.log({
+        message: 'accrueDebtToDeal missed deal',
+        dtp_deal_id,
+      });
+      continue;
+    }
+
     const {
       UF_CRM_1654076033: accruedDebt,
       UF_CRM_1654075693: voluntaryPayOff,
