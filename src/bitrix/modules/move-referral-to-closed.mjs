@@ -23,7 +23,10 @@ export async function moveReferralToClosed() {
 
   //TODO: add is_closed Boolean column
 }
-
+//creation date
+//referal id
+//deal_id
+//date now ( error date )
 export async function moveReferralProcentageRewardToClosed() {
   const { finishedRefferalsProcentageReward } =
     await getFinishedRefferalsProcentageReward({ procentageRewardAutoParkIds });
@@ -40,6 +43,7 @@ export async function moveReferralProcentageRewardToClosed() {
 }
 
 if (process.env.ENV == 'TEST') {
-  await moveReferralToClosed();
-  await moveReferralProcentageRewardToClosed();
+  // await moveReferralToClosed();
+  // await moveReferralProcentageRewardToClosed();
+  console.log('testing referral movement ...')
 }

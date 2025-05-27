@@ -672,3 +672,19 @@ export async function getDealsByIdsVerifyingStageConstancy({
     return null; // Indicate failure
   }
 }
+export async function getRefferalItem({refferal_id}){
+  const dealParams = {
+            entityTypeId: reffera,
+            id: refferal_id,
+            useOriginalUfNames: 'N',
+        }
+
+    const dealResponse = await bitrix.call('crm.deal.list', dealParams);
+    const currentDeals = dealResponse.result || [];
+
+    // TODO: Handle pagination if needed
+    // Note: Bitrix24 API may return a "next" field in the response if there are more pages
+
+    return currentDeals;
+  
+}
