@@ -1,11 +1,11 @@
 import {
   getFinishedRefferals,
   getFinishedRefferalsProcentageReward,
+  getReferralIds,
 } from '../bitrix.queries.mjs';
 import {
   changeItemStage,
-  createReferralItem,
-  deleteReferralItem,
+  getAllReferrals,
   getReferralItem,
 } from '../bitrix.utils.mjs';
 import { referralTypeId } from '../bitrix.constants.mjs';
@@ -69,6 +69,20 @@ export async function moveReferralProcentageRewardToClosed() {
 
 if (process.env.ENV == 'TEST') {
   console.log('testing referral movement ...');
-  await moveReferralToClosed();
-  await moveReferralProcentageRewardToClosed();
+  // await moveReferralToClosed();
+  // await moveReferralProcentageRewardToClosed();
+  const bitrix_data = await getAllReferrals({
+    referralTypeId,
+    selectFields: ['id'],
+  });
+  const db_data = await getReferralIds();
+  const missed_ids = db_data.reduce((acc, curr) => {
+    const { referral_id } = curr;
+
+    const bitrix_referral = bitrix_data.find((ref) => ref.id == referral_id);
+    if (!bitrix_referral) acc.push(referral_id);
+    return acc;
+  }, []);
+
+  console.log({ missed_ids });
 }
