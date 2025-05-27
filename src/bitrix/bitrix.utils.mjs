@@ -672,19 +672,59 @@ export async function getDealsByIdsVerifyingStageConstancy({
     return null; // Indicate failure
   }
 }
-export async function getRefferalItem({refferal_id}){
-  const dealParams = {
-            entityTypeId: reffera,
-            id: refferal_id,
-            useOriginalUfNames: 'N',
-        }
+export async function getReferralItem({ referral_id, referralTypeId }) {
+  const params = {
+    entityTypeId: referralTypeId,
+    id: referral_id,
+    useOriginalUfNames: 'N',
+  };
+  console.log('requesting ...', { params });
+  const response = await bitrix.call('crm.item.get', params);
 
-    const dealResponse = await bitrix.call('crm.deal.list', dealParams);
-    const currentDeals = dealResponse.result || [];
+  return response;
+}
 
-    // TODO: Handle pagination if needed
-    // Note: Bitrix24 API may return a "next" field in the response if there are more pages
+export async function createReferralItem({ referralTypeId }) {
+  const params = {
+    entityTypeId: referralTypeId,
 
-    return currentDeals;
-  
+    fields: {
+      title: 'ТЕСТ НЕ ЧІПАТИ!!!!!!!',
+    },
+  };
+  console.log('requesting ...', { params });
+  const response = await bitrix.call('crm.item.add', params);
+
+  return response;
+}
+export async function deleteReferralItem({ referralTypeId, referral_id }) {
+  const params = {
+    entityTypeId: referralTypeId,
+    id: referral_id,
+  };
+  console.log('Deleting item...', { params });
+  try {
+    const response = await bitrix.call('crm.item.delete', params);
+    // The response for a successful delete might be minimal, often just { result: true, time: { ... } }
+    // or { result: {}, time: { ... } } if the item was deleted.
+    // If the item doesn't exist, it might throw an error or return a specific error structure.
+    console.log('Item deletion response:', response);
+    return response; // Or true if response.result is indicative of success
+  } catch (e) {
+    console.error(
+      `Error deleting item ${referral_id} from entity ${referralTypeId}:`,
+      e
+    );
+    // Handle specific errors, e.g., if the item was not found
+    if (
+      e.isAxiosError &&
+      e.response &&
+      e.response.data &&
+      e.response.data.error === 'NOT_FOUND'
+    ) {
+      console.warn(`Item ${referral_id} not found for deletion.`);
+      return { result: false, error: 'NOT_FOUND' }; // Or handle as appropriate
+    }
+    throw e; // Re-throw other errors
+  }
 }

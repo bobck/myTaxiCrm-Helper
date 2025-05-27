@@ -2,7 +2,12 @@ import {
   getFinishedRefferals,
   getFinishedRefferalsProcentageReward,
 } from '../bitrix.queries.mjs';
-import { changeItemStage } from '../bitrix.utils.mjs';
+import {
+  changeItemStage,
+  createReferralItem,
+  deleteReferralItem,
+  getReferralItem,
+} from '../bitrix.utils.mjs';
 import { referralTypeId } from '../bitrix.constants.mjs';
 import { procentageRewardAutoParkIds } from '../bitrix.constants.mjs';
 
@@ -10,10 +15,23 @@ export async function moveReferralToClosed() {
   const { finishedRefferals } = await getFinishedRefferals({
     procentageRewardAutoParkIds,
   });
-
+  console.log({ finishedRefferals });
   for (let referral of finishedRefferals) {
-    const { referral_id } = referral;
-
+    const { referral_id, created_at } = referral;
+    try {
+      await getReferralItem({ referralTypeId, referral_id });
+    } catch (error) {
+      console.error(
+        `error occured while getting referral item, it probably doesnt exist ${referral_id}`,
+        {
+          referral_id,
+          error,
+          created_at,
+          date: new Date(),
+        }
+      );
+      continue;
+    }
     await changeItemStage({
       referralTypeId,
       id: referral_id,
@@ -23,17 +41,26 @@ export async function moveReferralToClosed() {
 
   //TODO: add is_closed Boolean column
 }
-//creation date
-//referal id
-//deal_id
-//date now ( error date )
 export async function moveReferralProcentageRewardToClosed() {
   const { finishedRefferalsProcentageReward } =
     await getFinishedRefferalsProcentageReward({ procentageRewardAutoParkIds });
-
+  console.log({ finishedRefferalsProcentageReward });
   for (let referral of finishedRefferalsProcentageReward) {
-    const { referral_id } = referral;
-
+    const { referral_id, created_at } = referral;
+    try {
+      await getReferralItem({ referralTypeId, referral_id });
+    } catch (error) {
+      console.error(
+        `error occured while getting referral item, it probably doesnt exist ${referral_id}`,
+        {
+          referral_id,
+          error,
+          created_at,
+          date: new Date(),
+        }
+      );
+      continue;
+    }
     await changeItemStage({
       referralTypeId,
       id: referral_id,
@@ -43,7 +70,7 @@ export async function moveReferralProcentageRewardToClosed() {
 }
 
 if (process.env.ENV == 'TEST') {
-  // await moveReferralToClosed();
-  // await moveReferralProcentageRewardToClosed();
-  console.log('testing referral movement ...')
+  console.log('testing referral movement ...');
+  await moveReferralToClosed();
+  await moveReferralProcentageRewardToClosed();
 }
