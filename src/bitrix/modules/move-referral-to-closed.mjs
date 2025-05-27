@@ -15,7 +15,6 @@ export async function moveReferralToClosed() {
   const { finishedRefferals } = await getFinishedRefferals({
     procentageRewardAutoParkIds,
   });
-  console.log({ finishedRefferals });
   for (let referral of finishedRefferals) {
     const { referral_id, created_at } = referral;
     try {
@@ -44,7 +43,6 @@ export async function moveReferralToClosed() {
 export async function moveReferralProcentageRewardToClosed() {
   const { finishedRefferalsProcentageReward } =
     await getFinishedRefferalsProcentageReward({ procentageRewardAutoParkIds });
-  console.log({ finishedRefferalsProcentageReward });
   for (let referral of finishedRefferalsProcentageReward) {
     const { referral_id, created_at } = referral;
     try {
