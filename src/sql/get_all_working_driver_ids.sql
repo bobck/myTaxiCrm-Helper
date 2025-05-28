@@ -2,6 +2,6 @@ with working_drivers as (SELECT d.id as driver_id,d.auto_park_id from drivers d 
 drivers_to_block_cash as(
 	select wd.driver_id,wd.auto_park_id, (cs.balance+cs.total_deposit-cs.total_debt)as driver_balance from working_drivers wd
 	join calculated_statements cs on wd.driver_id=cs.driver_id
-	and cs.week =21 and cs.year=2025
+	and cs.week =22 and cs.year=2025
 )
-select * from drivers_to_block_cash dtbc
+select * from drivers_to_block_cash dtbc where driver_balance<-1000

@@ -5,21 +5,11 @@ import {
 } from '../web.api.utlites.mjs';
 const activationValue = 1000;
 const calculateDriverCashBlockRules = ({ driver_balance }) => {
-  const cashBlockRule =
-    driver_balance < -1000
-      ? {
-          activationValue,
-          isEnabled: true,
-          target: 'BALANCE',
-        }
-      : {};
-  /**
-   * {
-          activationValue: null,
-          isEnabled: null,
-          target: null,
-        },
-   */
+  const cashBlockRule = {
+    activationValue,
+    isEnabled: true,
+    target: 'BALANCE',
+  };
   const cashBlockRules = [];
   if (cashBlockRule.isEnabled) cashBlockRules.push(cashBlockRule);
   return { cashBlockRules };
@@ -46,19 +36,19 @@ export const driverCashBlockRules = async () => {
         rules: cashBlockRules,
       },
     };
-    console.log(variables.editDriverCashBlockRulesInput);
+
     if (!variables.editDriverCashBlockRulesInput.isEnabled) {
       console.log(
         `skipping ${variables.editDriverCashBlockRulesInput.driverId}`
       );
       continue;
     }
-    // const editRulesQueryString = `
-    // mutation EditDriverCashBlockRules($editDriverCashBlockRulesInput: EditDriverCashBlockRulesInput!) {
-    //   editDriverCashBlockRules(editDriverCashBlockRulesInput: $editDriverCashBlockRulesInput) {
-    //     success
-    //   }
-    // }`;
+    const editRulesQueryString = `
+    mutation EditDriverCashBlockRules($editDriverCashBlockRulesInput: EditDriverCashBlockRulesInput!) {
+      editDriverCashBlockRules(editDriverCashBlockRulesInput: $editDriverCashBlockRulesInput) {
+        success
+      }
+    }`;
     const query =
       'mutation EditDriverCashBlockRules($editDriverCashBlockRulesInput: EditDriverCashBlockRulesInput!) {\n  editDriverCashBlockRules(editDriverCashBlockRulesInput: $editDriverCashBlockRulesInput) {\n    success\n  }\n}';
     const bodyForEditRules = {
@@ -67,9 +57,9 @@ export const driverCashBlockRules = async () => {
       query,
     };
     console.log(bodyForEditRules);
-    const response = await makeCRMRequestlimited({ body: bodyForEditRules });
-    console.log(response)
-    return
+    // const response = await makeCRMRequestlimited({ body: bodyForEditRules });
+    // console.log(response);
+    // return;
   }
   return;
   try {
