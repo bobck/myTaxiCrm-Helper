@@ -219,6 +219,14 @@ export const cityListWithAssignedBy = [
     cityName: 'Варшава',
     supportCityId: '3122',
   },
+  {
+    assignedBy: '',
+    auto_park_id: '1e8a6a0d-aa34-4d77-a87c-d0c86fab5577',
+    cityId: '',
+    brandingId: '3804',
+    cityName: "Кам'янське",
+    supportCityId: '',
+  },
 ];
 export const specialBrandingCities = [
   {
@@ -381,6 +389,7 @@ export const procentageRewardAutoParkIds = [
   '2f4c5352-0296-4fba-859b-9f8955f3f2a0',
   '472c4d3e-3fe7-45ea-9c94-a77f364bbd86',
   'b0328dc5-71be-485d-b6ec-786d9ce52112',
+  'e4df553f-4ec2-43a8-b012-4795259e983a'
 ];
 
 const positionCodes = {
