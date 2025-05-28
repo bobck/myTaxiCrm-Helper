@@ -3,10 +3,12 @@ import { openSShTunnel } from '../../../ssh.mjs';
 import {
   getDriversWithActiveCashBlockRules,
   insertDriverWithCashBlockRules,
+  markDriverCashBlockRulesAsDeleted,
 } from '../web.api.queries.mjs';
 import {
   getAllWorkingDriverIds,
   makeCRMRequestlimited,
+  getDriversWhoPaidOff,
 } from '../web.api.utlites.mjs';
 const activationValue = 1000;
 const calculateDriverCashBlockRules = () => {
@@ -32,7 +34,8 @@ const editDriverCashBlockRulesMutation = async ({ variables }) => {
   } catch (errors) {
     const [error] = errors;
     const { message, locations, path, extensions } = error;
-    throw { driver_id, auto_park_id, message, locations, path, extensions };
+
+    throw { message, locations, path, extensions, variables };
   }
 };
 const calculateMutationVariables = ({
@@ -90,10 +93,49 @@ export const setDriverCashBlockRules = async () => {
       continue;
     }
   }
+  console.log('setting done:)');
 };
-export const updateDriverCashBlockRules = async () => {};
+export const updateDriverCashBlockRules = async () => {
+  const { year, weekNumber } = calculateCurrentWeekAndYear();
+  const IdsOfDriversWithCashBlockRules = (
+    await getDriversWithActiveCashBlockRules()
+  ).map(({ driver_id }) => driver_id);
+  const { rows: drivers } = await getDriversWhoPaidOff({
+    year,
+    weekNumber,
+    ids: IdsOfDriversWithCashBlockRules,
+  });
+  console.log({
+    message: 'updateDriverCashBlockRules',
+    date: new Date(),
+    env: process.env.ENV,
+    drivers: drivers.length,
+    IdsOfDriversWithCashBlockRules: IdsOfDriversWithCashBlockRules.length,
+  });
+  if (drivers.length === 0) {
+    return;
+  }
+  for (const driver of drivers) {
+    try {
+      const { driver_id, auto_park_id } = driver;
+      const { variables } = calculateMutationVariables({
+        auto_park_id,
+        driver_id,
+        cashBlockRules: [],
+      });
+      await editDriverCashBlockRulesMutation({ variables });
+      await markDriverCashBlockRulesAsDeleted({ driver_id });
+      console.log(`updated driver ${driver_id}`);
+    } catch (error) {
+      console.error('error while updateDriverCashBlockRules', error);
+      continue;
+    }
+  }
+  console.log('updating done:)');
+};
 
 if ((process.env.ENV = 'TEST')) {
   await openSShTunnel;
+  await updateDriverCashBlockRules();
   await setDriverCashBlockRules();
 }

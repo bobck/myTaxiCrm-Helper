@@ -637,3 +637,12 @@ export async function getAllWorkingDriverIds({ ids, weekNumber, year }) {
   const { rows, rowCount } = result;
   return { rows };
 }
+//getDriversWhoPaidOff
+export async function getDriversWhoPaidOff({ ids, weekNumber, year }) {
+  const sql = fs
+    .readFileSync('src/sql/get_drivers_who_paid_off.sql')
+    .toString();
+  const result = await pool.query(sql, [ids, weekNumber, year]);
+  const { rows, rowCount } = result;
+  return { rows };
+}
