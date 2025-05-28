@@ -56,19 +56,20 @@ export const driverCashBlockRules = async () => {
       variables,
       query,
     };
-    console.log(bodyForEditRules);
-    // const response = await makeCRMRequestlimited({ body: bodyForEditRules });
-    // console.log(response);
-    // return;
+
+    try {
+      const response = await makeCRMRequestlimited({ body: bodyForEditRules });
+      console.log(response, { driver_id, auto_park_id });
+    } catch (errors) {
+      const { message, locations, path, extensions } = errors[0];
+      console.error(
+        'Ошибка при изменении правил:',
+        { driver_id, auto_park_id },
+        { message, locations, path, extensions }
+      );
+    }
   }
-  return;
-  try {
-    const { data } = response;
-    // Обработка data.editDriverCashBlockRules.success и data.editDriverCashBlockRules.message
-    console.log(data);
-  } catch (error) {
-    console.error('Ошибка при изменении правил:', error);
-  }
+  console.log(`done :)`);
 };
 
 if ((process.env.ENV = 'TEST')) {

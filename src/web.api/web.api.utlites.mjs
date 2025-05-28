@@ -81,8 +81,8 @@ async function makeCRMRequestWithRetry({ body }) {
         await setTimeout(retryDelay);
         retryDelay *= 2;
       } else {
-        console.error({ message: 'Max retries reached', error });
-        throw new Error('Max retries reached. Unable to complete the request.');
+        console.error({ message: 'Max retries reached' });
+        throw error;
       }
     }
   }
