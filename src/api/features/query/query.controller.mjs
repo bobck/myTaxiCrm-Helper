@@ -12,7 +12,7 @@ export const queryHandler = async (req, res) => {
     }
 
   try {
-    const { rows } = await QueryService.executeQuery(sql);
+    const { rows } = await QueryService.executeQuery({sql});
     return res.status(200).json(rows);
   } catch (err) {
     return res.status(404).json(err);
