@@ -16,7 +16,7 @@ exports.setup = function (options, seedLink) {
 
 exports.up = function (db, callback) {
   const sql = `CREATE TABLE driver_cash_block_rules (
-    id STRING NOT NULL,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     driver_id STRING NOT NULL, 
     is_deleted BOOLEAN DEFAULT FALSE,
     created_date DATETIME DEFAULT CURRENT_TIMESTAMP

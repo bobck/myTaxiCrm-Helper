@@ -1,10 +1,15 @@
+import { DateTime } from 'luxon';
 import { openSShTunnel } from '../../../ssh.mjs';
+import {
+  getDriversWithActiveCashBlockRules,
+  insertDriverWithCashBlockRules,
+} from '../web.api.queries.mjs';
 import {
   getAllWorkingDriverIds,
   makeCRMRequestlimited,
 } from '../web.api.utlites.mjs';
 const activationValue = 1000;
-const calculateDriverCashBlockRules = ({ driver_balance }) => {
+const calculateDriverCashBlockRules = () => {
   const cashBlockRule = {
     activationValue,
     isEnabled: true,
@@ -14,41 +19,8 @@ const calculateDriverCashBlockRules = ({ driver_balance }) => {
   if (cashBlockRule.isEnabled) cashBlockRules.push(cashBlockRule);
   return { cashBlockRules };
 };
-
-export const driverCashBlockRules = async () => {
-  const { rows: drivers } = await getAllWorkingDriverIds();
-  console.log({
-    message: 'driverCashBlockRules',
-    date: new Date(),
-    env: process.env.ENV,
-    drivers: drivers.length,
-  });
-  for (const driver of drivers) {
-    const { cashBlockRules } = calculateDriverCashBlockRules(driver);
-    const { driver_id, auto_park_id } = driver;
-    const variables = {
-      editDriverCashBlockRulesInput: {
-        autoParkId: auto_park_id,
-        driverId: driver_id,
-        isEnabled: cashBlockRules.length > 0,
-        mode: 'MIN_DEBT', // MAX_DEBT | MIN_DEBT
-        // balance: driver.driver_balance,
-        rules: cashBlockRules,
-      },
-    };
-
-    if (!variables.editDriverCashBlockRulesInput.isEnabled) {
-      console.log(
-        `skipping ${variables.editDriverCashBlockRulesInput.driverId}`
-      );
-      continue;
-    }
-    const editRulesQueryString = `
-    mutation EditDriverCashBlockRules($editDriverCashBlockRulesInput: EditDriverCashBlockRulesInput!) {
-      editDriverCashBlockRules(editDriverCashBlockRulesInput: $editDriverCashBlockRulesInput) {
-        success
-      }
-    }`;
+const editDriverCashBlockRulesMutation = async ({ variables }) => {
+  try {
     const query =
       'mutation EditDriverCashBlockRules($editDriverCashBlockRulesInput: EditDriverCashBlockRulesInput!) {\n  editDriverCashBlockRules(editDriverCashBlockRulesInput: $editDriverCashBlockRulesInput) {\n    success\n  }\n}';
     const bodyForEditRules = {
@@ -56,23 +28,72 @@ export const driverCashBlockRules = async () => {
       variables,
       query,
     };
-
+    await makeCRMRequestlimited({ body: bodyForEditRules });
+  } catch (errors) {
+    const [error] = errors;
+    const { message, locations, path, extensions } = error;
+    throw { driver_id, auto_park_id, message, locations, path, extensions };
+  }
+};
+const calculateMutationVariables = ({
+  auto_park_id,
+  driver_id,
+  cashBlockRules,
+}) => {
+  const variables = {
+    editDriverCashBlockRulesInput: {
+      autoParkId: auto_park_id,
+      driverId: driver_id,
+      isEnabled: cashBlockRules.length > 0,
+      mode: 'MIN_DEBT', // MAX_DEBT | MIN_DEBT
+      rules: cashBlockRules,
+    },
+  };
+  return { variables };
+};
+const calculateCurrentWeekAndYear = () => {
+  const today = DateTime.local().startOf('day');
+  const { year, weekNumber } = today;
+  return { year, weekNumber };
+};
+export const setDriverCashBlockRules = async () => {
+  const { year, weekNumber } = calculateCurrentWeekAndYear();
+  const IdsOfDriversWithCashBlockRules = (
+    await getDriversWithActiveCashBlockRules()
+  ).map(({ driver_id }) => driver_id);
+  const { rows: drivers } = await getAllWorkingDriverIds({
+    ids: IdsOfDriversWithCashBlockRules,
+    year,
+    weekNumber,
+  });
+  console.log({
+    message: 'setdriverCashBlockRules',
+    date: new Date(),
+    env: process.env.ENV,
+    drivers: drivers.length,
+    IdsOfDriversWithCashBlockRules: IdsOfDriversWithCashBlockRules.length,
+  });
+  for (const driver of drivers) {
     try {
-      const response = await makeCRMRequestlimited({ body: bodyForEditRules });
-      console.log(response, { driver_id, auto_park_id });
-    } catch (errors) {
-      const { message, locations, path, extensions } = errors[0];
-      console.error(
-        'Ошибка при изменении правил:',
-        { driver_id, auto_park_id },
-        { message, locations, path, extensions }
-      );
+      const { driver_id, auto_park_id } = driver;
+      const { cashBlockRules } = calculateDriverCashBlockRules();
+      const { variables } = calculateMutationVariables({
+        auto_park_id,
+        driver_id,
+        cashBlockRules,
+      });
+      await editDriverCashBlockRulesMutation({ variables });
+      await insertDriverWithCashBlockRules({ driver_id });
+      console.log(`insreted driver ${driver_id}`);
+    } catch (error) {
+      console.error('error while setDriverCashBlockRules', error);
+      continue;
     }
   }
-  console.log(`done :)`);
 };
+export const updateDriverCashBlockRules = async () => {};
 
 if ((process.env.ENV = 'TEST')) {
   await openSShTunnel;
-  await driverCashBlockRules();
+  await setDriverCashBlockRules();
 }
