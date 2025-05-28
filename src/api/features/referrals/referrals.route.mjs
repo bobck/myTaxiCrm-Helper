@@ -2,8 +2,8 @@ import express from 'express';
 import * as ReferralController from './referral.controller.mjs';
 const referralRouter = express.Router();
 
-referralRouter.post('/add', ReferralController.addHandler);
-referralRouter.post('/validate', ReferralController.validationHandler);
-referralRouter.post('/approve', ReferralController.approveHandler);
+referralRouter.post('/referral-add', ReferralController.addHandler);
+referralRouter.post('/referral-validation', ReferralController.validationHandler);
+referralRouter.post('/referral-approval', ReferralController.approveHandler);
 
 export default referralRouter;
