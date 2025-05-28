@@ -11,15 +11,15 @@ import {
 import { referralTypeId } from '../../../bitrix/bitrix.constants.mjs';
 
 export const add = async ({ query }) => {
-    const { referral_id, deal_id, task_id } = query;
-    
-    console.log({ message: 'POST: referral-add', query });
-    
-    await saveReferralIdForRecruitDeal({
-        deal_id,
-        referral_id,
-        task_id,
-    });
+  const { referral_id, deal_id, task_id } = query;
+
+  console.log({ message: 'POST: referral-add', query });
+
+  await saveReferralIdForRecruitDeal({
+    deal_id,
+    referral_id,
+    task_id,
+  });
 };
 export const validate = async ({ query }) => {
   const {

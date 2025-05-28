@@ -5,7 +5,7 @@ import referralRouter from '../features/referrals/referrals.route.mjs';
 const coreRouter = express.Router();
 
 coreRouter.use('/query', queryRouter);
-coreRouter.use('/referrals',referralRouter)
+coreRouter.use('/referrals', referralRouter);
 
 coreRouter.use('/', CoreController.handleCore);
 

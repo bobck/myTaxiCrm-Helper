@@ -6,6 +6,4 @@ referralRouter.post('/add', ReferralController.addHandler);
 referralRouter.post('/validate', ReferralController.validationHandler);
 referralRouter.post('/approve', ReferralController.approveHandler);
 
-
-
 export default referralRouter;
