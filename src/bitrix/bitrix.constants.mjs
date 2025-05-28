@@ -219,6 +219,14 @@ export const cityListWithAssignedBy = [
     cityName: 'Варшава',
     supportCityId: '3122',
   },
+  {
+    assignedBy: '',
+    auto_park_id: '1e8a6a0d-aa34-4d77-a87c-d0c86fab5577',
+    cityId: '',
+    brandingId: '3804',
+    cityName: "Кам'янське",
+    supportCityId: '',
+  },
 ];
 export const specialBrandingCities = [
   {
