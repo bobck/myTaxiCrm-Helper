@@ -35,7 +35,6 @@ export async function moveReferralToClosed() {
       });
     }
   }
-
 }
 export async function moveReferralProcentageRewardToClosed() {
   const { finishedRefferalsProcentageReward } =
