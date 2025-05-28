@@ -751,10 +751,6 @@ export async function getFiredDebtorDriverByDriverId({ driver_id }) {
     `;
   return db.get(sql, driver_id);
 }
-export const getReferralIds = () => {
-  const sql = `select referral_id from referral;`;
-  return db.all(sql);
-};
 export const markReferralAsClosed = ({ referral_id }) => {
   const sql = `UPDATE referral SET is_closed = TRUE WHERE referral_id = ?`;
   return db.run(sql, [referral_id]);
