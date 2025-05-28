@@ -36,7 +36,6 @@ export async function moveReferralToClosed() {
     }
   }
 
-  //TODO: add is_closed Boolean column
 }
 export async function moveReferralProcentageRewardToClosed() {
   const { finishedRefferalsProcentageReward } =
