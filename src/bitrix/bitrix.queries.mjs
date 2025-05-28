@@ -464,10 +464,12 @@ export async function getFinishedRefferals({ procentageRewardAutoParkIds }) {
       : '';
 
   const sql = `SELECT 
-                    referral_id
+                    referral_id,
+                    created_at
                 FROM referral 
                 WHERE date(expiry_after) < current_date
                 AND referral_id is not null
+                AND is_closed is FALSE
                 ${autoParkFilter}`;
 
   const finishedRefferals = await db.all(sql);
@@ -483,10 +485,12 @@ export async function getFinishedRefferalsProcentageReward({
       : '';
 
   const sql = `SELECT 
-                    referral_id
+                    referral_id,
+                    created_at
                 FROM referral 
                 WHERE date(procent_reward_expiry_after) < current_date
                 AND referral_id is not null
+                AND is_closed is FALSE
                 ${autoParkFilter}`;
 
   const finishedRefferalsProcentageReward = await db.all(sql);
@@ -747,3 +751,7 @@ export async function getFiredDebtorDriverByDriverId({ driver_id }) {
     `;
   return db.get(sql, driver_id);
 }
+export const markReferralAsClosed = ({ referral_id }) => {
+  const sql = `UPDATE referral SET is_closed = TRUE WHERE referral_id = ?`;
+  return db.run(sql, [referral_id]);
+};
