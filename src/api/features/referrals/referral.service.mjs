@@ -9,6 +9,18 @@ import {
   completeBitrixTaskById,
 } from '../../../bitrix/bitrix.utils.mjs';
 import { referralTypeId } from '../../../bitrix/bitrix.constants.mjs';
+
+export const add = async ({ query }) => {
+    const { referral_id, deal_id, task_id } = query;
+    
+    console.log({ message: 'POST: referral-add', query });
+    
+    await saveReferralIdForRecruitDeal({
+        deal_id,
+        referral_id,
+        task_id,
+    });
+};
 export const validate = async ({ query }) => {
   const {
     task_id,
@@ -73,20 +85,7 @@ export const validate = async ({ query }) => {
   }
 };
 
-export const add = async ({ query }) => {
-  const { referral_id, deal_id, task_id } = query;
-
-  console.log({ message: 'POST: referral-add', query });
-
-  await saveReferralIdForRecruitDeal({
-    deal_id,
-    referral_id,
-    task_id,
-  });
-};
-
 export const approve = async ({ query }) => {
-  const { query } = req;
   const { referral_id, referrer_phone, referrer_name, referrer_position } =
     query;
 
