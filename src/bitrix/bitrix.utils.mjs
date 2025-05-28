@@ -672,3 +672,56 @@ export async function getDealsByIdsVerifyingStageConstancy({
     return null; // Indicate failure
   }
 }
+export async function getCardIdsFromSpecialEntity({ entityTypeId }) {
+  try {
+    let doneAtAll = 0;
+    let doneAtPrevious = 0;
+    const pageSize = 50;
+    const items = [];
+    do {
+      const { result } = await bitrix.call('crm.item.list', {
+        entityTypeId,
+        start: doneAtAll + 1,
+        select: [
+          'ID',
+          // 'TITLE',
+          // 'ufCrm4_1744703234',
+          'ufCrm4_1654801473656', // license plate
+        ],
+      });
+      items.push(...result.items);
+      doneAtAll += result.items.length;
+      doneAtPrevious = result.items.length;
+      // console.log({ doneAtAll, doneAtPrevious });
+      // console.log({
+      //   firstId: result.items[0].id,
+      //   lastId: result.items[result.items.length - 1].id,
+      // });
+    } while (
+      doneAtPrevious >= pageSize
+      // && doneAtAll < 200
+    );
+    return items;
+  } catch (error) {
+    console.error('Error retrieving cards from entity:', error);
+    throw error;
+  }
+}
+
+export async function updateCarStatusAndBrand({ items }) {
+  const batchObj = {};
+  for (let item of items) {
+    const { carStatus, brandSticker, id } = item;
+    const params = {
+      id,
+      entityTypeId: '138',
+      'fields[ufCrm4_1744703234]': carStatus, //UF_CRM_4_1744703234
+      'fields[ufCrm4_1741607811]': brandSticker, //UF_CRM_4_1741607811
+    };
+    batchObj[id] = { method: 'crm.item.update', params };
+  }
+
+  const { result: temp_result } = await bitrix.batch(batchObj);
+  const { result } = temp_result;
+  return result;
+}
