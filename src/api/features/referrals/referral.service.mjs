@@ -1,9 +1,15 @@
 import { referralValidadion } from '../../../bitrix/modules/referral-validation.mjs';
-import { saveReferralIdForRecruitDeal } from '../../../bitrix/bitrix.queries.mjs';
-import { completeBitrixTaskById } from '../../../bitrix/bitrix.utils.mjs';
-import { saveRecruitDeal } from '../../../bitrix/bitrix.queries.mjs';
+import {
+  approvalReferralById,
+  saveReferralIdForRecruitDeal,
+  saveRecruitDeal,
+} from '../../../bitrix/bitrix.queries.mjs';
+import {
+  addCommentToEntity,
+  completeBitrixTaskById,
+} from '../../../bitrix/bitrix.utils.mjs';
+import { referralTypeId } from '../../../bitrix/bitrix.constants.mjs';
 export const validate = async ({ query }) => {
-    
   const {
     task_id,
     doc_id,
@@ -67,43 +73,38 @@ export const validate = async ({ query }) => {
   }
 };
 
-// app.post('/referral-add', async (req, res) => {
-//   const { query } = req;
-//   const { referral_id, deal_id, task_id } = query;
+export const add = async ({ query }) => {
+  const { referral_id, deal_id, task_id } = query;
 
-//   console.log({ message: 'POST: referral-add', query });
+  console.log({ message: 'POST: referral-add', query });
 
-//   await saveReferralIdForRecruitDeal({
-//     deal_id,
-//     referral_id,
-//     task_id,
-//   });
+  await saveReferralIdForRecruitDeal({
+    deal_id,
+    referral_id,
+    task_id,
+  });
+};
 
-//   return res.status(200).json({ status: 'ok' });
-// });
+export const approve = async ({ query }) => {
+  const { query } = req;
+  const { referral_id, referrer_phone, referrer_name, referrer_position } =
+    query;
 
-// app.post('/referral-approval', async (req, res) => {
-//   const { query } = req;
-//   const { referral_id, referrer_phone, referrer_name, referrer_position } =
-//     query;
+  console.log({ message: 'POST: referral-approval', query });
 
-//   console.log({ message: 'POST: referral-approval', query });
+  //TODO: move to module and pass crm link to referral card. Add validation if not exist
+  await approvalReferralById({
+    referral_id,
+    referrer_phone,
+    referrer_name,
+    referrer_position,
+  });
 
-//   //TODO: move to module and pass crm link to referral card. Add validation if not exist
-//   await approvalReferralById({
-//     referral_id,
-//     referrer_phone,
-//     referrer_name,
-//     referrer_position,
-//   });
+  const comment = `Реферал успішно додано до програми`;
 
-//   const comment = `Реферал успішно додано до програми`;
-
-//   await addCommentToEntity({
-//     entityId: referral_id,
-//     typeId: referralTypeId,
-//     comment,
-//   });
-
-//   return res.status(200).json({ status: 'ok' });
-// });
+  await addCommentToEntity({
+    entityId: referral_id,
+    typeId: referralTypeId,
+    comment,
+  });
+};
