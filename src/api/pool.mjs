@@ -1,5 +1,5 @@
 import pg from 'pg';
-const encodedPassword=encodeURIComponent(process.env.PG_PASSWORD);
+const encodedPassword = encodeURIComponent(process.env.PG_PASSWORD);
 const connectionString = `postgres://${process.env.PG_USER}:${encodedPassword}@${process.env.PROXY_HOST}:${process.env.PROXY_PORT}/${process.env.PG_DB}`;
 
 export const pool = new pg.Pool({

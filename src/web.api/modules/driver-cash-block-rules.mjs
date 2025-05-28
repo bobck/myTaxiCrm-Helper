@@ -87,13 +87,11 @@ export const setDriverCashBlockRules = async () => {
       });
       await editDriverCashBlockRulesMutation({ variables });
       await insertDriverWithCashBlockRules({ driver_id });
-      console.log(`insreted driver ${driver_id}`);
     } catch (error) {
       console.error('error while setDriverCashBlockRules', error);
       continue;
     }
   }
-  console.log('setting done:)');
 };
 export const updateDriverCashBlockRules = async () => {
   const { year, weekNumber } = calculateCurrentWeekAndYear();
@@ -125,13 +123,11 @@ export const updateDriverCashBlockRules = async () => {
       });
       await editDriverCashBlockRulesMutation({ variables });
       await markDriverCashBlockRulesAsDeleted({ driver_id });
-      console.log(`updated driver ${driver_id}`);
     } catch (error) {
       console.error('error while updateDriverCashBlockRules', error);
       continue;
     }
   }
-  console.log('updating done:)');
 };
 
 if ((process.env.ENV = 'TEST')) {
