@@ -257,6 +257,7 @@ export async function deleteBitrixTaskById({ task_id }) {
     return task;
   } catch (e) {
     console.error({ message: 'Unable to delete task', task_id });
+    throw e;
   }
 }
 
@@ -276,6 +277,7 @@ export async function completeBitrixTaskById({ task_id }) {
     return task;
   } catch (e) {
     console.error({ message: 'Unable to complete task', task_id });
+    throw e;
   }
 }
 
