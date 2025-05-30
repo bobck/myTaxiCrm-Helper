@@ -60,4 +60,15 @@ export const sentFirstLetterService = async ({ query }) => {
   });
 };
 
-export const letterApprovementService = async () => {};
+export const letterApprovementService = async ({ params, query }) => {
+  let { letter_id } = params;
+  letter_id = Number(letter_id);
+  const { bitrix_deal_id } = query;
+  if (!(letter_id === 1 || letter_id === 2)) {
+    throw { code: BAD_REQUEST, message: `unknown letter_id:${letter_id}` };
+  }
+  if (!bitrix_deal_id) {
+    throw { code: BAD_REQUEST, message: 'bitrix_deal_id is required' };
+  }
+  await BoltRepo.approveLetterByDealId({ bitrix_deal_id, letter_id });
+};

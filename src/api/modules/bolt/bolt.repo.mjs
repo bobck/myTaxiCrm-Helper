@@ -1,3 +1,4 @@
+import { setLetterApprovedByDealId } from '../../../bitrix/bitrix.queries.mjs';
 import { getAllBoltIdsByDriverPhone } from '../../../web.api/web.api.utlites.mjs';
 
 export const getDrivers = async ({ phone, bolt_id }) => {
@@ -13,4 +14,7 @@ export const getDrivers = async ({ phone, bolt_id }) => {
     };
   }
   return { drivers: rows };
+};
+export const approveLetterByDealId = async ({ bitrix_deal_id, letter_id }) => {
+  await setLetterApprovedByDealId({ bitrix_deal_id, letter_id });
 };
