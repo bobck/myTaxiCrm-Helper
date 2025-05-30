@@ -33,31 +33,19 @@ export const handleDriverPhone = ({ phone }) => {
   } else if (isPolishPhone) {
     handledPhone = filteredPhone.slice(2);
   } else {
-    return {
-      code: 400,
-      status: 'error',
-      error: {
-        message: 'Phone number is not valid. It should be Ukrainian or Polish',
-        phone,
-      },
+    throw {
+      code: BAD_REQUEST,
+      message: `Phone number is not valid. It should be Ukrainian or Polish. The phone:${phone}`,
     };
   }
   if (handledPhone.length !== 9) {
     return {
-      code: 400,
-      status: 'error',
-      error: {
-        message: 'Phone number length is not valid.',
-        phone,
-      },
+      code: BAD_REQUEST,
+      message: `Phone number length is not valid. The phone:${phone}`,
     };
   }
   const phoneReadyToQuery = `%${handledPhone}%`;
-  return {
-    code: 200,
-    status: 'ok',
-    phoneReadyToQuery,
-  };
+  return { phoneReadyToQuery };
 };
 export const authorizeAPIClient = ({ api_key }) => {
   let auth_result;

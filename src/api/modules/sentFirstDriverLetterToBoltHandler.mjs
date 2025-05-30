@@ -2,7 +2,7 @@ import { getAllBoltIdsByDriverPhone } from '../../web.api/web.api.utlites.mjs';
 import {
   handleDriverPhone,
   checkIfDriverStaysInTheSameCity,
-} from '../endpoints-utils.mjs';
+} from '../api.utils.mjs';
 import { updateRequestedDrivers } from '../../bitrix/bitrix.utils.mjs';
 import { insertBoltDriverToBan } from '../../bitrix/bitrix.queries.mjs';
 export const sentFirstDriverLetterToBolt = async (req, res) => {

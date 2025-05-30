@@ -1,4 +1,4 @@
-import { authorizeAPIClient } from '../endpoints-utils.mjs';
+import { authorizeAPIClient } from '../api.utils.mjs';
 import { api_status_codes } from '../api.constants.mjs';
 const { OK: SUCCESS_AUTH } = api_status_codes;
 export const boltAuthorizationMiddleware = (req, res, next) => {
