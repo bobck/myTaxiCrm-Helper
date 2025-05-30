@@ -1,28 +1,30 @@
 import * as BoltService from './bolt.service.mjs';
 import { api_status_codes } from '../../api.constants.mjs';
+import { controllerWrapper } from '../../api.utils.mjs';
 
 const { OK } = api_status_codes;
-export const handleFirstLetter = async (req, res) => {
-  try {
+
+export const handleFirstLetter = controllerWrapper({
+  handlerCB: async (req, res) => {
     const { query } = req;
     console.log({ message: 'POST: verify', query });
     await BoltService.sentFirstLetterService({ query });
     res.status(OK).json({ message: 'First letter sent' });
-  } catch (error) {
-    console.error('Error in sentFirstDriverLetterToBolt', { error });
-    const { code, messgae } = error;
-    res.status(code).json({ messgae, status: 'error' });
-  }
-};
+  },
+  handlingServiceName: 'sentFirstLetterService',
+});
 export const handleSecondLetter = (req, res) => {
   res.status(OK).json({ message: 'Second letter sent' });
 };
 
-export const handleLetterApprovement = async (req, res) => {
-  const { params, query } = req;
-  await BoltService.letterApprovementService({ params,query });
-  res.status(OK).json({ message: 'letter Approved' });
-};
+export const handleLetterApprovement = controllerWrapper({
+  handlerCB: async (req, res) => {
+    const { params, query } = req;
+    await BoltService.letterApprovementService({ params, query });
+    res.status(OK).json({ message: 'letter Approved' });
+  },
+  handlingServiceName: 'letterApprovementService',
+});
 
 export const handleBanApprovement = async (req, res) => {
   res.status(OK).json({ message: 'ban Approved' });

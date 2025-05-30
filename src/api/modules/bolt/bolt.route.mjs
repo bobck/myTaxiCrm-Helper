@@ -10,13 +10,12 @@ lettersRouter.post('/sent/1', BoltController.handleFirstLetter);
 lettersRouter.post('/sent/2', BoltController.handleSecondLetter);
 
 lettersRouter.post(
-    '/approve/:letter_id',
-    BoltController.handleLetterApprovement
+  '/approve/:letter_id',
+  BoltController.handleLetterApprovement
 );
 
 const banRouter = express.Router();
 banRouter.post('/confirmBan', BoltController.handleBanApprovement);
-
 
 // All routes defined in lettersRouter will be prefixed with /bolt/letters
 const boltRouter = express.Router();
