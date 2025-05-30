@@ -504,9 +504,8 @@ async function createOrResetOrdersTables() {
 }
 if (process.env.ENV === 'TEST') {
   console.log(`running loadRemonlineOrders in Test mode...`);
-  // await remonlineTokenToEnv(true);
-  await prepareOrderSequentially();
-  // await loadRemonlineOrders();
+  await remonlineTokenToEnv(true);
+  await loadRemonlineOrders();
 
   // await createOrResetOrdersTables();
 }
