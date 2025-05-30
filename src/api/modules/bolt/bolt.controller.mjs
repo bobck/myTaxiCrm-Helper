@@ -14,3 +14,6 @@ export const handleFirstLetter = async (req, res) => {
 export const handleSecondLetter = (req, res) => {
   res.status(200).json({ message: 'Second letter sent' });
 };
+export const handleBanApprovement = async (req, res) => {
+  res.status(200).json({ message: 'ban Approved' });
+};
