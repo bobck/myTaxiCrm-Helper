@@ -36,12 +36,6 @@ export const sentFirstLetterService = async ({ query }) => {
   if (bolt_id !== req_bolt_id) {
     updatePayload.bolt_id = bolt_id;
   }
-  console.log('inserting....', {
-    driver_id,
-    phone,
-    bitrix_deal_id,
-    bolt_id,
-  });
   await insertBoltDriverToBan({
     driver_id,
     phone,
@@ -64,7 +58,6 @@ export const letterApprovementService = async ({ params, query }) => {
   let { letter_id } = params;
   letter_id = Number(letter_id);
   const { bitrix_deal_id } = query;
-  console.log('LETTER APPROVEMENT SERVICE CALLED')
   if (!(letter_id === 1 || letter_id === 2)) {
     throw { code: BAD_REQUEST, message: `unknown letter_id:${letter_id}` };
   }
