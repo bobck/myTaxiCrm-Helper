@@ -4,7 +4,7 @@ export const handleFirstLetter = async (req, res) => {
   try {
     const { query } = req;
     console.log({ message: 'POST: verify', query });
-    await BoltService.sentFirstDriverLetterToBolt({ query });
+    await BoltService.sentFirstLetterService({ query });
   } catch (error) {
     console.error('Error in sentFirstDriverLetterToBolt', { error });
     const { code, messgae } = error;
@@ -14,6 +14,9 @@ export const handleFirstLetter = async (req, res) => {
 export const handleSecondLetter = (req, res) => {
   res.status(200).json({ message: 'Second letter sent' });
 };
+
+export const handleLetterApprovement = async (req, res) => {};
+
 export const handleBanApprovement = async (req, res) => {
   res.status(200).json({ message: 'ban Approved' });
 };

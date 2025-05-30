@@ -9,7 +9,7 @@ import { api_status_codes } from '../../api.constants.mjs';
 
 const { BAD_REQUEST } = api_status_codes;
 
-export const sentFirstDriverLetterToBolt = async ({ query }) => {
+export const sentFirstLetterService = async ({ query }) => {
   const {
     phone: req_phone,
     bolt_id: req_bolt_id,
@@ -59,3 +59,5 @@ export const sentFirstDriverLetterToBolt = async ({ query }) => {
     cards,
   });
 };
+
+export const letterApprovementService = async () => {};
