@@ -55,7 +55,8 @@
     "remonlineUOMsToBQManual": "ENV=TEST node -r dotenv/config src/bq/modules/load-remonline-uoms.mjs",
     "saveWorkingDriversManual": "ENV=TEST node -r dotenv/config src/web.api/gdc-report/modules/save-working-drivers-with-history-status.mjs",
     "getAndSaveClosedPolishBitrixDealsManual": "ENV=TEST node -r dotenv/config src/web.api/gdc-report/modules/get-and-save-closed-polish-bitrix-deals.mjs",
-    "moveReferralToClosedManually": "ENV=TEST node -r dotenv/config src/bitrix/modules/move-referral-to-closed.mjs"
+    "moveReferralToClosedManually": "ENV=TEST node -r dotenv/config src/bitrix/modules/move-referral-to-closed.mjs",
+    "testRabotaUaManually":"ENV=TEST node -r dotenv/config src/job-boards/modules/robota.ua.scrapper.mjs"
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",
@@ -63,6 +64,7 @@
     "@2bad/bitrix": "^2.5.1",
     "@google-cloud/bigquery": "^7.3.0",
     "@googleapis/sheets": "^5.0.5",
+    "axios": "^1.9.0",
     "bottleneck": "^2.19.5",
     "cron": "^3.1.6",
     "db-migrate": "^0.11.14",
