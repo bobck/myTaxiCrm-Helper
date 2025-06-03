@@ -1,4 +1,8 @@
-import { getRobotaUaTokenToEnv, performLogin } from '../job-board.utils.mjs';
+import {
+  getRobotaUaTokenToEnv,
+  getVacanciesList,
+  performLogin,
+} from '../job-board.utils.mjs';
 import fs from 'fs'; // Import the file system module
 import path from 'path'; // Import the path module
 
@@ -19,18 +23,30 @@ const writeLog = (message) => {
 export const robotaUaModule = async () => {
   writeLog('robotaUaModule started.'); // Log the start of the function
   try {
-    // const cookieString =
-    //   '_ga=GA1.1.1204849188.1748425504; _fbp=fb.1.1748425503795.871518994160306176; _gcl_au=1.1.1271314621.1748425504; rua-usm=date=28.05.2025&ptype=100&ts=1&id=fc1157414d2946fd8785249e4c1c1e58; searchEventAction=no_suggest; ASP.NET_SessionId=xpgzvkcukdkvlbldtw3tz1uy; __cf_bm=nwdg8vFs13jiCM.JjOh46Nq_ZnlL7xtgBnfRxxvNbtQ-1748947476-1.0.1.1-t6UICJpAODklD6L75DN8UC3jqn.I9uPej4z9S_UFgPloFUmZN7vdkKBWxE_fuVMlYDWf9IrwmDi2jhL17kRqGYljXoyoxUeUb.Vgpi9nFRE; uid=16969021; rua-usm2=date=03.06.2025&ptype=100&ts=24; _hjSession_2729827=eyJpZCI6ImI4YTY5OTMyLTU0ZjktNGNlMy1hOGE0LWViNTNmNmI4OTdkNCIsImMiOjE3NDg5NDc3OTM1NzEsInMiOjAsInIiOjAsInNiIjowLCJzciI6MCwic2UiOjAsImZzIjoxLCJzcCI6MH0=; _hjSessionUser_2729827=eyJpZCI6ImQ1YjFlMTUzLWI4ZTYtNWViYy1hNTAxLWNkMmVkYzBiZDVlZSIsImNyZWF0ZWQiOjE3NDg5NDc3OTM1NzAsImV4aXN0aW5nIjp0cnVlfQ==; _ga_WS6TVT9PSM=GS2.1.s1748946877$o3$g1$t1748947949$j50$l0$h1152344532';
-
-    writeLog(`Attempting login with username: ${process.env.ROBOTA_UA_EMAIL}`);
-    await performLogin(
-      {
-        username: process.env.ROBOTA_UA_EMAIL,
-        password: process.env.ROBOTA_UA_PASSWORD,
-      }
-      //   cookieString
-    );
+    // writeLog(`Attempting login with username: ${process.env.ROBOTA_UA_EMAIL}`);
+    const jwt = await performLogin({
+      username: process.env.ROBOTA_UA_EMAIL,
+      password: process.env.ROBOTA_UA_PASSWORD,
+    });
     writeLog('Login successful.'); // Log successful login
+    const vacanciesListGraphQLPayload = {
+      operationName: 'GetVacanciesList',
+      query:
+        'query GetVacanciesList($first: Int, $after: String, $statuses: [VacancyStatus!], $closingBehaviors: [VacancyClosingBehavior!], $employerIds: [ID!], $cityIds: [ID!], $sortType: MyVacanciesSortType, $keyword: String) {\n  myVacancies(\n    first: $first\n    after: $after\n    filter: {statuses: $statuses, closingBehaviors: $closingBehaviors, employerIds: $employerIds, cityIds: $cityIds, keywords: $keyword}\n    sortType: $sortType\n  ) {\n    totalCount\n    edges {\n      node {\n        ...VacanciesListItem\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n  totalVacancies: myVacancies(filter: {}) {\n    totalCount\n    __typename\n  }\n}\n\nfragment VacanciesListItem on Vacancy {\n  id\n  title\n  city {\n    id\n    name\n    __typename\n  }\n  address {\n    name\n    __typename\n  }\n  isPublicationInAllCities\n  currentPublicationService {\n    ...VacancyCurrentPublicationService\n    __typename\n  }\n  salary {\n    amount\n    currency\n    amountFrom\n    amountTo\n    __typename\n  }\n  sortDate\n  statusChangedAt\n  modifyDate\n  status\n  allowedVacancyActions\n  publicationType\n  publishPeriod {\n    begin\n    end\n    autoProlongEnd\n    daysUntilEnd\n    nextAutoProlongDate\n    __typename\n  }\n  hotPeriod {\n    begin\n    end\n    daysUntilEnd\n    __typename\n  }\n  closingType\n  positionRising {\n    last\n    leftTimes\n    leftDates\n    __typename\n  }\n  firstPublishedAt\n  owner {\n    fullName\n    id\n    __typename\n  }\n  contacts {\n    phones\n    photo\n    name\n    __typename\n  }\n  hasMyUnreviewedProlongationRequest\n  __typename\n}\n\nfragment VacancyCurrentPublicationService on CatalogService {\n  detailsUnion {\n    ...VacancyPublicationServiceDetails\n    ...VacancyPackageServiceDetails\n    __typename\n  }\n  __typename\n}\n\nfragment VacancyPublicationServiceDetails on VacancyPublicationCatalogService {\n  id\n  publicationType\n  vacancyMailingCount\n  vacancyRisingCount\n  supportedRegions {\n    id\n    __typename\n  }\n  typeWrapper {\n    id\n    type\n    __typename\n  }\n  __typename\n}\n\nfragment VacancyPackageServiceDetails on VacancyPackageCatalogService {\n  id\n  publicationType\n  vacancyMailingCount\n  vacancyRisingCount\n  supportedRegions {\n    id\n    __typename\n  }\n  typeWrapper {\n    id\n    type\n    __typename\n  }\n  __typename\n}\n',
+      variables: {
+        first: 20,
+        after: 'MA==', // This is "0" base64 encoded, often used for initial pagination offset
+        statuses: [],
+        employerIds: [],
+        closingBehaviors: [],
+        cityIds: [],
+        keyword: '',
+        sortType: 'BY_STATUS',
+      },
+    };
+
+    const vacancies = await getVacanciesList(jwt, vacanciesListGraphQLPayload);
+    console.log(vacancies)
   } catch (e) {
     writeLog(`Error in robotaUaModule: ${e.message}`); // Log the error message
     if (e.stack) {
