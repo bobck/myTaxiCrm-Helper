@@ -1,7 +1,5 @@
 import { robotaUaAPI, robotaUaAuthAPI } from './job-board.apis.mjs';
 
-//https://auth-api.robota.ua/Login
-
 export const getRobotaUaTokenToEnv = async () => {
   const requestBody = {
     username: process.env.ROBOTA_UA_EMAIL,
@@ -45,7 +43,7 @@ export async function performLogin(
     'Sec-Fetch-Dest': 'empty',
     'Sec-Fetch-Mode': 'cors',
     'Sec-Fetch-Site': 'same-site',
-    ...(cookieString && { Cookie: cookieString }), // Add Cookie header only if cookieString is provided
+    ...(cookieString && { Cookie: cookieString }),
     ...customHeaders,
   };
 
@@ -89,10 +87,9 @@ export async function getVacanciesList(
     console.warn(
       'GraphQL payload is empty or not provided. The API might expect a specific payload.'
     );
-    // Consider throwing an error or returning early if payload is essential
   }
 
-  const endpoint = '/?q=GetVacanciesList'; // The endpoint seems to use a query param for operation type
+  const endpoint = '/?q=GetVacanciesList'; 
   const defaultHeaders = {
     Authorization: `Bearer ${bearerToken}`,
     'Content-Type': 'application/json',
@@ -117,13 +114,6 @@ export async function getVacanciesList(
   };
 
   console.log('calling getVacanciesList...');
-  // console.log(`Attempting POST to ${draculaBaseURL}${endpoint}`);
-  // console.log(
-  //   'GraphQL Payload:',
-  //   JSON.stringify(graphQLPayload).substring(0, 500) + '...'
-  // );
-  // console.log('Request Headers:', defaultHeaders);
-
   try {
     const response = await robotaUaAPI.post(endpoint, graphQLPayload, {
       headers: defaultHeaders,
