@@ -1,4 +1,3 @@
-
 import { DateTime } from 'luxon';
 
 import { referralValidadion } from '../../../bitrix/modules/referral-validation.mjs';
