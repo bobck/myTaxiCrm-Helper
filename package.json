@@ -58,7 +58,10 @@
     "saveWorkingDriversManual": "ENV=TEST node -r dotenv/config src/web.api/gdc-report/modules/save-working-drivers-with-history-status.mjs",
     "getAndSaveClosedPolishBitrixDealsManual": "ENV=TEST node -r dotenv/config src/web.api/gdc-report/modules/get-and-save-closed-polish-bitrix-deals.mjs",
     "moveReferralToClosedManually": "ENV=TEST node -r dotenv/config src/bitrix/modules/move-referral-to-closed.mjs",
-    "moveBoltDriversBanCardsManually": "ENV=TEST BOLT_DRIVERS_BAN_CARDS=17 CHUNK_SIZE=11 node -r dotenv/config src/bitrix/modules/move-bolt-drivers-to-ban.mjs"
+    "moveBoltDriversBanCardsManually": "ENV=TEST BOLT_DRIVERS_BAN_CARDS=17 CHUNK_SIZE=11 node -r dotenv/config src/bitrix/modules/move-bolt-drivers-to-ban.mjs",
+    "launchAPI:dev": "ENV=DEV API_HOST=localhost node -r dotenv/config src/api/api.mjs",
+    "launchAPI:prod": "ENV=PROD API_HOST=0.0.0.0 node -r dotenv/config src/api/api.mjs"
+
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",

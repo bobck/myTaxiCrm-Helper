@@ -74,7 +74,7 @@ export async function getOrders(
     const { message, code } = data;
     const { validation } = message;
 
-    if (response.status == 403 && code == 101) {
+    if ((response.status == 403 && code == 101) || response.status == 401) {
       console.info({ function: 'getOrders', message: 'Get new Auth' });
       await remonlineTokenToEnv(true);
       return await getOrders({ idLabels, ids }, _page, _orders);
@@ -97,7 +97,7 @@ export async function getOrders(
 
   _orders.push(...orders);
 
-  console.log({ count, page, doneOnPrevPage, leftToFinish });
+  // console.log({ count, page, doneOnPrevPage, leftToFinish });
 
   if (leftToFinish > 0) {
     return await getOrders(
@@ -129,7 +129,7 @@ export async function changeOrderStatus({ id, statusId }) {
     const { message, code } = data;
     const { validation } = message;
 
-    if (response.status == 403 && code == 101) {
+    if ((response.status == 403 && code == 101) || response.status == 401) {
       console.info({ function: 'createOrder', message: 'Get new Auth' });
       await remonlineTokenToEnv(true);
       return await changeOrderStatus({ id, statusId });
@@ -249,7 +249,7 @@ export async function getTransfers({ branch_id }, _page = 1, _transfers = []) {
   if (!success) {
     const { message, code } = data;
     const { validation } = message;
-    if (response.status == 403 && code == 101) {
+    if ((response.status == 403 && code == 101) || response.status == 401) {
       console.info({ function: 'getTransfers', message: 'Get new Auth' });
       await remonlineTokenToEnv(true);
       return await getTransfers({ branch_id }, _page, _transfers);
@@ -298,7 +298,7 @@ export async function getEmployees() {
   if (!success) {
     const { message, code } = data;
     const { validation } = message;
-    if (response.status == 403 && code == 101) {
+    if ((response.status == 403 && code == 101) || response.status == 401) {
       console.info({ function: 'getEmployees', message: 'Get new Auth' });
       await remonlineTokenToEnv(true);
       return await getEmployees();
@@ -328,7 +328,7 @@ export async function getAssets(_page = 1, _assets = []) {
   if (!success) {
     const { message, code } = data;
     const { validation } = message;
-    if (response.status == 403 && code == 101) {
+    if ((response.status == 403 && code == 101) || response.status == 401) {
       console.info({ function: 'getAssets', message: 'Get new Auth' });
       await remonlineTokenToEnv(true);
       return await getAssets(_page, _assets);
@@ -373,7 +373,7 @@ export async function getUOMs() {
   if (!success) {
     const { message, code } = data;
     const { validation } = message;
-    if (response.status == 403 && code == 101) {
+    if ((response.status == 403 && code == 101) || response.status == 401) {
       console.info({ function: 'getUOMs', message: 'Get new Auth' });
       await remonlineTokenToEnv(true);
       return await getEmployees();

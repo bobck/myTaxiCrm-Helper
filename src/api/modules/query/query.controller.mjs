@@ -1,7 +1,6 @@
 import * as QueryService from './query.service.mjs';
 
 export const queryHandler = async (req, res) => {
-  console.log('queryHandler requested');
   const { body } = req;
   const { sql } = body;
   if (!sql) {

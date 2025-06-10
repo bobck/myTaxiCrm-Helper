@@ -1,3 +1,6 @@
+
+import { DateTime } from 'luxon';
+
 import { referralValidadion } from '../../../bitrix/modules/referral-validation.mjs';
 import {
   approvalReferralById,
@@ -51,7 +54,6 @@ export const validate = async ({ query }) => {
   if (!isValid) {
     throw new Error({ message: 'invalid referral' });
   }
-
   const { auto_park_id, id } = isValid;
   try {
     const expiryAfter7DaysPeriod = DateTime.now()
