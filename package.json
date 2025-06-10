@@ -54,7 +54,8 @@
     "remonlineEmployeesToBQManual": "ENV=TEST node -r dotenv/config src/bq/modules/load-remonline-employees.mjs",
     "remonlineUOMsToBQManual": "ENV=TEST node -r dotenv/config src/bq/modules/load-remonline-uoms.mjs",
     "saveWorkingDriversManual": "ENV=TEST node -r dotenv/config src/web.api/gdc-report/modules/save-working-drivers-with-history-status.mjs",
-    "getAndSaveClosedPolishBitrixDealsManual": "ENV=TEST node -r dotenv/config src/web.api/gdc-report/modules/get-and-save-closed-polish-bitrix-deals.mjs"
+    "getAndSaveClosedPolishBitrixDealsManual": "ENV=TEST node -r dotenv/config src/web.api/gdc-report/modules/get-and-save-closed-polish-bitrix-deals.mjs",
+    "testAutozapasManually": "ENV=DEV node -r dotenv/config src/warehouse/modules/autozapas.mjs"
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",
@@ -62,6 +63,8 @@
     "@2bad/bitrix": "^2.5.1",
     "@google-cloud/bigquery": "^7.3.0",
     "@googleapis/sheets": "^5.0.5",
+    "axios": "^1.9.0",
+    "axios-cookiejar-support": "^6.0.2",
     "bottleneck": "^2.19.5",
     "cron": "^3.1.6",
     "db-migrate": "^0.11.14",
@@ -75,7 +78,8 @@
     "sqlite": "^5.0.1",
     "sqlite3": "^5.1.6",
     "ssh2": "^1.14.0",
-    "telegraf": "^4.15.0"
+    "telegraf": "^4.15.0",
+    "tough-cookie": "^5.1.2"
   },
   "devDependencies": {
     "prettier": "^3.5.3"
