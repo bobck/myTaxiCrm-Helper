@@ -1,7 +1,10 @@
 import { cityListWithAssignedBy } from '../bitrix/bitrix.constants.mjs';
 import { getAllBoltIdsByDriverPhone } from '../web.api/web.api.utlites.mjs';
 import { api_status_codes } from './api.constants.mjs';
+import googleLibphonenumber from 'google-libphonenumber';
+const { PhoneNumberUtil } = googleLibphonenumber;
 
+const phoneUtil = PhoneNumberUtil.getInstance();
 const {
   OK: SUCCESS_AUTH,
   BAD_REQUEST,
@@ -71,27 +74,21 @@ export const checkIfDriverStaysInTheSameCity = async ({
 
   return { checkResult, actualCityId };
 };
+
 export const handleDriverPhone = ({ phone }) => {
-  const filteredPhone = String(phone).replaceAll(/[^0-9]/g, '');
-  const isUkrainianPhone = filteredPhone.startsWith('380');
-  const isPolishPhone = filteredPhone.startsWith('48');
-  let handledPhone;
-  if (isUkrainianPhone) {
-    handledPhone = filteredPhone.slice(3);
-  } else if (isPolishPhone) {
-    handledPhone = filteredPhone.slice(2);
-  } else {
+  try {
+    const numberProto = phoneUtil.parse(phone);
+
+    if (!phoneUtil.isValidNumber(numberProto)) {
+      throw new Error('Invalid phone number.');
+    }
+    const nationalNumber = numberProto.getNationalNumber();
+    const phoneReadyToQuery = `%${nationalNumber}%`;
+    return { phoneReadyToQuery };
+  } catch (error) {
     throw {
       code: BAD_REQUEST,
-      message: `Phone number is not valid. It should be Ukrainian or Polish. The phone:${phone}`,
+      message: `Phone number is not valid. Provided phone: ${phone}`,
     };
   }
-  if (handledPhone.length !== 9) {
-    return {
-      code: BAD_REQUEST,
-      message: `Phone number length is not valid. The phone:${phone}`,
-    };
-  }
-  const phoneReadyToQuery = `%${handledPhone}%`;
-  return { phoneReadyToQuery };
 };
