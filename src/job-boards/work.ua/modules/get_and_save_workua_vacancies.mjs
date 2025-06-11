@@ -1,4 +1,4 @@
-import { checkJobs } from "../work.ua.utils.mjs";
+import { checkJobs } from "../workua.utils.mjs";
 
 export const getAndSaveWorkUaVacanciesManually = async () => {
   console.log({

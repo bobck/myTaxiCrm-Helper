@@ -1,4 +1,4 @@
-import WorkUaApiClient from './work.ua.api.mjs';
+import WorkUaApiClient from './workua.api.mjs';
 
 const workUaAPI = new WorkUaApiClient({
   email: process.env.WORK_UA_EMAIL,
