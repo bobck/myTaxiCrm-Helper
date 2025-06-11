@@ -55,7 +55,9 @@
     "remonlineUOMsToBQManual": "ENV=TEST node -r dotenv/config src/bq/modules/load-remonline-uoms.mjs",
     "saveWorkingDriversManual": "ENV=TEST node -r dotenv/config src/web.api/gdc-report/modules/save-working-drivers-with-history-status.mjs",
     "getAndSaveClosedPolishBitrixDealsManual": "ENV=TEST node -r dotenv/config src/web.api/gdc-report/modules/get-and-save-closed-polish-bitrix-deals.mjs",
-    "testAutozapasManually": "ENV=DEV node -r dotenv/config src/warehouse/modules/autozapas.mjs"
+    "testAutozapasManually": "ENV=DEV node -r dotenv/config src/warehouse/modules/autozapas.mjs",
+    "testAutonovadManually": "ENV=DEV node -r dotenv/config src/warehouse/modules/autonovad.mjs"
+    
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",
