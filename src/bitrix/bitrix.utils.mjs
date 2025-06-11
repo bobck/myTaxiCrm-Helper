@@ -675,9 +675,7 @@ export async function getDealsByIdsVerifyingStageConstancy({
   }
 }
 export async function updateRequestedDrivers({ cards }) {
-  console.log('updateRequestedDrivers ...', {
-    cards: cards.length,
-  });
+ 
   const batchObj = {};
   for (const card of cards) {
     const {
