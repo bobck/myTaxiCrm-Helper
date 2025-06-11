@@ -1,3 +1,4 @@
+import { getAPI } from "../robotaua.utils.mjs";
 
 
 export const getAndSaveRobotaUaVacancies = async () => {
@@ -5,7 +6,7 @@ export const getAndSaveRobotaUaVacancies = async () => {
     module: 'getAndSaveRobotaUaVacancies',
     date: new Date(),
   });
-  const result = await checkJobs();
+  const result= await getAPI()
   console.log({result})
 };
 

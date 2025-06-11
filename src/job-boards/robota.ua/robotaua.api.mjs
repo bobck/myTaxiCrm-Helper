@@ -21,7 +21,8 @@ class RobotaUaApiClient {
         password: password,
         remember: true,
       });
-      const token = response.data.token;
+      console.log({data:response.data})
+      const token = response.data;
       if (!token) {
         throw new Error('Token not found in login response.');
       }
