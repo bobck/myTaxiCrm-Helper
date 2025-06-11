@@ -114,10 +114,7 @@ export const moveBoltDriversToBan = async () => {
     const bitrixRespObj = await updateRequestedDrivers({
       cards: chunk,
     });
-
-  
   }
-
 };
 
 if (process.env.ENV === 'TEST') {

@@ -1,9 +1,9 @@
+import googleLibphonenumber from 'google-libphonenumber';
 import { cityListWithAssignedBy } from '../bitrix/bitrix.constants.mjs';
 import { getAllBoltIdsByDriverPhone } from '../web.api/web.api.utlites.mjs';
 import { api_status_codes } from './api.constants.mjs';
-import googleLibphonenumber from 'google-libphonenumber';
-const { PhoneNumberUtil } = googleLibphonenumber;
 
+const { PhoneNumberUtil } = googleLibphonenumber;
 const phoneUtil = PhoneNumberUtil.getInstance();
 const {
   OK: SUCCESS_AUTH,
