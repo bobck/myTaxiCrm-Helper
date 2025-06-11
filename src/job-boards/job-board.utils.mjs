@@ -89,7 +89,7 @@ export async function getVacanciesList(
     );
   }
 
-  const endpoint = '/?q=GetVacanciesList'; 
+  const endpoint = '/?q=GetVacanciesList';
   const defaultHeaders = {
     Authorization: `Bearer ${bearerToken}`,
     'Content-Type': 'application/json',

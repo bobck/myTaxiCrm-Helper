@@ -1,4 +1,4 @@
-import { checkJobs } from "../workua.utils.mjs";
+import { checkJobs } from '../workua.utils.mjs';
 
 export const getAndSaveWorkUaVacanciesManually = async () => {
   console.log({
@@ -6,7 +6,7 @@ export const getAndSaveWorkUaVacanciesManually = async () => {
     date: new Date(),
   });
   const result = await checkJobs();
-  console.log({result})
+  console.log({ result });
 };
 
 if (process.env.ENV === 'DEV' || process.env.ENV === 'TEST') {

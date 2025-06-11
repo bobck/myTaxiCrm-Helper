@@ -6,6 +6,6 @@ const workUaAPI = new WorkUaApiClient({
 });
 
 export const checkJobs = async () => {
-    return workUaAPI.token;
-//   return await workUaAPI.checkLoginAndGetJobs();
+  return workUaAPI.token;
+  //   return await workUaAPI.checkLoginAndGetJobs();
 };
