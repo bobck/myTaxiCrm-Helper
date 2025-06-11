@@ -65,13 +65,18 @@ export const moveBoltDriversToBan = async () => {
   const queryParams = computeQueryParams();
   const driversToBan = await getALLBoltDriversToBan(queryParams);
   const driver_ids = driversToBan.map((driver) => driver.driver_id);
-  console.log({ driversToBan });
+
   const { rows } = await getBoltDriversToBan({ ...queryParams, driver_ids });
+
+  console.log({
+    date: new Date(),
+    module: 'moveBoltDriversToBan',
+    boltDriversToBan: rows.length,
+  });
+
   if (rows.length === 0) {
-    console.error('No any drivers to ban found.');
     return;
   }
-  console.log({ rows });
 
   const processedCards = [];
   for (const [index, row] of rows.entries()) {
@@ -100,7 +105,7 @@ export const moveBoltDriversToBan = async () => {
     };
     processedCards.push(card);
   }
-  console.log({ processedCards });
+
   const chunkedProcessedCards = chunkArray(
     processedCards,
     Number(process.env.CHUNK_SIZE) || 10
@@ -110,14 +115,9 @@ export const moveBoltDriversToBan = async () => {
       cards: chunk,
     });
 
-    console.log(
-      `chunk ${index} with ${chunk.length} has been successfully uploaded`
-    );
+  
   }
 
-  console.log(
-    `${processedCards.length} bolt drivers to ban cards creation has been finished.`
-  );
 };
 
 if (process.env.ENV === 'TEST') {

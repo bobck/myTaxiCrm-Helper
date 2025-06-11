@@ -6,7 +6,6 @@ const { OK, BAD_REQUEST } = api_status_codes;
 export const approveDriverLetterToBoltHandler = async (req, res) => {
   let { letter_id } = req.params;
   letter_id = Number(letter_id);
-  console.log(req.params);
   const { bitrix_deal_id } = req.query;
   if (!(letter_id === 1 || letter_id === 2)) {
     res.status(BAD_REQUEST).json({ message: `unknown letter_id:${letter_id}` });

@@ -17,8 +17,8 @@ await initApi();
 // sheetJobs();
 bqJobs();
 
-// await remonlineTokenToEnv();
-// remonlineJobs();
+await remonlineTokenToEnv();
+remonlineJobs();
 
-// driversCustomTariffJobs();
-// bitrixJobs();
+driversCustomTariffJobs();
+bitrixJobs();
