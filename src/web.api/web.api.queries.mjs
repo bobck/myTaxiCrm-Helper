@@ -159,3 +159,15 @@ export async function updateExistedDriversWithRevenue(
     console.error('Ошибка при вставке данных:', error);
   }
 }
+export const getDriversWithActiveCashBlockRules = () => {
+  const sql = `SELECT driver_id FROM driver_cash_block_rules WHERE is_deleted=FALSE`;
+  return db.all(sql);
+};
+export const insertDriverWithCashBlockRules = ({ driver_id }) => {
+  const sql = `INSERT INTO driver_cash_block_rules(driver_id) VALUES(?)`;
+  return db.run(sql, driver_id);
+};
+export const markDriverCashBlockRulesAsDeleted = ({ driver_id }) => {
+  const sql = `UPDATE driver_cash_block_rules SET is_deleted=true WHERE driver_id = ?`;
+  return db.run(sql, driver_id);
+};
