@@ -29,7 +29,16 @@ class WorkUaApiClient {
       this.handleApiError(error);
     }
   }
-
+  async getVacancies(options = { full: 1, all: 0, active: 1 }) {
+    try {
+      const { full, all, active } = options;
+      const requestLocation=`/jobs/my?full=${full}&all=${all}&active=${active}`
+      const response =  await this.api.get(requestLocation);
+      return response.data;
+    } catch (error) {
+      this.handleApiError(error);
+    }
+  }
   async getResponsesByJobId(jobId, options = {}) {
     if (!jobId) {
       throw new Error('Job ID is required to get responses.');

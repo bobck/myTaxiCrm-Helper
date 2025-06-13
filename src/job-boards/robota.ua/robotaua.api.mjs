@@ -9,7 +9,6 @@ class RobotaUaApiClient {
       },
     });
   }
-
   static async initialize({ email, password }) {
     const authApi = axios.create({
       baseURL: 'https://auth-api.robota.ua',
@@ -35,7 +34,9 @@ class RobotaUaApiClient {
       throw error;
     }
   }
-
+  async getVacancies(){
+  
+  }
   async getResponses(
     options = { vacancyId: 0, folderId: 0, page: 0, filter: '' }
   ) {
