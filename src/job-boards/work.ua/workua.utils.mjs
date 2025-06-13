@@ -23,6 +23,13 @@ export const getVacancyIds = async () => {
   const vacancyIds = vacancies.map((vacancy) => Number(vacancy.id));
   return { vacancyIds };
 };
+export const getResponsesByVacancyId = async ({ vacancyId, _responses }) => {
+  if (!_responses) {
+    _responses = [];
+  }
+  const { responses } = await workUaAPI.getVacancyResponses(vacancyId);
+  return { responses };
+};
 
 export const checkJobs = async () => {
   return workUaAPI.token;

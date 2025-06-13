@@ -1,5 +1,5 @@
 import axios from 'axios';
-
+const MAX_RESPONSES_PER_REQ = 50;
 class WorkUaApiClient {
   constructor({ email, password, locale }) {
     if (!locale) {
@@ -32,25 +32,40 @@ class WorkUaApiClient {
   async getVacancies(options = { full: 1, all: 0, active: 1 }) {
     try {
       const { full, all, active } = options;
-      const requestLocation=`/jobs/my?full=${full}&all=${all}&active=${active}`
-      const response =  await this.api.get(requestLocation);
+      const requestLocation = `/jobs/my?full=${full}&all=${all}&active=${active}`;
+      const response = await this.api.get(requestLocation);
       return response.data;
     } catch (error) {
       this.handleApiError(error);
     }
   }
-  async getResponsesByJobId(jobId, options = {}) {
-    if (!jobId) {
-      throw new Error('Job ID is required to get responses.');
+  async getVacancyResponses(
+    vacancyId,
+    options = {
+      limit: process.env.ENV === 'DEV' ? 50 : MAX_RESPONSES_PER_REQ,
+      last_id: 0,
+      before_id: 0,
+      before: 0,
+      sort: 0,
     }
-    try {
-      const response = await this.api.get(`/jobs/${jobId}/responses`, {
-        params: options,
-      });
-      return response.data;
-    } catch (error) {
-      this.handleApiError(error);
+  ) {
+    const { limit, last_id, before_id, before, sort } = options;
+    let queryParams = `?limit=${limit}&sort=${sort}`;
+    if (last_id) {
+      queryParams += `&last_id=${last_id}`;
     }
+    if (before_id) {
+      queryParams += `&before_id=${before_id}`;
+    }
+    if (before) {
+      queryParams += `&before=${before}`;
+    }
+    const requestLocation = `/jobs/${vacancyId}/responses/`;
+    const requestUrl = requestLocation + queryParams;
+    const { data } = await this.api.get(requestUrl);
+    const { items: responses } = data;
+
+    return { responses };
   }
 
   handleApiError(error) {
