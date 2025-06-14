@@ -4,12 +4,12 @@ const robotaUaAPI = await RobotaUaApiClient.initialize({
   email: process.env.ROBOTA_UA_EMAIL,
   password: process.env.ROBOTA_UA_PASSWORD,
 });
-export const getVacancyList=async()=>{
-  const resp=await robotaUaAPI.getVacancies();
+export const getVacancyList = async () => {
+  const resp = await robotaUaAPI.getVacancies();
   return resp;
-}
-export const getVanacyApplies = async ({vacancyId}) => {
-  const {applies} = await robotaUaAPI.getResponses({ vacancyId });
+};
+export const getVacancyApplies = async ({ vacancyId }={vacancyId:0}) => {
+  const { applies } = await robotaUaAPI.getApplies({ vacancyId });
 
-  return {applies};
+  return { applies };
 };

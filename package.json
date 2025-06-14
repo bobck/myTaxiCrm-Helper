@@ -56,7 +56,7 @@
     "saveWorkingDriversManual": "ENV=TEST node -r dotenv/config src/web.api/gdc-report/modules/save-working-drivers-with-history-status.mjs",
     "getAndSaveClosedPolishBitrixDealsManual": "ENV=TEST node -r dotenv/config src/web.api/gdc-report/modules/get-and-save-closed-polish-bitrix-deals.mjs",
     "moveReferralToClosedManually": "ENV=TEST node -r dotenv/config src/bitrix/modules/move-referral-to-closed.mjs",
-    "testRabotaUaManually": "ENV=DEV node -r dotenv/config src/job-boards/robota.ua/modules/get_and_save_robotaua_vacancies.mjs",
+    "testRobotaUaManually": "ENV=DEV node -r dotenv/config src/job-boards/robota.ua/modules/get_and_save_robotaua_vacancies.mjs",
     "testWorkUaManually": "ENV=DEV node -r dotenv/config src/job-boards/work.ua/modules/get_and_save_workua_vacancies.mjs",
     "launchAPI:dev": "ENV=DEV API_HOST=localhost node -r dotenv/config src/api/api.mjs",
     "launchAPI:prod": "ENV=PROD API_HOST=0.0.0.0 node -r dotenv/config src/api/api.mjs"

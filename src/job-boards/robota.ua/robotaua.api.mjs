@@ -34,10 +34,8 @@ class RobotaUaApiClient {
       throw error;
     }
   }
-  async getVacancies(){
-  
-  }
-  async getResponses(
+  async getVacancies() {}
+  async getApplies(
     options = { vacancyId: 0, folderId: 0, page: 0, filter: '' }
   ) {
     try {
