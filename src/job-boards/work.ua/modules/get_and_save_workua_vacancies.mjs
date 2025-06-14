@@ -1,5 +1,7 @@
+import { processResponse } from '../work.ua.business-entity.mjs';
 import {
   checkJobs,
+  getAllResponses,
   getResponsesByVacancyId,
   getVacancies,
   getVacancyIds,
@@ -109,9 +111,19 @@ export const getAndSaveWorkUaVacanciesManually = async () => {
     promises.push(getResponsesByVacancyId({ vacancyId }));
   }
   const responses = await Promise.all(promises);
-  console.log(responses[0]);
 };
-
+export const getAllAndSaveAllWorkUaVacancyResponses = async () => {
+  console.log({
+    module: 'getAllAndSaveAllWorkUaVacancies',
+    date: new Date(),
+  });
+  const last_id = 369951742;
+  const { responses } = await getAllResponses({last_id});
+  const processedResponses = await Promise.all(responses.map(processResponse));
+  console.log({ processedResponses });
+  console.log({ processedResponses: processedResponses.length });
+};
 if (process.env.ENV === 'DEV' || process.env.ENV === 'TEST') {
-  await getAndSaveWorkUaVacanciesManually();
+  // await getAndSaveWorkUaVacanciesManually();
+  await getAllAndSaveAllWorkUaVacancyResponses();
 }

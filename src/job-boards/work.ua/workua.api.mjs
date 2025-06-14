@@ -67,7 +67,25 @@ class WorkUaApiClient {
 
     return { responses };
   }
+  async getResponses(options = {}) {
+    const { limit, last_id, before_id, before, sort } = options;
+    let queryParams = `?limit=${limit}&sort=${sort}`;
 
+    if (last_id) {
+      queryParams += `&last_id=${last_id}`;
+    }
+    if (before_id) {
+      queryParams += `&before_id=${before_id}`;
+    }
+    if (before) {
+      queryParams += `&before=${before}`;
+    }
+
+    const endpoint = '/jobs/responses/';
+    const requestUrl = endpoint + queryParams;
+    console.log(requestUrl);
+    return await this.api(requestUrl);
+  }
   handleApiError(error) {
     if (error.response) {
       switch (error.response.status) {

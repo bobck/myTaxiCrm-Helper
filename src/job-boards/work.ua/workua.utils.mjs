@@ -30,7 +30,16 @@ export const getResponsesByVacancyId = async ({ vacancyId, _responses }) => {
   const { responses } = await workUaAPI.getVacancyResponses(vacancyId);
   return { responses };
 };
-
+export const getAllResponses = async ({last_id}={last_id:0}) => {
+  const options={
+    sort: 0,
+    limit: 50,
+    last_id
+  }
+  const { data } = await workUaAPI.getResponses(options);
+  const { items: responses } = data;
+  return { responses };
+};
 export const checkJobs = async () => {
   return workUaAPI.token;
   //   return await workUaAPI.checkLoginAndGetJobs();
