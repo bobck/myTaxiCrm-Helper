@@ -62,7 +62,15 @@ class RobotaUaApiClient {
       this.handleApiError(error);
     }
   }
+  async getResume({resumeId}){
+    try {
+      const response = await this.employerApi.get(`/resume/${resumeId}`);
+      return response.data;
+    } catch (error) {
+      this.handleApiError(error);
+    }
 
+  }
   async addOrEditVacancy(vacancyData) {
     try {
       const response = await this.employerApi.post('/vacancy/add', vacancyData);
