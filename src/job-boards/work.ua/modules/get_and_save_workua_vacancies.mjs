@@ -1,3 +1,4 @@
+import { createVacancyResponseCards } from '../../../bitrix/bitrix.utils.mjs';
 import { processResponse } from '../work.ua.business-entity.mjs';
 import {
   checkJobs,
@@ -122,6 +123,8 @@ export const getAllAndSaveAllWorkUaVacancyResponses = async () => {
   const processedResponses = await Promise.all(responses.map(processResponse));
   console.log({ processedResponses });
   console.log({ processedResponses: processedResponses.length });
+  const cards = await createVacancyResponseCards({ dtos: processedResponses });
+  console.log(cards);
 };
 if (process.env.ENV === 'DEV' || process.env.ENV === 'TEST') {
   // await getAndSaveWorkUaVacanciesManually();

@@ -16,9 +16,10 @@ export const processResponse = async (resumeResponse) => {
     : `https://www.work.ua/employer/my/applicants/${candidate_id}/?jobId=${job_id}`;
 
   return {
+    sourceOfApplyment: 'work.ua',
     id,
-    full_name: fio,
-    birth_date,
+    fullName: fio,
+    dateOfBirth: birth_date,
     email,
     phone,
     cvURL,
