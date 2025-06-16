@@ -20,7 +20,7 @@ class RobotaUaApiClient {
         password: password,
         remember: true,
       });
-      console.log({ data: response.data });
+      // console.log({ data: response.data });
       const token = response.data;
       if (!token) {
         throw new Error('Token not found in login response.');
@@ -34,7 +34,24 @@ class RobotaUaApiClient {
       throw error;
     }
   }
-  async getVacancies() {}
+  async getVacancies(
+    options = {
+      page:0,
+      // sortField: 'string',
+      // vacancyName: 'string',
+      // code: 'string',
+      // // cityId: 0,
+      // vacancyStateId: 'All',
+      // vacancyTypeId: 'All',
+      // multiUserId: 0,
+      // sortDirection: 'string',
+    }
+  ) {
+    const resp = await this.employerApi.post('/vacancy/list', options);
+    const { vacancies } = resp.data;
+    // console.log({data})
+    return {vacancies};
+  }
   async getApplies(
     options = { vacancyId: 0, folderId: 0, page: 0, filter: '' }
   ) {
@@ -62,14 +79,13 @@ class RobotaUaApiClient {
       this.handleApiError(error);
     }
   }
-  async getResume({resumeId}){
+  async getResume({ resumeId }) {
     try {
       const response = await this.employerApi.get(`/resume/${resumeId}`);
       return response.data;
     } catch (error) {
       this.handleApiError(error);
     }
-
   }
   async addOrEditVacancy(vacancyData) {
     try {

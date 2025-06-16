@@ -695,3 +695,4 @@ export const createVacancyResponseCards = async ({ dtos }) => {
   }
   return batchObj;
 };
+

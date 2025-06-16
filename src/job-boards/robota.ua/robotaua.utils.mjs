@@ -5,8 +5,18 @@ export const robotaUaAPI = await RobotaUaApiClient.initialize({
   password: process.env.ROBOTA_UA_PASSWORD,
 });
 export const getVacancyList = async () => {
-  const resp = await robotaUaAPI.getVacancies();
-  return resp;
+  const vacancies = [];
+  let data;
+  let current_page = 0;
+  do {
+    data = await robotaUaAPI.getVacancies({ page: current_page,vacancyStateId:'Publicated' });
+    vacancies.push(...data.vacancies);
+    console.log({ current_page, vacancies: data.vacancies.length });
+    current_page++;
+  
+  } while (data.vacancies.length > 0);
+  // const resp = await robotaUaAPI.getVacancies();
+  return {vacancies};
 };
 export const getVacancyApplies = async ({ vacancyId } = { vacancyId: 0 }) => {
   const { applies } = await robotaUaAPI.getApplies({ vacancyId });
