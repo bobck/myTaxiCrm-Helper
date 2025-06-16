@@ -57,6 +57,8 @@ class RobotaUaApiClient {
   ) {
     try {
       const response = await this.employerApi.post('/apply/list', options);
+      console.log(response);
+      
       return response.data;
     } catch (error) {
       this.handleApiError(error);

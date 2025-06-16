@@ -9,17 +9,33 @@ export const getVacancyList = async () => {
   let data;
   let current_page = 0;
   do {
-    data = await robotaUaAPI.getVacancies({ page: current_page,vacancyStateId:'Publicated' });
+    data = await robotaUaAPI.getVacancies({
+      page: current_page,
+      vacancyStateId: 'Publicated',
+    });
     vacancies.push(...data.vacancies);
     console.log({ current_page, vacancies: data.vacancies.length });
     current_page++;
-  
   } while (data.vacancies.length > 0);
   // const resp = await robotaUaAPI.getVacancies();
-  return {vacancies};
+  return { vacancies };
 };
-export const getVacancyApplies = async ({ vacancyId } = { vacancyId: 0 }) => {
-  const { applies } = await robotaUaAPI.getApplies({ vacancyId });
+export const getVacancyApplies = async ({ vacancyId }) => {
+  // const { applies } = await robotaUaAPI.getApplies({ vacancyId, page: 47 });
+  const applies = [];
+  let data;
+  let current_page = 0;
+  let last_page;
+  do {
+    data = await robotaUaAPI.getApplies({
+      vacancyId,
+      page: last_page || current_page,
+    });
+    last_page=data
+    applies.push(...data.applies);
+    console.log({ current_page, applies: data.applies.length });
+    current_page++;
+  } while (data.applies.length > 0);
 
   return { applies };
 };
