@@ -17,12 +17,17 @@ export const getAndSaveRobotaUaVacancies = async () => {
     module: 'getAndSaveRobotaUaVacancies',
     date: new Date(),
   });
-  const existingVacancyIds = (await getAllVacancyIds()).map(
-    (item) => item.vacancy_id
-  );
+  // const existingVacancyIds = (await getAllVacancyIds()).map(
+  //   (item) => item.vacancy_id
+  // );
+  const existingVacancyIds =[]
   const page = parseInt(existingVacancyIds.length / 20);
   const { vacancies } = await getVacancyList({ last_page: page });
   
+
+
+  console.log(vacancies);
+  return
   const newVacancies = vacancies.filter(
     (vacancy) => !existingVacancyIds.includes(vacancy.vacancyId)
   );

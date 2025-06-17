@@ -29,7 +29,7 @@ export const getVacancyApplies = async ({ vacancyId }) => {
   do {
     data = await robotaUaAPI.getApplies({
       vacancyId,
-      page: last_page || current_page,
+      // page: last_page || current_page,
     });
     last_page=data
     applies.push(...data.applies);

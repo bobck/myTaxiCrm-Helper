@@ -109,3 +109,8 @@ export async function markManyVacanciesAsDeleted({ vacancy_ids }) {
                     vacancy_id IN (${placeholders})`;
   await db.run(sql, ...vacancy_ids);
 }
+export async function getAllActiveVacancies() {
+  const sql = `SELECT * from robota_ua_pagination where is_deleted = FALSE`;
+  const activeVacancies = await db.all(sql);
+  return { activeVacancies };
+}
