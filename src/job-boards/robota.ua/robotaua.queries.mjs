@@ -1,3 +1,11 @@
+import sqlite3 from 'sqlite3';
+import { open } from 'sqlite';
+
+const db = await open({
+  filename: process.env.DEV_DB,
+  driver: sqlite3.Database,
+});
+
 /**
  * Creates a new vacancy record in the robota_ua_pagination table.
  * Other fields will be initialized with default or NULL values.
@@ -9,18 +17,13 @@
 export async function createVacancy({
   vacancy_id,
   vacancy_name,
-  vacancy_date
+  vacancy_date,
 }) {
   const sql = `INSERT INTO robota_ua_pagination 
                     (vacancy_id, vacancy_name, vacancy_date)
                 VALUES 
                     (?, ?, ?)`;
-  await db.run(
-    sql,
-    vacancy_id,
-    vacancy_name,
-    vacancy_date
-  );
+  await db.run(sql, vacancy_id, vacancy_name, vacancy_date);
 }
 
 /**
@@ -53,9 +56,7 @@ export async function updateVacancyProgress({
  * @param {string} params.vacancy_id - The ID of the vacancy to retrieve pagination for.
  * @returns {Promise<object|undefined>} An object containing last_page and last_apply_id, or undefined if not found.
  */
-export async function getPagination({
-  vacancy_id
-}) {
+export async function getPagination({ vacancy_id }) {
   const sql = `SELECT 
                     last_page,
                     last_apply_id
@@ -65,4 +66,46 @@ export async function getPagination({
                     vacancy_id = ?`;
   const pagination = await db.get(sql, vacancy_id);
   return pagination;
+}
+export async function getAllVacancyIds() {
+  const sql = `SELECT 
+                    vacancy_id
+                FROM 
+                    robota_ua_pagination
+                WHERE 
+                    is_deleted = FALSE`;
+  const vacancyIds = await db.all(sql);
+  return vacancyIds;
+}
+/**
+ * Marks a vacancy as deleted by setting the is_deleted flag to TRUE.
+ * It also automatically updates the 'updated_date' to the current timestamp.
+ * @param {object} params - The parameters for the operation.
+ * @param {string} params.vacancy_id - The ID of the vacancy to mark as deleted.
+ */
+export async function markVacancyAsDeleted({ vacancy_id }) {
+  const sql = `UPDATE 
+                    robota_ua_pagination
+                SET 
+                    is_deleted = TRUE,
+                    updated_date = CURRENT_TIMESTAMP
+                WHERE 
+                    vacancy_id = ?`;
+  await db.run(sql, vacancy_id);
+}
+export async function markManyVacanciesAsDeleted({ vacancy_ids }) {
+  if (!vacancy_ids || vacancy_ids.length === 0) {
+    return; // No IDs to process
+  }
+
+  const placeholders = vacancy_ids.map(() => '?').join(',');
+
+  const sql = `UPDATE 
+                    robota_ua_pagination
+                SET 
+                    is_deleted = TRUE,
+                    updated_date = CURRENT_TIMESTAMP
+                WHERE 
+                    vacancy_id IN (${placeholders})`;
+  await db.run(sql, ...vacancy_ids);
 }

@@ -4,7 +4,7 @@ export const robotaUaAPI = await RobotaUaApiClient.initialize({
   email: process.env.ROBOTA_UA_EMAIL,
   password: process.env.ROBOTA_UA_PASSWORD,
 });
-export const getVacancyList = async () => {
+export const getVacancyList = async ({last_page}) => {
   const vacancies = [];
   let data;
   let current_page = 0;
