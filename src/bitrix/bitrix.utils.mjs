@@ -713,7 +713,6 @@ export async function updateRequestedDrivers({ cards }) {
   }
   const { result: resp, time } = await bitrix.batch(batchObj);
   const { result: itemObj } = resp;
-  console.log('got batch response', itemObj);
   return itemObj;
 }
 export async function createBanBoltDriverCards({ cards }) {

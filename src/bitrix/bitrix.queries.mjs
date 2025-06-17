@@ -782,13 +782,11 @@ export async function insertBoltDriverToBan({
  */
 export async function setLetterApprovedByDealId({
   bitrix_deal_id: input,
-  letter_id,
+  letter_column,
 }) {
-  const column =
-    letter_id === 1 ? 'is_first_letter_approved' : 'is_second_letter_approved';
   const sql = /*sql*/ `
       UPDATE bolt_drivers_to_ban
-      SET ${column} = 1,  -- Using 0 for FALSE in SQLite
+      SET ${letter_column} = 1,  -- Using 0 for FALSE in SQLite
           updated_at = CURRENT_TIMESTAMP
       WHERE bitrix_deal_id = ?
       RETURNING bitrix_deal_id; -- This will only return if a row was actually updated

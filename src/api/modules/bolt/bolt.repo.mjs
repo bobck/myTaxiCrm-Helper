@@ -16,5 +16,7 @@ export const getDrivers = async ({ phone, bolt_id }) => {
   return { drivers: rows };
 };
 export const approveLetterByDealId = async ({ bitrix_deal_id, letter_id }) => {
-  await setLetterApprovedByDealId({ bitrix_deal_id, letter_id });
+  const letter_column =
+    letter_id === 1 ? 'is_first_letter_approved' : 'is_second_letter_approved';
+  await setLetterApprovedByDealId({ bitrix_deal_id, letter_column });
 };
