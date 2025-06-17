@@ -22,19 +22,14 @@ export const getAndSaveRobotaUaVacancies = async () => {
   );
   const page = parseInt(existingVacancyIds.length / 20);
   const { vacancies } = await getVacancyList({ last_page: page });
-  vacancies.pop();
-  vacancies.pop();
-  vacancies.pop();
-  vacancies.pop();
+  
   const newVacancies = vacancies.filter(
     (vacancy) => !existingVacancyIds.includes(vacancy.vacancyId)
   );
   const deletedVacancies = existingVacancyIds.filter(
     (vacancyId) => !vacancies.find((vacancy) => vacancy.vacancyId === vacancyId)
   );
-  console.log({ page, existingVacanies: existingVacancyIds.length });
-  console.log({ newVacancies: newVacancies.length });
-  console.log({ deletedVacancies: deletedVacancies.length });
+
 
   for (const vacancy of newVacancies) {
     const { vacancyId, vacancyName, vacancyDate } = vacancy;
@@ -47,10 +42,7 @@ export const getAndSaveRobotaUaVacancies = async () => {
   }
   await markManyVacanciesAsDeleted({ vacancy_ids: deletedVacancies });
 
-  //https://robota.ua/my/vacancies/9414972/applies?id=27838157-empty
-  //https://robota.ua/my/vacancies/9414972/applies?id=7973901-prof
-
-  //https://robota.ua/my/vacancies/8997804/applies?id=17283895-prof
+  
   return;
   const processedApplies = applies.map(processApiResponse);
   // console.log(processedApplies)
@@ -60,6 +52,5 @@ export const getAndSaveRobotaUaVacancies = async () => {
 if (process.env.ENV === 'DEV' || process.env.ENV === 'TEST') {
   await getAndSaveRobotaUaVacancies();
 
-  // const a = await robotaUaAPI.getResume({ resumeId: 24583573 });
-  // console.log({a})
+
 }

@@ -57,8 +57,8 @@
     "getAndSaveClosedPolishBitrixDealsManual": "ENV=TEST node -r dotenv/config src/web.api/gdc-report/modules/get-and-save-closed-polish-bitrix-deals.mjs",
     "testDriverCashBlockRulesManually": "ENV=TEST node -r dotenv/config src/web.api/modules/driver-cash-block-rules.mjs",
     "moveReferralToClosedManually": "ENV=TEST node -r dotenv/config src/bitrix/modules/move-referral-to-closed.mjs",
-    "moveReferralToClosedManually": "ENV=TEST node -r dotenv/config src/bitrix/modules/move-referral-to-closed.mjs",
     "testRobotaUaManually": "ENV=DEV node -r dotenv/config src/job-boards/robota.ua/modules/get_and_save_robotaua_vacancies.mjs",
+    "testRobotaUaAppliesManually": "ENV=DEV node -r dotenv/config src/job-boards/robota.ua/modules/get_and_save_robotaua_applies.mjs",
     "testWorkUaManually": "ENV=DEV node -r dotenv/config src/job-boards/work.ua/modules/get_and_save_workua_vacancies.mjs",
     "launchAPI:dev": "ENV=DEV API_HOST=localhost node -r dotenv/config src/api/api.mjs",
     "launchAPI:prod": "ENV=PROD API_HOST=0.0.0.0 node -r dotenv/config src/api/api.mjs"
