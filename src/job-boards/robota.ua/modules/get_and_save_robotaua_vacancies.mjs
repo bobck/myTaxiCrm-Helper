@@ -15,11 +15,12 @@ export const getAndSaveRobotaUaVacancies = async () => {
 
   
   for (const vacancy of vacancies) {
-    const { vacancyId, vacancyName } = vacancy;
-    // console.log({ vacancyId, vacancyName });
-    const { applies } = await getVacancyApplies({ vacancyId});
+    const { vacancyId, vacancyName,vacancyDate } = vacancy;
+    console.log({ vacancyId, vacancyName ,vacancyDate});
+    // console.log(vacancy)
+    // const { applies } = await getVacancyApplies({ vacancyId});
     // console.log(applies[0]);
-    break;
+    // break;
   }
 
   //https://robota.ua/my/vacancies/9414972/applies?id=27838157-empty
