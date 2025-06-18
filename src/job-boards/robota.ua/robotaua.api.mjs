@@ -36,7 +36,7 @@ class RobotaUaApiClient {
   }
   async getVacancies(
     options = {
-      page:0,
+      page: 0,
       // sortField: 'string',
       // vacancyName: 'string',
       // code: 'string',
@@ -50,7 +50,7 @@ class RobotaUaApiClient {
     const resp = await this.employerApi.post('/vacancy/list', options);
     const { vacancies } = resp.data;
     // console.log({data})
-    return {vacancies};
+    return { vacancies };
   }
   async getApplies(
     options = { vacancyId: 0, folderId: 0, page: 0, filter: '' }
@@ -58,7 +58,6 @@ class RobotaUaApiClient {
     try {
       const response = await this.employerApi.post('/apply/list', options);
 
-      
       return response.data;
     } catch (error) {
       this.handleApiError(error);

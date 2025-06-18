@@ -13,7 +13,7 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
     // console.log(vacancy);
 
     const { applies } = await getVacancyApplies(vacancy);
-    console.log(applies)
+    console.log(applies);
     return;
   }
   //   return;

@@ -119,7 +119,7 @@ export const getAllAndSaveAllWorkUaVacancyResponses = async () => {
     date: new Date(),
   });
   const last_id = 369951742;
-  const { responses } = await getAllResponses({last_id});
+  const { responses } = await getAllResponses({ last_id });
   const processedResponses = await Promise.all(responses.map(processResponse));
   console.log({ processedResponses });
   console.log({ processedResponses: processedResponses.length });

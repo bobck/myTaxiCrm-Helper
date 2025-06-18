@@ -13,7 +13,8 @@ export function sanitizePhoneNumber(phoneStr) {
 }
 
 export function processApiResponse(response) {
-  const {id,vacancyId, experiences, educations, contacts, ...rest } = response;
+  const { id, vacancyId, experiences, educations, contacts, ...rest } =
+    response;
 
   let workExperienceString =
     experiences?.length > 0

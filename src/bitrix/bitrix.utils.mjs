@@ -683,7 +683,7 @@ export const createVacancyResponseCards = async ({ dtos }) => {
     const params = {};
     for (const param in dto) {
       if (
-        !Object.keys(jobBoardApplymentParametersToBitrixKeys).includes(param)||
+        !Object.keys(jobBoardApplymentParametersToBitrixKeys).includes(param) ||
         dto[param] === null ||
         dto[param] === undefined
       ) {
@@ -695,4 +695,3 @@ export const createVacancyResponseCards = async ({ dtos }) => {
   }
   return batchObj;
 };
-
