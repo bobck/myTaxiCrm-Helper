@@ -5,7 +5,7 @@ const workUaAPI = new WorkUaApiClient({
   password: process.env.WORK_UA_PASSWORD,
 });
 export const getVacancies = async (
-  { full, all, active } = { full: 1, all: 1, active: 1 }
+  { full, all, active } = { full: 0, all: 1, active: 1 }
 ) => {
   const { items: vacancies } = await workUaAPI.getVacancies({
     full,

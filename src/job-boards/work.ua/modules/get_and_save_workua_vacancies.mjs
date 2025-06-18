@@ -98,9 +98,11 @@ export const getAndSaveWorkUaVacanciesManually = async () => {
     module: 'getAndSaveWorkUaVacanciesManually',
     date: new Date(),
   });
-  const { vacancyIds } = await getVacancyIds();
-  console.log({ vacancyIds: vacancyIds.length });
-
+  // const { vacancyIds } = await getVacancyIds();
+  const {vacancies}= await getVacancies();
+  // console.log({ vacancyIds: vacancyIds.length });
+  console.log({vacancies})
+  return
   const promises = [];
   for (const [index, vacancyId] of vacancyIds.entries()) {
     if (index > 1) {
@@ -119,14 +121,17 @@ export const getAllAndSaveAllWorkUaVacancyResponses = async () => {
     date: new Date(),
   });
   const last_id = 369951742;
+
   const { responses } = await getAllResponses({ last_id });
+  console.log(responses);
+  return
   const processedResponses = await Promise.all(responses.map(processResponse));
-  console.log({ processedResponses });
-  console.log({ processedResponses: processedResponses.length });
+  // console.log({ processedResponses });
+  // console.log({ processedResponses: processedResponses.length });
   const cards = await createVacancyResponseCards({ dtos: processedResponses });
   console.log(cards);
 };
 if (process.env.ENV === 'DEV' || process.env.ENV === 'TEST') {
-  // await getAndSaveWorkUaVacanciesManually();
-  await getAllAndSaveAllWorkUaVacancyResponses();
+  await getAndSaveWorkUaVacanciesManually();
+  // await getAllAndSaveAllWorkUaVacancyResponses();
 }
