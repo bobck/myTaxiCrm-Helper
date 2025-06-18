@@ -10,10 +10,10 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
   });
   const { activeVacancies } = await getAllActiveVacancies();
   for (const vacancy of activeVacancies) {
-    console.log(vacancy);
+    // console.log(vacancy);
 
     const { applies } = await getVacancyApplies(vacancy);
-    console.log(applies);
+    console.log(applies)
     return;
   }
   //   return;
