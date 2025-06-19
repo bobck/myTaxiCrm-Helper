@@ -15,7 +15,7 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
 
     const { applies } = await getVacancyApplies(vacancy);
     // console.log(applies);
-    
+
     // return;
   }
   //   return;
@@ -23,7 +23,6 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
   const processedApplies = applies.map(processApiResponse);
   // console.log(processedApplies)
   console.log(await createVacancyResponseCards({ dtos: processedApplies }));
-
 };
 
 if (process.env.ENV === 'DEV' || process.env.ENV === 'TEST') {

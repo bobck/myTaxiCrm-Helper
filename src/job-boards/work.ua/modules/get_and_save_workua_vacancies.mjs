@@ -40,14 +40,14 @@ export const getAndSaveWorkUaVacancies = async () => {
   console.log('Current Work.ua Vacancies:', currentWorkUaVacancies.length);
   console.log('New Work.ua Vacancies to add:', newWorkUaVacancies.length);
   for (const vacancy of newWorkUaVacancies) {
-    const { id, name, date } = vacancy; 
+    const { id, name, date } = vacancy;
     console.log(
       `Adding new Work.ua vacancy: ID=${id}, Name=${name}, Date=${date}`
     );
     await createWorkUaVacancy({
       vacancy_id: id.toString(),
       vacancy_name: name,
-      vacancy_date: date, 
+      vacancy_date: date,
     });
   }
 
