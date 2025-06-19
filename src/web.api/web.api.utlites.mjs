@@ -81,8 +81,8 @@ async function makeCRMRequestWithRetry({ body }) {
         await setTimeout(retryDelay);
         retryDelay *= 2;
       } else {
-        console.error({ message: 'Max retries reached', error });
-        throw new Error('Max retries reached. Unable to complete the request.');
+        console.error({ message: 'Max retries reached' });
+        throw error;
       }
     }
   }
@@ -630,6 +630,7 @@ export async function getHandledCashBlockRulesInfo({ fired_drivers_ids }) {
   return { rows };
 }
 
+
 export async function getAllBoltIdsByDriverPhone({ phone }) {
   const sql = fs
     .readFileSync('src/sql/get_all_bolt_ids_by_driver_phone.sql')
@@ -652,6 +653,22 @@ export async function getBoltDriversToBan({
     year,
     driver_ids,
   ]);
+
+export async function getAllWorkingDriverIds({ ids, weekNumber, year }) {
+  const sql = fs
+    .readFileSync('src/sql/get_all_working_driver_ids.sql')
+    .toString();
+  const result = await pool.query(sql, [ids, weekNumber, year]);
+  const { rows, rowCount } = result;
+  return { rows };
+}
+//getDriversWhoPaidOff
+export async function getDriversWhoPaidOff({ ids, weekNumber, year }) {
+  const sql = fs
+    .readFileSync('src/sql/get_drivers_who_paid_off.sql')
+    .toString();
+  const result = await pool.query(sql, [ids, weekNumber, year]);
+
   const { rows, rowCount } = result;
   return { rows };
 }
