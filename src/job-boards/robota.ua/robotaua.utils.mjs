@@ -37,7 +37,7 @@ export const getVacancyApplies = async ({ vacancyId }) => {
       last_id: data.applies[0].id,
     });
     if (process.env.ENV === 'DEV' && current_page === 3) {
-      break;
+      return { applies };
     }
     current_page++;
   } while (data.applies.length > 0);
