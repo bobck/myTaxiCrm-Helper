@@ -630,7 +630,6 @@ export async function getHandledCashBlockRulesInfo({ fired_drivers_ids }) {
   return { rows };
 }
 
-
 export async function getAllBoltIdsByDriverPhone({ phone }) {
   const sql = fs
     .readFileSync('src/sql/get_all_bolt_ids_by_driver_phone.sql')
@@ -653,6 +652,9 @@ export async function getBoltDriversToBan({
     year,
     driver_ids,
   ]);
+  const { rows, rowCount } = result;
+  return { rows };
+}
 
 export async function getAllWorkingDriverIds({ ids, weekNumber, year }) {
   const sql = fs
