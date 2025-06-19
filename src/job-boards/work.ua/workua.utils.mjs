@@ -44,3 +44,42 @@ export const checkJobs = async () => {
   return workUaAPI.token;
   //   return await workUaAPI.checkLoginAndGetJobs();
 };
+// workua.utils.mjs (модифицированный для пагинации откликов)
+// ... (существующий код)
+
+export const getVacancyResponses = async ({ vacancyId, last_id }) => {
+  const allResponses = [];
+  let currentLastId = last_id;
+  let hasMore = true;
+
+  while (hasMore) {
+    const options = {
+      limit: process.env.ENV === 'DEV' ? 5 : MAX_RESPONSES_PER_REQ, // Для DEV можно уменьшить лимит
+      last_id: currentLastId,
+    };
+    const { responses } = await workUaAPI.getVacancyResponses(
+      vacancyId,
+      options
+    );
+
+    if (responses && responses.length > 0) {
+      allResponses.push(...responses);
+      currentLastId = responses[responses.length - 1].id;
+      // Если количество полученных ответов меньше лимита, значит, это последняя страница
+      if (responses.length < options.limit) {
+        hasMore = false;
+      }
+    } else {
+      hasMore = false; // Нет больше откликов
+    }
+
+    // Если в режиме DEV, можно ограничить количество итераций для тестирования
+    if (process.env.ENV === 'DEV' && allResponses.length > 50) {
+      // Пример: остановить после 50 откликов в DEV
+      hasMore = false;
+    }
+  }
+  return { responses: allResponses };
+};
+
+// ... (остальной код)
