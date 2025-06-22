@@ -690,15 +690,10 @@ export const createVacancyResponseCards = async ({ dtos }) => {
         continue;
       }
       params[jobBoardApplymentParametersToBitrixKeys[param]] = dto[param];
-      /**
-       * entityTypeId: '1162',
-      'fields[title]': full_name,
-      'fields[STAGE_ID]': stage_id,
-       */
-      params[jobBoardApplymentParametersToBitrixKeys['entityTypeId']] = '1162';
-      params[jobBoardApplymentParametersToBitrixKeys['fields[title]']];
-      params[jobBoardApplymentParametersToBitrixKeys['fields[STAGE_ID]']];
     }
+    params['entityTypeId'] = '1162';
+    // params['fields[title]'];
+    params['fields[STAGE_ID]'] = 'DT1142_64:NEW'; //crm-stage-dt1142_64:new DT1142_64:NEW
     batchObj[`${sourceOfApplyment}:${id}`] = { method: 'crm.item.add', params };
   }
   return batchObj;

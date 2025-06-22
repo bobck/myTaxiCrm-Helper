@@ -24,7 +24,7 @@ export const getAndSaveWorkUaVacancies = async () => {
     all: 1,
     active: 1,
   });
-  console.log(currentWorkUaVacancies);
+  // console.log(currentWorkUaVacancies);
   const currentWorkUaVacancyIds = currentWorkUaVacancies.map((vacancy) =>
     vacancy.id.toString()
   );

@@ -9,6 +9,7 @@ export const processResponse = async (resumeResponse) => {
     phone,
     with_file,
     job_id,
+    title,
   } = resumeResponse;
 
   const cvURL = with_file
@@ -24,5 +25,6 @@ export const processResponse = async (resumeResponse) => {
     phone,
     cvURL,
     date,
+    title
   };
 };

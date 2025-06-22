@@ -5,9 +5,13 @@ import {
 } from '../workua.queries.mjs';
 import { getVacancyResponses } from '../workua.utils.mjs'; // Предполагается, что getVacancyResponses будет импортирован из workua.utils.mjs
 import { processResponse as processWorkUaApiResponse } from '../workua.business-entity.mjs';
-import { createVacancyResponseCards } from '../../../bitrix/bitrix.utils.mjs'; // Adjust path if needed
+import {
+  chunkArray,
+  createVacancyResponseCards,
+} from '../../../bitrix/bitrix.utils.mjs'; // Adjust path if needed
+import { assignVacancyTitleToApplies } from '../../job-boards.utils.mjs';
 
-const vacanciesCount = 37;
+const vacanciesCount = 1;
 let counter = 0;
 
 export const getAndSaveWorkUaVacancyApplies = async () => {
@@ -22,7 +26,7 @@ export const getAndSaveWorkUaVacancyApplies = async () => {
   for (const vacancy of activeWorkUaVacancies) {
     console.log(`Processing Work.ua Vacancy ID: ${vacancy.vacancy_id}`);
 
-    const { last_apply_id, vacancy_id } = vacancy;
+    const { last_apply_id, vacancy_id, vacancy_name } = vacancy;
     const { responses: currentApplies } = await getVacancyResponses({
       vacancyId: vacancy_id,
       last_id: 0,
@@ -30,41 +34,56 @@ export const getAndSaveWorkUaVacancyApplies = async () => {
     });
     // console.log(currentApplies)
 
-    if (currentApplies && currentApplies.length > 0) {
-      console.log(
-        `Fetched ${currentApplies.length} applies for vacancy ${vacancy.vacancy_id}. Last Apply ID: ${last_apply_id}`
-      );
-
-      allApplies.push(...currentApplies);
-    }
-
-    if (currentApplies.length > 0) {
-      // Обновляем last_apply_id в базе данных
-      await updateWorkUaVacancyProgress({
-        vacancy_id: vacancy.vacancy_id,
-        last_apply_id: currentApplies[currentApplies.length - 1].id,
-      });
-    } else {
+    if (currentApplies.length === 0) {
       console.log(
         `No new applies for Work.ua Vacancy ID ${vacancy.vacancy_id}`
       );
+      continue;
     }
+
+    console.log(
+      `Fetched ${currentApplies.length} applies for vacancy ${vacancy.vacancy_id}. Last Apply ID: ${last_apply_id}`
+    );
+
+    // allApplies.push(
+    //   ...assignVacancyTitleToApplies({
+    //     applies: currentApplies,
+    //     title: vacancy_name,
+    //   })
+    // );
+
+    // console.log(allApplies)
+    // return;
+
+    const processedApplies = await Promise.all(
+      assignVacancyTitleToApplies({
+        applies: currentApplies,
+        title: vacancy_name,
+      }).map(processWorkUaApiResponse)
+    );
+
+    console.log({ processedApplies: processedApplies.length }); // Для отладки
+    // console.log(processedApplies[0]);
+    const chunkedApplies = chunkArray(processedApplies, 1);
+    for (const chunk of chunkedApplies) {
+      const batchObj = await createVacancyResponseCards({
+        dtos: chunk,
+      });
+      await updateWorkUaVacancyProgress({
+        vacancy_id: vacancy.vacancy_id,
+        last_apply_id: chunk[chunk.length - 1].id,
+      });
+      console.log(batchObj)
+      break;
+    }
+
+    // console.log(batchObj);k
+    // return;
     // Ограничение для DEV/TEST среды, если нужно
     if (process.env.ENV === 'DEV' || process.env.ENV === 'TEST') {
       if (++counter >= vacanciesCount) break;
     }
   }
-
-  const processedApplies = await Promise.all(
-    allApplies.map(processWorkUaApiResponse)
-  );
-
-  console.log({ processedApplies: processedApplies.length }); // Для отладки
-  const batchObj = await createVacancyResponseCards({
-    dtos: processedApplies,
-  }); // Раскомментируйте, когда будете готовы отправлять в Bitrix
-  // console.log(batchObj);
-  return;
 };
 
 if (process.env.ENV === 'DEV' || process.env.ENV === 'TEST') {
