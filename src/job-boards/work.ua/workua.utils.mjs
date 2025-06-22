@@ -60,6 +60,7 @@ export const getVacancyResponses = async ({ vacancyId, last_id }) => {
         // limit: process.env.ENV === 'DEV' ? 5 : MAX_RESPONSES_PER_REQ, // Для DEV можно уменьшить лимит
         limit: MAX_RESPONSES_PER_REQ,
         last_id: Number(currentLastId),
+        sort: 1,
       };
       console.log(options);
       const { responses } = await workUaAPI.getVacancyResponses(
@@ -82,10 +83,10 @@ export const getVacancyResponses = async ({ vacancyId, last_id }) => {
       }
 
       // Если в режиме DEV, можно ограничить количество итераций для тестирования
-      if (process.env.ENV === 'DEV' && allResponses.length > 50) {
-        // Пример: остановить после 50 откликов в DEV
-        hasMore = false;
-      }
+      // if (process.env.ENV === 'DEV' && allResponses.length > 50) {
+      //   // Пример: остановить после 50 откликов в DEV
+      //   hasMore = false;
+      // }
     } catch (e) {
       const { status } = e;
       if (status === 404) {

@@ -7,7 +7,7 @@ import { getVacancyResponses } from '../workua.utils.mjs'; // Предполаг
 import { processResponse as processWorkUaApiResponse } from '../workua.business-entity.mjs';
 import { createVacancyResponseCards } from '../../../bitrix/bitrix.utils.mjs'; // Adjust path if needed
 
-const vacanciesCount = 3;
+const vacanciesCount = 37;
 let counter = 0;
 
 export const getAndSaveWorkUaVacancyApplies = async () => {
@@ -25,8 +25,8 @@ export const getAndSaveWorkUaVacancyApplies = async () => {
     const { last_apply_id, vacancy_id } = vacancy;
     const { responses: currentApplies } = await getVacancyResponses({
       vacancyId: vacancy_id,
-
       last_id: 0,
+      last_id: last_apply_id,
     });
     // console.log(currentApplies)
 
