@@ -25,6 +25,6 @@ export const processResponse = async (resumeResponse) => {
     phone,
     cvURL,
     date,
-    title
+    title,
   };
 };

@@ -692,7 +692,7 @@ export const createVacancyResponseCards = async ({ dtos }) => {
       params[jobBoardApplymentParametersToBitrixKeys[param]] = dto[param];
     }
     params['entityTypeId'] = '1142';
-    params['fields[STAGE_ID]'] = 'DT1142_64:NEW'; 
+    params['fields[STAGE_ID]'] = 'DT1142_64:NEW';
     batchObj[`${sourceOfApplyment}:${id}`] = { method: 'crm.item.add', params };
   }
   const { result: temp_result } = await bitrix.batch(batchObj);

@@ -68,15 +68,13 @@ export const getVacancyResponses = async ({ vacancyId, last_id }) => {
         // );
         allResponses.push(...responses);
         currentLastId = responses[responses.length - 1].id;
-     
+
         if (responses.length === 0) {
           hasMore = false;
         }
       } else {
         hasMore = false;
       }
-
-     
     } catch (e) {
       const { status } = e;
       if (status === 404) {
@@ -87,4 +85,3 @@ export const getVacancyResponses = async ({ vacancyId, last_id }) => {
   }
   return { responses: allResponses };
 };
-
