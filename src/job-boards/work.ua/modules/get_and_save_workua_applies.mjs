@@ -1,10 +1,14 @@
 import {
   getAllActiveWorkUaVacancies,
   updateWorkUaVacancyProgress,
+  getLastWorkUaVaccancyApply,
 } from '../workua.queries.mjs';
 import { getVacancyResponses } from '../workua.utils.mjs'; // Предполагается, что getVacancyResponses будет импортирован из workua.utils.mjs
 import { processResponse as processWorkUaApiResponse } from '../workua.business-entity.mjs';
 import { createVacancyResponseCards } from '../../../bitrix/bitrix.utils.mjs'; // Adjust path if needed
+
+const vacanciesCount = 35;
+let counter = 0;
 
 export const getAndSaveWorkUaVacancyApplies = async () => {
   console.log({
@@ -15,79 +19,52 @@ export const getAndSaveWorkUaVacancyApplies = async () => {
   const { activeVacancies: activeWorkUaVacancies } =
     await getAllActiveWorkUaVacancies();
   let allApplies = [];
-  let lastId = 370274985; // Начинаем с последнего обработанного apply_id
-  let hasMoreApplies = true;
-  let current_vacancy;
-  try {
-    for (const vacancy of activeWorkUaVacancies) {
-      console.log(`Processing Work.ua Vacancy ID: ${vacancy.vacancy_id}`);
+  for (const vacancy of activeWorkUaVacancies) {
+    console.log(`Processing Work.ua Vacancy ID: ${vacancy.vacancy_id}`);
 
-      // let allApplies = [];
-      // lastId = vacancy.last_apply_id || 0; // Начинаем с последнего обработанного apply_id
-      // let hasMoreApplies = true;
+    const { last_apply_id, vacancy_id } = vacancy;
+    const { responses: currentApplies } = await getVacancyResponses({
+      vacancyId: vacancy_id,
 
-      while (hasMoreApplies) {
-        current_vacancy = vacancy.vacancy_id;
-        const { responses: currentApplies } = await getVacancyResponses({
-          // Предполагается, что эта функция будет получать отклики
-          vacancyId: vacancy.vacancy_id,
-          last_id: lastId,
-        });
-        // console.log(currentApplies)
-        // return;
-
-        if (currentApplies && currentApplies.length > 0) {
-          console.log(
-            `Fetched ${currentApplies.length} applies for vacancy ${vacancy.vacancy_id}. Last Apply ID: ${lastId}`
-          );
-
-          allApplies.push(...currentApplies);
-          lastId = currentApplies[currentApplies.length - 1].id; // Обновляем lastId на ID последнего отклика
-        } else {
-          hasMoreApplies = false; // Больше нет откликов
-        }
-
-        // Ограничение для DEV/TEST среды, если нужно
-      }
-
-      if (allApplies.length > 0) {
-        console.log(
-          `Total applies for Work.ua Vacancy ID ${vacancy.vacancy_id}: ${allApplies.length}`
-        );
-
-        // Обновляем last_apply_id в базе данных
-        await updateWorkUaVacancyProgress({
-          vacancy_id: vacancy.vacancy_id,
-          last_apply_id: lastId,
-        });
-
-        const processedApplies = await Promise.all(
-          allApplies.map(processWorkUaApiResponse)
-        );
-
-        console.log(processedApplies); // Для отладки
-        const batchObj = await createVacancyResponseCards({
-          dtos: processedApplies,
-        }); // Раскомментируйте, когда будете готовы отправлять в Bitrix
-        console.log(batchObj);
-        return;
-      } else {
-        console.log(
-          `No new applies for Work.ua Vacancy ID ${vacancy.vacancy_id}`
-        );
-      }
-      // Ограничение для DEV/TEST среды, если нужно
-      if (process.env.ENV === 'DEV' || process.env.ENV === 'TEST') {
-        break;
-      }
-    }
-  } catch (e) {
-    console.error({
-      allApplies: allApplies.length,
-      vacancies: activeWorkUaVacancies.length,
-      current_vacancy,
+      last_id: 0,
     });
+    // console.log(currentApplies)
+
+    if (currentApplies && currentApplies.length > 0) {
+      console.log(
+        `Fetched ${currentApplies.length} applies for vacancy ${vacancy.vacancy_id}. Last Apply ID: ${last_apply_id}`
+      );
+
+      allApplies.push(...currentApplies);
+    }
+
+    if (currentApplies.length > 0) {
+      // Обновляем last_apply_id в базе данных
+      await updateWorkUaVacancyProgress({
+        vacancy_id: vacancy.vacancy_id,
+        last_apply_id: currentApplies[currentApplies.length - 1].id,
+      });
+    } else {
+      console.log(
+        `No new applies for Work.ua Vacancy ID ${vacancy.vacancy_id}`
+      );
+    }
+    // Ограничение для DEV/TEST среды, если нужно
+    if (process.env.ENV === 'DEV' || process.env.ENV === 'TEST') {
+      if (++counter >= vacanciesCount) break;
+    }
   }
+
+  const processedApplies = await Promise.all(
+    allApplies.map(processWorkUaApiResponse)
+  );
+
+  console.log({ processedApplies: processedApplies.length }); // Для отладки
+  const batchObj = await createVacancyResponseCards({
+    dtos: processedApplies,
+  }); // Раскомментируйте, когда будете готовы отправлять в Bitrix
+  // console.log(batchObj);
+  return;
 };
 
 if (process.env.ENV === 'DEV' || process.env.ENV === 'TEST') {

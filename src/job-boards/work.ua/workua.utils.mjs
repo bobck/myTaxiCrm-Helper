@@ -64,6 +64,7 @@ export const getVacancyResponses = async ({ vacancyId, last_id }) => {
       );
 
       if (responses && responses.length > 0) {
+        console.log(`Fetched ${responses.length} responses for vacancy ${vacancyId}`)
         allResponses.push(...responses);
         currentLastId = responses[responses.length - 1].id;
         // Если количество полученных ответов меньше лимита, значит, это последняя страница

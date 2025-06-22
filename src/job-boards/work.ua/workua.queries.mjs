@@ -114,3 +114,13 @@ export async function getAllActiveWorkUaVacancies() {
   const activeVacancies = await db.all(sql);
   return { activeVacancies };
 }
+export const getLastWorkUaVaccancyApply = async ({ vacancy_id }) => {
+  const sql = `SELECT
+                    last_apply_id
+                FROM
+                    work_ua_pagination
+                WHERE
+                    vacancy_id = ?`;
+  const lastApplyId = await db.get(sql, vacancy_id);
+  return lastApplyId;
+};
