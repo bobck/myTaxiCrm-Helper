@@ -22,7 +22,7 @@ export const getAndSaveWorkUaVacancyApplies = async () => {
 
   const { activeVacancies: activeWorkUaVacancies } =
     await getAllActiveWorkUaVacancies();
-  let allApplies = [];
+  // let allApplies = [];
   for (const vacancy of activeWorkUaVacancies) {
     console.log(`Processing Work.ua Vacancy ID: ${vacancy.vacancy_id}`);
 
@@ -35,9 +35,9 @@ export const getAndSaveWorkUaVacancyApplies = async () => {
     // console.log(currentApplies)
 
     if (currentApplies.length === 0) {
-      console.log(
-        `No new applies for Work.ua Vacancy ID ${vacancy.vacancy_id}`
-      );
+      // console.log(
+      //   `No new applies for Work.ua Vacancy ID ${vacancy.vacancy_id}`
+      // );
       continue;
     }
 
@@ -63,7 +63,7 @@ export const getAndSaveWorkUaVacancyApplies = async () => {
     );
 
     console.log({ processedApplies: processedApplies.length }); // Для отладки
-    // console.log(processedApplies[0]);
+    return;
     const chunkedApplies = chunkArray(processedApplies, 8);
     for (const chunk of chunkedApplies) {
       const batchObj = await createVacancyResponseCards({
@@ -73,13 +73,10 @@ export const getAndSaveWorkUaVacancyApplies = async () => {
         vacancy_id: vacancy.vacancy_id,
         last_apply_id: chunk[chunk.length - 1].id,
       });
-      console.log(batchObj)
+      console.log(batchObj);
       break;
     }
 
-    // console.log(batchObj);k
-    // return;
-    // Ограничение для DEV/TEST среды, если нужно
     if (process.env.ENV === 'DEV' || process.env.ENV === 'TEST') {
       if (++counter >= vacanciesCount) break;
     }
