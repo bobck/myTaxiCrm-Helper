@@ -64,7 +64,7 @@ export const getAndSaveWorkUaVacancyApplies = async () => {
 
     console.log({ processedApplies: processedApplies.length }); // Для отладки
     // console.log(processedApplies[0]);
-    const chunkedApplies = chunkArray(processedApplies, 1);
+    const chunkedApplies = chunkArray(processedApplies, 8);
     for (const chunk of chunkedApplies) {
       const batchObj = await createVacancyResponseCards({
         dtos: chunk,
