@@ -20,7 +20,7 @@ export const getVacancyList = async ({ last_page }) => {
   // const resp = await robotaUaAPI.getVacancies();
   return { vacancies };
 };
-export const getVacancyApplies = async ({ vacancyId }) => {
+export const getVacancyApplies = async ({ vacancy_id: vacancyId }) => {
   // const { applies } = await robotaUaAPI.getApplies({ vacancyId, page: 47 });
   const applies = [];
   let data;
@@ -30,14 +30,17 @@ export const getVacancyApplies = async ({ vacancyId }) => {
       vacancyId,
       page: current_page,
     });
-    applies.push(...data.applies);
-    console.log({
-      current_page,
-      applies: data.applies.length,
-      last_id: data.applies[0].id,
-    });
-    if (process.env.ENV === 'DEV' && current_page === 3) {
-      return { applies };
+    if (data.applies.length > 0) {
+        applies.push(...data.applies);
+        console.log({
+          vacancyId,
+          current_page,
+          applies: data.applies.length,
+          last_id: data.applies[0].id,
+        });
+        if (process.env.ENV === 'DEV' && current_page === 3) {
+          return { applies };
+        }
     }
     current_page++;
   } while (data.applies.length > 0);

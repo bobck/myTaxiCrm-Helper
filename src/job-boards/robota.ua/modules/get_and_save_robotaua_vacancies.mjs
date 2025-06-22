@@ -13,19 +13,15 @@ import {
 } from '../robotaua.utils.mjs';
 
 export const getAndSaveRobotaUaVacancies = async () => {
-  console.log({
-    module: 'getAndSaveRobotaUaVacancies',
-    date: new Date(),
-  });
-  // const existingVacancyIds = (await getAllVacancyIds()).map(
-  //   (item) => item.vacancy_id
-  // );
-  const existingVacancyIds = [];
+  const existingVacancyIds = (await getAllVacancyIds()).map(
+    (item) => item.vacancy_id
+  );
+  // const existingVacancyIds = [];
   const page = parseInt(existingVacancyIds.length / 20);
   const { vacancies } = await getVacancyList({ last_page: page });
 
-  console.log(vacancies);
-  return;
+  console.log({ vacancies: vacancies.length });
+
   const newVacancies = vacancies.filter(
     (vacancy) => !existingVacancyIds.includes(vacancy.vacancyId)
   );
@@ -35,7 +31,7 @@ export const getAndSaveRobotaUaVacancies = async () => {
 
   for (const vacancy of newVacancies) {
     const { vacancyId, vacancyName, vacancyDate } = vacancy;
-    console.log({ vacancyId, vacancyName, vacancyDate });
+    // console.log({ vacancyId, vacancyName, vacancyDate });
     await createVacancy({
       vacancy_id: vacancyId,
       vacancy_name: vacancyName,
@@ -43,7 +39,12 @@ export const getAndSaveRobotaUaVacancies = async () => {
     });
   }
   await markManyVacanciesAsDeleted({ vacancy_ids: deletedVacancies });
-
+  console.log({
+    module: 'getAndSaveRobotaUaVacancies',
+    date: new Date(),
+    newVacancies: newVacancies.length,
+    deletedVacancies: deletedVacancies.length,
+  });
   return;
   const processedApplies = applies.map(processApiResponse);
   // console.log(processedApplies)

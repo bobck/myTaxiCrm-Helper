@@ -3,6 +3,8 @@ import fs from 'fs';
 import path from 'path';
 import { getVacancyApplies } from '../robotaua.utils.mjs';
 import { createVacancyResponseCards } from '../../../bitrix/bitrix.utils.mjs';
+import { assignVacancyTitleToApplies } from '../../job-boards.utils.mjs';
+import { processApiResponse } from '../robotaua.business-entity.mjs';
 
 export const getAndSaveRobotaUaVacancyApplies = async () => {
   console.log({
@@ -10,18 +12,22 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
     date: new Date(),
   });
   const { activeVacancies } = await getAllActiveVacancies();
-  for (const vacancy of activeVacancies) {
+  const applies = [];
+  for (const [index, vacancy] of activeVacancies.entries()) {
     // console.log(vacancy);
-
-    const { applies } = await getVacancyApplies(vacancy);
-    // console.log(applies);
-
-    // return;
+    const { vacancy_name, vacancy_id } = vacancy;
+    const { applies: _applies } = await getVacancyApplies({ vacancy_id });
+    applies.push(
+      ...assignVacancyTitleToApplies({ applies: _applies, title: vacancy_name })
+    );
+    if (index === 1) {
+      break;
+    }
   }
-  //   return;
-
+  // processApiResponse
   const processedApplies = applies.map(processApiResponse);
-  // console.log(processedApplies)
+  console.log(processedApplies)
+  return
   console.log(await createVacancyResponseCards({ dtos: processedApplies }));
 };
 
