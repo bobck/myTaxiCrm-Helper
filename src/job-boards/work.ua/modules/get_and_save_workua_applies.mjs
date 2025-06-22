@@ -7,7 +7,7 @@ import { getVacancyResponses } from '../workua.utils.mjs'; // Предполаг
 import { processResponse as processWorkUaApiResponse } from '../workua.business-entity.mjs';
 import { createVacancyResponseCards } from '../../../bitrix/bitrix.utils.mjs'; // Adjust path if needed
 
-const vacanciesCount = 35;
+const vacanciesCount = 3;
 let counter = 0;
 
 export const getAndSaveWorkUaVacancyApplies = async () => {

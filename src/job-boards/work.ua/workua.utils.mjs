@@ -1,4 +1,5 @@
 import WorkUaApiClient from './workua.api.mjs';
+import { MAX_RESPONSES_PER_REQ } from './workua.api.mjs';
 
 const workUaAPI = new WorkUaApiClient({
   email: process.env.WORK_UA_EMAIL,
@@ -48,6 +49,7 @@ export const checkJobs = async () => {
 // ... (существующий код)
 
 export const getVacancyResponses = async ({ vacancyId, last_id }) => {
+  console.log('start fetching');
   const allResponses = [];
   let currentLastId = last_id;
   let hasMore = true;
@@ -55,20 +57,24 @@ export const getVacancyResponses = async ({ vacancyId, last_id }) => {
   while (hasMore) {
     try {
       const options = {
-        limit: process.env.ENV === 'DEV' ? 5 : MAX_RESPONSES_PER_REQ, // Для DEV можно уменьшить лимит
-        last_id: currentLastId,
+        // limit: process.env.ENV === 'DEV' ? 5 : MAX_RESPONSES_PER_REQ, // Для DEV можно уменьшить лимит
+        limit: MAX_RESPONSES_PER_REQ,
+        last_id: Number(currentLastId),
       };
+      console.log(options);
       const { responses } = await workUaAPI.getVacancyResponses(
         vacancyId,
         options
       );
 
       if (responses && responses.length > 0) {
-        console.log(`Fetched ${responses.length} responses for vacancy ${vacancyId}`)
+        console.log(
+          `Fetched ${responses.length} responses for vacancy ${vacancyId}`
+        );
         allResponses.push(...responses);
         currentLastId = responses[responses.length - 1].id;
         // Если количество полученных ответов меньше лимита, значит, это последняя страница
-        if (responses.length < options.limit) {
+        if (responses.length === 0) {
           hasMore = false;
         }
       } else {
@@ -83,6 +89,7 @@ export const getVacancyResponses = async ({ vacancyId, last_id }) => {
     } catch (e) {
       const { status } = e;
       if (status === 404) {
+        console.log(`downloading done for vacancy ${vacancyId}`);
         hasMore = false;
       }
     }

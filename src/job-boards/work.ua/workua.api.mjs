@@ -1,5 +1,5 @@
 import axios from 'axios';
-const MAX_RESPONSES_PER_REQ = 50;
+export const MAX_RESPONSES_PER_REQ = 50;
 class WorkUaApiClient {
   constructor({ email, password, locale }) {
     if (!locale) {
