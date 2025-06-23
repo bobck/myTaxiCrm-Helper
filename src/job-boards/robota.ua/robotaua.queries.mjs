@@ -114,3 +114,151 @@ export async function getAllActiveVacancies() {
   const activeVacancies = await db.all(sql);
   return { activeVacancies };
 }
+/**
+ * Inserts a new vacancy apply record into the robota_ua_vacancy_applies table.
+ * 'created_date' and 'updated_date' will be initialized with the current timestamp.
+ * 'is_deleted' defaults to FALSE.
+ * @param {object} params - The parameters for the new vacancy apply.
+ * @param {string} params.vacancy_id - The ID of the vacancy.
+ * @param {number} [params.bitrix_id] - Optional Bitrix ID associated with the apply.
+ * @param {number} [params.robota_ua_city_id] - Optional city ID from robota.ua.
+ * @param {string} [params.apply_date] - Optional date of the application (DATETIME format).
+ */
+export async function createVacancyApply({
+  vacancy_id,
+  bitrix_id = null,
+  robota_ua_city_id = null,
+  apply_date = null,
+}) {
+  const sql = `INSERT INTO robota_ua_vacancy_applies 
+                    (vacancy_id, bitrix_id, robota_ua_city_id, apply_date)
+                VALUES 
+                    (?, ?, ?, ?)`;
+  await db.run(sql, vacancy_id, bitrix_id, robota_ua_city_id, apply_date);
+}
+
+/**
+ * Updates an existing vacancy apply record based on its ID.
+ * It automatically updates the 'updated_date' to the current timestamp.
+ * @param {object} params - The parameters for the update.
+ * @param {number} params.id - The primary key ID of the vacancy apply to update.
+ * @param {string} [params.vacancy_id] - Optional new vacancy ID.
+ * @param {number} [params.bitrix_id] - Optional new Bitrix ID.
+ * @param {number} [params.robota_ua_city_id] - Optional new city ID.
+ * @param {boolean} [params.is_deleted] - Optional new deletion status.
+ * @param {string} [params.apply_date] - Optional new application date (DATETIME format).
+ */
+export async function updateVacancyApply({
+  id,
+  vacancy_id,
+  bitrix_id,
+  robota_ua_city_id,
+  is_deleted,
+  apply_date,
+}) {
+  const fields = [];
+  const values = [];
+
+  if (vacancy_id !== undefined) {
+    fields.push('vacancy_id = ?');
+    values.push(vacancy_id);
+  }
+  if (bitrix_id !== undefined) {
+    fields.push('bitrix_id = ?');
+    values.push(bitrix_id);
+  }
+  if (robota_ua_city_id !== undefined) {
+    fields.push('robota_ua_city_id = ?');
+    values.push(robota_ua_city_id);
+  }
+  if (is_deleted !== undefined) {
+    fields.push('is_deleted = ?');
+    values.push(is_deleted);
+  }
+  if (apply_date !== undefined) {
+    fields.push('apply_date = ?');
+    values.push(apply_date);
+  }
+
+  if (fields.length === 0) {
+    console.log('No fields to update for vacancy apply.');
+    return;
+  }
+
+  const sql = `UPDATE robota_ua_vacancy_applies
+                SET ${fields.join(', ')}, updated_date = CURRENT_TIMESTAMP
+                WHERE id = ?`;
+  await db.run(sql, ...values, id);
+}
+
+/**
+ * Retrieves a single vacancy apply record by its ID.
+ * @param {object} params - The parameters for the query.
+ * @param {number} params.id - The ID of the vacancy apply to retrieve.
+ * @returns {Promise<object|undefined>} An object containing the vacancy apply data, or undefined if not found.
+ */
+export async function getVacancyApplyById({ id }) {
+  const sql = `SELECT *
+                FROM robota_ua_vacancy_applies
+                WHERE id = ?`;
+  const apply = await db.get(sql, id);
+  return apply;
+}
+
+/**
+ * Retrieves all vacancy apply records for a given vacancy ID.
+ * @param {object} params - The parameters for the query.
+ * @param {string} params.vacancy_id - The vacancy ID to filter by.
+ * @param {boolean} [params.include_deleted=false] - If true, includes records marked as deleted.
+ * @returns {Promise<Array<object>>} An array of vacancy apply records.
+ */
+export async function getVacancyAppliesByVacancyId({
+  vacancy_id,
+  include_deleted = false,
+}) {
+  let sql = `SELECT *
+                FROM robota_ua_vacancy_applies
+                WHERE vacancy_id = ?`;
+  const values = [vacancy_id];
+
+  if (!include_deleted) {
+    sql += ` AND is_deleted = FALSE`;
+  }
+
+  const applies = await db.all(sql, ...values);
+  return applies;
+}
+
+/**
+ * Marks a specific vacancy apply record as deleted by setting the is_deleted flag to TRUE.
+ * It also automatically updates the 'updated_date' to the current timestamp.
+ * @param {object} params - The parameters for the operation.
+ * @param {number} params.id - The ID of the vacancy apply to mark as deleted.
+ */
+export async function markVacancyApplyAsDeleted({ id }) {
+  const sql = `UPDATE robota_ua_vacancy_applies
+                SET is_deleted = TRUE, updated_date = CURRENT_TIMESTAMP
+                WHERE id = ?`;
+  await db.run(sql, id);
+}
+
+/**
+ * Retrieves all non-deleted vacancy applies.
+ * @returns {Promise<Array<object>>} An array of active vacancy apply records.
+ */
+export async function getAllActiveVacancyApplies() {
+  const sql = `SELECT * FROM robota_ua_vacancy_applies WHERE is_deleted = FALSE`;
+  const activeApplies = await db.all(sql);
+  return activeApplies;
+}
+
+/**
+ * Deletes a vacancy apply record by its ID.
+ * Use with caution, as this permanently removes the record.
+ * @param {object} params - The parameters for the operation.
+ * @param {number} params.id - The ID of the vacancy apply to delete.
+ */
+export async function deleteVacancyApplyById({ id }) {
+  const sql = `DELETE FROM robota_ua_vacancy_applies WHERE id = ?`;
+  await db.run(sql, id);
+}
