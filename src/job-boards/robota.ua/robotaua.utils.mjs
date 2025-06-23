@@ -31,16 +31,16 @@ export const getVacancyApplies = async ({ vacancy_id: vacancyId }) => {
       page: current_page,
     });
     if (data.applies.length > 0) {
-        applies.push(...data.applies);
-        console.log({
-          vacancyId,
-          current_page,
-          applies: data.applies.length,
-          last_id: data.applies[0].id,
-        });
-        if (process.env.ENV === 'DEV' && current_page === 3) {
-          return { applies };
-        }
+      applies.push(...data.applies);
+      console.log({
+        vacancyId,
+        current_page,
+        applies: data.applies.length,
+        last_id: data.applies[0].id,
+      });
+      if (process.env.ENV === 'DEV' && current_page === 3) {
+        return { applies };
+      }
     }
     current_page++;
   } while (data.applies.length > 0);

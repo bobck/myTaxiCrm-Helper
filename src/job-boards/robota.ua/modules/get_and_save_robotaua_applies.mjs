@@ -24,7 +24,7 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
     //   break;
     // }
   }
-  console.log(applies)
+  console.log(applies);
   // processApiResponse
   // const processedApplies = applies.map(processApiResponse);
   // console.log(processedApplies);
