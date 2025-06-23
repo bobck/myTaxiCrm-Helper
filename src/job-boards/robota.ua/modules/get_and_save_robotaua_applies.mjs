@@ -20,9 +20,9 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
     applies.push(
       ...assignVacancyTitleToApplies({ applies: _applies, title: vacancy_name })
     );
-    if (index === 5) {
-      break;
-    }
+    // if (index === 5) {
+    //   break;
+    // }
   }
   console.log(applies)
   // processApiResponse

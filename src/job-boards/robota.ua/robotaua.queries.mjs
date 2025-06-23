@@ -114,27 +114,82 @@ export async function getAllActiveVacancies() {
   const activeVacancies = await db.all(sql);
   return { activeVacancies };
 }
+
 /**
  * Inserts a new vacancy apply record into the robota_ua_vacancy_applies table.
  * 'created_date' and 'updated_date' will be initialized with the current timestamp.
  * 'is_deleted' defaults to FALSE.
  * @param {object} params - The parameters for the new vacancy apply.
+ * @param {number} [params.id] - Optional ID for the record. If not provided, SQLite will auto-increment.
  * @param {string} params.vacancy_id - The ID of the vacancy.
  * @param {number} [params.bitrix_id] - Optional Bitrix ID associated with the apply.
  * @param {number} [params.robota_ua_city_id] - Optional city ID from robota.ua.
  * @param {string} [params.apply_date] - Optional date of the application (DATETIME format).
  */
 export async function createVacancyApply({
+  id = null, // Allow optional ID
   vacancy_id,
   bitrix_id = null,
   robota_ua_city_id = null,
   apply_date = null,
 }) {
   const sql = `INSERT INTO robota_ua_vacancy_applies 
-                    (vacancy_id, bitrix_id, robota_ua_city_id, apply_date)
+                    (id, vacancy_id, bitrix_id, robota_ua_city_id, apply_date)
                 VALUES 
-                    (?, ?, ?, ?)`;
-  await db.run(sql, vacancy_id, bitrix_id, robota_ua_city_id, apply_date);
+                    (?, ?, ?, ?, ?)`;
+  await db.run(sql, id, vacancy_id, bitrix_id, robota_ua_city_id, apply_date);
+}
+
+/**
+ * Inserts multiple new vacancy apply records into the robota_ua_vacancy_applies table in a batch.
+ * This operation is wrapped in a transaction for atomicity and performance.
+ * 'created_date' and 'updated_date' for each record will be initialized with the current timestamp.
+ * 'is_deleted' defaults to FALSE for each record.
+ * @param {Array<object>} applies - An array of objects, where each object represents a vacancy apply.
+ * Each object should have at least 'vacancy_id' and can optionally include 'id',
+ * 'bitrix_id', 'robota_ua_city_id', and 'apply_date'.
+ * If 'id' is not provided for an individual apply, SQLite will auto-increment it.
+ * Example: [{ id: 1, vacancy_id: 'v1' }, { vacancy_id: 'v2', bitrix_id: 123 }]
+ */
+export async function createManyVacancyApplies({ applies }) {
+  if (!applies || applies.length === 0) {
+    console.log('No vacancy apply records to insert.');
+    return;
+  }
+
+  // Define the columns for insertion
+  const columns = `(id, vacancy_id, bitrix_id, robota_ua_city_id, apply_date)`;
+
+  // Create placeholders for each row
+  const placeholders = applies.map(() => `(?, ?, ?, ?, ?)`).join(', ');
+
+  // Flatten all values into a single array for the batch insert
+  const values = [];
+  applies.forEach((apply) => {
+    values.push(
+      apply.id || null, // Allow user-provided ID, or null for auto-increment
+      apply.vacancy_id,
+      apply.bitrix_id || null,
+      apply.robota_ua_city_id || null,
+      apply.apply_date || null
+    );
+  });
+
+  const sql = `INSERT INTO robota_ua_vacancy_applies 
+                    ${columns}
+                VALUES 
+                    ${placeholders}`;
+
+  // Execute the batch insert within a transaction
+  await db
+    .transaction(async () => {
+      await db.run(sql, ...values);
+    })
+    .catch((error) => {
+      console.error('Error during batch insertion of vacancy applies:', error);
+      // Re-throw or handle the error as appropriate for your application
+      throw error;
+    });
 }
 
 /**
