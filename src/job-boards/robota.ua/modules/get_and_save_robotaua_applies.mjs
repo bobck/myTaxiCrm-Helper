@@ -20,14 +20,15 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
     applies.push(
       ...assignVacancyTitleToApplies({ applies: _applies, title: vacancy_name })
     );
-    if (index === 1) {
+    if (index === 5) {
       break;
     }
   }
+  console.log(applies)
   // processApiResponse
-  const processedApplies = applies.map(processApiResponse);
-  console.log(processedApplies)
-  return
+  // const processedApplies = applies.map(processApiResponse);
+  // console.log(processedApplies);
+  return;
   console.log(await createVacancyResponseCards({ dtos: processedApplies }));
 };
 
