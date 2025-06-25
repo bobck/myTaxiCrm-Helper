@@ -77,7 +77,7 @@ export function driversCustomTariffJobs() {
     getAndSaveClosedPolishBitrixDealsJob.stop();
 
     updateAndSaveDriverCashBlockRulesJob.stop();
-    
+
     driversCustomTariffJobs();
   }
 }
