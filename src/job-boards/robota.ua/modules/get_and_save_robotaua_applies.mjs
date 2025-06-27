@@ -19,9 +19,10 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
     const { vacancy_name, vacancy_id } = vacancy;
     const { applies: _applies } = await getVacancyApplies({ vacancy_id });
     applies.push(
-      ...assignVacancyTitleToApplies({ applies: _applies, title: vacancy_name })
-      .map((city)=>{}
-      )
+      ...assignVacancyTitleToApplies({
+        applies: _applies,
+        title: vacancy_name,
+      }).map((city) => {})
     );
 
     if (index === 0) {

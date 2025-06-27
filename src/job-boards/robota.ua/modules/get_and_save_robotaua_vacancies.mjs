@@ -56,7 +56,11 @@ export const getAndSaveRobotaUaVacancies = async () => {
 
 if (process.env.ENV === 'DEV' || process.env.ENV === 'TEST') {
   // await getAndSaveRobotaUaVacancies();
-  const cityIds = (await getAllUniqueRobotaUaCityIds()).map((city)=>city.robota_ua_city_id);
-  const presentCities= robotaUaCities.filter((city)=>cityIds.includes(city.id))
-  console.log(presentCities)
+  const cityIds = (await getAllUniqueRobotaUaCityIds()).map(
+    (city) => city.robota_ua_city_id
+  );
+  const presentCities = robotaUaCities.filter((city) =>
+    cityIds.includes(city.id)
+  );
+  console.log(presentCities);
 }

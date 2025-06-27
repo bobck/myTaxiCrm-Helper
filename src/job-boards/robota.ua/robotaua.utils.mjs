@@ -48,4 +48,4 @@ export const getVacancyApplies = async ({ vacancy_id: vacancyId }) => {
 
   return { applies };
 };
-export const getCityList = () => robotaUaAPI.getCityValues()
+export const getCityList = () => robotaUaAPI.getCityValues();
