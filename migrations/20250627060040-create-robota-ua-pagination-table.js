@@ -21,6 +21,7 @@ exports.up = function (db, callback) {
     last_page INTEGER,
     last_apply_id INTEGER,
     bitrix_id INTEGER,
+    robota_ua_city_id INTEGER NOT NULL,
     is_deleted BOOLEAN DEFAULT FALSE,
     vacancy_date DATETIME,
     created_date DATETIME DEFAULT CURRENT_TIMESTAMP,

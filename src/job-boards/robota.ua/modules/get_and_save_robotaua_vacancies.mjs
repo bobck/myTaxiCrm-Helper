@@ -19,8 +19,9 @@ export const getAndSaveRobotaUaVacancies = async () => {
   // const existingVacancyIds = [];
   const page = parseInt(existingVacancyIds.length / 20);
   const { vacancies } = await getVacancyList({ last_page: page });
-
+  console.log(vacancies)
   console.log({ vacancies: vacancies.length });
+  return
 
   const newVacancies = vacancies.filter(
     (vacancy) => !existingVacancyIds.includes(vacancy.vacancyId)

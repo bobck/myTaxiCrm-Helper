@@ -1,7 +1,7 @@
 import { getAllActiveVacancies } from '../robotaua.queries.mjs';
 import fs from 'fs';
 import path from 'path';
-import { getVacancyApplies } from '../robotaua.utils.mjs';
+import { getCityList, getVacancyApplies } from '../robotaua.utils.mjs';
 import { createVacancyResponseCards } from '../../../bitrix/bitrix.utils.mjs';
 import { assignVacancyTitleToApplies } from '../../job-boards.utils.mjs';
 import { processApiResponse } from '../robotaua.business-entity.mjs';
@@ -11,6 +11,7 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
     module: 'getAndSaveRobotaUaVacancyApplies',
     date: new Date(),
   });
+  const cities = await getCityList();
   const { activeVacancies } = await getAllActiveVacancies();
   const applies = [];
   for (const [index, vacancy] of activeVacancies.entries()) {
@@ -19,10 +20,13 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
     const { applies: _applies } = await getVacancyApplies({ vacancy_id });
     applies.push(
       ...assignVacancyTitleToApplies({ applies: _applies, title: vacancy_name })
+      .map((city)=>{}
+      )
     );
-    // if (index === 5) {
-    //   break;
-    // }
+
+    if (index === 0) {
+      break;
+    }
   }
   console.log(applies);
   // processApiResponse

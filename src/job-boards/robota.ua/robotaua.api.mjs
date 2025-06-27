@@ -96,6 +96,14 @@ class RobotaUaApiClient {
       this.handleApiError(error);
     }
   }
+  async getCityList() {
+    const response = await this.employerApi.get('/vacancy/cityList');
+    return response.data;
+  }
+  async getCityValues() {
+    const response = await this.employerApi.get('/values/cityList');
+    return response.data;
+  }
 
   handleApiError(error) {
     console.error('Robota.ua API Error:');
