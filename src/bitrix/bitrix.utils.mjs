@@ -694,7 +694,7 @@ export const createVacancyResponseCards = async ({ dtos }) => {
     params['entityTypeId'] = '1142';
     params['fields[STAGE_ID]'] = 'DT1142_64:NEW';
     batchObj[`${sourceOfApplyment}:${id}`] = { method: 'crm.item.add', params };
-    console.log(dto)
+    console.log(dto);
     break;
   }
   // return batchObj;
