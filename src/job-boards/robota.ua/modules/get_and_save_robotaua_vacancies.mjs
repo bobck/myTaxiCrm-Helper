@@ -1,7 +1,9 @@
 import { createVacancyResponseCards } from '../../../bitrix/bitrix.utils.mjs';
 import { processApiResponse } from '../robotaua.business-entity.mjs';
+import { robotaUaCities } from '../robotaua.constants.mjs';
 import {
   createVacancy,
+  getAllUniqueRobotaUaCityIds,
   getAllVacancyIds,
   markManyVacanciesAsDeleted,
   markVacancyAsDeleted,
@@ -19,9 +21,8 @@ export const getAndSaveRobotaUaVacancies = async () => {
   // const existingVacancyIds = [];
   const page = parseInt(existingVacancyIds.length / 20);
   const { vacancies } = await getVacancyList({ last_page: page });
-  console.log(vacancies)
+
   console.log({ vacancies: vacancies.length });
-  return
 
   const newVacancies = vacancies.filter(
     (vacancy) => !existingVacancyIds.includes(vacancy.vacancyId)
@@ -31,12 +32,13 @@ export const getAndSaveRobotaUaVacancies = async () => {
   );
 
   for (const vacancy of newVacancies) {
-    const { vacancyId, vacancyName, vacancyDate } = vacancy;
+    const { vacancyId, vacancyName, vacancyDate, cityId } = vacancy;
     // console.log({ vacancyId, vacancyName, vacancyDate });
     await createVacancy({
       vacancy_id: vacancyId,
       vacancy_name: vacancyName,
       vacancy_date: vacancyDate,
+      robota_ua_city_id: cityId,
     });
   }
   await markManyVacanciesAsDeleted({ vacancy_ids: deletedVacancies });
@@ -53,5 +55,8 @@ export const getAndSaveRobotaUaVacancies = async () => {
 };
 
 if (process.env.ENV === 'DEV' || process.env.ENV === 'TEST') {
-  await getAndSaveRobotaUaVacancies();
+  // await getAndSaveRobotaUaVacancies();
+  const cityIds = (await getAllUniqueRobotaUaCityIds()).map((city)=>city.robota_ua_city_id);
+  const presentCities= robotaUaCities.filter((city)=>cityIds.includes(city.id))
+  console.log(presentCities)
 }

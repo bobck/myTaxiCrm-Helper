@@ -18,12 +18,15 @@ export async function createVacancy({
   vacancy_id,
   vacancy_name,
   vacancy_date,
+  robota_ua_city_id,
 }) {
+  //robota_ua_city_id
+  // console.log(arguments)
   const sql = `INSERT INTO robota_ua_pagination 
-                    (vacancy_id, vacancy_name, vacancy_date)
+                    (vacancy_id, vacancy_name, vacancy_date, robota_ua_city_id)
                 VALUES 
-                    (?, ?, ?)`;
-  await db.run(sql, vacancy_id, vacancy_name, vacancy_date);
+                    (?, ?, ?,?)`;
+  await db.run(sql, vacancy_id, vacancy_name, vacancy_date, robota_ua_city_id);
 }
 
 /**
@@ -317,3 +320,7 @@ export async function deleteVacancyApplyById({ id }) {
   const sql = `DELETE FROM robota_ua_vacancy_applies WHERE id = ?`;
   await db.run(sql, id);
 }
+export const getAllUniqueRobotaUaCityIds = async () => {
+  const sql = `SELECT DISTINCT robota_ua_city_id FROM robota_ua_pagination;`;
+  return await db.all(sql);
+};
