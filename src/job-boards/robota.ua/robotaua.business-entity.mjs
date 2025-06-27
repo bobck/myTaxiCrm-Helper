@@ -13,8 +13,16 @@ export function sanitizePhoneNumber(phoneStr) {
 }
 
 export function processApiResponse(response) {
-  const { id, vacancyId, experiences, educations, contacts, ...rest } =
-    response;
+  const {
+    id,
+    title,
+    vacancyId,
+    experiences,
+    educations,
+    contacts,
+    bitrix_city_id,
+    ...rest
+  } = response;
 
   let workExperienceString =
     experiences?.length > 0
@@ -62,6 +70,8 @@ export function processApiResponse(response) {
       : new Date(rest.birthDate).toISOString().split('T')[0];
 
   const processedData = {
+    id,
+    title,
     fullName: rest.name || null,
     avatar:
       rest.photo && !rest.photo.includes('non-photo.png') ? rest.photo : null,
@@ -73,7 +83,7 @@ export function processApiResponse(response) {
     socialNetwork: socialNetworksString,
     dateOfBirth: birthDate,
     applyingForPosition: rest.speciality || null,
-    city: educations?.[0]?.location || null,
+    city: bitrix_city_id,
     sex:
       rest.gender === 'Unknown' || rest.gender === 'Other' ? null : rest.gender,
     skills: cleanHtml(rest.skillsSummary) || null,
@@ -91,7 +101,7 @@ export function processApiResponse(response) {
     educationDetails: educationString,
     educationYears: educations?.[0]?.yearOfGraduation?.toString() ?? null,
     responsibleRecruiter: null,
-    hrCity: null,
+    hrCity: bitrix_city_id,
     isVolunteerToMove: null,
     country: null,
     degreeLevel: null,
