@@ -1,6 +1,7 @@
 import { Bitrix, Method } from '@2bad/bitrix';
 import fs from 'fs';
 import { pool } from './../api/pool.mjs';
+import { jobBoardApplymentParametersToBitrixKeys } from './bitrix.constants.mjs';
 const bitrix = Bitrix(
   `https://${process.env.BITRIX_PORTAL_HOST}/rest/${process.env.BITRIX_USER_ID}/${process.env.BITRIX_API_KEY}/`
 );
@@ -674,3 +675,31 @@ export async function getDealsByIdsVerifyingStageConstancy({
     return null; // Indicate failure
   }
 }
+
+export const createVacancyResponseCards = async ({ dtos }) => {
+  const batchObj = {};
+  for (let dto of dtos) {
+    const { sourceOfApplyment, id } = dto;
+    const params = {};
+    for (const param in dto) {
+      if (
+        !Object.keys(jobBoardApplymentParametersToBitrixKeys).includes(param) ||
+        dto[param] === null ||
+        dto[param] === undefined
+      ) {
+        continue;
+      }
+      params[jobBoardApplymentParametersToBitrixKeys[param]] = dto[param];
+    }
+    params['entityTypeId'] = '1142';
+    params['fields[STAGE_ID]'] = 'DT1142_64:NEW';
+    batchObj[`${sourceOfApplyment}:${id}`] = { method: 'crm.item.add', params };
+    console.log(dto);
+    break;
+  }
+  // return batchObj;
+  // console.log
+  const { result: temp_result } = await bitrix.batch(batchObj);
+  const { result } = temp_result;
+  return result;
+};
