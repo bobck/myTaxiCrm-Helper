@@ -29,8 +29,8 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
     const filteredApplies = _applies.filter(
       (apply) => apply.id > last_apply_id
     );
-    console.log(filteredApplies);
-    return;
+    // console.log(filteredApplies);
+    // return;
     const applies = assignVacancyTitleToApplies({
       applies: _applies.filter((apply) => apply.id > last_apply_id),
       title: `${vacancy_name} ${robota_ua_city.name}`,
