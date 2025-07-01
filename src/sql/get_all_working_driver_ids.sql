@@ -4,5 +4,5 @@ drivers_to_block_cash as(
 	join calculated_statements cs on wd.driver_id=cs.driver_id
 	and cs.week =$2 and cs.year=$3
 )
-select * from drivers_to_block_cash dtbc where driver_balance<-1000 
+select * from drivers_to_block_cash dtbc where driver_balance<$4
 order by driver_id

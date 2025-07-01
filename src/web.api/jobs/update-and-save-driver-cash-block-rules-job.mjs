@@ -4,7 +4,7 @@ import {
   updateDriverCashBlockRules,
 } from '../modules/driver-cash-block-rules.mjs';
 
-const cronTime = '0 10 * * *';
+const cronTime = '15 17 * * *';
 
 const timeZone = 'Europe/Kiev';
 
