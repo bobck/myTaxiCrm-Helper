@@ -10,7 +10,9 @@ import {
   makeCRMRequestlimited,
   getDriversWhoPaidOff,
 } from '../web.api.utlites.mjs';
-const activationValue = 1000;
+
+const activationValue = 200;
+
 const calculateDriverCashBlockRules = () => {
   const cashBlockRule = {
     activationValue,
