@@ -10,7 +10,9 @@ import {
   makeCRMRequestlimited,
   getDriversWhoPaidOff,
 } from '../web.api.utlites.mjs';
-const activationValue = 1000;
+
+const activationValue = 200;
+
 const calculateDriverCashBlockRules = () => {
   const cashBlockRule = {
     activationValue,
@@ -68,7 +70,9 @@ export const setDriverCashBlockRules = async () => {
     ids: IdsOfDriversWithCashBlockRules,
     year,
     weekNumber,
+    activationValue: activationValue * -1,
   });
+
   console.log({
     message: 'setdriverCashBlockRules',
     date: new Date(),
@@ -130,8 +134,8 @@ export const updateDriverCashBlockRules = async () => {
   }
 };
 
-if ((process.env.ENV = 'TEST')) {
+if (process.env.ENV == 'TEST') {
   await openSShTunnel;
-  await updateDriverCashBlockRules();
+  // await updateDriverCashBlockRules();
   await setDriverCashBlockRules();
 }
