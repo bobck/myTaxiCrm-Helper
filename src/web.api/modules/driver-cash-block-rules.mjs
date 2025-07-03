@@ -142,7 +142,7 @@ export const updateDriverCashBlockRules = async () => {
   }
 };
 
-if ((process.env.ENV = 'TEST')) {
+if (process.env.ENV == 'TEST') {
   await openSShTunnel;
   // await updateDriverCashBlockRules();
   await setDriverCashBlockRules();
