@@ -13,6 +13,12 @@ import {
 
 const activationValue = 200;
 
+const driversToOmit = [
+  '21361ee9-dac3-4f70-8434-885945abaaab',
+  '571cc438-a05a-44c8-a159-2e448bc27e49',
+  '2bc07bdc-b04d-486c-af6a-b68a7aec2d67',
+];
+
 const calculateDriverCashBlockRules = () => {
   const cashBlockRule = {
     activationValue,
@@ -71,6 +77,7 @@ export const setDriverCashBlockRules = async () => {
     year,
     weekNumber,
     activationValue: activationValue * -1,
+    driversToOmit,
   });
 
   console.log({
@@ -80,6 +87,7 @@ export const setDriverCashBlockRules = async () => {
     drivers: drivers.length,
     IdsOfDriversWithCashBlockRules: IdsOfDriversWithCashBlockRules.length,
   });
+  // return;
   for (const driver of drivers) {
     try {
       const { driver_id, auto_park_id } = driver;

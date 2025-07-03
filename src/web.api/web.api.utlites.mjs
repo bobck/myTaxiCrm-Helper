@@ -634,6 +634,7 @@ export async function getAllWorkingDriverIds({
   weekNumber,
   year,
   activationValue,
+  driversToOmit,
 }) {
   // console.log(arguments)
   const sql = fs
@@ -644,6 +645,7 @@ export async function getAllWorkingDriverIds({
     weekNumber,
     year,
     activationValue,
+    driversToOmit,
   ]);
   const { rows, rowCount } = result;
   return { rows };
