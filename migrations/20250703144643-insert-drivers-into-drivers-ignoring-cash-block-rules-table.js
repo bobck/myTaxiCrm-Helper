@@ -18,7 +18,9 @@ exports.up = function (db, callback) {
   ];
 
   // Construct a single INSERT statement with multiple VALUES clauses
-  const values = driversToOmit.map(driverId => `('${driverId}', TRUE)`).join(', ');
+  const values = driversToOmit
+    .map((driverId) => `('${driverId}', TRUE)`)
+    .join(', ');
   const sql = `INSERT INTO drivers_ignoring_cash_block_rules (driver_id, is_active) VALUES ${values};`;
 
   db.runSql(sql, callback);
@@ -32,7 +34,9 @@ exports.down = function (db, callback) {
   ];
 
   // Construct a single DELETE statement using an IN clause
-  const driverIdsIn = driversToOmit.map(driverId => `'${driverId}'`).join(', ');
+  const driverIdsIn = driversToOmit
+    .map((driverId) => `'${driverId}'`)
+    .join(', ');
   const sql = `DELETE FROM drivers_ignoring_cash_block_rules WHERE driver_id IN (${driverIdsIn});`;
 
   db.runSql(sql, callback);

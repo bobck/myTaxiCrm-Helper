@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon';
 import { openSShTunnel } from '../../../ssh.mjs';
 import {
+  getDriversIgnoringCashBlockRules,
   getDriversWithActiveCashBlockRules,
   insertDriverWithCashBlockRules,
   markDriverCashBlockRulesAsDeleted,
@@ -12,12 +13,6 @@ import {
 } from '../web.api.utlites.mjs';
 
 const activationValue = 200;
-
-const driversToOmit = [
-  '21361ee9-dac3-4f70-8434-885945abaaab',
-  '571cc438-a05a-44c8-a159-2e448bc27e49',
-  '2bc07bdc-b04d-486c-af6a-b68a7aec2d67',
-];
 
 const calculateDriverCashBlockRules = () => {
   const cashBlockRule = {
@@ -72,6 +67,10 @@ export const setDriverCashBlockRules = async () => {
   const IdsOfDriversWithCashBlockRules = (
     await getDriversWithActiveCashBlockRules()
   ).map(({ driver_id }) => driver_id);
+  const driversToOmit = (await getDriversIgnoringCashBlockRules()).map(
+    ({ driver_id }) => driver_id
+  );
+  console.log(driversToOmit);
   const { rows: drivers } = await getAllWorkingDriverIds({
     ids: IdsOfDriversWithCashBlockRules,
     year,
@@ -85,9 +84,9 @@ export const setDriverCashBlockRules = async () => {
     date: new Date(),
     env: process.env.ENV,
     drivers: drivers.length,
+    driversToOmit: driversToOmit.length,
     IdsOfDriversWithCashBlockRules: IdsOfDriversWithCashBlockRules.length,
   });
-  // return;
   for (const driver of drivers) {
     try {
       const { driver_id, auto_park_id } = driver;
