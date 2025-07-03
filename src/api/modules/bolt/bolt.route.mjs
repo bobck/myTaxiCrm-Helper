@@ -1,7 +1,7 @@
 import express from 'express';
 
-import { boltAuthorizationMiddleware } from './middleware/bolt.middlewares.mjs';
 import * as BoltController from './bolt.controller.mjs';
+import { authorizationMiddleware } from '../../core/middleware/core.middlewares.mjs';
 
 const lettersRouter = express.Router();
 
@@ -19,7 +19,7 @@ banRouter.post('/confirmBan', BoltController.handleBanApprovement);
 
 // All routes defined in lettersRouter will be prefixed with /bolt/letters
 const boltRouter = express.Router();
-boltRouter.use(boltAuthorizationMiddleware);
+boltRouter.use(authorizationMiddleware);
 boltRouter.use('/letters', lettersRouter);
 boltRouter.use('/ban', banRouter);
 
