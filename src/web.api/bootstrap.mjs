@@ -17,6 +17,7 @@ import { inflowOutflowDriversReportJob } from './inflow-outflow-drivers-report/j
 import { upToDateCurrentDateGDCReportJob } from './gdc-report/jobs/up-to-date-current-date.mjs';
 import { saveRepairAndAccidentCarsReportJob } from './jobs/save-repair-and-accident-cars-job.mjs';
 import { getAndSaveClosedPolishBitrixDealsJob } from './gdc-report/jobs/get-and-save-closed-polish-bitrix-deals-job.mjs';
+import { updateAndSaveDriverCashBlockRulesJob } from './jobs/update-and-save-driver-cash-block-rules-job.mjs';
 
 export function driversCustomTariffJobs() {
   try {
@@ -45,6 +46,7 @@ export function driversCustomTariffJobs() {
     console.log('inflowOutflowDriversReport Job runs...');
     saveRepairAndAccidentCarsReportJob.start();
     getAndSaveClosedPolishBitrixDealsJob.start();
+    updateAndSaveDriverCashBlockRulesJob.start();
   } catch (error) {
     console.error('sync error, app down...');
     console.error({ time: new Date(), error });
@@ -73,6 +75,9 @@ export function driversCustomTariffJobs() {
     inflowOutflowDriversReportJob.stop();
     saveRepairAndAccidentCarsReportJob.stop();
     getAndSaveClosedPolishBitrixDealsJob.stop();
+
+    updateAndSaveDriverCashBlockRulesJob.stop();
+
     driversCustomTariffJobs();
   }
 }
