@@ -171,3 +171,7 @@ export const markDriverCashBlockRulesAsDeleted = ({ driver_id }) => {
   const sql = `UPDATE driver_cash_block_rules SET is_deleted=true WHERE driver_id = ?`;
   return db.run(sql, driver_id);
 };
+export const getDriversIgnoringCashBlockRules = () => {
+  const sql = `SELECT driver_id FROM drivers_ignoring_cash_block_rules WHERE is_active=TRUE`;
+  return db.all(sql);
+};
