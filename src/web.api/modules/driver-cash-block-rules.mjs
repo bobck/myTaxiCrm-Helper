@@ -67,16 +67,15 @@ export const setDriverCashBlockRules = async () => {
   const IdsOfDriversWithCashBlockRules = (
     await getDriversWithActiveCashBlockRules()
   ).map(({ driver_id }) => driver_id);
-  const driversToOmit = (await getDriversIgnoringCashBlockRules()).map(
+  const driversToIgnore = (await getDriversIgnoringCashBlockRules()).map(
     ({ driver_id }) => driver_id
   );
-  console.log(driversToOmit);
   const { rows: drivers } = await getAllWorkingDriverIds({
     ids: IdsOfDriversWithCashBlockRules,
     year,
     weekNumber,
     activationValue: activationValue * -1,
-    driversToOmit,
+    driversToIgnore,
   });
 
   console.log({
@@ -84,7 +83,7 @@ export const setDriverCashBlockRules = async () => {
     date: new Date(),
     env: process.env.ENV,
     drivers: drivers.length,
-    driversToOmit: driversToOmit.length,
+    driversToIgnore: driversToIgnore.length,
     IdsOfDriversWithCashBlockRules: IdsOfDriversWithCashBlockRules.length,
   });
   for (const driver of drivers) {
