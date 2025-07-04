@@ -16,7 +16,7 @@ exports.setup = function (options, seedLink) {
 
 exports.up = function (db, callback) {
   const sql = `CREATE TABLE drivers_ignoring_cash_block_rules (
-    driver_id STRING NOT NULL, 
+    driver_id STRING NOT NULL UNIQUE, 
     is_active BOOLEAN DEFAULT TRUE
     )`;
   db.runSql(sql, callback);
