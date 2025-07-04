@@ -60,6 +60,7 @@ WITH
         OR cs.accounting != 0
         OR cs.tariff_tax != 0
         OR cs.total_bonuses != 0
+        OR cs.total_rate_revenue::NUMERIC != 0 
         OR cs.total_payable_to_driver < 0
         OR cs.last_week_balance < 0
       )
@@ -82,6 +83,7 @@ WITH
           'driver_revenue',
           'accounting',
           'tariff_tax',
+          'total_rate_revenue_without_initial_details',
           'total_bonuses'
         ]
       ) AS expense_type,
@@ -90,7 +92,7 @@ WITH
           cs.driver_revenue,
           cs.accounting,
           cs.tariff_tax,
-          (cs.tariff_tax - cs.accounting::numeric - cs.total_bonuses::numeric ) * -1,
+          (cs.total_rate_revenue + cs.tariff_tax - cs.accounting::numeric - cs.total_bonuses::numeric ) * -1,
           cs.total_bonuses * -1
         ]
       ) AS SUM
@@ -102,6 +104,7 @@ WITH
         OR cs.accounting != 0
         OR cs.tariff_tax != 0
         OR cs.total_bonuses != 0
+        OR cs.total_rate_revenue::NUMERIC != 0
         OR cs.total_payable_to_driver < 0
         OR cs.last_week_balance < 0
       )
