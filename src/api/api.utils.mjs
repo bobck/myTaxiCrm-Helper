@@ -83,7 +83,6 @@ export const handleDriverPhones = ({ phones }) => {
     if (!phoneUtil.isValidNumber(numberProto)) {
       continue;
     }
-    acc++;
 
     const nationalNumber = numberProto.getNationalNumber();
     phonesReadyToQuery.push(`%${nationalNumber}%`);

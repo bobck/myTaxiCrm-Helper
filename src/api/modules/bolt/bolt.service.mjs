@@ -18,19 +18,18 @@ export const sentFirstLetterService = async ({ query }) => {
     bitrix_deal_id,
   } = query;
   let phones;
-  if (phone instanceof Array) {
+  if (req_phone instanceof Array) {
     phones = req_phone;
   } else {
     phones = [req_phone];
   }
   const { phonesReadyToQuery } = handleDriverPhones({ phones });
   const updatePayload = { bitrix_deal_id };
-
   const { drivers } = await BoltRepo.getDrivers({
     phones: phonesReadyToQuery,
   });
   const [driver] = drivers;
-  console.log({ driver });
+
   const { driver_id, auto_park_id, external_id: bolt_id, phone } = driver;
   const { checkResult, actualCityId } = await checkIfDriverStaysInTheSameCity({
     driver_id,
@@ -43,7 +42,6 @@ export const sentFirstLetterService = async ({ query }) => {
   if (bolt_id !== req_bolt_id) {
     updatePayload.bolt_id = bolt_id;
   }
-  console.log('inserting...');
   await insertBoltDriverToBan({
     driver_id,
     phone,
@@ -56,7 +54,6 @@ export const sentFirstLetterService = async ({ query }) => {
       ...updatePayload,
     },
   ];
-  console.log('cards', cards);
   await updateRequestedDrivers({
     cards,
   });

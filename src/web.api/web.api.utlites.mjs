@@ -632,7 +632,7 @@ export async function getHandledCashBlockRulesInfo({ fired_drivers_ids }) {
 
 export async function getAllBoltIdsByDriverPhones({ phones }) {
   const sql = fs
-    .readFileSync('src/sql/get_all_bolt_ids_by_driver_phone.sql')
+    .readFileSync('src/sql/get_all_bolt_ids_by_driver_phones.sql')
     .toString();
   const result = await pool.query(sql, [phones]);
   const { rows, rowCount } = result;

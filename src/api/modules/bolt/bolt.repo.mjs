@@ -1,8 +1,10 @@
 import { setLetterApprovedByDealId } from '../../../bitrix/bitrix.queries.mjs';
 import { getAllBoltIdsByDriverPhones } from '../../../web.api/web.api.utlites.mjs';
+import { api_status_codes } from '../../api.constants.mjs';
+
+const { BAD_REQUEST } = api_status_codes;
 
 export const getDrivers = async ({ phones }) => {
-  console.log('getDrivers querying...', { phones });
   const { rows } = await getAllBoltIdsByDriverPhones({
     phones,
   });
