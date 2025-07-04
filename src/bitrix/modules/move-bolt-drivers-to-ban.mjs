@@ -61,7 +61,7 @@ export const moveBoltDriversToBan = async () => {
   const queryParams = computeQueryParams();
   const driversToBan = await getALLBoltDriversToBan(queryParams);
   const driver_ids = driversToBan.map((driver) => driver.driver_id);
-  console.log({driver_ids})
+  console.log({ driver_ids });
   const { rows } = await getBoltDriversToBan({ ...queryParams, driver_ids });
 
   console.log({
