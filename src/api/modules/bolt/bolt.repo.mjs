@@ -1,17 +1,17 @@
 import { setLetterApprovedByDealId } from '../../../bitrix/bitrix.queries.mjs';
-import { getAllBoltIdsByDriverPhone } from '../../../web.api/web.api.utlites.mjs';
+import { getAllBoltIdsByDriverPhones } from '../../../web.api/web.api.utlites.mjs';
 
-export const getDrivers = async ({ phone, bolt_id }) => {
-  const { rows } = await getAllBoltIdsByDriverPhone({
-    phone,
-    bolt_id,
+export const getDrivers = async ({ phones }) => {
+  console.log('getDrivers querying...', { phones });
+  const { rows } = await getAllBoltIdsByDriverPhones({
+    phones,
   });
 
   if (!rows || rows.length === 0) {
-    throw {
+    throw new Error({
       code: BAD_REQUEST,
       message: "Any bolt ID wasn't found",
-    };
+    });
   }
   return { drivers: rows };
 };

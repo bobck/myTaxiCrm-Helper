@@ -7,7 +7,8 @@ const { OK } = api_status_codes;
 export const handleFirstLetter = controllerWrapper({
   handlerCB: async (req, res) => {
     const { query } = req;
-    console.log({ message: 'POST: verify', query });
+
+    console.log({ message: 'POST: FIRST LETTER', query });
     await BoltService.sentFirstLetterService({ query });
     res.status(OK).json({ message: 'First letter sent' });
   },
@@ -20,6 +21,7 @@ export const handleSecondLetter = (req, res) => {
 export const handleLetterApprovement = controllerWrapper({
   handlerCB: async (req, res) => {
     const { params, query } = req;
+    console.log({ message: `POST: APPROVE LETTER ${params.letter_id}`, query });
     await BoltService.letterApprovementService({ params, query });
     res.status(OK).json({ message: 'letter Approved' });
   },

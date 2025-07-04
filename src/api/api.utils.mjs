@@ -1,6 +1,6 @@
 import googleLibphonenumber from 'google-libphonenumber';
 import { cityListWithAssignedBy } from '../bitrix/bitrix.constants.mjs';
-import { getAllBoltIdsByDriverPhone } from '../web.api/web.api.utlites.mjs';
+import { getAllBoltIdsByDriverPhones } from '../web.api/web.api.utlites.mjs';
 import { api_status_codes } from './api.constants.mjs';
 
 const { PhoneNumberUtil } = googleLibphonenumber;
@@ -16,15 +16,14 @@ export const controllerWrapper = ({ handlerCB, handlingServiceName }) => {
     try {
       await handlerCB(req, res);
     } catch (error) {
+      console.error(`error occured in ${handlingServiceName}`, error);
+      const { code, message } = error;
       if (error instanceof Error) {
         res
           .status(INTERNAL_SERVER_ERROR)
           .json({ message: 'Internal Server Error', status: 'error' });
         return;
       }
-
-      console.error(`error occured in ${handlingServiceName}`, error);
-      const { code, message } = error;
       res.status(code).json({ message, status: 'error' });
     }
   };
@@ -75,20 +74,25 @@ export const checkIfDriverStaysInTheSameCity = async ({
   return { checkResult, actualCityId };
 };
 
-export const handleDriverPhone = ({ phone }) => {
-  try {
-    const numberProto = phoneUtil.parse(phone);
-
+export const handleDriverPhones = ({ phones }) => {
+  const phonesReadyToQuery = [];
+  for (const phone of phones) {
+    const numberProto = phoneUtil.parse(
+      phone[0] === ' ' ? `+${phone.slice(1)}` : `+${phone}`
+    );
     if (!phoneUtil.isValidNumber(numberProto)) {
-      throw new Error('Invalid phone number.');
+      continue;
     }
+    acc++;
+
     const nationalNumber = numberProto.getNationalNumber();
-    const phoneReadyToQuery = `%${nationalNumber}%`;
-    return { phoneReadyToQuery };
-  } catch (error) {
-    throw {
-      code: BAD_REQUEST,
-      message: `Phone number is not valid. Provided phone: ${phone}`,
-    };
+    phonesReadyToQuery.push(`%${nationalNumber}%`);
   }
+  if (phonesReadyToQuery.length === 0) {
+    throw new Error({
+      code: BAD_REQUEST,
+      message: 'None of the provided phone numbers are valid',
+    });
+  }
+  return { phonesReadyToQuery };
 };

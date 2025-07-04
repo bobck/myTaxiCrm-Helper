@@ -40,21 +40,17 @@ function processDBCard({ driver_id, driversToBan }) {
     bolt_id,
     bitrix_deal_id,
     phone,
-    is_banned,
     is_first_letter_approved,
     is_second_letter_approved,
   } = dbcard;
-  if (is_banned) {
-    console.log(`driver ${driver_id} is already banned`);
-    return { bitrix_deal_id: null };
-  }
+
   if (!is_first_letter_approved) {
     console.log(`driver ${driver_id} hasn't received first letter approvement`);
     return { bitrix_deal_id: null };
   }
   if (is_second_letter_approved) {
     console.log(
-      `driver ${driver_id} has already received second letter approvement`
+      `driver ${driver_id} has already received second letter approvement, which means that he is already banned.`
     );
     return { bitrix_deal_id: null };
   }
@@ -65,7 +61,7 @@ export const moveBoltDriversToBan = async () => {
   const queryParams = computeQueryParams();
   const driversToBan = await getALLBoltDriversToBan(queryParams);
   const driver_ids = driversToBan.map((driver) => driver.driver_id);
-
+  console.log({driver_ids})
   const { rows } = await getBoltDriversToBan({ ...queryParams, driver_ids });
 
   console.log({

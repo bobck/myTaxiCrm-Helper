@@ -847,7 +847,7 @@ export async function getBoltDriverById({ driver_id }) {
  */
 export async function getALLBoltDriversToBan() {
   const sql = /*sql*/ `
-      SELECT driver_id, bolt_id, bitrix_deal_id, phone, is_banned, is_first_letter_approved, is_second_letter_approved
+      SELECT driver_id, bolt_id, bitrix_deal_id, phone, is_first_letter_approved, is_second_letter_approved
       FROM bolt_drivers_to_ban;
   `;
   return db.all(sql);

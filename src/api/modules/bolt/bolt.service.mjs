@@ -1,11 +1,12 @@
 import * as BoltRepo from './bolt.repo.mjs';
 import {
-  handleDriverPhone,
+  handleDriverPhones,
   checkIfDriverStaysInTheSameCity,
 } from '../../api.utils.mjs';
 import { updateRequestedDrivers } from '../../../bitrix/bitrix.utils.mjs';
 import { insertBoltDriverToBan } from '../../../bitrix/bitrix.queries.mjs';
 import { api_status_codes } from '../../api.constants.mjs';
+import e from 'express';
 
 const { BAD_REQUEST } = api_status_codes;
 
@@ -16,14 +17,20 @@ export const sentFirstLetterService = async ({ query }) => {
     city_id,
     bitrix_deal_id,
   } = query;
-  const { phoneReadyToQuery } = handleDriverPhone({ phone: req_phone });
+  let phones;
+  if (phone instanceof Array) {
+    phones = req_phone;
+  } else {
+    phones = [req_phone];
+  }
+  const { phonesReadyToQuery } = handleDriverPhones({ phones });
   const updatePayload = { bitrix_deal_id };
 
   const { drivers } = await BoltRepo.getDrivers({
-    phone: phoneReadyToQuery,
-    bolt_id: req_bolt_id,
+    phones: phonesReadyToQuery,
   });
   const [driver] = drivers;
+  console.log({ driver });
   const { driver_id, auto_park_id, external_id: bolt_id, phone } = driver;
   const { checkResult, actualCityId } = await checkIfDriverStaysInTheSameCity({
     driver_id,
@@ -36,6 +43,7 @@ export const sentFirstLetterService = async ({ query }) => {
   if (bolt_id !== req_bolt_id) {
     updatePayload.bolt_id = bolt_id;
   }
+  console.log('inserting...');
   await insertBoltDriverToBan({
     driver_id,
     phone,
@@ -48,7 +56,7 @@ export const sentFirstLetterService = async ({ query }) => {
       ...updatePayload,
     },
   ];
-
+  console.log('cards', cards);
   await updateRequestedDrivers({
     cards,
   });

@@ -26,7 +26,6 @@ SELECT DISTINCT ON (d.id)
 FROM aggregated_reports ar
     JOIN drivers d
 ON ar.driver_id = d.id
-    AND d.inner_status = 'FIRED_OUT'
     JOIN calculated_statements cs
     ON cs.driver_id = ar.driver_id
     AND cs.week = $2
@@ -35,5 +34,6 @@ ON ar.driver_id = d.id
     ON ar.driver_id = dti.driver_id
     AND dti.integration_type = 'BOLT'
 WHERE dti.external_id IS NOT NULL AND d.id = ANY($4)
-    AND (cs.total_payable_to_driver - cs.total_debt)<0
 ORDER BY d.id;
+  --  AND d.inner_status = 'FIRED_OUT'
+  --  AND (cs.total_payable_to_driver - cs.total_debt)<0
