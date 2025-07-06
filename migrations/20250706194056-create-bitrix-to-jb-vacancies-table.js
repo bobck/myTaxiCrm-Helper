@@ -24,7 +24,7 @@ exports.up = function (db, callback) {
     is_active BOOLEAN DEFAULT FALSE,
     created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (vacancy_id)
+    PRIMARY KEY (bitrix_vacancy_id)
     )`;
   db.runSql(sql, callback);
 };
