@@ -16,15 +16,12 @@ exports.setup = function (options, seedLink) {
 
 exports.up = function (db, callback) {
   const sql = `CREATE TABLE work_ua_pagination (
-    vacancy_id STRING NOT NULL,
-    vacancy_name TEXT,
+    work_ua_vacancy_id STRING NOT NULL,
     last_apply_id INTEGER,
-    bitrix_id INTEGER,
-    is_deleted BOOLEAN DEFAULT FALSE,
-    vacancy_date DATETIME,
-    created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (vacancy_id)
+    bitrix_vacancy_id INTEGER,
+    is_active BOOLEAN DEFAULT FALSE,
+    last_apply_date DATETIME,
+    PRIMARY KEY (work_ua_vacancy_id)
     )`;
   db.runSql(sql, callback);
 };

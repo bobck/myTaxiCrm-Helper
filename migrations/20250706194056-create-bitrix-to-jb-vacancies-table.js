@@ -14,30 +14,23 @@ exports.setup = function (options, seedLink) {
   seed = seedLink;
 };
 
-/**
- *  work_ua_vacancy_id STRING NOT NULL,
-    last_apply_id INTEGER,
-    bitrix_id INTEGER,
-    is_active BOOLEAN DEFAULT FALSE,
-    last_vacancy_date DATETIME,
-    PRIMARY KEY (work_ua_vacancy_id)
- */
 exports.up = function (db, callback) {
-  const sql = `CREATE TABLE robota_ua_pagination (
+  const sql = `CREATE TABLE bitrix_vacancies_to_job_board_vacancies (
     robota_ua_vacancy_id STRING NOT NULL,
-    last_page INTEGER,
-    last_apply_id INTEGER,
+    vacancy_name TEXT,
     bitrix_vacancy_id INTEGER,
-    robota_ua_city_id INTEGER NOT NULL,
+    work_ua_vacancy_id INTEGER,
+    robota_ua_vacancy_id INTEGER,
     is_active BOOLEAN DEFAULT FALSE,
-    last_apply_date DATETIME,
-    PRIMARY KEY (robota_ua_vacancy_id)
+    created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (vacancy_id)
     )`;
   db.runSql(sql, callback);
 };
 
 exports.down = function (db) {
-  const sql = `DROP TABLE robota_ua_pagination`;
+  const sql = `DROP TABLE bitrix_vacancies_to_job_board_vacancies`;
   db.runSql(sql);
 };
 
