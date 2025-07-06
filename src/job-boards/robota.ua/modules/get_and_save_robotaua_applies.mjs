@@ -29,8 +29,8 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
     const filteredApplies = _applies.filter(
       (apply) => apply.id > last_apply_id
     );
-    // console.log(filteredApplies);
-    // return;
+    console.log(filteredApplies[0]);
+    return;
     const applies = assignVacancyTitleToApplies({
       applies: _applies.filter((apply) => apply.id > last_apply_id),
       title: `${vacancy_name} ${robota_ua_city.name}`,
@@ -51,9 +51,12 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
       last_apply_id: current_last_apply_id,
     });
     if (index === 2) {
+      console.log(applies)
       break;
     }
   }
+
+
 };
 
 if (process.env.ENV === 'DEV' || process.env.ENV === 'TEST') {

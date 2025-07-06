@@ -30,10 +30,10 @@ export const getAndSaveWorkUaVacancyApplies = async () => {
     const { responses: currentApplies } = await getVacancyResponses({
       vacancyId: vacancy_id,
       last_id: 0,
-      last_id: last_apply_id,
+      last_id: 370274985,
     });
-    // console.log(currentApplies)
-
+    console.log(currentApplies)
+    return;
     if (currentApplies.length === 0) {
       // console.log(
       //   `No new applies for Work.ua Vacancy ID ${vacancy.vacancy_id}`
