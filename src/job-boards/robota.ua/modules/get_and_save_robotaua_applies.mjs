@@ -4,7 +4,7 @@ import {
 } from '../robotaua.queries.mjs';
 import { getCityList, getVacancyApplies } from '../robotaua.utils.mjs';
 import { createVacancyResponseCards } from '../../../bitrix/bitrix.utils.mjs';
-import { assignVacancyTitleToApplies } from '../../job-boards.utils.mjs';
+import { assignVacancyTitleToApplies } from '../../job-board.utils.mjs';
 import { processApiResponse } from '../robotaua.business-entity.mjs';
 import { cityListWithAssignedBy as bitrixCities } from '../../../bitrix/bitrix.constants.mjs';
 import { robotaUaCities } from '../robotaua.constants.mjs';

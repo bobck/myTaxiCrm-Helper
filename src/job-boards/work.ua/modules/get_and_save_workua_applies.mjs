@@ -9,7 +9,7 @@ import {
   chunkArray,
   createVacancyResponseCards,
 } from '../../../bitrix/bitrix.utils.mjs'; // Adjust path if needed
-import { assignVacancyTitleToApplies } from '../../job-boards.utils.mjs';
+import { assignVacancyTitleToApplies } from '../../job-board.utils.mjs';
 
 const vacanciesCount = 1;
 let counter = 0;
