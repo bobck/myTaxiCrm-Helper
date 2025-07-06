@@ -51,12 +51,10 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
       last_apply_id: current_last_apply_id,
     });
     if (index === 2) {
-      console.log(applies)
+      console.log(applies);
       break;
     }
   }
-
-
 };
 
 if (process.env.ENV === 'DEV' || process.env.ENV === 'TEST') {

@@ -32,7 +32,7 @@ export const getAndSaveWorkUaVacancyApplies = async () => {
       last_id: 0,
       last_id: 370274985,
     });
-    console.log(currentApplies)
+    console.log(currentApplies);
     return;
     if (currentApplies.length === 0) {
       // console.log(
