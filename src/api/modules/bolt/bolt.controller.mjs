@@ -10,7 +10,7 @@ export const handleFirstLetter = controllerWrapper({
 
     console.log({ message: 'POST: FIRST LETTER', query });
     await BoltService.sentFirstLetterService({ query });
-    res.status(OK).json({ message: 'First letter sent' });
+    return res.status(OK).json({ message: 'First letter sent' });
   },
   handlingServiceName: 'sentFirstLetterService',
 });

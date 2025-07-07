@@ -11,18 +11,8 @@ import e from 'express';
 const { BAD_REQUEST } = api_status_codes;
 
 export const sentFirstLetterService = async ({ query }) => {
-  const {
-    phone: req_phone,
-    bolt_id: req_bolt_id,
-    city_id,
-    bitrix_deal_id,
-  } = query;
-  let phones;
-  if (req_phone instanceof Array) {
-    phones = req_phone;
-  } else {
-    phones = [req_phone];
-  }
+  const { phones, bolt_id: req_bolt_id, city_id, bitrix_deal_id } = query;
+
   const { phonesReadyToQuery } = handleDriverPhones({ phones });
   const updatePayload = { bitrix_deal_id };
   const { drivers } = await BoltRepo.getDrivers({
