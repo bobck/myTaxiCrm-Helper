@@ -7,7 +7,6 @@ import { updateRequestedDrivers } from '../../../bitrix/bitrix.utils.mjs';
 import { insertBoltDriverToBan } from '../../../bitrix/bitrix.queries.mjs';
 import { api_status_codes } from '../../api.constants.mjs';
 
-
 const { BAD_REQUEST } = api_status_codes;
 
 export const sentFirstLetterService = async ({ query }) => {
