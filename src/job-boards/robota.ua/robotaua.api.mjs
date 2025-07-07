@@ -104,6 +104,15 @@ class RobotaUaApiClient {
     const response = await this.employerApi.get('/values/cityList');
     return response.data;
   }
+  async getVacancyById({vacancyId}) {
+    try {
+      const response = await this.employerApi.post(`/vacancy/get/${vacancyId}`);
+      return response.data;
+    } catch (error) {
+      this.handleApiError(error);
+    }
+
+  }
 
   handleApiError(error) {
     console.error('Robota.ua API Error:');

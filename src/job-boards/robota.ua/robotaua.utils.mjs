@@ -21,6 +21,7 @@ export const getVacancyList = async ({ last_page }) => {
   // const resp = await robotaUaAPI.getVacancies();
   return { vacancies };
 };
+
 export const getVacancyApplies = async ({ vacancy_id: vacancyId }) => {
   // const { applies } = await robotaUaAPI.getApplies({ vacancyId, page: 47 });
   const applies = [];
@@ -49,3 +50,5 @@ export const getVacancyApplies = async ({ vacancy_id: vacancyId }) => {
   return { applies };
 };
 export const getCityList = () => robotaUaAPI.getCityValues();
+export const getRobotaUaVacancyById = ({ vacancyId }) =>
+  robotaUaAPI.getVacancyById({ vacancyId });
