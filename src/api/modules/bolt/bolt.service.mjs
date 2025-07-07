@@ -6,7 +6,7 @@ import {
 import { updateRequestedDrivers } from '../../../bitrix/bitrix.utils.mjs';
 import { insertBoltDriverToBan } from '../../../bitrix/bitrix.queries.mjs';
 import { api_status_codes } from '../../api.constants.mjs';
-import e from 'express';
+
 
 const { BAD_REQUEST } = api_status_codes;
 
