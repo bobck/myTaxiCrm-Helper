@@ -16,7 +16,6 @@ exports.setup = function (options, seedLink) {
 
 exports.up = function (db, callback) {
   const sql = `CREATE TABLE bitrix_vacancies_to_job_board_vacancies (
-    robota_ua_vacancy_id STRING NOT NULL,
     vacancy_name TEXT,
     bitrix_vacancy_id INTEGER,
     work_ua_vacancy_id INTEGER,

@@ -14,17 +14,9 @@ exports.setup = function (options, seedLink) {
   seed = seedLink;
 };
 
-/**
- *  work_ua_vacancy_id STRING NOT NULL,
-    last_apply_id INTEGER,
-    bitrix_id INTEGER,
-    is_active BOOLEAN DEFAULT FALSE,
-    last_vacancy_date DATETIME,
-    PRIMARY KEY (work_ua_vacancy_id)
- */
 exports.up = function (db, callback) {
   const sql = `CREATE TABLE robota_ua_pagination (
-    robota_ua_vacancy_id STRING NOT NULL,
+    robota_ua_vacancy_id INTEGER NOT NULL,
     last_page INTEGER,
     last_apply_id INTEGER,
     bitrix_vacancy_id INTEGER,
