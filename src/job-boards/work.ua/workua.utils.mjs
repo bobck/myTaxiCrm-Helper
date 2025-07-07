@@ -87,13 +87,15 @@ export const getVacancyResponses = async ({ vacancyId, last_id }) => {
 };
 export const getWorkUaVacancyById = async ({ vacancyId }) => {
   const { items: vacancies } = await workUaAPI.getVacancies({
-    full:0,
-    all:1,
-    active:1,
+    full: 0,
+    all: 1,
+    active: 1,
   });
-  const vacancy=vacancies.find((vacancy)=>Number(vacancy.id)===Number(vacancyId))
+  const vacancy = vacancies.find(
+    (vacancy) => Number(vacancy.id) === Number(vacancyId)
+  );
   return { vacancy };
-  
+
   // const data = await workUaAPI.getVacancyById({ vacancyId });
   // return data;
 };

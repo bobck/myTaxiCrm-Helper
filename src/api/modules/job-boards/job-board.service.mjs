@@ -34,7 +34,7 @@ export const activateVacancy = async ({ query }) => {
   const robotaUaVacancy = await getRobotaUaVacancyById({
     vacancyId: robota_ua_vacancy_id,
   });
-  if(!robotaUaVacancy){
+  if (!robotaUaVacancy) {
     const comment = `Вакансія robota.ua id: ${robota_ua_vacancy_id} не знайдена`;
     // await addCommentToEntity({
     //   entityId: bitrix_vacancy_id,
@@ -42,12 +42,11 @@ export const activateVacancy = async ({ query }) => {
     //   comment,
     // });
   }
-  
 
   const workUaVacancy = await getWorkUaVacancyById({
     vacancyId: work_ua_vacancy_id,
   });
-  if(!workUaVacancy){
+  if (!workUaVacancy) {
     const comment = `Вакансія work.ua id: ${work_ua_vacancy_id} не знайдена`;
     // await addCommentToEntity({
     //   entityId: bitrix_vacancy_id,
@@ -55,7 +54,6 @@ export const activateVacancy = async ({ query }) => {
     //   comment,
     // });
   }
-  
 
   // await createBitrixVacancy({
   //   bitrix_vacancy_id,

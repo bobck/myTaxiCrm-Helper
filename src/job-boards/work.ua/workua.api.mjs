@@ -90,7 +90,7 @@ class WorkUaApiClient {
     const queryParams = `?id=${vacancyId}&all=1`;
     const requestLocation = `/jobs/my/`;
     const requestUrl = requestLocation + queryParams;
-    const {data} = await this.api.get(requestUrl);
+    const { data } = await this.api.get(requestUrl);
     return data;
   }
   handleApiError(error) {
