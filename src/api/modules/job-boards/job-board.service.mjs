@@ -84,12 +84,12 @@ export const activateVacancy = async ({ query }) => {
       robota_ua_vacancy_id,
     });
   }
-  if (vacancy.robota_ua_vacancy_id) {
-    await activateRobotaUaVacancy({ vacancyId: vacancy.robota_ua_vacancy_id });
+  if (robota_ua_vacancy_id) {
+    await activateRobotaUaVacancy({ vacancyId: robota_ua_vacancy_id });
     await markRobotaUaVacancyAsActive(vacancy);
   }
-  if (vacancy.work_ua_vacancy_id) {
-    await activateWorkUaVacancy({ vacancyId: vacancy.work_ua_vacancy_id });
+  if (work_ua_vacancy_id) {
+    await activateWorkUaVacancy({ vacancyId: work_ua_vacancy_id });
     await markWorkUaVacancyAsActive(vacancy);
   }
   return 'vacancy created';
