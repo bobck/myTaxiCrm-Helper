@@ -1,5 +1,6 @@
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
+import { robotaUaAPI } from './robotaua.utils.mjs';
 
 const db = await open({
   filename: process.env.DEV_DB,
@@ -76,27 +77,26 @@ export async function getAllVacancyIds() {
                 FROM 
                     robota_ua_pagination
                 WHERE 
-                    is_deleted = FALSE`;
+                    is_active = FALSE`;
   const vacancyIds = await db.all(sql);
   return vacancyIds;
 }
 /**
- * Marks a vacancy as deleted by setting the is_deleted flag to TRUE.
+ * Marks a vacancy as active by setting the is_active flag to TRUE.
  * It also automatically updates the 'updated_date' to the current timestamp.
  * @param {object} params - The parameters for the operation.
- * @param {string} params.vacancy_id - The ID of the vacancy to mark as deleted.
+ * @param {string} params.vacancy_id - The ID of the vacancy to mark as active.
  */
-export async function markVacancyAsDeleted({ vacancy_id }) {
+export async function markRobotaUaVacancyAsActive({ robota_ua_vacancy_id }) {
   const sql = `UPDATE 
                     robota_ua_pagination
                 SET 
-                    is_deleted = TRUE,
-                    updated_date = CURRENT_TIMESTAMP
+                    is_active = TRUE
                 WHERE 
-                    vacancy_id = ?`;
-  await db.run(sql, vacancy_id);
+                    robota_ua_vacancy_id = ?`;
+  await db.run(sql, robota_ua_vacancy_id);
 }
-export async function markManyVacanciesAsDeleted({ vacancy_ids }) {
+export async function markManyRobotaUaVacanciesAsActive({ vacancy_ids }) {
   if (!vacancy_ids || vacancy_ids.length === 0) {
     return; // No IDs to process
   }
@@ -106,14 +106,23 @@ export async function markManyVacanciesAsDeleted({ vacancy_ids }) {
   const sql = `UPDATE 
                     robota_ua_pagination
                 SET 
-                    is_deleted = TRUE,
+                    is_active = TRUE,
                     updated_date = CURRENT_TIMESTAMP
                 WHERE 
                     vacancy_id IN (${placeholders})`;
   await db.run(sql, ...vacancy_ids);
 }
-export async function getAllActiveVacancies() {
-  const sql = `SELECT * from robota_ua_pagination where is_deleted = FALSE`;
+export async function getAllActiveRobotaUaVacancies() {
+  const sql = `SELECT * from robota_ua_pagination where is_active = FALSE`;
   const activeVacancies = await db.all(sql);
   return { activeVacancies };
 }
+export const createRobotaUaSynchronizedVacancy = async ({
+  bitrix_vacancy_id,
+  robota_ua_vacancy_id,
+  is_active,
+}) => {
+  const sql = `INSERT INTO robota_ua_pagination (bitrix_vacancy_id,robota_ua_vacancy_id,is_active) VALUES (?,?,?)`;
+
+  await db.run(sql, bitrix_vacancy_id, robota_ua_vacancy_id, is_active);
+};

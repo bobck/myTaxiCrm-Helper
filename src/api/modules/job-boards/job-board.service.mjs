@@ -1,8 +1,16 @@
 import { vacancyRequestTypeId } from '../../../bitrix/bitrix.constants.mjs';
 import { addCommentToEntity } from '../../../bitrix/bitrix.utils.mjs';
 import { createBitrixVacancy } from '../../../job-boards/job-board.queries.mjs';
-import { getRobotaUaVacancyById } from '../../../job-boards/robota.ua/robotaua.utils.mjs';
-import { getWorkUaVacancyById } from '../../../job-boards/work.ua/workua.utils.mjs';
+import { markRobotaUaVacancyAsActive } from '../../../job-boards/robota.ua/robotaua.queries.mjs';
+import {
+  activateRobotaUaVacancy,
+  getRobotaUaVacancyById,
+} from '../../../job-boards/robota.ua/robotaua.utils.mjs';
+import { markWorkUaVacancyAsActive } from '../../../job-boards/work.ua/workua.queries.mjs';
+import {
+  activateWorkUaVacancy,
+  getWorkUaVacancyById,
+} from '../../../job-boards/work.ua/workua.utils.mjs';
 import * as jobBoardRepo from './job-board.repo.mjs';
 /**
  * 
@@ -17,6 +25,46 @@ import * as jobBoardRepo from './job-board.repo.mjs';
     PRIMARY KEY (bitrix_vacancy_id)
     )`
  */
+const createVacancy = async ({
+  bitrix_vacancy_id,
+  vacancy_name,
+  work_ua_vacancy_id,
+  robota_ua_vacancy_id,
+}) => {
+  if (robota_ua_vacancy_id) {
+    const robotaUaVacancy = await getRobotaUaVacancyById({
+      vacancyId: robota_ua_vacancy_id,
+    });
+    if (!robotaUaVacancy && robota_ua_vacancy_id) {
+      const comment = `Вакансія robota.ua id: ${robota_ua_vacancy_id} не знайдена`;
+      // await addCommentToEntity({
+      //   entityId: bitrix_vacancy_id,
+      //   typeId: vacancyRequestTypeId,
+      //   comment,
+      // });
+    }
+  }
+  if (work_ua_vacancy_id) {
+    const workUaVacancy = await getWorkUaVacancyById({
+      vacancyId: work_ua_vacancy_id,
+    });
+    if (!workUaVacancy) {
+      const comment = `Вакансія work.ua id: ${work_ua_vacancy_id} не знайдена`;
+      // await addCommentToEntity({
+      //   entityId: bitrix_vacancy_id,
+      //   typeId: vacancyRequestTypeId,
+      //   comment,
+      // });
+    }
+  }
+
+  // await createBitrixVacancy({
+  //   bitrix_vacancy_id,
+  //   vacancy_name,
+  //   work_ua_vacancy_id,
+  //   robota_ua_vacancy_id,
+  // });
+};
 export const activateVacancy = async ({ query }) => {
   console.log({ query });
   const {
@@ -28,39 +76,22 @@ export const activateVacancy = async ({ query }) => {
   const { vacancy } = await jobBoardRepo.getExistingVacancy({
     bitrix_vacancy_id,
   });
-  if (vacancy) {
-    return 'vacancy already exist';
+  if (!vacancy) {
+    await createVacancy({
+      bitrix_vacancy_id,
+      vacancy_name,
+      work_ua_vacancy_id,
+      robota_ua_vacancy_id,
+    });
   }
-  const robotaUaVacancy = await getRobotaUaVacancyById({
-    vacancyId: robota_ua_vacancy_id,
-  });
-  if (!robotaUaVacancy) {
-    const comment = `Вакансія robota.ua id: ${robota_ua_vacancy_id} не знайдена`;
-    // await addCommentToEntity({
-    //   entityId: bitrix_vacancy_id,
-    //   typeId: vacancyRequestTypeId,
-    //   comment,
-    // });
+  if (vacancy.robota_ua_vacancy_id) {
+    await activateRobotaUaVacancy({ vacancyId: vacancy.robota_ua_vacancy_id });
+    await markRobotaUaVacancyAsActive(vacancy);
   }
-
-  const workUaVacancy = await getWorkUaVacancyById({
-    vacancyId: work_ua_vacancy_id,
-  });
-  if (!workUaVacancy) {
-    const comment = `Вакансія work.ua id: ${work_ua_vacancy_id} не знайдена`;
-    // await addCommentToEntity({
-    //   entityId: bitrix_vacancy_id,
-    //   typeId: vacancyRequestTypeId,
-    //   comment,
-    // });
+  if (vacancy.work_ua_vacancy_id) {
+    await activateWorkUaVacancy({ vacancyId: vacancy.work_ua_vacancy_id });
+    await markWorkUaVacancyAsActive(vacancy);
   }
-
-  // await createBitrixVacancy({
-  //   bitrix_vacancy_id,
-  //   vacancy_name,
-  //   work_ua_vacancy_id,
-  //   robota_ua_vacancy_id,
-  // });
   return 'vacancy created';
 };
 

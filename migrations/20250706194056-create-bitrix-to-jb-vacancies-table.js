@@ -20,7 +20,7 @@ exports.up = function (db, callback) {
     bitrix_vacancy_id INTEGER,
     work_ua_vacancy_id INTEGER,
     robota_ua_vacancy_id INTEGER,
-    is_active BOOLEAN DEFAULT FALSE,
+    is_active BOOLEAN DEFAULT TRUE,
     created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (bitrix_vacancy_id)

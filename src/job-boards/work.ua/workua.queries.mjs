@@ -70,29 +70,28 @@ export async function getAllWorkUaVacancyIds() {
                 FROM
                     work_ua_pagination
                 WHERE
-                    is_deleted = FALSE`;
+                    is_active = FALSE`;
   const vacancyIds = await db.all(sql);
   return vacancyIds;
 }
 
 /**
- * Marks a Work.ua vacancy as deleted by setting the is_deleted flag to TRUE.
+ * Marks a Work.ua vacancy as active by setting the is_active flag to TRUE.
  * It also automatically updates the 'updated_date' to the current timestamp.
  * @param {object} params - The parameters for the operation.
- * @param {string} params.vacancy_id - The ID of the vacancy to mark as deleted.
+ * @param {string} params.work_ua_vacancy_id - The ID of the vacancy to mark as .
  */
-export async function markWorkUaVacancyAsDeleted({ vacancy_id }) {
-  const sql = `UPDATE
+export async function markWorkUaVacancyAsActive({ work_ua_vacancy_id }) {
+  const sql = /*sql*/ `UPDATE
                     work_ua_pagination
                 SET
-                    is_deleted = TRUE,
-                    updated_date = CURRENT_TIMESTAMP
+                    is_active = TRUE
                 WHERE
-                    vacancy_id = ?`;
-  await db.run(sql, vacancy_id);
+                    work_ua_vacancy_id = ?`;
+  await db.run(sql, work_ua_vacancy_id);
 }
 
-export async function markManyWorkUaVacanciesAsDeleted({ vacancy_ids }) {
+export async function markManyWorkUaVacanciesAsActive({ vacancy_ids }) {
   if (!vacancy_ids || vacancy_ids.length === 0) {
     return; // No IDs to process
   }
@@ -102,7 +101,7 @@ export async function markManyWorkUaVacanciesAsDeleted({ vacancy_ids }) {
   const sql = `UPDATE
                     work_ua_pagination
                 SET
-                    is_deleted = TRUE,
+                    is_active = TRUE,
                     updated_date = CURRENT_TIMESTAMP
                 WHERE
                     vacancy_id IN (${placeholders})`;
@@ -110,7 +109,7 @@ export async function markManyWorkUaVacanciesAsDeleted({ vacancy_ids }) {
 }
 
 export async function getAllActiveWorkUaVacancies() {
-  const sql = `SELECT * from work_ua_pagination where is_deleted = FALSE`;
+  const sql = `SELECT * from work_ua_pagination where is_active = FALSE`;
   const activeVacancies = await db.all(sql);
   return { activeVacancies };
 }
@@ -123,4 +122,13 @@ export const getLastWorkUaVaccancyApply = async ({ vacancy_id }) => {
                     vacancy_id = ?`;
   const lastApplyId = await db.get(sql, vacancy_id);
   return lastApplyId;
+};
+export const createWorkUaSynchronizedVacancy = async ({
+  bitrix_vacancy_id,
+  work_ua_vacancy_id,
+  is_active,
+}) => {
+  const sql = `INSERT INTO work_ua_pagination (bitrix_vacancy_id,work_ua_vacancy_id,is_active) VALUES (?,?,?)`;
+
+  await db.run(sql, bitrix_vacancy_id, work_ua_vacancy_id, is_active);
 };
