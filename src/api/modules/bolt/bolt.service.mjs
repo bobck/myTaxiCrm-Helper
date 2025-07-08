@@ -3,7 +3,11 @@ import {
   handleDriverPhones,
   checkIfDriverStaysInTheSameCity,
 } from '../../api.utils.mjs';
-import { updateRequestedDrivers } from '../../../bitrix/bitrix.utils.mjs';
+import {
+  addCommentToEntity,
+  moveRequestedDriversToCheckStage,
+  updateRequestedDrivers,
+} from '../../../bitrix/bitrix.utils.mjs';
 import { insertBoltDriverToBan } from '../../../bitrix/bitrix.queries.mjs';
 import { api_status_codes } from '../../api.constants.mjs';
 
@@ -17,6 +21,22 @@ export const sentFirstLetterService = async ({ query }) => {
   const { drivers } = await BoltRepo.getDrivers({
     phones: phonesReadyToQuery,
   });
+  if (!drivers || drivers.length === 0) {
+    console.log('No drivers found', query);
+    await addCommentToEntity({
+      entityId: bitrix_deal_id,
+      typeId: 1132,
+      comment:
+        'Не знайдено жодного запису водія в MyTaxiCRM з поданими номерами телефонів.',
+    });
+    await moveRequestedDriversToCheckStage({
+      cards: [{ bitrix_deal_id, phone: phones[0] }],
+    });
+    console.error({
+      code: BAD_REQUEST,
+      message: "Any bolt ID wasn't found",
+    });
+  }
   const [driver] = drivers;
 
   const { driver_id, auto_park_id, external_id: bolt_id, phone } = driver;
@@ -46,6 +66,7 @@ export const sentFirstLetterService = async ({ query }) => {
   await updateRequestedDrivers({
     cards,
   });
+  console.log(query, 'done');
 };
 
 export const letterApprovementService = async ({ params, query }) => {

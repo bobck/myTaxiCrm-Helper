@@ -9,12 +9,6 @@ export const getDrivers = async ({ phones }) => {
     phones,
   });
 
-  if (!rows || rows.length === 0) {
-    throw new Error({
-      code: BAD_REQUEST,
-      message: "Any bolt ID wasn't found",
-    });
-  }
   return { drivers: rows };
 };
 export const approveLetterByDealId = async ({ bitrix_deal_id, letter_id }) => {

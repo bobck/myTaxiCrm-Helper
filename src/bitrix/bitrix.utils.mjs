@@ -715,6 +715,22 @@ export async function updateRequestedDrivers({ cards }) {
   const { result: itemObj } = resp;
   return itemObj;
 }
+export async function moveRequestedDriversToCheckStage({ cards }) {
+  const batchObj = {};
+  for (const card of cards) {
+    const { bitrix_deal_id, phone } = card;
+    const params = {
+      id: bitrix_deal_id,
+      entityTypeId: '1132',
+      'fields[STAGE_ID]': 'DT1132_60:UC_WX9FQC', //Перевірити
+    };
+
+    batchObj[phone] = { method: 'crm.item.update', params };
+  }
+  const { result: resp, time } = await bitrix.batch(batchObj);
+  const { result: itemObj } = resp;
+  return itemObj;
+}
 export async function createBanBoltDriverCards({ cards }) {
   let batchObj = {};
 
