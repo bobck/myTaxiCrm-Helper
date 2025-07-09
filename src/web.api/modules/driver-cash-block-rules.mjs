@@ -11,6 +11,7 @@ import {
   getDriversWhoPaidOff,
   getTheMostRecentDriverCashBlockRuleIdByDriverId,
 } from '../web.api.utlites.mjs';
+import e from 'express';
 
 const activationValue = 200;
 
@@ -33,7 +34,12 @@ const editDriverCashBlockRulesMutation = async ({ variables }) => {
       variables,
       query,
     };
-    await makeCRMRequestlimited({ body: bodyForEditRules });
+    const { data, errors } = await makeCRMRequestlimited({
+      body: bodyForEditRules,
+    });
+    const { editDriverCashBlockRules } = data;
+    const { success } = editDriverCashBlockRules;
+    return { success, errors };
   } catch (errors) {
     const [error] = errors;
     const { message, locations, path, extensions } = error;
@@ -103,7 +109,12 @@ export const setDriverCashBlockRules = async () => {
         cashBlockRules,
       });
       try {
-        await editDriverCashBlockRulesMutation({ variables });
+        const { success, errors } = await editDriverCashBlockRulesMutation({
+          variables,
+        });
+        if (!success) {
+          throw errors;
+        }
       } catch (e) {
         console.error(e);
         continue;
@@ -165,6 +176,6 @@ export const updateDriverCashBlockRules = async () => {
 
 if (process.env.ENV == 'TEST') {
   await openSShTunnel;
-  await updateDriverCashBlockRules();
-  // await setDriverCashBlockRules();
+  // await updateDriverCashBlockRules();
+  await setDriverCashBlockRules();
 }
