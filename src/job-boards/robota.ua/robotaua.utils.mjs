@@ -58,5 +58,7 @@ export const getRobotaUaVacancyById = async ({ vacancyId }) => {
   }
 };
 export const activateRobotaUaVacancy = async ({ vacancyId }) => {
-  console.log({ message: `robota.ua vacancy ${vacancyId} is being activated...` });
+  console.log({
+    message: `robota.ua vacancy ${vacancyId} is being activated...`,
+  });
 };

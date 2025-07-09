@@ -1,6 +1,9 @@
 import { vacancyRequestTypeId } from '../../../bitrix/bitrix.constants.mjs';
 import { addCommentToEntity } from '../../../bitrix/bitrix.utils.mjs';
-import { createBitrixVacancy, updateBitrixVacancy } from '../../../job-boards/job-board.queries.mjs';
+import {
+  createBitrixVacancy,
+  updateBitrixVacancy,
+} from '../../../job-boards/job-board.queries.mjs';
 import { markRobotaUaVacancyAsActive } from '../../../job-boards/robota.ua/robotaua.queries.mjs';
 import {
   activateRobotaUaVacancy,
