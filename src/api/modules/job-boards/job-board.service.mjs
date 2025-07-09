@@ -17,6 +17,7 @@ import {
   activateWorkUaVacancy,
   getWorkUaVacancyById,
 } from '../../../job-boards/work.ua/workua.utils.mjs';
+import { getRobotaAndWokUaVacanciesById } from './job-board.buisness-entity.mjs';
 import * as jobBoardRepo from './job-board.repo.mjs';
 /**
  * 
@@ -38,39 +39,25 @@ const addVacancy = async ({
   work_ua_vacancy_id,
   robota_ua_vacancy_id,
 }) => {
-  if (robota_ua_vacancy_id) {
-    const robotaUaVacancy = await getRobotaUaVacancyById({
-      vacancyId: robota_ua_vacancy_id,
+  const { workUaVacancy, robotaUaVacancy } =
+    await getRobotaAndWokUaVacanciesById({
+      work_ua_vacancy_id,
+      robota_ua_vacancy_id,
     });
-    if (!robotaUaVacancy && robota_ua_vacancy_id) {
-      const comment = `Вакансія robota.ua id: ${robota_ua_vacancy_id} не знайдена`;
-      // await addCommentToEntity({
-      //   entityId: bitrix_vacancy_id,
-      //   typeId: vacancyRequestTypeId,
-      //   comment,
-      // });
-    }
+  const payload = {};
+  if (workUaVacancy) {
+    payload.work_ua_vacancy_id = workUaVacancy.id;
   }
-  if (work_ua_vacancy_id) {
-    const workUaVacancy = await getWorkUaVacancyById({
-      vacancyId: work_ua_vacancy_id,
-    });
-    if (!workUaVacancy) {
-      const comment = `Вакансія work.ua id: ${work_ua_vacancy_id} не знайдена`;
-      // await addCommentToEntity({
-      //   entityId: bitrix_vacancy_id,
-      //   typeId: vacancyRequestTypeId,
-      //   comment,
-      // });
-    }
+  if (robotaUaVacancy) {
+    payload.robota_ua_vacancy_id = robotaUaVacancy.id;
   }
 
-  // await createBitrixVacancy({
-  //   bitrix_vacancy_id,
-  //   vacancy_name,
-  //   work_ua_vacancy_id,
-  //   robota_ua_vacancy_id,
-  // });
+  jobBoardRepo.createVacancySynchronously({
+    bitrix_vacancy_id,
+    vacancy_name,
+    is_active: false,
+    ...payload,
+  });
 };
 const updateVacancy = async ({
   bitrix_vacancy_id,
@@ -78,11 +65,24 @@ const updateVacancy = async ({
   work_ua_vacancy_id,
   robota_ua_vacancy_id,
 }) => {
+  const { workUaVacancy, robotaUaVacancy } =
+    await getRobotaAndWokUaVacanciesById({
+      work_ua_vacancy_id,
+      robota_ua_vacancy_id,
+    });
+  const payload = {};
+  if (workUaVacancy) {
+    payload.work_ua_vacancy_id = workUaVacancy.id;
+  }
+  if (robotaUaVacancy) {
+    payload.robota_ua_vacancy_id = robotaUaVacancy.id;
+  }
+
   jobBoardRepo.updateVacancySynchronously({
     bitrix_vacancy_id,
     vacancy_name,
-    work_ua_vacancy_id,
-    robota_ua_vacancy_id,
+    is_active: false,
+    ...payload,
   });
 };
 export const add_update_vacancy_fork = async ({ query }) => {

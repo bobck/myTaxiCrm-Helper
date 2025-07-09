@@ -1,4 +1,5 @@
 import {
+  createBitrixVacancy,
   getVacancyById,
   updateBitrixVacancy,
 } from '../../../job-boards/job-board.queries.mjs';
@@ -22,28 +23,41 @@ export const createVacancySynchronously = async ({
   vacancy_name,
   work_ua_vacancy_id,
   robota_ua_vacancy_id,
+  is_active,
 }) => {
   console.log({
     message: 'creating vacancy',
     bitrix_vacancy_id,
     vacancy_name,
   });
-  await createRobotaUaSynchronizedVacancy({
+  await createBitrixVacancy({
     bitrix_vacancy_id,
-    robota_ua_vacancy_id,
-    is_active: true,
-  });
-  await createWorkUaSynchronizedVacancy({
-    bitrix_vacancy_id,
+    vacancy_name,
     work_ua_vacancy_id,
-    is_active: true,
+    robota_ua_vacancy_id,
+    is_active,
   });
+  if (robota_ua_vacancy_id) {
+    await createRobotaUaSynchronizedVacancy({
+      bitrix_vacancy_id,
+      robota_ua_vacancy_id,
+      is_active,
+    });
+  }
+  if (work_ua_vacancy_id) {
+    await createWorkUaSynchronizedVacancy({
+      bitrix_vacancy_id,
+      work_ua_vacancy_id,
+      is_active,
+    });
+  }
 };
 export const updateVacancySynchronously = async ({
   bitrix_vacancy_id,
   vacancy_name,
   work_ua_vacancy_id,
   robota_ua_vacancy_id,
+  is_active,
 }) => {
   console.log({
     message: 'updating vacancy',
@@ -55,15 +69,20 @@ export const updateVacancySynchronously = async ({
     vacancy_name,
     work_ua_vacancy_id,
     robota_ua_vacancy_id,
+    is_active,
   });
-  await updateRobotaUaSynchronizedVacancy({
-    bitrix_vacancy_id,
-    robota_ua_vacancy_id,
-    is_active: false,
-  });
-  await updateWorkUaSynchronizedVacancy({
-    bitrix_vacancy_id,
-    work_ua_vacancy_id,
-    is_active: false,
-  });
+  if (robota_ua_vacancy_id) {
+    await updateRobotaUaSynchronizedVacancy({
+      bitrix_vacancy_id,
+      robota_ua_vacancy_id,
+      is_active,
+    });
+  }
+  if (work_ua_vacancy_id) {
+    await updateWorkUaSynchronizedVacancy({
+      bitrix_vacancy_id,
+      work_ua_vacancy_id,
+      is_active,
+    });
+  }
 };
