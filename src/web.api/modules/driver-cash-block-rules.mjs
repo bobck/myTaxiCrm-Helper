@@ -9,6 +9,7 @@ import {
   getAllWorkingDriverIds,
   makeCRMRequestlimited,
   getDriversWhoPaidOff,
+  getTheMostRecentDriverCashBlockRuleIdByDriverId,
 } from '../web.api.utlites.mjs';
 
 const activationValue = 200;
@@ -39,6 +40,13 @@ const editDriverCashBlockRulesMutation = async ({ variables }) => {
 
     throw { message, locations, path, extensions, variables };
   }
+};
+const deleteDriverCustomCashBlockRuleMutation = async ({ variables }) => {
+  const query =
+    'mutation DeleteDriverCustomCashboxRules($deleteDriverCustomCashboxRulesInput: DeleteDriverCustomCashboxRulesInput!) {\n  deleteDriverCustomCashboxRules(deleteDriverCustomCashboxRulesInput: $deleteDriverCustomCashboxRulesInput) {\n    success\n  }\n}';
+  const variables = {
+    deleteDriverCustomCashboxRulesInput: { driverId: null, ruleId: null },
+  };
 };
 const calculateMutationVariables = ({
   auto_park_id,
@@ -74,7 +82,7 @@ export const setDriverCashBlockRules = async () => {
   });
 
   console.log({
-    message: 'setdriverCashBlockRules',
+    message: 'setDriverCashBlockRules',
     date: new Date(),
     env: process.env.ENV,
     drivers: drivers.length,
@@ -90,7 +98,14 @@ export const setDriverCashBlockRules = async () => {
         cashBlockRules,
       });
       await editDriverCashBlockRulesMutation({ variables });
-      await insertDriverWithCashBlockRules({ driver_id });
+      const { rows } = await getTheMostRecentDriverCashBlockRuleIdByDriverId({
+        driver_id,
+      });
+      const { id: driver_cash_block_rule_id } = rows[0];
+      await insertDriverWithCashBlockRules({
+        driver_id,
+        driver_cash_block_rule_id,
+      });
     } catch (error) {
       console.error('error while setDriverCashBlockRules', error);
       continue;

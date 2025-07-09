@@ -657,3 +657,14 @@ export async function getDriversWhoPaidOff({ ids, weekNumber, year }) {
   const { rows, rowCount } = result;
   return { rows };
 }
+export async function getTheMostRecentDriverCashBlockRuleIdByDriverId({
+  driver_id,
+}) {
+  const sql = fs
+    .readFileSync(
+      'src/sql/get_the_most_recent_driver_cash_block_rule_id_by_driver_id.sql'
+    )
+    .toString();
+  const result = await pool.query(sql, [driver_id]);
+  const { rows, rowCount } = result;
+}
