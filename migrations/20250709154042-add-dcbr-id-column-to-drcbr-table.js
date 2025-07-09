@@ -10,9 +10,10 @@ exports.setup = function (options, seedLink) {
   seed = seedLink;
 };
 
-exports.up = function (db, callback) {
-  const sql = `ALTER TABLE driver_cash_block_rules ADD COLUMN driver_cash_block_rule_id TEXT;`;
-  db.runSql(sql, callback);
+exports.up =  function (db, callback) {
+
+  const sql = `ALTER TABLE driver_cash_block_rules ADD COLUMN driver_cash_block_rule_id TEXT NOT NULL DEFAULT '';`;
+   db.runSql(sql, callback);
 };
 
 exports.down = function (db, callback) {
