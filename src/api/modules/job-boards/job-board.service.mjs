@@ -1,16 +1,8 @@
 import { addCommentToEntity } from '../../../bitrix/bitrix.utils.mjs';
-import {
-  markRobotaUaVacancyAsActive,
-} from '../../../job-boards/robota.ua/robotaua.queries.mjs';
-import {
-  activateRobotaUaVacancy,
-
-} from '../../../job-boards/robota.ua/robotaua.utils.mjs';
+import { markRobotaUaVacancyAsActive } from '../../../job-boards/robota.ua/robotaua.queries.mjs';
+import { activateRobotaUaVacancy } from '../../../job-boards/robota.ua/robotaua.utils.mjs';
 import { markWorkUaVacancyAsActive } from '../../../job-boards/work.ua/workua.queries.mjs';
-import {
-  activateWorkUaVacancy,
- 
-} from '../../../job-boards/work.ua/workua.utils.mjs';
+import { activateWorkUaVacancy } from '../../../job-boards/work.ua/workua.utils.mjs';
 import { getRobotaAndWokUaVacanciesById } from './job-board.buisness-entity.mjs';
 import * as jobBoardRepo from './job-board.repo.mjs';
 /**
@@ -37,13 +29,16 @@ const addVacancy = async ({
     await getRobotaAndWokUaVacanciesById({
       work_ua_vacancy_id,
       robota_ua_vacancy_id,
+      bitrix_vacancy_id,
     });
   const payload = {};
   if (workUaVacancy) {
-    payload.work_ua_vacancy_id = workUaVacancy.id;
+    console.log({ workUaVacancy, message: 'found' });
+    payload.workUaVacancy = workUaVacancy;
   }
   if (robotaUaVacancy) {
-    payload.robota_ua_vacancy_id = robotaUaVacancy.id;
+    console.log({ robotaUaVacancy, message: 'found' });
+    payload.robotaUaVacancy = robotaUaVacancy;
   }
 
   jobBoardRepo.addVacancySynchronously({
@@ -58,18 +53,32 @@ const updateVacancy = async ({
   vacancy_name,
   work_ua_vacancy_id,
   robota_ua_vacancy_id,
+  vacancy,
 }) => {
   const { workUaVacancy, robotaUaVacancy } =
     await getRobotaAndWokUaVacanciesById({
       work_ua_vacancy_id,
       robota_ua_vacancy_id,
+      bitrix_vacancy_id,
     });
-  const payload = {};
+  const payload = { vacancy };
   if (workUaVacancy) {
     payload.work_ua_vacancy_id = workUaVacancy.id;
+    if (vacancy.work_ua_vacancy_id !== workUaVacancy.id) {
+      await jobBoardRepo.synchronizeWorkUaVacancy({
+        workUaVacancy,
+        vacancy,
+      });
+    }
   }
   if (robotaUaVacancy) {
-    payload.robota_ua_vacancy_id = robotaUaVacancy.id;
+    payload.robota_ua_vacancy_id = robotaUaVacancy.vacancyId;
+    if (vacancy.robota_ua_vacancy_id !== robotaUaVacancy.vacancyId) {
+      await jobBoardRepo.synchronizeRobotaUaVacancy({
+        robotaUaVacancy,
+        vacancy,
+      });
+    }
   }
 
   jobBoardRepo.updateVacancySynchronously({
@@ -102,6 +111,7 @@ export const add_update_vacancy_fork = async ({ query }) => {
     vacancy_name,
     work_ua_vacancy_id,
     robota_ua_vacancy_id,
+    vacancy,
   });
 };
 export const activateVacancy = async ({ query }) => {

@@ -89,11 +89,8 @@ export const getWorkUaVacancyById = async ({ vacancyId }) => {
   const { items: vacancies } = await workUaAPI.getVacancies({
     full: 0,
     all: 1,
-    active: 1,
   });
-  const vacancy = vacancies.find(
-    (vacancy) => Number(vacancy.id) === Number(vacancyId)
-  );
+  const vacancy = vacancies.find((vacancy) => vacancy.id == vacancyId);
   return { vacancy };
 
   // const data = await workUaAPI.getVacancyById({ vacancyId });

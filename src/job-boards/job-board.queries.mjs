@@ -16,10 +16,30 @@ export const createBitrixVacancy = async ({
   vacancy_name,
   work_ua_vacancy_id,
   robota_ua_vacancy_id,
+  is_active,
 }) => {
-  const sql = `INSERT INTO bitrix_vacancies_to_job_board_vacancies 
-    (bitrix_vacancy_id,vacancy_name,work_ua_vacancy_id,robota_ua_vacancy_id) 
-    VALUES (${bitrix_vacancy_id},'${vacancy_name}',${work_ua_vacancy_id},${robota_ua_vacancy_id})`;
+  console.log({
+    bitrix_vacancy_id,
+    vacancy_name,
+    work_ua_vacancy_id,
+    robota_ua_vacancy_id,
+  });
+  let columns = 'bitrix_vacancy_id,vacancy_name';
+  let values = `${bitrix_vacancy_id},'${vacancy_name}'`;
+  if (robota_ua_vacancy_id) {
+    columns += ',robota_ua_vacancy_id';
+    values += `,${robota_ua_vacancy_id}`;
+  }
+  if (work_ua_vacancy_id) {
+    columns += ',work_ua_vacancy_id';
+    values += `,${work_ua_vacancy_id}`;
+  }
+  if (is_active) {
+    columns += ',is_active';
+    values += `,${is_active}`;
+  }
+
+  const sql = `INSERT INTO bitrix_vacancies_to_job_board_vacancies (${columns}) VALUES (${values})`;
   await db.run(sql);
 };
 export const updateBitrixVacancy = async ({

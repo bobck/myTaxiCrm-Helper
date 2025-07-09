@@ -5,6 +5,7 @@ import * as jobBoardService from './job-board.service.mjs';
 export const addOrUpdateVacancyEndpoint = controllerWrapper({
   handlerCB: async (req, res, next) => {
     const { query } = req;
+    console.log({ query, endpoint: 'addOrUpdateVacancyEndpoint' });
     const result = await jobBoardService.add_update_vacancy_fork({ query });
     res.send(result);
   },

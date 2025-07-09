@@ -21,6 +21,7 @@ exports.up = function (db, callback) {
     bitrix_vacancy_id INTEGER,
     is_active BOOLEAN DEFAULT FALSE,
     last_apply_date DATETIME,
+    region INTEGER,
     PRIMARY KEY (work_ua_vacancy_id)
     )`;
   db.runSql(sql, callback);
