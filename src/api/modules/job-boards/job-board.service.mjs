@@ -52,7 +52,7 @@ const addVacancy = async ({
     payload.robota_ua_vacancy_id = robotaUaVacancy.id;
   }
 
-  jobBoardRepo.createVacancySynchronously({
+  jobBoardRepo.addVacancySynchronously({
     bitrix_vacancy_id,
     vacancy_name,
     is_active: false,
@@ -112,23 +112,11 @@ export const add_update_vacancy_fork = async ({ query }) => {
 };
 export const activateVacancy = async ({ query }) => {
   console.log({ query });
-  const {
-    bitrix_vacancy_id,
-    vacancy_name,
-    work_ua_vacancy_id,
-    robota_ua_vacancy_id,
-  } = query;
+  const { bitrix_vacancy_id } = query;
   const { vacancy } = await jobBoardRepo.getExistingVacancy({
     bitrix_vacancy_id,
   });
-  if (!vacancy) {
-    await addVacancy({
-      bitrix_vacancy_id,
-      vacancy_name,
-      work_ua_vacancy_id,
-      robota_ua_vacancy_id,
-    });
-  }
+  const { work_ua_vacancy_id, robota_ua_vacancy_id } = vacancy;
   if (robota_ua_vacancy_id) {
     await activateRobotaUaVacancy({ vacancyId: robota_ua_vacancy_id });
     await markRobotaUaVacancyAsActive(vacancy);

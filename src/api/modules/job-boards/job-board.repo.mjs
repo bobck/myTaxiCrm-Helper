@@ -18,7 +18,7 @@ export const getExistingVacancy = async ({ bitrix_vacancy_id }) => {
 
   return { vacancy };
 };
-export const createVacancySynchronously = async ({
+export const addVacancySynchronously = async ({
   bitrix_vacancy_id,
   vacancy_name,
   work_ua_vacancy_id,
