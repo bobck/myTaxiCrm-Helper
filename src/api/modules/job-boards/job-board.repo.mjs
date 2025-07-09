@@ -32,7 +32,7 @@ export const addVacancySynchronously = async ({
     bitrix_vacancy_id,
     vacancy_name,
   });
-  const comments = [];
+  const _comments = [];
   let commentsLimit = 0;
   const payload = {};
 
@@ -50,7 +50,7 @@ export const addVacancySynchronously = async ({
   if (robotaUaVacancy) {
     commentsLimit++;
     if (existingRobotaUaVacancy) {
-      comments.push(
+      _comments.push(
         `Подана вакансія robota.ua id:${robota_ua_vacancy_id} вже існує в системі.`
       );
     } else {
@@ -66,7 +66,7 @@ export const addVacancySynchronously = async ({
   if (workUaVacancy) {
     commentsLimit++;
     if (existingWorkUaVacancy) {
-      comments.push(
+      _comments.push(
         `Подана вакансія work.ua id:${work_ua_vacancy_id} вже існує в системі.`
       );
     } else {
@@ -79,8 +79,8 @@ export const addVacancySynchronously = async ({
       console.log('work vacancy created');
     }
   }
-  if (commentsLimit <= comments.length) {
-    return { comments, isVacancyCreated: false };
+  if (commentsLimit <= _comments.length) {
+    return { comments: _comments, isAnyVacancyCreated: false };
   }
   await createBitrixVacancy({
     bitrix_vacancy_id,
@@ -88,7 +88,7 @@ export const addVacancySynchronously = async ({
     is_active,
     ...payload,
   });
-  return { comments, isVacancyCreated: true };
+  return { comments: _comments, isAnyVacancyCreated: true };
 };
 export const updateVacancySynchronously = async ({
   bitrix_vacancy_id,
@@ -147,7 +147,7 @@ export const updateVacancySynchronously = async ({
     }
   }
   if (comments.length >= commentsLimit) {
-    return { comments, isVacancyUpdated: false };
+    return { comments, isAnyVacancyUpdated: false };
   }
   await updateBitrixVacancy({
     bitrix_vacancy_id,
@@ -156,7 +156,7 @@ export const updateVacancySynchronously = async ({
     robota_ua_vacancy_id,
     is_active,
   });
-  return { comments, isVacancyUpdated: true };
+  return { comments, isAnyVacancyUpdated: true };
 };
 
 export const synchronizeWorkUaVacancy = async ({ workUaVacancy, vacancy }) => {

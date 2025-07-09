@@ -8,36 +8,42 @@ export const getRobotaAndWokUaVacanciesById = async ({
   work_ua_vacancy_id,
   robota_ua_vacancy_id,
 }) => {
-  let workUaVacancy, robotaUaVacancy;
+  let workUaVacancy,
+    robotaUaVacancy,
+    commentsLimit = 0;
+  const _comments = [];
   if (robota_ua_vacancy_id) {
+    commentsLimit++;
     robotaUaVacancy = await getRobotaUaVacancyById({
       vacancyId: robota_ua_vacancy_id,
     });
     if (!robotaUaVacancy && robota_ua_vacancy_id) {
-      const comment = `Вакансія robota.ua id: ${robota_ua_vacancy_id} не знайдена`;
-      console.log({ bitrix_vacancy_id, comment });
-      //   await addCommentToEntity({
-      //     entityId: bitrix_vacancy_id,
-      //     typeId: vacancyRequestTypeId,
-      //     comment,
-      //   });
+      _comments.push(
+        `Вакансія robota.ua id: ${robota_ua_vacancy_id} не знайдена`
+      );
     }
   }
   if (work_ua_vacancy_id) {
-    const {  vacancy } = await getWorkUaVacancyById({
+    commentsLimit++;
+    const { vacancy } = await getWorkUaVacancyById({
       vacancyId: work_ua_vacancy_id,
     });
     workUaVacancy = vacancy;
     if (!workUaVacancy) {
-      const comment = `Вакансія work.ua id: ${work_ua_vacancy_id} не знайдена`;
-      console.log({ bitrix_vacancy_id, comment });
-      //   await addCommentToEntity({
-      //     entityId: bitrix_vacancy_id,
-      //     typeId: vacancyRequestTypeId,
-      //     comment,
-      //   });
+      _comments.push(`Вакансія work.ua id: ${work_ua_vacancy_id} не знайдена`);
     }
   }
+  if (commentsLimit <= _comments.length) {
+    return {
+      workUaVacancy,
+      robotaUaVacancy,
+      _comments,
+      isAnyVacancyFound: false,
+    };
+  }
 
-  return { workUaVacancy, robotaUaVacancy };
+  return { workUaVacancy, robotaUaVacancy, _comments, isAnyVacancyFound: true };
+};
+export const assignCommentsToVacancyRequest = async ({ comments }) => {
+  console.log('assigning comments to vacancy request', comments);
 };
