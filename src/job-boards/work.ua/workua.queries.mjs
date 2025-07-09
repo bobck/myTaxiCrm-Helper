@@ -129,7 +129,7 @@ export const createWorkUaSynchronizedVacancy = async ({
   is_active,
 }) => {
   const { id: work_ua_vacancy_id, region } = workUaVacancy;
-  const sql = `INSERT INTO work_ua_pagination (bitrix_vacancy_id,work_ua_vacancy_id,is_active,region) VALUES (?,?,?.?)`;
+  const sql = `INSERT INTO work_ua_pagination (bitrix_vacancy_id,work_ua_vacancy_id,is_active,region) VALUES (?,?,?,?)`;
 
   await db.run(sql, bitrix_vacancy_id, work_ua_vacancy_id, is_active, region);
 };

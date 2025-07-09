@@ -119,12 +119,21 @@ export async function getAllActiveRobotaUaVacancies() {
 }
 export const createRobotaUaSynchronizedVacancy = async ({
   bitrix_vacancy_id,
-  robota_ua_vacancy_id,
+  robotaUaVacancy,
   is_active,
 }) => {
-  const sql = `INSERT INTO robota_ua_pagination (bitrix_vacancy_id,robota_ua_vacancy_id,is_active) VALUES (?,?,?)`;
+  const { vacancyId: robota_ua_vacancy_id, cityId: robota_ua_city_id } =
+    robotaUaVacancy;
 
-  await db.run(sql, bitrix_vacancy_id, robota_ua_vacancy_id, is_active);
+  const sql = `INSERT INTO robota_ua_pagination (bitrix_vacancy_id,robota_ua_vacancy_id,is_active,robota_ua_city_id) VALUES (?,?,?,?)`;
+
+  await db.run(
+    sql,
+    bitrix_vacancy_id,
+    robota_ua_vacancy_id,
+    is_active,
+    robota_ua_city_id
+  );
 };
 export const updateRobotaUaSynchronizedVacancy = async ({
   bitrix_vacancy_id,
