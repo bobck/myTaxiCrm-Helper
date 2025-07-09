@@ -9,7 +9,9 @@ import {
   getAllWorkingDriverIds,
   makeCRMRequestlimited,
   getDriversWhoPaidOff,
+  getTheMostRecentDriverCashBlockRuleIdByDriverId,
 } from '../web.api.utlites.mjs';
+import e from 'express';
 
 const activationValue = 200;
 
@@ -32,13 +34,30 @@ const editDriverCashBlockRulesMutation = async ({ variables }) => {
       variables,
       query,
     };
-    await makeCRMRequestlimited({ body: bodyForEditRules });
+    const { data, errors } = await makeCRMRequestlimited({
+      body: bodyForEditRules,
+    });
+    const { editDriverCashBlockRules } = data;
+    const { success } = editDriverCashBlockRules;
+    return { success, errors };
   } catch (errors) {
     const [error] = errors;
     const { message, locations, path, extensions } = error;
 
     throw { message, locations, path, extensions, variables };
   }
+};
+const deleteDriverCustomCashBlockRuleMutation = async ({
+  driver_id: driverId,
+  driver_cash_block_rule_id: ruleId,
+}) => {
+  const operationName = 'DeleteDriverCustomCashboxRules';
+  const query =
+    'mutation DeleteDriverCustomCashboxRules($deleteDriverCustomCashboxRulesInput: DeleteDriverCustomCashboxRulesInput!) {\n  deleteDriverCustomCashboxRules(deleteDriverCustomCashboxRulesInput: $deleteDriverCustomCashboxRulesInput) {\n    success\n  }\n}';
+  const variables = {
+    deleteDriverCustomCashboxRulesInput: { driverId, ruleId },
+  };
+  await makeCRMRequestlimited({ body: { operationName, query, variables } });
 };
 const calculateMutationVariables = ({
   auto_park_id,
@@ -74,7 +93,7 @@ export const setDriverCashBlockRules = async () => {
   });
 
   console.log({
-    message: 'setdriverCashBlockRules',
+    message: 'setDriverCashBlockRules',
     date: new Date(),
     env: process.env.ENV,
     drivers: drivers.length,
@@ -89,8 +108,25 @@ export const setDriverCashBlockRules = async () => {
         driver_id,
         cashBlockRules,
       });
-      await editDriverCashBlockRulesMutation({ variables });
-      await insertDriverWithCashBlockRules({ driver_id });
+      try {
+        const { success, errors } = await editDriverCashBlockRulesMutation({
+          variables,
+        });
+        if (!success) {
+          throw errors;
+        }
+      } catch (e) {
+        console.error(e);
+        continue;
+      }
+      const { rows } = await getTheMostRecentDriverCashBlockRuleIdByDriverId({
+        driver_id,
+      });
+      const { id: driver_cash_block_rule_id } = rows[0];
+      await insertDriverWithCashBlockRules({
+        driver_id,
+        driver_cash_block_rule_id,
+      });
     } catch (error) {
       console.error('error while setDriverCashBlockRules', error);
       continue;
@@ -99,9 +135,11 @@ export const setDriverCashBlockRules = async () => {
 };
 export const updateDriverCashBlockRules = async () => {
   const { year, weekNumber } = calculateCurrentWeekAndYear();
-  const IdsOfDriversWithCashBlockRules = (
-    await getDriversWithActiveCashBlockRules()
-  ).map(({ driver_id }) => driver_id);
+  const driversWithCashBlockRules = await getDriversWithActiveCashBlockRules();
+  const IdsOfDriversWithCashBlockRules = driversWithCashBlockRules.map(
+    ({ driver_id }) => driver_id
+  );
+
   const { rows: drivers } = await getDriversWhoPaidOff({
     year,
     weekNumber,
@@ -119,13 +157,15 @@ export const updateDriverCashBlockRules = async () => {
   }
   for (const driver of drivers) {
     try {
-      const { driver_id, auto_park_id } = driver;
-      const { variables } = calculateMutationVariables({
-        auto_park_id,
+      const { driver_id } = driver;
+      const { driver_cash_block_rule_id } = driversWithCashBlockRules.find(
+        (d) => d.driver_id === driver_id
+      );
+
+      await deleteDriverCustomCashBlockRuleMutation({
         driver_id,
-        cashBlockRules: [],
+        driver_cash_block_rule_id,
       });
-      await editDriverCashBlockRulesMutation({ variables });
       await markDriverCashBlockRulesAsDeleted({ driver_id });
     } catch (error) {
       console.error('error while updateDriverCashBlockRules', error);
