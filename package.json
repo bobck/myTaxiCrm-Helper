@@ -58,7 +58,8 @@
     "testDriverCashBlockRulesManually": "ENV=TEST node -r dotenv/config src/web.api/modules/driver-cash-block-rules.mjs",
     "moveReferralToClosedManually": "ENV=TEST node -r dotenv/config src/bitrix/modules/move-referral-to-closed.mjs",
     "launchAPI:dev": "ENV=DEV API_HOST=localhost node -r dotenv/config src/api/api.mjs",
-    "launchAPI:prod": "ENV=PROD API_HOST=0.0.0.0 node -r dotenv/config src/api/api.mjs"
+    "launchAPI:prod": "ENV=PROD API_HOST=0.0.0.0 node -r dotenv/config src/api/api.mjs",
+    "assignCashBlockRuleIdsToDrversManually": "ENV=ASSIGN_CASH_BLOCK_RULE_IDS_TO_DRIVERS node -r dotenv/config src/web.api/modules/driver-cash-block-rules.mjs"
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",

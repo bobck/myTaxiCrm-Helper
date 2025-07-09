@@ -174,3 +174,10 @@ export const markDriverCashBlockRulesAsDeleted = ({ driver_id }) => {
   const sql = `UPDATE driver_cash_block_rules SET is_deleted=true WHERE driver_id = ?`;
   return db.run(sql, driver_id);
 };
+export const updateDCBR = async ({ drivers }) => {
+  for (const driver of drivers) {
+    const { driver_id, id: driver_cash_block_rule_id } = driver;
+    const sql = `UPDATE driver_cash_block_rules SET driver_cash_block_rule_id = ? WHERE driver_id = ?;`;
+    await db.run(sql, driver_cash_block_rule_id, driver_id);
+  }
+};

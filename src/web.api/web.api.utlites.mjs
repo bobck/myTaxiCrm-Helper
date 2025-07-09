@@ -669,3 +669,9 @@ export async function getTheMostRecentDriverCashBlockRuleIdByDriverId({
   const { rows, rowCount } = result;
   return { rows };
 }
+export async function getDriversCashBlockRules({ driver_ids }) {
+  const sql = fs.readFileSync('src/sql/dcbr-assignment.sql').toString();
+  const result = await pool.query(sql, [driver_ids]);
+  const { rows, rowCount } = result;
+  return { rows };
+}

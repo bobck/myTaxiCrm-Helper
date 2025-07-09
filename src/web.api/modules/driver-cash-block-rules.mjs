@@ -4,14 +4,15 @@ import {
   getDriversWithActiveCashBlockRules,
   insertDriverWithCashBlockRules,
   markDriverCashBlockRulesAsDeleted,
+  updateDCBR,
 } from '../web.api.queries.mjs';
 import {
   getAllWorkingDriverIds,
   makeCRMRequestlimited,
   getDriversWhoPaidOff,
   getTheMostRecentDriverCashBlockRuleIdByDriverId,
+  getDriversCashBlockRules,
 } from '../web.api.utlites.mjs';
-import e from 'express';
 
 const activationValue = 200;
 
@@ -173,9 +174,23 @@ export const updateDriverCashBlockRules = async () => {
     }
   }
 };
+export const assignCashBlockRuleIdsToDrvers = async () => {
+  const IdsOfDriversWithCashBlockRules = (
+    await getDriversWithActiveCashBlockRules()
+  ).map(({ driver_id }) => driver_id);
+  const { rows: drivers } = await getDriversCashBlockRules({
+    driver_ids: IdsOfDriversWithCashBlockRules,
+  });
+  updateDCBR({ drivers });
+  console.log('assignCashBlockRuleIdsToDrvers done');
+};
 
 if (process.env.ENV == 'TEST') {
   await openSShTunnel;
   // await updateDriverCashBlockRules();
   await setDriverCashBlockRules();
+}
+if (process.env.ENV == 'ASSIGN_CASH_BLOCK_RULE_IDS_TO_DRIVERS') {
+  await openSShTunnel;
+  await assignCashBlockRuleIdsToDrvers();
 }
