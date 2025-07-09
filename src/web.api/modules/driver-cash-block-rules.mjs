@@ -190,7 +190,3 @@ if (process.env.ENV == 'TEST') {
   // await updateDriverCashBlockRules();
   await setDriverCashBlockRules();
 }
-if (process.env.ENV == 'ASSIGN_CASH_BLOCK_RULE_IDS_TO_DRIVERS') {
-  await openSShTunnel;
-  await assignCashBlockRuleIdsToDrvers();
-}

@@ -1,5 +1,6 @@
 import { CronJob } from 'cron';
 import {
+  assignCashBlockRuleIdsToDrvers,
   setDriverCashBlockRules,
   updateDriverCashBlockRules,
 } from '../modules/driver-cash-block-rules.mjs';
@@ -13,6 +14,7 @@ const job = CronJob.from({
   timeZone,
   onTick: async () => {
     try {
+      await assignCashBlockRuleIdsToDrvers();
       await updateDriverCashBlockRules();
       await setDriverCashBlockRules();
     } catch (error) {
