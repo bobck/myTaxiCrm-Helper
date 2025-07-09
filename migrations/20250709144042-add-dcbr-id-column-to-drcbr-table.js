@@ -11,7 +11,7 @@ exports.setup = function (options, seedLink) {
 };
 
 exports.up = function (db, callback) {
-  const sql = `ALTER TABLE driver_cash_block_rules ADD COLUMN driver_cash_block_rule_id TEXT NOT NULL;`;
+  const sql = `ALTER TABLE driver_cash_block_rules ADD COLUMN driver_cash_block_rule_id TEXT;`;
   db.runSql(sql, callback);
 };
 
