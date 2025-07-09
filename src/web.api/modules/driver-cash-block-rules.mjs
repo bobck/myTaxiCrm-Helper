@@ -102,7 +102,12 @@ export const setDriverCashBlockRules = async () => {
         driver_id,
         cashBlockRules,
       });
-      await editDriverCashBlockRulesMutation({ variables });
+      try {
+        await editDriverCashBlockRulesMutation({ variables });
+      } catch (e) {
+        console.error(e);
+        continue;
+      }
       const { rows } = await getTheMostRecentDriverCashBlockRuleIdByDriverId({
         driver_id,
       });
