@@ -1,21 +1,15 @@
-import { vacancyRequestTypeId } from '../../../bitrix/bitrix.constants.mjs';
 import { addCommentToEntity } from '../../../bitrix/bitrix.utils.mjs';
 import {
-  createBitrixVacancy,
-  updateBitrixVacancy,
-} from '../../../job-boards/job-board.queries.mjs';
-import {
   markRobotaUaVacancyAsActive,
-  updateVacancyProgress,
 } from '../../../job-boards/robota.ua/robotaua.queries.mjs';
 import {
   activateRobotaUaVacancy,
-  getRobotaUaVacancyById,
+
 } from '../../../job-boards/robota.ua/robotaua.utils.mjs';
 import { markWorkUaVacancyAsActive } from '../../../job-boards/work.ua/workua.queries.mjs';
 import {
   activateWorkUaVacancy,
-  getWorkUaVacancyById,
+ 
 } from '../../../job-boards/work.ua/workua.utils.mjs';
 import { getRobotaAndWokUaVacanciesById } from './job-board.buisness-entity.mjs';
 import * as jobBoardRepo from './job-board.repo.mjs';
@@ -125,9 +119,23 @@ export const activateVacancy = async ({ query }) => {
     await activateWorkUaVacancy({ vacancyId: work_ua_vacancy_id });
     await markWorkUaVacancyAsActive(vacancy);
   }
-  return 'vacancy created';
+  return 'vacancy activated';
 };
 
 export const deactivateVacancy = async ({ query }) => {
+  console.log({ query });
+  const { bitrix_vacancy_id } = query;
+  const { vacancy } = await jobBoardRepo.getExistingVacancy({
+    bitrix_vacancy_id,
+  });
+  const { work_ua_vacancy_id, robota_ua_vacancy_id } = vacancy;
+  if (robota_ua_vacancy_id) {
+    await deactivateRobotaUaVacancy({ vacancyId: robota_ua_vacancy_id });
+    await markRobotaUaVacancyAsInactive(vacancy);
+  }
+  if (work_ua_vacancy_id) {
+    await deactivateWorkUaVacancy({ vacancyId: work_ua_vacancy_id });
+    await markWorkUaVacancyAsInactive(vacancy);
+  }
   return 'velcome to disable vacancy';
 };
