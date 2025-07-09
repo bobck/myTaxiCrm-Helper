@@ -41,12 +41,17 @@ const editDriverCashBlockRulesMutation = async ({ variables }) => {
     throw { message, locations, path, extensions, variables };
   }
 };
-const deleteDriverCustomCashBlockRuleMutation = async ({ variables }) => {
+const deleteDriverCustomCashBlockRuleMutation = async ({
+  driver_id: driverId,
+  driver_cash_block_rule_id: ruleId,
+}) => {
+  const operationName = 'DeleteDriverCustomCashboxRules';
   const query =
     'mutation DeleteDriverCustomCashboxRules($deleteDriverCustomCashboxRulesInput: DeleteDriverCustomCashboxRulesInput!) {\n  deleteDriverCustomCashboxRules(deleteDriverCustomCashboxRulesInput: $deleteDriverCustomCashboxRulesInput) {\n    success\n  }\n}';
   const variables = {
-    deleteDriverCustomCashboxRulesInput: { driverId: null, ruleId: null },
+    deleteDriverCustomCashboxRulesInput: { driverId, ruleId },
   };
+  await makeCRMRequestlimited({ body: { operationName, query, variables } });
 };
 const calculateMutationVariables = ({
   auto_park_id,
@@ -114,9 +119,11 @@ export const setDriverCashBlockRules = async () => {
 };
 export const updateDriverCashBlockRules = async () => {
   const { year, weekNumber } = calculateCurrentWeekAndYear();
-  const IdsOfDriversWithCashBlockRules = (
-    await getDriversWithActiveCashBlockRules()
-  ).map(({ driver_id }) => driver_id);
+  const driversWithCashBlockRules = await getDriversWithActiveCashBlockRules();
+  const IdsOfDriversWithCashBlockRules = driversWithCashBlockRules.map(
+    ({ driver_id }) => driver_id
+  );
+
   const { rows: drivers } = await getDriversWhoPaidOff({
     year,
     weekNumber,
@@ -134,13 +141,15 @@ export const updateDriverCashBlockRules = async () => {
   }
   for (const driver of drivers) {
     try {
-      const { driver_id, auto_park_id } = driver;
-      const { variables } = calculateMutationVariables({
-        auto_park_id,
+      const { driver_id } = driver;
+      const { driver_cash_block_rule_id } = driversWithCashBlockRules.find(
+        (d) => d.driver_id === driver_id
+      );
+
+      await deleteDriverCustomCashBlockRuleMutation({
         driver_id,
-        cashBlockRules: [],
+        driver_cash_block_rule_id,
       });
-      await editDriverCashBlockRulesMutation({ variables });
       await markDriverCashBlockRulesAsDeleted({ driver_id });
     } catch (error) {
       console.error('error while updateDriverCashBlockRules', error);
@@ -151,6 +160,6 @@ export const updateDriverCashBlockRules = async () => {
 
 if (process.env.ENV == 'TEST') {
   await openSShTunnel;
-  // await updateDriverCashBlockRules();
-  await setDriverCashBlockRules();
+  await updateDriverCashBlockRules();
+  // await setDriverCashBlockRules();
 }

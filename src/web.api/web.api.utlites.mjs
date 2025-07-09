@@ -662,9 +662,10 @@ export async function getTheMostRecentDriverCashBlockRuleIdByDriverId({
 }) {
   const sql = fs
     .readFileSync(
-      'src/sql/get_the_most_recent_driver_cash_block_rule_id_by_driver_id.sql'
+      'src/sql/get_the_most_recent_driver_cash_block_rule_by_driver_id.sql'
     )
     .toString();
   const result = await pool.query(sql, [driver_id]);
   const { rows, rowCount } = result;
+  return { rows };
 }
