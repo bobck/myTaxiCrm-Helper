@@ -74,6 +74,15 @@ export async function getAllWorkUaVacancyIds() {
   const vacancyIds = await db.all(sql);
   return vacancyIds;
 }
+export async function getAnyWorkUaVacancyById({ work_ua_vacancy_id }) {
+  const sql = `SELECT
+                    *
+                FROM
+                    work_ua_pagination
+                WHERE
+                    work_ua_vacancy_id = ?`;
+  return await db.get(sql, work_ua_vacancy_id);
+}
 
 /**
  * Marks a Work.ua vacancy as active by setting the is_active flag to TRUE.

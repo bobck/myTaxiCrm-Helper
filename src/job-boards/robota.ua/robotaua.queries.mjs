@@ -117,6 +117,10 @@ export async function getAllActiveRobotaUaVacancies() {
   const activeVacancies = await db.all(sql);
   return { activeVacancies };
 }
+export async function getAnyRobotaUaVacancyById({ robota_ua_vacancy_id }) {
+  const sql = `SELECT * from robota_ua_pagination where robota_ua_vacancy_id = ?`;
+  return await db.get(sql, robota_ua_vacancy_id);
+}
 export const createRobotaUaSynchronizedVacancy = async ({
   bitrix_vacancy_id,
   robotaUaVacancy,
