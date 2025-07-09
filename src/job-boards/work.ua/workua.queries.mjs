@@ -132,3 +132,11 @@ export const createWorkUaSynchronizedVacancy = async ({
 
   await db.run(sql, bitrix_vacancy_id, work_ua_vacancy_id, is_active);
 };
+export const updateWorkUaSynchronizedVacancy = async ({
+  bitrix_vacancy_id,
+  work_ua_vacancy_id,
+  is_active,
+}) => {
+  const sql = /*sql */ `UPDATE work_ua_pagination SET work_ua_vacancy_id = ?, is_active = ? WHERE bitrix_vacancy_id = ?`;
+  await db.run(sql, work_ua_vacancy_id, is_active, bitrix_vacancy_id);
+};

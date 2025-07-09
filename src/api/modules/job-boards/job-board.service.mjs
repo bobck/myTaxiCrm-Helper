@@ -4,7 +4,10 @@ import {
   createBitrixVacancy,
   updateBitrixVacancy,
 } from '../../../job-boards/job-board.queries.mjs';
-import { markRobotaUaVacancyAsActive } from '../../../job-boards/robota.ua/robotaua.queries.mjs';
+import {
+  markRobotaUaVacancyAsActive,
+  updateVacancyProgress,
+} from '../../../job-boards/robota.ua/robotaua.queries.mjs';
 import {
   activateRobotaUaVacancy,
   getRobotaUaVacancyById,
@@ -75,7 +78,7 @@ const updateVacancy = async ({
   work_ua_vacancy_id,
   robota_ua_vacancy_id,
 }) => {
-  await updateBitrixVacancy({
+  jobBoardRepo.updateVacancySynchronously({
     bitrix_vacancy_id,
     vacancy_name,
     work_ua_vacancy_id,

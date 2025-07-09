@@ -13,5 +13,8 @@ export const reportBitrixEntityError = async ({
   bitrix_id,
   typeId,
 }) => {
+  if (!(bitrix_id && typeId && comment)) {
+    throw new Error('unknown kind of error');
+  }
   await addCommentToEntity({ comment, entityId: bitrix_id, typeId });
 };

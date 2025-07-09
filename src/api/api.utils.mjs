@@ -16,6 +16,13 @@ export const controllerWrapper = ({
     try {
       await handlerCB(req, res);
     } catch (error) {
+      if (error instanceof Error) {
+        console.error(error);
+        res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({ message: 'Internal Server Error', status: 'error' });
+        return;
+      }
       if (errorHandler) {
         await errorHandler(error);
         res
@@ -25,12 +32,7 @@ export const controllerWrapper = ({
       }
       console.error(`error occured in ${handlingServiceName}`, error);
       const { code, message } = error;
-      if (error instanceof Error) {
-        res
-          .status(INTERNAL_SERVER_ERROR)
-          .json({ message: 'Internal Server Error', status: 'error' });
-        return;
-      }
+
       res.status(code).json({ message, status: 'error' });
     }
   };

@@ -8,7 +8,8 @@ export const addOrUpdateVacancyEndpoint = controllerWrapper({
     const result = await jobBoardService.add_update_vacancy_fork({ query });
     res.send(result);
   },
-  handlingServiceName: 'addVacancyEndpoint',
+  handlingServiceName: 'addOrUpdateVacancyEndpoint',
+  errorHandler: reportBitrixEntityError,
 });
 
 export const activateVacancyEndpoint = controllerWrapper({
