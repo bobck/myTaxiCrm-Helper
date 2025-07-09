@@ -1,188 +1,17 @@
-import { DateTime } from 'luxon';
-import { openSShTunnel } from '../../../ssh.mjs';
-import {
-  getDriversWithActiveCashBlockRules,
-  insertDriverWithCashBlockRules,
-  markDriverCashBlockRulesAsDeleted,
-  updateDCBR,
-} from '../web.api.queries.mjs';
-import {
-  getAllWorkingDriverIds,
-  makeCRMRequestlimited,
-  getDriversWhoPaidOff,
-  getTheMostRecentDriverCashBlockRuleIdByDriverId,
-  getDriversCashBlockRules,
-} from '../web.api.utlites.mjs';
+'use strict';
 
-const activationValue = 200;
+var dbm;
+var type;
+var seed;
 
-const calculateDriverCashBlockRules = () => {
-  const cashBlockRule = {
-    activationValue,
-    isEnabled: true,
-    target: 'BALANCE',
-  };
-  const cashBlockRules = [];
-  if (cashBlockRule.isEnabled) cashBlockRules.push(cashBlockRule);
-  return { cashBlockRules };
+exports.setup = function (options, seedLink) {
+  dbm = options.dbmigrate;
+  type = dbm.dataType;
+  seed = seedLink;
 };
-const editDriverCashBlockRulesMutation = async ({ variables }) => {
-  try {
-    const query =
-      'mutation EditDriverCashBlockRules($editDriverCashBlockRulesInput: EditDriverCashBlockRulesInput!) {\n  editDriverCashBlockRules(editDriverCashBlockRulesInput: $editDriverCashBlockRulesInput) {\n    success\n  }\n}';
-    const bodyForEditRules = {
-      operationName: 'EditDriverCashBlockRules',
-      variables,
-      query,
-    };
-    const { data, errors } = await makeCRMRequestlimited({
-      body: bodyForEditRules,
-    });
-    const { editDriverCashBlockRules } = data;
-    const { success } = editDriverCashBlockRules;
-    return { success, errors };
-  } catch (errors) {
-    const [error] = errors;
-    const { message, locations, path, extensions } = error;
 
-    throw { message, locations, path, extensions, variables };
-  }
-};
-const deleteDriverCustomCashBlockRuleMutation = async ({
-  driver_id: driverId,
-  driver_cash_block_rule_id: ruleId,
-}) => {
-  const operationName = 'DeleteDriverCustomCashboxRules';
-  const query =
-    'mutation DeleteDriverCustomCashboxRules($deleteDriverCustomCashboxRulesInput: DeleteDriverCustomCashboxRulesInput!) {\n  deleteDriverCustomCashboxRules(deleteDriverCustomCashboxRulesInput: $deleteDriverCustomCashboxRulesInput) {\n    success\n  }\n}';
-  const variables = {
-    deleteDriverCustomCashboxRulesInput: { driverId, ruleId },
-  };
-  await makeCRMRequestlimited({ body: { operationName, query, variables } });
-};
-const calculateMutationVariables = ({
-  auto_park_id,
-  driver_id,
-  cashBlockRules,
-}) => {
-  const variables = {
-    editDriverCashBlockRulesInput: {
-      autoParkId: auto_park_id,
-      driverId: driver_id,
-      isEnabled: cashBlockRules.length > 0,
-      mode: 'MIN_DEBT', // MAX_DEBT | MIN_DEBT
-      rules: cashBlockRules,
-    },
-  };
-  return { variables };
-};
-const calculateCurrentWeekAndYear = () => {
-  const today = DateTime.local().startOf('day');
-  const { year, weekNumber } = today;
-  return { year, weekNumber };
-};
-export const setDriverCashBlockRules = async () => {
-  const { year, weekNumber } = calculateCurrentWeekAndYear();
-  const IdsOfDriversWithCashBlockRules = (
-    await getDriversWithActiveCashBlockRules()
-  ).map(({ driver_id }) => driver_id);
-  const { rows: drivers } = await getAllWorkingDriverIds({
-    ids: IdsOfDriversWithCashBlockRules,
-    year,
-    weekNumber,
-    activationValue: activationValue * -1,
-  });
-
-  console.log({
-    message: 'setDriverCashBlockRules',
-    date: new Date(),
-    env: process.env.ENV,
-    drivers: drivers.length,
-    IdsOfDriversWithCashBlockRules: IdsOfDriversWithCashBlockRules.length,
-  });
-  for (const driver of drivers) {
-    try {
-      const { driver_id, auto_park_id } = driver;
-      const { cashBlockRules } = calculateDriverCashBlockRules();
-      const { variables } = calculateMutationVariables({
-        auto_park_id,
-        driver_id,
-        cashBlockRules,
-      });
-      try {
-        const { success, errors } = await editDriverCashBlockRulesMutation({
-          variables,
-        });
-        if (!success) {
-          throw errors;
-        }
-      } catch (e) {
-        console.error(e);
-        continue;
-      }
-      const { rows } = await getTheMostRecentDriverCashBlockRuleIdByDriverId({
-        driver_id,
-      });
-      const { id: driver_cash_block_rule_id } = rows[0];
-      await insertDriverWithCashBlockRules({
-        driver_id,
-        driver_cash_block_rule_id,
-      });
-    } catch (error) {
-      console.error('error while setDriverCashBlockRules', error);
-      continue;
-    }
-  }
-};
-export const updateDriverCashBlockRules = async () => {
-  const { year, weekNumber } = calculateCurrentWeekAndYear();
-  const driversWithCashBlockRules = await getDriversWithActiveCashBlockRules();
-  const IdsOfDriversWithCashBlockRules = driversWithCashBlockRules.map(
-    ({ driver_id }) => driver_id
-  );
-
-  const { rows: drivers } = await getDriversWhoPaidOff({
-    year,
-    weekNumber,
-    ids: IdsOfDriversWithCashBlockRules,
-  });
-  console.log({
-    message: 'updateDriverCashBlockRules',
-    date: new Date(),
-    env: process.env.ENV,
-    drivers: drivers.length,
-    IdsOfDriversWithCashBlockRules: IdsOfDriversWithCashBlockRules.length,
-  });
-  if (drivers.length === 0) {
-    return;
-  }
-  for (const driver of drivers) {
-    try {
-      const { driver_id } = driver;
-      const { driver_cash_block_rule_id } = driversWithCashBlockRules.find(
-        (d) => d.driver_id === driver_id
-      );
-
-      await deleteDriverCustomCashBlockRuleMutation({
-        driver_id,
-        driver_cash_block_rule_id,
-      });
-      await markDriverCashBlockRulesAsDeleted({ driver_id });
-    } catch (error) {
-      console.error('error while updateDriverCashBlockRules', error);
-      continue;
-    }
-  }
-};
-export const assignCashBlockRuleIdsToDrvers = async () => {
-  const IdsOfDriversWithCashBlockRules = (
-    await getDriversWithActiveCashBlockRules()
-  ).map(({ driver_id }) => driver_id);
-  const { rows: drivers } = await getDriversCashBlockRules({
-    driver_ids: IdsOfDriversWithCashBlockRules,
-  });
-  // console.log(drivers.slice(0, 100), drivers.slice(100));
-  const driverss = [
+exports.up = async function (db, callback) {
+  const rules = [
     {
       id: 'c2017334-a3a8-4d75-b952-e8282315f138',
       driver_id: 'db278ee2-3f3a-4d3d-88fd-12c1295d36be',
@@ -708,15 +537,20 @@ export const assignCashBlockRuleIdsToDrvers = async () => {
       driver_id: '95562abc-2d59-4348-a2f4-dfe8f238a6b9',
     },
   ];
-  console.log({pg:drivers.length,drivers:driverss.length})
-  return;
-  updateDCBR({ drivers });
-  console.log('assignCashBlockRuleIdsToDrvers done');
+  const sql = `ALTER TABLE driver_cash_block_rules ADD COLUMN driver_cash_block_rule_id TEXT NOT NULL DEFAULT '';`;
+  await db.runSql(sql, callback);
+  for (const rule of rules) {
+    const { driver_id, id: driver_cash_block_rule_id } = rule;
+    const sql = `UPDATE driver_cash_block_rules SET driver_cash_block_rule_id = ? WHERE driver_id = ?;`;
+    await db.runSql(sql, driver_cash_block_rule_id, driver_id);
+  }
 };
 
-if (process.env.ENV == 'TEST') {
-  await openSShTunnel;
-  assignCashBlockRuleIdsToDrvers();
-  // // await updateDriverCashBlockRules();
-  // await setDriverCashBlockRules();
-}
+exports.down = function (db, callback) {
+  const sql = `ALTER TABLE driver_cash_block_rules DROP COLUMN driver_cash_block_rule_id;`;
+  db.runSql(sql, callback);
+};
+
+exports._meta = {
+  version: 1,
+};
