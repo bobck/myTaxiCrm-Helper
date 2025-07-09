@@ -1,6 +1,6 @@
 import { vacancyRequestTypeId } from '../../../bitrix/bitrix.constants.mjs';
 import { addCommentToEntity } from '../../../bitrix/bitrix.utils.mjs';
-import { createBitrixVacancy } from '../../../job-boards/job-board.queries.mjs';
+import { createBitrixVacancy, updateBitrixVacancy } from '../../../job-boards/job-board.queries.mjs';
 import { markRobotaUaVacancyAsActive } from '../../../job-boards/robota.ua/robotaua.queries.mjs';
 import {
   activateRobotaUaVacancy,
@@ -25,7 +25,8 @@ import * as jobBoardRepo from './job-board.repo.mjs';
     PRIMARY KEY (bitrix_vacancy_id)
     )`
  */
-const createVacancy = async ({
+
+const addVacancy = async ({
   bitrix_vacancy_id,
   vacancy_name,
   work_ua_vacancy_id,
@@ -65,6 +66,44 @@ const createVacancy = async ({
   //   robota_ua_vacancy_id,
   // });
 };
+const updateVacancy = async ({
+  bitrix_vacancy_id,
+  vacancy_name,
+  work_ua_vacancy_id,
+  robota_ua_vacancy_id,
+}) => {
+  await updateBitrixVacancy({
+    bitrix_vacancy_id,
+    vacancy_name,
+    work_ua_vacancy_id,
+    robota_ua_vacancy_id,
+  });
+};
+export const add_update_vacancy_fork = async ({ query }) => {
+  const {
+    bitrix_vacancy_id,
+    vacancy_name,
+    work_ua_vacancy_id,
+    robota_ua_vacancy_id,
+  } = query;
+  const { vacancy } = await jobBoardRepo.getExistingVacancy({
+    bitrix_vacancy_id,
+  });
+  if (!vacancy) {
+    return await addVacancy({
+      bitrix_vacancy_id,
+      vacancy_name,
+      work_ua_vacancy_id,
+      robota_ua_vacancy_id,
+    });
+  }
+  return await updateVacancy({
+    bitrix_vacancy_id,
+    vacancy_name,
+    work_ua_vacancy_id,
+    robota_ua_vacancy_id,
+  });
+};
 export const activateVacancy = async ({ query }) => {
   console.log({ query });
   const {
@@ -77,7 +116,7 @@ export const activateVacancy = async ({ query }) => {
     bitrix_vacancy_id,
   });
   if (!vacancy) {
-    await createVacancy({
+    await addVacancy({
       bitrix_vacancy_id,
       vacancy_name,
       work_ua_vacancy_id,

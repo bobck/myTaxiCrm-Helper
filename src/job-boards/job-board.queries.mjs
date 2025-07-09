@@ -22,3 +22,16 @@ export const createBitrixVacancy = async ({
     VALUES (${bitrix_vacancy_id},'${vacancy_name}',${work_ua_vacancy_id},${robota_ua_vacancy_id})`;
   await db.run(sql);
 };
+export const updateBitrixVacancy = async ({
+  bitrix_vacancy_id,
+  vacancy_name,
+  work_ua_vacancy_id,
+  robota_ua_vacancy_id,
+}) => {
+  const sql = /*sql*/ `UPDATE bitrix_vacancies_to_job_board_vacancies 
+    SET vacancy_name = '${vacancy_name}',
+    work_ua_vacancy_id = ${work_ua_vacancy_id},
+    robota_ua_vacancy_id = ${robota_ua_vacancy_id}
+    WHERE bitrix_vacancy_id = ${bitrix_vacancy_id}`;
+  await db.run(sql);
+};

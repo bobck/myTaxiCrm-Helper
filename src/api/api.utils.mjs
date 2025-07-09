@@ -7,11 +7,22 @@ const {
   INTERNAL_SERVER_ERROR,
 } = api_status_codes;
 
-export const controllerWrapper = ({ handlerCB, handlingServiceName }) => {
+export const controllerWrapper = ({
+  handlerCB,
+  handlingServiceName,
+  errorHandler,
+}) => {
   return async (req, res) => {
     try {
       await handlerCB(req, res);
     } catch (error) {
+      if (errorHandler) {
+        await errorHandler(error);
+        res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({ message: 'Internal Server Error', status: 'error' });
+        return;
+      }
       console.error(`error occured in ${handlingServiceName}`, error);
       const { code, message } = error;
       if (error instanceof Error) {
