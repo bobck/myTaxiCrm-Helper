@@ -11,6 +11,7 @@ import {
   getDriversWhoPaidOff,
   getTheMostRecentDriverCashBlockRuleIdByDriverId,
 } from '../web.api.utlites.mjs';
+import { message } from 'telegraf/filters';
 
 const activationValue = 200;
 
@@ -56,7 +57,13 @@ const deleteDriverCustomCashBlockRuleMutation = async ({
   const variables = {
     deleteDriverCustomCashboxRulesInput: { driverId, ruleId },
   };
-  await makeCRMRequestlimited({ body: { operationName, query, variables } });
+  const { data, errors } = await makeCRMRequestlimited({
+    body: { operationName, query, variables },
+  });
+  const { deleteDriverCustomCashboxRules } = data;
+  console.log('data:', data);
+  const { success } = deleteDriverCustomCashboxRules;
+  return { success, errors };
 };
 const calculateMutationVariables = ({
   auto_park_id,
@@ -152,20 +159,26 @@ export const updateDriverCashBlockRules = async () => {
     IdsOfDriversWithCashBlockRules: IdsOfDriversWithCashBlockRules.length,
   });
   if (drivers.length === 0) {
-    return;
+    // return;
   }
-  for (const driver of drivers) {
+  for (const driver of driversWithCashBlockRules) {
     try {
       const { driver_id } = driver;
       const { driver_cash_block_rule_id } = driversWithCashBlockRules.find(
         (d) => d.driver_id === driver_id
       );
 
-      await deleteDriverCustomCashBlockRuleMutation({
-        driver_id,
-        driver_cash_block_rule_id,
-      });
+      const { success, errors } = await deleteDriverCustomCashBlockRuleMutation(
+        {
+          driver_id,
+          driver_cash_block_rule_id,
+        }
+      );
       await markDriverCashBlockRulesAsDeleted({ driver_id });
+      if (!success) {
+        throw errors;
+      }
+      console.log({ driver_id, driver_cash_block_rule_id, message: 'deleted' });
     } catch (error) {
       console.error('error while updateDriverCashBlockRules', error);
       continue;
@@ -175,6 +188,6 @@ export const updateDriverCashBlockRules = async () => {
 
 if (process.env.ENV == 'TEST') {
   await openSShTunnel;
-  // // await updateDriverCashBlockRules();
+  await updateDriverCashBlockRules();
   // await setDriverCashBlockRules();
 }
