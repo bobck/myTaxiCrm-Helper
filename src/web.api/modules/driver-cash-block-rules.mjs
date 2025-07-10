@@ -11,7 +11,6 @@ import {
   getDriversWhoPaidOff,
   getTheMostRecentDriverCashBlockRuleIdByDriverId,
 } from '../web.api.utlites.mjs';
-import { message } from 'telegraf/filters';
 
 const activationValue = 200;
 
@@ -61,7 +60,6 @@ const deleteDriverCustomCashBlockRuleMutation = async ({
     body: { operationName, query, variables },
   });
   const { deleteDriverCustomCashboxRules } = data;
-  console.log('data:', data);
   const { success } = deleteDriverCustomCashboxRules;
   return { success, errors };
 };
@@ -178,7 +176,6 @@ export const updateDriverCashBlockRules = async () => {
       if (!success) {
         throw errors;
       }
-      console.log({ driver_id, driver_cash_block_rule_id, message: 'deleted' });
     } catch (error) {
       console.error('error while updateDriverCashBlockRules', error);
       continue;
