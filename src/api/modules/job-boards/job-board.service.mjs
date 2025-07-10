@@ -1,10 +1,22 @@
 import { addCommentToEntity } from '../../../bitrix/bitrix.utils.mjs';
-import { markRobotaUaVacancyAsActive } from '../../../job-boards/robota.ua/robotaua.queries.mjs';
-import { activateRobotaUaVacancy } from '../../../job-boards/robota.ua/robotaua.utils.mjs';
-import { markWorkUaVacancyAsActive } from '../../../job-boards/work.ua/workua.queries.mjs';
-import { activateWorkUaVacancy } from '../../../job-boards/work.ua/workua.utils.mjs';
 import {
-  assignCommentsToVacancyRequest,
+  markRobotaUaVacancyAsActive,
+  markRobotaUaVacancyAsInactive,
+} from '../../../job-boards/robota.ua/robotaua.queries.mjs';
+import {
+  activateRobotaUaVacancy,
+  deactivateRobotaUaVacancy,
+} from '../../../job-boards/robota.ua/robotaua.utils.mjs';
+import {
+  markWorkUaVacancyAsActive,
+  markWorkUaVacancyAsInactive,
+} from '../../../job-boards/work.ua/workua.queries.mjs';
+import {
+  activateWorkUaVacancy,
+  deactivateWorkUaVacancy,
+} from '../../../job-boards/work.ua/workua.utils.mjs';
+import {
+  assignManyCommentsToVacancyRequest,
   getRobotaAndWokUaVacanciesById,
 } from './job-board.buisness-entity.mjs';
 import * as jobBoardRepo from './job-board.repo.mjs';
@@ -42,7 +54,7 @@ const addVacancy = async ({
   comments.push(..._comments1);
   if (!isAnyVacancyFound) {
     comments.push('Жодної вакансії не знайдено');
-    await assignCommentsToVacancyRequest({ comments });
+    await assignManyCommentsToVacancyRequest({ comments });
     return;
   }
   const payload = {};
@@ -68,7 +80,7 @@ const addVacancy = async ({
   } else {
     comments.push(`Вакансія додана до системи.`);
   }
-  await assignCommentsToVacancyRequest({ comments });
+  await assignManyCommentsToVacancyRequest({ comments });
 };
 const updateVacancy = async ({
   bitrix_vacancy_id,
@@ -91,7 +103,7 @@ const updateVacancy = async ({
   comments.push(..._comments1);
   if (!isAnyVacancyFound) {
     comments.push('Жодної вакансії не знайдено');
-    await assignCommentsToVacancyRequest({ comments });
+    await assignManyCommentsToVacancyRequest({ comments });
     return;
   }
   const payload = { vacancy };
@@ -127,7 +139,7 @@ const updateVacancy = async ({
   } else {
     comments.push(`Вакансія оновлена в системі.`);
   }
-  await assignCommentsToVacancyRequest({ comments });
+  await assignManyCommentsToVacancyRequest({ comments, bitrix_vacancy_id });
 };
 export const add_update_vacancy_fork = async ({ query }) => {
   const {

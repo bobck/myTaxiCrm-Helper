@@ -703,3 +703,19 @@ export const createVacancyResponseCards = async ({ dtos }) => {
   const { result } = temp_result;
   return result;
 };
+
+export async function addManyCommentsToEntity({ comments, entityId, typeId }) {
+  let batchArray = [];
+
+  for (let comment of comments) {
+    const params = {
+      'fields[ENTITY_ID]': entityId,
+      'fields[ENTITY_TYPE]': `DYNAMIC_${typeId}`,
+      'fields[COMMENT]': comment,
+    };
+    batchArray.push({ method: 'crm.timeline.comment.add', params });
+  }
+  const { result, time } = await bitrix.batch(batchArray);
+
+  return result;
+}

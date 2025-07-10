@@ -99,6 +99,15 @@ export async function markWorkUaVacancyAsActive({ work_ua_vacancy_id }) {
                     work_ua_vacancy_id = ?`;
   await db.run(sql, work_ua_vacancy_id);
 }
+export async function markWorkUaVacancyAsInactive({ work_ua_vacancy_id }) {
+  const sql = /*sql*/ `UPDATE
+                    work_ua_pagination
+                SET
+                    is_active = FALSE
+                WHERE
+                    work_ua_vacancy_id = ?`;
+  await db.run(sql, work_ua_vacancy_id);
+}
 
 export async function markManyWorkUaVacanciesAsActive({ vacancy_ids }) {
   if (!vacancy_ids || vacancy_ids.length === 0) {

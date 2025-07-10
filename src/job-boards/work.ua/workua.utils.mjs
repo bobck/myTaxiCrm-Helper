@@ -101,3 +101,8 @@ export const activateWorkUaVacancy = async ({ vacancyId }) => {
     message: `worku.ua vacancy ${vacancyId} is being activated...`,
   });
 };
+export const deactivateWorkUaVacancy = async ({ vacancyId }) => {
+  console.log({
+    message: `worku.ua vacancy ${vacancyId} is being activated...`,
+  });
+};

@@ -96,6 +96,15 @@ export async function markRobotaUaVacancyAsActive({ robota_ua_vacancy_id }) {
                     robota_ua_vacancy_id = ?`;
   await db.run(sql, robota_ua_vacancy_id);
 }
+export async function markRobotaUaVacancyAsInactive({ robota_ua_vacancy_id }) {
+  const sql = `UPDATE 
+                    robota_ua_pagination
+                SET 
+                    is_active = FALSE
+                WHERE 
+                    robota_ua_vacancy_id = ?`;
+  await db.run(sql, robota_ua_vacancy_id);
+}
 export async function markManyRobotaUaVacanciesAsActive({ vacancy_ids }) {
   if (!vacancy_ids || vacancy_ids.length === 0) {
     return; // No IDs to process
