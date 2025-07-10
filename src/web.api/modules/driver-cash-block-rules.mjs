@@ -11,7 +11,6 @@ import {
   getDriversWhoPaidOff,
   getTheMostRecentDriverCashBlockRuleIdByDriverId,
 } from '../web.api.utlites.mjs';
-import e from 'express';
 
 const activationValue = 200;
 
@@ -176,6 +175,6 @@ export const updateDriverCashBlockRules = async () => {
 
 if (process.env.ENV == 'TEST') {
   await openSShTunnel;
-  // await updateDriverCashBlockRules();
-  await setDriverCashBlockRules();
+  // // await updateDriverCashBlockRules();
+  // await setDriverCashBlockRules();
 }
