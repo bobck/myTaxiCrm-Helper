@@ -13,6 +13,7 @@ import {
 } from '../web.api.utlites.mjs';
 
 const activationValue = 200;
+const maxDebt = -1000;
 
 const calculateDriverCashBlockRules = () => {
   const cashBlockRule = {
@@ -93,7 +94,7 @@ export const setDriverCashBlockRules = async () => {
     ids: IdsOfDriversWithCashBlockRules,
     year,
     weekNumber,
-    activationValue: activationValue * -1,
+    maxDebt,
   });
 
   console.log({
