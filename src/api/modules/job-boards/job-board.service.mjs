@@ -67,15 +67,16 @@ const addVacancy = async ({
     payload.robotaUaVacancy = robotaUaVacancy;
   }
 
-  const { _comments: _comments2, isVacancyCreated } =
+  const { _comments: _comments2, isAnyVacancyCreated } =
     await jobBoardRepo.addVacancySynchronously({
       bitrix_vacancy_id,
       vacancy_name,
       is_active: false,
       ...payload,
     });
+  console.log({ _comments2, isAnyVacancyCreated });
   comments.push(..._comments2);
-  if (!isVacancyCreated) {
+  if (!isAnyVacancyCreated) {
     comments.push(`Вакансія НЕ додана до системи.`);
   } else {
     comments.push(`Вакансія додана до системи.`);
@@ -134,6 +135,7 @@ const updateVacancy = async ({
       ...payload,
     });
   comments.push(..._comments2);
+  console.log({ comments, isAnyVacancyUpdated });
   if (!isAnyVacancyUpdated) {
     comments.push(`Вакансія НЕ оновлена в системі.`);
   } else {

@@ -715,6 +715,8 @@ export async function addManyCommentsToEntity({ comments, entityId, typeId }) {
     };
     batchArray.push({ method: 'crm.timeline.comment.add', params });
   }
+  console.log(batchArray);
+  return batchArray;
   const { result, time } = await bitrix.batch(batchArray);
 
   return result;

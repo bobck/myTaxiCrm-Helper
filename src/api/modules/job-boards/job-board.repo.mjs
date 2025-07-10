@@ -30,24 +30,17 @@ export const addVacancySynchronously = async ({
   console.log({
     message: 'creating vacancy',
     bitrix_vacancy_id,
-    vacancy_name,
   });
   const _comments = [];
   let commentsLimit = 0;
   const payload = {};
 
-  const { work_ua_vacancy_id } = workUaVacancy;
-  const { robota_ua_vacancy_id } = robotaUaVacancy;
-
-  const existingRobotaUaVacancy = await getAnyRobotaUaVacancyById({
-    robota_ua_vacancy_id,
-  });
-  const existingWorkUaVacancy = await getAnyWorkUaVacancyById({
-    work_ua_vacancy_id,
-  });
-
-  console.log('bitrix vacancy created');
+  console.log({ commentsLimit, _comments });
   if (robotaUaVacancy) {
+    const { robota_ua_vacancy_id } = robotaUaVacancy;
+    const existingRobotaUaVacancy = await getAnyRobotaUaVacancyById({
+      robota_ua_vacancy_id,
+    });
     commentsLimit++;
     if (existingRobotaUaVacancy) {
       _comments.push(
@@ -63,7 +56,13 @@ export const addVacancySynchronously = async ({
       console.log('robota vacancy created');
     }
   }
+  console.log({ commentsLimit, _comments });
   if (workUaVacancy) {
+    const { work_ua_vacancy_id } = workUaVacancy;
+    const existingWorkUaVacancy = await getAnyWorkUaVacancyById({
+      work_ua_vacancy_id,
+    });
+
     commentsLimit++;
     if (existingWorkUaVacancy) {
       _comments.push(
@@ -80,21 +79,21 @@ export const addVacancySynchronously = async ({
     }
   }
   if (commentsLimit <= _comments.length) {
-    return { comments: _comments, isAnyVacancyCreated: false };
+    return { _comments, isAnyVacancyCreated: false };
   }
+  console.log({ commentsLimit, _comments });
   await createBitrixVacancy({
     bitrix_vacancy_id,
     vacancy_name,
     is_active,
     ...payload,
   });
-  return { comments: _comments, isAnyVacancyCreated: true };
+  console.log('bitrix vacancy created');
+  return { _comments, isAnyVacancyCreated: true };
 };
 export const updateVacancySynchronously = async ({
   bitrix_vacancy_id,
   vacancy_name,
-  work_ua_vacancy_id,
-  robota_ua_vacancy_id,
   is_active,
   workUaVacancy,
   robotaUaVacancy,
@@ -107,8 +106,6 @@ export const updateVacancySynchronously = async ({
   const _comments = [];
   let commentsLimit = 0;
   const payload = {};
-  const { work_ua_vacancy_id } = workUaVacancy;
-  const { robota_ua_vacancy_id } = robotaUaVacancy;
 
   const existingRobotaUaVacancy = await getAnyRobotaUaVacancyById({
     robota_ua_vacancy_id,
@@ -117,7 +114,8 @@ export const updateVacancySynchronously = async ({
     work_ua_vacancy_id,
   });
 
-  if (robota_ua_vacancy_id) {
+  if (robotaUaVacancy) {
+    const { robota_ua_vacancy_id } = robotaUaVacancy;
     commentsLimit++;
     if (existingRobotaUaVacancy) {
       _comments.push(
@@ -133,7 +131,8 @@ export const updateVacancySynchronously = async ({
       console.log('robota vacancy updated');
     }
   }
-  if (work_ua_vacancy_id) {
+  if (workUaVacancy) {
+    const { work_ua_vacancy_id } = workUaVacancy;
     commentsLimit++;
     if (existingWorkUaVacancy) {
       _comments.push(
