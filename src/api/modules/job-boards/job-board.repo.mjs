@@ -96,13 +96,15 @@ export const updateVacancySynchronously = async ({
   work_ua_vacancy_id,
   robota_ua_vacancy_id,
   is_active,
+  workUaVacancy,
+  robotaUaVacancy,
 }) => {
   console.log({
     message: 'updating vacancy',
     bitrix_vacancy_id,
     vacancy_name,
   });
-  const comments = [];
+  const _comments = [];
   let commentsLimit = 0;
   const payload = {};
   const { work_ua_vacancy_id } = workUaVacancy;
@@ -118,7 +120,7 @@ export const updateVacancySynchronously = async ({
   if (robota_ua_vacancy_id) {
     commentsLimit++;
     if (existingRobotaUaVacancy) {
-      comments.push(
+      _comments.push(
         `Подана вакансія robota.ua id:${robota_ua_vacancy_id} вже існує в системі.`
       );
     } else {
@@ -134,7 +136,7 @@ export const updateVacancySynchronously = async ({
   if (work_ua_vacancy_id) {
     commentsLimit++;
     if (existingWorkUaVacancy) {
-      comments.push(
+      _comments.push(
         `Подана вакансія work.ua id:${work_ua_vacancy_id} вже існує в системі.`
       );
     } else {
@@ -146,8 +148,8 @@ export const updateVacancySynchronously = async ({
       payload.work_ua_vacancy_id = work_ua_vacancy_id;
     }
   }
-  if (comments.length >= commentsLimit) {
-    return { comments, isAnyVacancyUpdated: false };
+  if (_comments.length >= commentsLimit) {
+    return { comments: _comments, isAnyVacancyUpdated: false };
   }
   await updateBitrixVacancy({
     bitrix_vacancy_id,
@@ -156,7 +158,7 @@ export const updateVacancySynchronously = async ({
     robota_ua_vacancy_id,
     is_active,
   });
-  return { comments, isAnyVacancyUpdated: true };
+  return { comments: _comments, isAnyVacancyUpdated: true };
 };
 
 export const synchronizeWorkUaVacancy = async ({ workUaVacancy, vacancy }) => {

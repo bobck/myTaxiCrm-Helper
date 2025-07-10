@@ -10,7 +10,6 @@ export const addOrUpdateVacancyEndpoint = controllerWrapper({
     res.send(result);
   },
   handlingServiceName: 'addOrUpdateVacancyEndpoint',
-  errorHandler: reportBitrixEntityError,
 });
 
 export const activateVacancyEndpoint = controllerWrapper({

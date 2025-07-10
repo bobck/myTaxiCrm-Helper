@@ -64,9 +64,9 @@ const addVacancy = async ({
     });
   comments.push(..._comments2);
   if (!isVacancyCreated) {
-    comments.push(`Жодна вакансія не створена.`);
+    comments.push(`Вакансія НЕ додана до системи.`);
   } else {
-    comments.push(`Вакансія створена.`);
+    comments.push(`Вакансія додана до системи.`);
   }
   await assignCommentsToVacancyRequest({ comments });
 };
@@ -114,12 +114,20 @@ const updateVacancy = async ({
     }
   }
 
-  jobBoardRepo.updateVacancySynchronously({
-    bitrix_vacancy_id,
-    vacancy_name,
-    is_active: false,
-    ...payload,
-  });
+  const { isAnyVacancyUpdated, _comments: _comments2 } =
+    jobBoardRepo.updateVacancySynchronously({
+      bitrix_vacancy_id,
+      vacancy_name,
+      is_active: false,
+      ...payload,
+    });
+  comments.push(..._comments2);
+  if (!isAnyVacancyUpdated) {
+    comments.push(`Вакансія НЕ оновлена в системі.`);
+  } else {
+    comments.push(`Вакансія оновлена в системі.`);
+  }
+  await assignCommentsToVacancyRequest({ comments });
 };
 export const add_update_vacancy_fork = async ({ query }) => {
   const {
