@@ -94,11 +94,9 @@ class WorkUaApiClient {
     return data;
   }
   async activateVacancy({ vacancyId }) {
-    this.api.put(`/jobs/${vacancyId}`)
+    this.api.put(`/jobs/${vacancyId}`);
   }
-  async deactivateVacancy({ vacancyId }) {
-  
-  }
+  async deactivateVacancy({ vacancyId }) {}
   handleApiError(error) {
     if (error.response) {
       switch (error.response.status) {
