@@ -798,21 +798,6 @@ export async function setLetterApprovedByDealId({
   return { bitrix_deal_id };
 }
 
-/**
- * Sets the is_banned flag to true for a specific driver.
- * @param {Object} params - The parameters for banning the driver.
- * @param {string} params.driver_id - The ID of the driver to ban.
- * @returns {Promise<Object>} - A promise that resolves with an object indicating success (e.g., { changes: 1 }).
- */
-export async function banBoltDriver({ driver_id }) {
-  const sql = /*sql*/ `
-      UPDATE bolt_drivers_to_ban
-      SET is_banned = TRUE,
-          updated_at = CURRENT_TIMESTAMP
-      WHERE driver_id = ?;
-  `;
-  return db.run(sql, driver_id);
-}
 
 /**
  * Retrieves all drivers for whom the first letter has been sent.
@@ -820,7 +805,7 @@ export async function banBoltDriver({ driver_id }) {
  */
 export async function getBoltDriversFirstLetterSent() {
   const sql = /*sql*/ `
-      SELECT driver_id, bolt_id, bitrix_deal_id, phone, is_banned, is_first_letter_approved, is_second_letter_approved, created_at, updated_at
+      SELECT driver_id, bolt_id, bitrix_deal_id, phone, is_first_letter_approved, is_second_letter_approved, created_at, updated_at
       FROM bolt_drivers_to_ban
       WHERE is_first_letter_approved = TRUE;
   `;
@@ -835,7 +820,7 @@ export async function getBoltDriversFirstLetterSent() {
  */
 export async function getBoltDriverById({ driver_id }) {
   const sql = /*sql*/ `
-      SELECT driver_id, bolt_id, bitrix_deal_id, phone, is_banned, is_first_letter_approved, is_second_letter_approved, created_at, updated_at
+      SELECT driver_id, bolt_id, bitrix_deal_id, phone, is_first_letter_approved, is_second_letter_approved, created_at, updated_at
       FROM bolt_drivers_to_ban
       WHERE driver_id = ?;
   `;
