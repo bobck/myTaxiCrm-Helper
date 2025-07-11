@@ -158,9 +158,9 @@ export const updateDriverCashBlockRules = async () => {
     IdsOfDriversWithCashBlockRules: IdsOfDriversWithCashBlockRules.length,
   });
   if (drivers.length === 0) {
-    // return;
+    return;
   }
-  for (const driver of driversWithCashBlockRules) {
+  for (const driver of drivers) {
     try {
       const { driver_id } = driver;
       const { driver_cash_block_rule_id } = driversWithCashBlockRules.find(
