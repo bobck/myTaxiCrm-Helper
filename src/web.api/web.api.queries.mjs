@@ -160,12 +160,15 @@ export async function updateExistedDriversWithRevenue(
   }
 }
 export const getDriversWithActiveCashBlockRules = () => {
-  const sql = `SELECT driver_id FROM driver_cash_block_rules WHERE is_deleted=FALSE`;
+  const sql = `SELECT driver_id,driver_cash_block_rule_id FROM driver_cash_block_rules WHERE is_deleted=FALSE`;
   return db.all(sql);
 };
-export const insertDriverWithCashBlockRules = ({ driver_id }) => {
-  const sql = `INSERT INTO driver_cash_block_rules(driver_id) VALUES(?)`;
-  return db.run(sql, driver_id);
+export const insertDriverWithCashBlockRules = ({
+  driver_id,
+  driver_cash_block_rule_id,
+}) => {
+  const sql = `INSERT INTO driver_cash_block_rules(driver_id,driver_cash_block_rule_id) VALUES(?,?)`;
+  return db.run(sql, driver_id, driver_cash_block_rule_id);
 };
 export const markDriverCashBlockRulesAsDeleted = ({ driver_id }) => {
   const sql = `UPDATE driver_cash_block_rules SET is_deleted=true WHERE driver_id = ?`;
