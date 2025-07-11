@@ -3,12 +3,7 @@ import { cityListWithAssignedBy as cityList } from '../bitrix.constants.mjs';
 import { chunkArray, updateRequestedDrivers } from '../bitrix.utils.mjs';
 import { openSShTunnel } from '../../../ssh.mjs';
 import { DateTime } from 'luxon';
-import {
-  // getBoltDriverBanReqByDriverId,
-  // insertBoltDriverBanReq,
-  // getALLBoltDriversToBan,
-  getALLBoltDriversToBan,
-} from '../bitrix.queries.mjs';
+import { getALLBoltDriversToBan } from '../bitrix.queries.mjs';
 
 const Seven_days_without_trips_message_type = 3430;
 const debtorState = 3434;
@@ -61,7 +56,6 @@ export const moveBoltDriversToBan = async () => {
   const queryParams = computeQueryParams();
   const driversToBan = await getALLBoltDriversToBan(queryParams);
   const driver_ids = driversToBan.map((driver) => driver.driver_id);
-  console.log({ driver_ids });
   const { rows } = await getBoltDriversToBan({ ...queryParams, driver_ids });
 
   console.log({
