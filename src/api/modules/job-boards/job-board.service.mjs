@@ -8,6 +8,7 @@ import {
   deactivateRobotaUaVacancy,
 } from '../../../job-boards/robota.ua/robotaua.utils.mjs';
 import {
+  getAnyWorkUaVacancyByBitrixId,
   markWorkUaVacancyAsActive,
   markWorkUaVacancyAsInactive,
 } from '../../../job-boards/work.ua/workua.queries.mjs';
@@ -171,6 +172,7 @@ export const activateVacancy = async ({ query }) => {
     bitrix_vacancy_id,
   });
   const { work_ua_vacancy_id, robota_ua_vacancy_id } = vacancy;
+  console.log({ work_ua_vacancy_id, robota_ua_vacancy_id });
   const {
     workUaVacancy,
     robotaUaVacancy,
@@ -181,14 +183,24 @@ export const activateVacancy = async ({ query }) => {
     robota_ua_vacancy_id,
     bitrix_vacancy_id,
   });
-  console.log({ workUaVacancy, robotaUaVacancy });
+  console.log(workUaVacancy);
   return;
-  if (robota_ua_vacancy_id) {
+  if (false && robota_ua_vacancy_id) {
+    const robotaUaVacancy = await getAnyWorkUaVacancyByBitrixId({
+      bitrix_vacancy_id,
+    });
     await activateRobotaUaVacancy({ vacancyId: robota_ua_vacancy_id });
     await markRobotaUaVacancyAsActive(vacancy);
   }
   if (work_ua_vacancy_id) {
-    await activateWorkUaVacancy({ vacancyId: work_ua_vacancy_id });
+    const workUaVacancy = await getAnyWorkUaVacancyByBitrixId({
+      bitrix_vacancy_id,
+    });
+    const { publicationType } = workUaVacancy;
+    await activateWorkUaVacancy({
+      vacancyId: work_ua_vacancy_id,
+      publicationType,
+    });
     await markWorkUaVacancyAsActive(vacancy);
   }
   return 'vacancy activated';

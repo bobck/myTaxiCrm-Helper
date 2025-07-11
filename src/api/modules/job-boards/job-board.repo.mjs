@@ -38,27 +38,6 @@ export const addVacancySynchronously = async ({
   const _comments = [];
   let commentsLimit = 0;
   const payload = {};
-  if (robotaUaVacancy) {
-    const { vacancyId: robota_ua_vacancy_id } = robotaUaVacancy;
-    const existingRobotaUaVacancy = await getAnyRobotaUaVacancyById({
-      robota_ua_vacancy_id,
-    });
-    commentsLimit++;
-    if (existingRobotaUaVacancy) {
-      _comments.push(
-        `Подана вакансія robota.ua id:${robota_ua_vacancy_id} вже існує в системі.`
-      );
-    } else {
-      await createRobotaUaSynchronizedVacancy({
-        bitrix_vacancy_id,
-        robotaUaVacancy,
-        is_active,
-      });
-      payload.robota_ua_vacancy_id = robota_ua_vacancy_id;
-      console.log('robota vacancy created');
-    }
-  }
-
   if (workUaVacancy) {
     const { id: work_ua_vacancy_id } = workUaVacancy;
     const existingWorkUaVacancy = await getAnyWorkUaVacancyById({
@@ -80,6 +59,29 @@ export const addVacancySynchronously = async ({
       console.log('work vacancy created');
     }
   }
+  console.log({ payload });
+
+  if (robotaUaVacancy) {
+    const { vacancyId: robota_ua_vacancy_id } = robotaUaVacancy;
+    const existingRobotaUaVacancy = await getAnyRobotaUaVacancyById({
+      robota_ua_vacancy_id,
+    });
+    commentsLimit++;
+    if (existingRobotaUaVacancy) {
+      _comments.push(
+        `Подана вакансія robota.ua id:${robota_ua_vacancy_id} вже існує в системі.`
+      );
+    } else {
+      await createRobotaUaSynchronizedVacancy({
+        bitrix_vacancy_id,
+        robotaUaVacancy,
+        is_active,
+      });
+      payload.robota_ua_vacancy_id = robota_ua_vacancy_id;
+      console.log('robota vacancy created');
+    }
+  }
+
   if (commentsLimit <= _comments.length) {
     return { _comments, isAnyVacancyCreated: false };
   }

@@ -22,9 +22,14 @@ exports.up = function (db, callback) {
     is_active BOOLEAN DEFAULT FALSE,
     last_apply_date DATETIME,
     region INTEGER,
-    publicationType TEXT NOT NULL DEFAULT 'standart_job_free'
+    publicationType TEXT DEFAULT 'standart_job_free',
+    description TEXT,
+    experience TEXT,
+    jobtype TEXT,
+    category TEXT,
+    name TEXT,
     PRIMARY KEY (work_ua_vacancy_id)
-    )`;
+    );`;
   db.runSql(sql, callback);
 };
 

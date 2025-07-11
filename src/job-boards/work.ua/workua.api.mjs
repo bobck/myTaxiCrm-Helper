@@ -93,8 +93,28 @@ class WorkUaApiClient {
     const { data } = await this.api.get(requestUrl);
     return data;
   }
-  async activateVacancy({ vacancyId }) {
-    this.api.put(`/jobs/${vacancyId}`);
+  async activateVacancy({ vacancyId, publicationType }) {
+    try {
+      const body = new URLSearchParams();
+      body.append('publication', publicationType);
+
+      const { data } = await this.api.put(`/jobs/${vacancyId}`, body, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      });
+      const { status, errors } = data;
+      console.log(data);
+      console.error(errors);
+      console.log(
+        `Vacancy ${vacancyId} activated with publication type: ${publicationType}`
+      );
+    } catch (error) {
+      const { status, errors } = error;
+      // console.log(data);
+      console.error(error.response.data);
+      // this.handleApiError(error);
+    }
   }
   async deactivateVacancy({ vacancyId }) {}
   handleApiError(error) {

@@ -87,7 +87,7 @@ export const getVacancyResponses = async ({ vacancyId, last_id }) => {
 };
 export const getWorkUaVacancyById = async ({ vacancyId }) => {
   const { items: vacancies } = await workUaAPI.getVacancies({
-    full: 0,
+    full: 1,
     all: 1,
   });
   const vacancy = vacancies.find((vacancy) => vacancy.id == vacancyId);
@@ -96,10 +96,15 @@ export const getWorkUaVacancyById = async ({ vacancyId }) => {
   // const data = await workUaAPI.getVacancyById({ vacancyId });
   // return data;
 };
-export const activateWorkUaVacancy = async ({ vacancyId }) => {
+export const activateWorkUaVacancy = async ({ vacancyId, publicationType }) => {
   console.log({
     message: `worku.ua vacancy ${vacancyId} is being activated...`,
   });
+  const resp = await workUaAPI.activateVacancy({
+    vacancyId,
+    publicationType,
+  });
+  return resp;
 };
 export const deactivateWorkUaVacancy = async ({ vacancyId }) => {
   console.log({

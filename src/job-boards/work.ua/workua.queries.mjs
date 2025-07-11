@@ -154,16 +154,70 @@ export const createWorkUaSynchronizedVacancy = async ({
   is_active,
   workUaVacancy,
 }) => {
-  const { id: work_ua_vacancy_id, region } = workUaVacancy;
-  const sql = `INSERT INTO work_ua_pagination (bitrix_vacancy_id,work_ua_vacancy_id,is_active,region) VALUES (?,?,?,?)`;
+  /**
+   * {
+  status: 'error',
+  errors: [
+    {
+      id: 'empty_field_name',
+      message: 'Не заполнено поле name - заголовок вакансии'
+    },
+    {
+      id: 'empty_field_description',
+      message: 'Не заполнено поле description - описание вакансии'
+    },
+    {
+      id: 'empty_field_region',
+      message: 'Не заполнено поле region - регион вакансии'
+    },
+    {
+      id: 'empty_field_category',
+      message: 'Не заполнено поле category - раздел вакансии'
+    },
+    {
+      id: 'empty_field_jobtype',
+      message: 'Не заполнено поле jobtype - вид занятости'
+    },
+    {
+      id: 'empty_field_experience',
+      message: 'Не заполнено поле experience - опыт работы'
+    }
+  ]
+}
+   */
+  const {
+    id: work_ua_vacancy_id,
+    region,
+    publication: publicationType,
+    experience,
+    jobtype,
+    category,
+    description,
+    name,
+  } = workUaVacancy;
+  const sql = `INSERT INTO work_ua_pagination (bitrix_vacancy_id,work_ua_vacancy_id,is_active,region,publicationType,experience,jobtype,category,description,name) VALUES (?,?,?,?,?,?,?,?,?,?)`;
   console.log({
     sql,
     bitrix_vacancy_id,
     is_active,
     work_ua_vacancy_id,
     region,
+    publicationType,
   });
-  await db.run(sql, bitrix_vacancy_id, work_ua_vacancy_id, is_active, region);
+
+  await db.run(
+    sql,
+    bitrix_vacancy_id,
+    work_ua_vacancy_id,
+    is_active,
+    region,
+    publicationType,
+    experience,
+    jobtype,
+    category,
+    description,
+    name
+  );
 };
 export const deleteWorkUaSynchronizedVacancy = async ({
   work_ua_vacancy_id,
