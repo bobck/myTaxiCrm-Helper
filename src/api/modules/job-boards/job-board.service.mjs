@@ -109,33 +109,28 @@ const updateVacancy = async ({
   }
   const payload = { vacancy };
   if (workUaVacancy) {
-    payload.work_ua_vacancy_id = workUaVacancy.id;
-    if (vacancy.work_ua_vacancy_id !== workUaVacancy.id) {
-      await jobBoardRepo.synchronizeWorkUaVacancy({
-        workUaVacancy,
-        vacancy,
-      });
+    if (Number(vacancy.work_ua_vacancy_id) !== Number(workUaVacancy.id)) {
+      payload.workUaVacancy = workUaVacancy;
     }
   }
   if (robotaUaVacancy) {
-    payload.robota_ua_vacancy_id = robotaUaVacancy.vacancyId;
-    if (vacancy.robota_ua_vacancy_id !== robotaUaVacancy.vacancyId) {
-      await jobBoardRepo.synchronizeRobotaUaVacancy({
-        robotaUaVacancy,
-        vacancy,
-      });
+    if (
+      Number(vacancy.robota_ua_vacancy_id) !== Number(robotaUaVacancy.vacancyId)
+    ) {
+      payload.robotaUaVacancy = robotaUaVacancy;
     }
   }
 
-  const { isAnyVacancyUpdated, _comments: _comments2 } =
-    jobBoardRepo.updateVacancySynchronously({
+  const { _comments: _comments2, isAnyVacancyUpdated } =
+    await jobBoardRepo.updateVacancySynchronously({
       bitrix_vacancy_id,
       vacancy_name,
       is_active: false,
       ...payload,
     });
+
+  console.log({ _comments2, isAnyVacancyUpdated });
   comments.push(..._comments2);
-  console.log({ comments, isAnyVacancyUpdated });
   if (!isAnyVacancyUpdated) {
     comments.push(`Вакансія НЕ оновлена в системі.`);
   } else {

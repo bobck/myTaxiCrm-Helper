@@ -6,12 +6,14 @@ import {
 import {
   createRobotaUaSynchronizedVacancy,
   deleteRobotaUaSynchronizedVacancy,
+  getAnyRobotaUaVacancyByBitrixId,
   getAnyRobotaUaVacancyById,
   updateRobotaUaSynchronizedVacancy,
 } from '../../../job-boards/robota.ua/robotaua.queries.mjs';
 import {
   createWorkUaSynchronizedVacancy,
   deleteWorkUaSynchronizedVacancy,
+  getAnyWorkUaVacancyByBitrixId,
   getAnyWorkUaVacancyById,
   updateWorkUaSynchronizedVacancy,
 } from '../../../job-boards/work.ua/workua.queries.mjs';
@@ -112,19 +114,40 @@ export const updateVacancySynchronously = async ({
     const existingRobotaUaVacancy = await getAnyRobotaUaVacancyById({
       robota_ua_vacancy_id,
     });
+
     commentsLimit++;
     if (existingRobotaUaVacancy) {
-      _comments.push(
-        `Подана вакансія robota.ua id:${robota_ua_vacancy_id} вже існує в системі.`
-      );
+      if (existingRobotaUaVacancy.bitrix_vacancy_id == bitrix_vacancy_id) {
+        await updateRobotaUaSynchronizedVacancy({
+          bitrix_vacancy_id,
+          robota_ua_vacancy_id,
+          is_active,
+        });
+        payload.robota_ua_vacancy_id = robota_ua_vacancy_id;
+        console.log('robota vacancy updated');
+      } else {
+        _comments.push(
+          `Подана вакансія robota.ua id:${robota_ua_vacancy_id} вже існує в системі.`
+        );
+      }
     } else {
-      await updateRobotaUaSynchronizedVacancy({
-        bitrix_vacancy_id,
-        robota_ua_vacancy_id,
-        is_active,
-      });
+      const existingRobotaUaVacancyByBitrixId =
+        await getAnyRobotaUaVacancyByBitrixId({ bitrix_vacancy_id });
+      if (existingRobotaUaVacancyByBitrixId) {
+        await updateRobotaUaSynchronizedVacancy({
+          bitrix_vacancy_id,
+          robota_ua_vacancy_id,
+          is_active,
+        });
+      } else {
+        await createRobotaUaSynchronizedVacancy({
+          bitrix_vacancy_id,
+          robotaUaVacancy,
+          is_active,
+        });
+      }
+
       payload.robota_ua_vacancy_id = robota_ua_vacancy_id;
-      console.log('robota vacancy updated');
     }
   }
   if (workUaVacancy) {
@@ -134,39 +157,58 @@ export const updateVacancySynchronously = async ({
     });
     commentsLimit++;
     if (existingWorkUaVacancy) {
-      _comments.push(
-        `Подана вакансія work.ua id:${work_ua_vacancy_id} вже існує в системі.`
-      );
+      if (existingWorkUaVacancy.bitrix_vacancy_id == bitrix_vacancy_id) {
+        await updateWorkUaSynchronizedVacancy({
+          bitrix_vacancy_id,
+          work_ua_vacancy_id,
+          is_active,
+        });
+        payload.work_ua_vacancy_id = work_ua_vacancy_id;
+      } else {
+        _comments.push(
+          `Подана вакансія work.ua id:${work_ua_vacancy_id} вже існує в системі.`
+        );
+      }
     } else {
-      await updateWorkUaSynchronizedVacancy({
-        bitrix_vacancy_id,
-        work_ua_vacancy_id,
-        is_active,
-      });
+      const existingWorkUaVacancyByBitrixId =
+        await getAnyWorkUaVacancyByBitrixId({ bitrix_vacancy_id });
+      if (existingWorkUaVacancyByBitrixId) {
+        await updateWorkUaSynchronizedVacancy({
+          bitrix_vacancy_id,
+          work_ua_vacancy_id,
+          is_active,
+        });
+      } else {
+        await createWorkUaSynchronizedVacancy({
+          bitrix_vacancy_id,
+          workUaVacancy,
+          is_active,
+        });
+      }
       payload.work_ua_vacancy_id = work_ua_vacancy_id;
     }
   }
   if (_comments.length >= commentsLimit) {
-    return { comments: _comments, isAnyVacancyUpdated: false };
+    console.log('no vacancy updated');
+    return { _comments, isAnyVacancyUpdated: false };
   }
   await updateBitrixVacancy({
     bitrix_vacancy_id,
     vacancy_name,
-    work_ua_vacancy_id,
-    robota_ua_vacancy_id,
     is_active,
+    ...payload,
   });
-  return { comments: _comments, isAnyVacancyUpdated: true };
+  console.log('vacancy updated');
+  return { _comments, isAnyVacancyUpdated: true };
 };
 
 export const synchronizeWorkUaVacancy = async ({ workUaVacancy, vacancy }) => {
   const { bitrix_vacancy_id, work_ua_vacancy_id } = vacancy;
-  const { id, is_active, region } = workUaVacancy;
+  const { is_active } = workUaVacancy;
   await createWorkUaSynchronizedVacancy({
     bitrix_vacancy_id,
-    work_ua_vacancy_id: id,
+    workUaVacancy,
     is_active,
-    region,
   });
   if (work_ua_vacancy_id) {
     await deleteWorkUaSynchronizedVacancy({ work_ua_vacancy_id });

@@ -130,6 +130,10 @@ export async function getAnyRobotaUaVacancyById({ robota_ua_vacancy_id }) {
   const sql = `SELECT * from robota_ua_pagination where robota_ua_vacancy_id = ?`;
   return await db.get(sql, robota_ua_vacancy_id);
 }
+export async function getAnyRobotaUaVacancyByBitrixId({ bitrix_vacancy_id }) {
+  const sql = `SELECT * from robota_ua_pagination where bitrix_vacancy_id = ?`;
+  return await db.get(sql, bitrix_vacancy_id);
+}
 export const createRobotaUaSynchronizedVacancy = async ({
   bitrix_vacancy_id,
   robotaUaVacancy,
@@ -160,5 +164,5 @@ export const updateRobotaUaSynchronizedVacancy = async ({
 }) => {
   const sql = `UPDATE robota_ua_pagination SET robota_ua_vacancy_id = ?, is_active = ? WHERE bitrix_vacancy_id = ?`;
 
-  await db.run(sql, bitrix_vacancy_id, robota_ua_vacancy_id, is_active);
+  await db.run(sql, robota_ua_vacancy_id, is_active, bitrix_vacancy_id);
 };

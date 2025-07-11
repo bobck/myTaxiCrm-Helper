@@ -48,10 +48,16 @@ export const updateBitrixVacancy = async ({
   work_ua_vacancy_id,
   robota_ua_vacancy_id,
 }) => {
+  let toSet = `vacancy_name = '${vacancy_name}'`;
+  if(robota_ua_vacancy_id){
+    toSet += `,robota_ua_vacancy_id = ${robota_ua_vacancy_id}`;
+  }
+  if(work_ua_vacancy_id){
+    toSet += `,work_ua_vacancy_id = ${work_ua_vacancy_id}`;
+  }
+
   const sql = /*sql*/ `UPDATE bitrix_vacancies_to_job_board_vacancies 
-    SET vacancy_name = '${vacancy_name}',
-    work_ua_vacancy_id = ${work_ua_vacancy_id},
-    robota_ua_vacancy_id = ${robota_ua_vacancy_id}
+    SET ${toSet}
     WHERE bitrix_vacancy_id = ${bitrix_vacancy_id}`;
   await db.run(sql);
 };

@@ -83,7 +83,15 @@ export async function getAnyWorkUaVacancyById({ work_ua_vacancy_id }) {
                     work_ua_vacancy_id = ?`;
   return await db.get(sql, work_ua_vacancy_id);
 }
-
+export async function getAnyWorkUaVacancyByBitrixId({ bitrix_vacancy_id }) {
+  const sql = `SELECT
+                    *
+                FROM
+                    work_ua_pagination
+                WHERE
+                    bitrix_vacancy_id = ?`;
+  return await db.get(sql, bitrix_vacancy_id);
+}
 /**
  * Marks a Work.ua vacancy as active by setting the is_active flag to TRUE.
  * It also automatically updates the 'updated_date' to the current timestamp.
