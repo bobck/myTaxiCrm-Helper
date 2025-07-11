@@ -2,7 +2,7 @@ import * as BoltRepo from './bolt.repo.mjs';
 import {
   handleDriverPhones,
   checkIfDriverStaysInTheSameCity,
-} from './bolt.business-entity.mjs'
+} from './bolt.business-entity.mjs';
 import {
   addCommentToEntity,
   moveRequestedDriversToCheckStage,

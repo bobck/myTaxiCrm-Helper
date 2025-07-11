@@ -52,4 +52,3 @@ export const authorizeAPIClient = ({ api_key }) => {
   }
   return auth_result;
 };
-
