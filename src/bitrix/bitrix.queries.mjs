@@ -798,7 +798,6 @@ export async function setLetterApprovedByDealId({
   return { bitrix_deal_id };
 }
 
-
 /**
  * Retrieves all drivers for whom the first letter has been sent.
  * @returns {Promise<Array<Object>>} - A promise that resolves with an array of driver records.

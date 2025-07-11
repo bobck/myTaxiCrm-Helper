@@ -14,9 +14,6 @@ lettersRouter.post(
   BoltController.handleLetterApprovement
 );
 
-const banRouter = express.Router();
-banRouter.post('/confirm', BoltController.handleBanApprovement);
-
 // All routes defined in lettersRouter will be prefixed with /bolt/letters
 const boltRouter = express.Router();
 boltRouter.use(authorizationMiddleware);

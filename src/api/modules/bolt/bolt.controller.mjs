@@ -27,7 +27,3 @@ export const handleLetterApprovement = controllerWrapper({
   },
   handlingServiceName: 'letterApprovementService',
 });
-
-export const handleBanApprovement = async (req, res) => {
-  res.status(OK).json({ message: 'ban Approved' });
-};
