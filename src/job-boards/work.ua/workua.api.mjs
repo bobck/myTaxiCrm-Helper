@@ -1,5 +1,8 @@
 import axios from 'axios';
+import { Buffer } from 'buffer'; // Import Buffer for Node.js environment
+
 export const MAX_RESPONSES_PER_REQ = 50;
+
 class WorkUaApiClient {
   constructor({ email, password, locale }) {
     if (!locale) {
@@ -29,6 +32,7 @@ class WorkUaApiClient {
       this.handleApiError(error);
     }
   }
+
   async getVacancies(options = { full: 1, all: 0, active: 1 }) {
     try {
       const { full, all, active } = options;
@@ -39,6 +43,7 @@ class WorkUaApiClient {
       this.handleApiError(error);
     }
   }
+
   async getVacancyResponses(
     vacancyId,
     options = {
@@ -67,6 +72,7 @@ class WorkUaApiClient {
 
     return { responses };
   }
+
   async getResponses(options = {}) {
     const { limit, last_id, before_id, before, sort } = options;
     let queryParams = `?limit=${limit}&sort=${sort}`;
@@ -86,6 +92,7 @@ class WorkUaApiClient {
     console.log(requestUrl);
     return await this.api(requestUrl);
   }
+
   async getVacancyById({ vacancyId }) {
     const queryParams = `?id=${vacancyId}&all=1`;
     const requestLocation = `/jobs/my/`;
@@ -93,33 +100,135 @@ class WorkUaApiClient {
     const { data } = await this.api.get(requestUrl);
     return data;
   }
-  async activateVacancy({ vacancyId, publicationType }) {
+
+  /**
+   * Activates a vacancy by setting its publication type and other required fields.
+   * This method uses a PUT request to update the vacancy.
+   *
+   * @param {object} params - The parameters for activating the vacancy.
+   * @param {object} params.vacancy - An object containing vacancy details.
+   * @param {string} params.vacancy.work_ua_vacancy_id - The ID of the vacancy to activate.
+   * @param {string} params.vacancy.publicationType - The type of publication (e.g., 'standart_job').
+   * @param {number} params.vacancy.region - The numeric ID of the region.
+   * @param {number} params.vacancy.experience - The numeric ID of the experience level.
+   * @param {string} params.vacancy.jobtype - A JSON string representing an array of job type IDs (e.g., '["74"]').
+   * @param {string} params.vacancy.category - A JSON string representing an array of category IDs (e.g., '["22","25"]').
+   * @param {string} params.vacancy.description - The description of the vacancy.
+   * @param {string} params.vacancy.name - The name/title of the vacancy.
+   * @returns {Promise<void>} A promise that resolves when the vacancy is successfully activated.
+   */
+  async activateVacancy({ vacancy }) {
     try {
+      const {
+        work_ua_vacancy_id,
+        publicationType,
+        region,
+        experience,
+        jobtype,
+        category,
+        description,
+        name,
+      } = vacancy;
+
+      // Parse jobtype and category strings into arrays of numbers
+      const jobtypeParsed = JSON.parse(jobtype); // e.g., [74]
+      const categoryParsed = JSON.parse(category); // e.g., [22, 25]
+
       const body = new URLSearchParams();
       body.append('publication', publicationType);
+      body.append('description', description);
+      body.append('name', name);
 
-      const { data } = await this.api.put(`/jobs/${vacancyId}`, body, {
+      // Append region and experience with the [id] suffix as required by the API
+      // Ensure region and experience are not null/undefined before appending
+      if (region !== null && region !== undefined) {
+        body.append('region[id]', region);
+      } else {
+        console.warn(
+          'Region is missing or null. This might cause an API error.'
+        );
+      }
+
+      if (experience !== null && experience !== undefined) {
+        body.append('experience[id]', experience);
+      } else {
+        console.warn(
+          'Experience is missing or null. This might cause an API error.'
+        );
+      }
+
+      // Append jobtype and category as arrays of objects with [id] suffix
+      // The API expects format like jobtype[0][id]=X&jobtype[1][id]=Y
+      if (jobtypeParsed && jobtypeParsed.length > 0) {
+        jobtypeParsed.forEach((id, index) => {
+          body.append(`jobtype[${index}][id]`, id);
+        });
+      } else {
+        console.warn(
+          'Job type is missing or empty. This might cause an API error.'
+        );
+      }
+
+      if (categoryParsed && categoryParsed.length > 0) {
+        categoryParsed.forEach((id, index) => {
+          body.append(`category[${index}][id]`, id);
+        });
+      } else {
+        console.warn(
+          'Category is missing or empty. This might cause an API error.'
+        );
+      }
+
+      // Send the PUT request
+      const response = await this.api.put(`/jobs/${work_ua_vacancy_id}`, body, {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
       });
-      const { status, errors } = data;
-      console.log(data);
-      console.error(errors);
+
+      // The API typically returns 204 No Content for successful PUT operations
+      // so 'response.data' might be empty.
       console.log(
-        `Vacancy ${vacancyId} activated with publication type: ${publicationType}`
+        `Vacancy ${work_ua_vacancy_id} activated with publication type: ${publicationType}. Response status: ${response.status}`
       );
     } catch (error) {
-      const { status, errors } = error;
-      // console.log(data);
-      console.error(error.response.data);
+      console.log('error occurred while activating vacancy');
+      console.log(error.response.data);
+      // Delegate error handling to the centralized handleApiError method
       // this.handleApiError(error);
     }
   }
-  async deactivateVacancy({ vacancyId }) {}
+
+  async deactivateVacancy({ vacancyId }) {
+    try {
+      // The API expects Content-Length: 0 for empty PUT bodies.
+      await this.api.put(`/jobs/${vacancyId}/close`, null, {
+        headers: {
+          'Content-Length': '0',
+        },
+      });
+      console.log(`Vacancy ${vacancyId} deactivated.`);
+    } catch (error) {
+      console.log('error occurred while deactivating vacancy');
+      console.log(error.response.data);
+      // this.handleApiError(error);
+    }
+  }
+
   handleApiError(error) {
     if (error.response) {
       switch (error.response.status) {
+        case 400:
+          console.error(
+            'API Error: 400 Bad Request. The request was malformed or invalid.'
+          );
+          if (error.response.data && error.response.data.errors) {
+            console.error('Specific API Errors:');
+            error.response.data.errors.forEach((err) => {
+              console.error(`  - ID: ${err.id}, Message: ${err.message}`);
+            });
+          }
+          break;
         case 401:
           console.error(
             'API Error: 401 Unauthorized. Please check your email and password.'
@@ -143,7 +252,11 @@ class WorkUaApiClient {
             `API Error: ${error.response.status} ${error.response.statusText}`
           );
       }
-      if (error.response.data) {
+      // Ensure error.response.data is logged only if it exists and hasn't been specifically handled
+      if (
+        error.response.data &&
+        (error.response.status !== 400 || !error.response.data.errors)
+      ) {
         console.error(
           'Error details:',
           JSON.stringify(error.response.data, null, 2)

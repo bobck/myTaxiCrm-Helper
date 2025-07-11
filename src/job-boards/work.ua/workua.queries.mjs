@@ -154,37 +154,6 @@ export const createWorkUaSynchronizedVacancy = async ({
   is_active,
   workUaVacancy,
 }) => {
-  /**
-   * {
-  status: 'error',
-  errors: [
-    {
-      id: 'empty_field_name',
-      message: 'Не заполнено поле name - заголовок вакансии'
-    },
-    {
-      id: 'empty_field_description',
-      message: 'Не заполнено поле description - описание вакансии'
-    },
-    {
-      id: 'empty_field_region',
-      message: 'Не заполнено поле region - регион вакансии'
-    },
-    {
-      id: 'empty_field_category',
-      message: 'Не заполнено поле category - раздел вакансии'
-    },
-    {
-      id: 'empty_field_jobtype',
-      message: 'Не заполнено поле jobtype - вид занятости'
-    },
-    {
-      id: 'empty_field_experience',
-      message: 'Не заполнено поле experience - опыт работы'
-    }
-  ]
-}
-   */
   const {
     id: work_ua_vacancy_id,
     region,
@@ -195,6 +164,9 @@ export const createWorkUaSynchronizedVacancy = async ({
     description,
     name,
   } = workUaVacancy;
+  const jobTypeStringified = JSON.stringify(jobtype);
+  const categoryStringified = JSON.stringify(category);
+
   const sql = `INSERT INTO work_ua_pagination (bitrix_vacancy_id,work_ua_vacancy_id,is_active,region,publicationType,experience,jobtype,category,description,name) VALUES (?,?,?,?,?,?,?,?,?,?)`;
   console.log({
     sql,
@@ -203,6 +175,11 @@ export const createWorkUaSynchronizedVacancy = async ({
     work_ua_vacancy_id,
     region,
     publicationType,
+    experience,
+    jobTypeStringified,
+    categoryStringified: categoryStringified,
+    // description,
+    name,
   });
 
   await db.run(
@@ -213,8 +190,8 @@ export const createWorkUaSynchronizedVacancy = async ({
     region,
     publicationType,
     experience,
-    jobtype,
-    category,
+    jobTypeStringified,
+    categoryStringified,
     description,
     name
   );

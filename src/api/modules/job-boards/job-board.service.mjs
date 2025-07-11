@@ -183,8 +183,7 @@ export const activateVacancy = async ({ query }) => {
     robota_ua_vacancy_id,
     bitrix_vacancy_id,
   });
-  console.log(workUaVacancy);
-  return;
+
   if (false && robota_ua_vacancy_id) {
     const robotaUaVacancy = await getAnyWorkUaVacancyByBitrixId({
       bitrix_vacancy_id,
@@ -196,10 +195,8 @@ export const activateVacancy = async ({ query }) => {
     const workUaVacancy = await getAnyWorkUaVacancyByBitrixId({
       bitrix_vacancy_id,
     });
-    const { publicationType } = workUaVacancy;
     await activateWorkUaVacancy({
-      vacancyId: work_ua_vacancy_id,
-      publicationType,
+      workUaVacancy,
     });
     await markWorkUaVacancyAsActive(vacancy);
   }
