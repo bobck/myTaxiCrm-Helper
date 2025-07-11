@@ -139,7 +139,6 @@ export const createRobotaUaSynchronizedVacancy = async ({
     robotaUaVacancy;
 
   const sql = `INSERT INTO robota_ua_pagination (bitrix_vacancy_id,robota_ua_vacancy_id,is_active,robota_ua_city_id) VALUES (?,?,?,?)`;
-
   await db.run(
     sql,
     bitrix_vacancy_id,
@@ -147,6 +146,12 @@ export const createRobotaUaSynchronizedVacancy = async ({
     is_active,
     robota_ua_city_id
   );
+};
+export const deleteRobotaUaSynchronizedVacancy = async ({
+  robota_ua_vacancy_id,
+}) => {
+  const sql = `DELETE FROM robota_ua_pagination WHERE robota_ua_vacancy_id = ?`;
+  await db.run(sql, robota_ua_vacancy_id);
 };
 export const updateRobotaUaSynchronizedVacancy = async ({
   bitrix_vacancy_id,

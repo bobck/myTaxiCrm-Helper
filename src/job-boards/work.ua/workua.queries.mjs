@@ -144,12 +144,24 @@ export const getLastWorkUaVaccancyApply = async ({ vacancy_id }) => {
 export const createWorkUaSynchronizedVacancy = async ({
   bitrix_vacancy_id,
   is_active,
-  work_ua_vacancy_id,
-  region,
+  workUaVacancy,
 }) => {
+  const { id: work_ua_vacancy_id, region } = workUaVacancy;
   const sql = `INSERT INTO work_ua_pagination (bitrix_vacancy_id,work_ua_vacancy_id,is_active,region) VALUES (?,?,?,?)`;
-
+  console.log({
+    sql,
+    bitrix_vacancy_id,
+    is_active,
+    work_ua_vacancy_id,
+    region,
+  });
   await db.run(sql, bitrix_vacancy_id, work_ua_vacancy_id, is_active, region);
+};
+export const deleteWorkUaSynchronizedVacancy = async ({
+  work_ua_vacancy_id,
+}) => {
+  const sql = `DELETE FROM work_ua_pagination WHERE work_ua_vacancy_id = ?`;
+  await db.run(sql, work_ua_vacancy_id);
 };
 export const updateWorkUaSynchronizedVacancy = async ({
   bitrix_vacancy_id,
@@ -157,5 +169,11 @@ export const updateWorkUaSynchronizedVacancy = async ({
   is_active,
 }) => {
   const sql = /*sql */ `UPDATE work_ua_pagination SET work_ua_vacancy_id = ?, is_active = ? WHERE bitrix_vacancy_id = ?`;
+  console.log({
+    sql,
+    bitrix_vacancy_id,
+    work_ua_vacancy_id,
+    is_active,
+  });
   await db.run(sql, work_ua_vacancy_id, is_active, bitrix_vacancy_id);
 };

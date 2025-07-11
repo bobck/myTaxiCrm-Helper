@@ -1,7 +1,4 @@
-import {
-  addCommentToEntity,
-  addManyCommentsToEntity,
-} from '../../../bitrix/bitrix.utils.mjs';
+import { addManyCommentsToAnEntity } from '../../../bitrix/bitrix.utils.mjs';
 import { vacancyRequestTypeId } from '../../../job-boards/job-board.constants.mjs';
 import { getRobotaUaVacancyById } from '../../../job-boards/robota.ua/robotaua.utils.mjs';
 import { getWorkUaVacancyById } from '../../../job-boards/work.ua/workua.utils.mjs';
@@ -51,10 +48,11 @@ export const assignManyCommentsToVacancyRequest = async ({
   comments,
   bitrix_vacancy_id,
 }) => {
+  vacancyRequestTypeId;
   console.log('assigning comments to vacancy request', comments);
-  await addManyCommentsToEntity({
-    entity_id: bitrix_vacancy_id,
-    type_id: vacancyRequestTypeId,
-    comments,
-  });
+  // await addManyCommentsToEntity({
+  //   entityId: bitrix_vacancy_id,
+  //   typeId: vacancyRequestTypeId,
+  //   comments,
+  // });
 };

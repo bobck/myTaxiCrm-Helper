@@ -5,11 +5,13 @@ import {
 } from '../../../job-boards/job-board.queries.mjs';
 import {
   createRobotaUaSynchronizedVacancy,
+  deleteRobotaUaSynchronizedVacancy,
   getAnyRobotaUaVacancyById,
   updateRobotaUaSynchronizedVacancy,
 } from '../../../job-boards/robota.ua/robotaua.queries.mjs';
 import {
   createWorkUaSynchronizedVacancy,
+  deleteWorkUaSynchronizedVacancy,
   getAnyWorkUaVacancyById,
   updateWorkUaSynchronizedVacancy,
 } from '../../../job-boards/work.ua/workua.queries.mjs';
@@ -34,10 +36,8 @@ export const addVacancySynchronously = async ({
   const _comments = [];
   let commentsLimit = 0;
   const payload = {};
-
-  console.log({ commentsLimit, _comments });
   if (robotaUaVacancy) {
-    const { robota_ua_vacancy_id } = robotaUaVacancy;
+    const { vacancyId: robota_ua_vacancy_id } = robotaUaVacancy;
     const existingRobotaUaVacancy = await getAnyRobotaUaVacancyById({
       robota_ua_vacancy_id,
     });
@@ -56,9 +56,9 @@ export const addVacancySynchronously = async ({
       console.log('robota vacancy created');
     }
   }
-  console.log({ commentsLimit, _comments });
+
   if (workUaVacancy) {
-    const { work_ua_vacancy_id } = workUaVacancy;
+    const { id: work_ua_vacancy_id } = workUaVacancy;
     const existingWorkUaVacancy = await getAnyWorkUaVacancyById({
       work_ua_vacancy_id,
     });
@@ -81,7 +81,7 @@ export const addVacancySynchronously = async ({
   if (commentsLimit <= _comments.length) {
     return { _comments, isAnyVacancyCreated: false };
   }
-  console.log({ commentsLimit, _comments });
+  console.log({ payload });
   await createBitrixVacancy({
     bitrix_vacancy_id,
     vacancy_name,
@@ -107,15 +107,11 @@ export const updateVacancySynchronously = async ({
   let commentsLimit = 0;
   const payload = {};
 
-  const existingRobotaUaVacancy = await getAnyRobotaUaVacancyById({
-    robota_ua_vacancy_id,
-  });
-  const existingWorkUaVacancy = await getAnyWorkUaVacancyById({
-    work_ua_vacancy_id,
-  });
-
   if (robotaUaVacancy) {
-    const { robota_ua_vacancy_id } = robotaUaVacancy;
+    const { vacancyId: robota_ua_vacancy_id } = robotaUaVacancy;
+    const existingRobotaUaVacancy = await getAnyRobotaUaVacancyById({
+      robota_ua_vacancy_id,
+    });
     commentsLimit++;
     if (existingRobotaUaVacancy) {
       _comments.push(
@@ -132,7 +128,10 @@ export const updateVacancySynchronously = async ({
     }
   }
   if (workUaVacancy) {
-    const { work_ua_vacancy_id } = workUaVacancy;
+    const { id: work_ua_vacancy_id } = workUaVacancy;
+    const existingWorkUaVacancy = await getAnyWorkUaVacancyById({
+      work_ua_vacancy_id,
+    });
     commentsLimit++;
     if (existingWorkUaVacancy) {
       _comments.push(
@@ -161,7 +160,7 @@ export const updateVacancySynchronously = async ({
 };
 
 export const synchronizeWorkUaVacancy = async ({ workUaVacancy, vacancy }) => {
-  const { bitrix_vacancy_id } = vacancy;
+  const { bitrix_vacancy_id, work_ua_vacancy_id } = vacancy;
   const { id, is_active, region } = workUaVacancy;
   await createWorkUaSynchronizedVacancy({
     bitrix_vacancy_id,
@@ -169,12 +168,15 @@ export const synchronizeWorkUaVacancy = async ({ workUaVacancy, vacancy }) => {
     is_active,
     region,
   });
+  if (work_ua_vacancy_id) {
+    await deleteWorkUaSynchronizedVacancy({ work_ua_vacancy_id });
+  }
 };
 export const synchronizeRobotaUaVacancy = async ({
   robotaUaVacancy,
   vacancy,
 }) => {
-  const { bitrix_vacancy_id } = vacancy;
+  const { bitrix_vacancy_id, robota_ua_vacancy_id } = vacancy;
   const { vacancyId, is_active, region } = robotaUaVacancy;
   await createRobotaUaSynchronizedVacancy({
     bitrix_vacancy_id,
@@ -182,4 +184,7 @@ export const synchronizeRobotaUaVacancy = async ({
     is_active,
     region,
   });
+  if (robota_ua_vacancy_id) {
+    await deleteRobotaUaSynchronizedVacancy({ robota_ua_vacancy_id });
+  }
 };
