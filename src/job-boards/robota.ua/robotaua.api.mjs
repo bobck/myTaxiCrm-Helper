@@ -113,9 +113,9 @@ class RobotaUaApiClient {
       this.handleApiError(error);
     }
   }
-  async activateVacancy({ vacancyId }) {
+  async changeVacancyState({ vacancyId, state }) {
     try {
-      this.employerApi;
+      this.employerApi.post(`/vacancy/state/${vacancyId}?state=${state}`);
     } catch (error) {
       this.handleApiError(error);
     }
