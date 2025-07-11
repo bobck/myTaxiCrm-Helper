@@ -113,7 +113,14 @@ class RobotaUaApiClient {
       this.handleApiError(error);
     }
   }
-
+  async activateVacancy({ vacancyId }) {
+    try {
+      this.employerApi
+    }
+    catch (error) {
+      this.handleApiError(error);
+    }
+  }
   handleApiError(error) {
     console.error('Robota.ua API Error:');
     if (error.response) {
