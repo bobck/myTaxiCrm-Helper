@@ -49,10 +49,10 @@ export const updateBitrixVacancy = async ({
   robota_ua_vacancy_id,
 }) => {
   let toSet = `vacancy_name = '${vacancy_name}'`;
-  if(robota_ua_vacancy_id){
+  if (robota_ua_vacancy_id) {
     toSet += `,robota_ua_vacancy_id = ${robota_ua_vacancy_id}`;
   }
-  if(work_ua_vacancy_id){
+  if (work_ua_vacancy_id) {
     toSet += `,work_ua_vacancy_id = ${work_ua_vacancy_id}`;
   }
 
