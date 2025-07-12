@@ -11,8 +11,7 @@ import {
 } from '../../../bitrix/bitrix.utils.mjs'; // Adjust path if needed
 import { assignVacancyTitleToApplies } from '../../job-board.utils.mjs';
 
-const vacanciesCount = 1;
-let counter = 0;
+
 
 export const getAndSaveWorkUaVacancyApplies = async () => {
   console.log({
@@ -26,9 +25,9 @@ export const getAndSaveWorkUaVacancyApplies = async () => {
   for (const vacancy of activeWorkUaVacancies) {
     console.log(`Processing Work.ua Vacancy ID: ${vacancy.vacancy_id}`);
 
-    const { last_apply_id, vacancy_id, vacancy_name } = vacancy;
+    const { last_apply_id,work_ua_vacancy_id, vacancy_name } = vacancy;
     const { responses: currentApplies } = await getVacancyResponses({
-      vacancyId: vacancy_id,
+      vacancyId: work_ua_vacancy_id,
       last_id: 0,
       last_id: 370274985,
     });

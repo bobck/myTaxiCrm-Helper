@@ -6,14 +6,6 @@ const db = await open({
   driver: sqlite3.Database,
 });
 
-/**
- * Creates a new vacancy record in the work_ua_pagination table.
- * Other fields will be initialized with default or NULL values.
- * @param {object} params - The parameters for the new vacancy.
- * @param {string} params.vacancy_id - The unique ID of the vacancy.
- * @param {string} params.vacancy_name - The name of the vacancy.
- * @param {string} params.vacancy_date - The date of the vacancy.
- */
 export async function createWorkUaVacancy({
   vacancy_id,
   vacancy_name,
@@ -26,36 +18,26 @@ export async function createWorkUaVacancy({
   await db.run(sql, vacancy_id, vacancy_name, vacancy_date);
 }
 
-/**
- * Updates the last processed application ID for a specific Work.ua vacancy.
- * It also automatically updates the 'updated_date' to the current timestamp.
- * @param {object} params - The parameters for the update.
- * @param {string} params.vacancy_id - The ID of the vacancy to update.
- * @param {number} params.last_apply_id - The new last application ID.
- */
 export async function updateWorkUaVacancyProgress({
-  vacancy_id,
+  work_ua_vacancy_id,
   last_apply_id,
+  last_apply_date,
 }) {
   const sql = `UPDATE
                     work_ua_pagination
                 SET
                     last_apply_id = ?,
+                    last_apply_date = ?,
                     updated_date = CURRENT_TIMESTAMP
                 WHERE
-                    vacancy_id = ?`;
-  await db.run(sql, last_apply_id, vacancy_id);
+                    work_ua_vacancy_id = ?`;
+  await db.run(sql, last_apply_id, last_apply_date, work_ua_vacancy_id);
 }
 
-/**
- * Retrieves the pagination data (last apply ID) for a given Work.ua vacancy.
- * @param {object} params - The parameters for the query.
- * @param {string} params.vacancy_id - The ID of the vacancy to retrieve pagination for.
- * @returns {Promise<object|undefined>} An object containing last_apply_id, or undefined if not found.
- */
 export async function getWorkUaPagination({ vacancy_id }) {
   const sql = `SELECT
-                    last_apply_id
+                    last_apply_id,
+                    last_apply_date
                 FROM
                     work_ua_pagination
                 WHERE
@@ -64,16 +46,6 @@ export async function getWorkUaPagination({ vacancy_id }) {
   return pagination;
 }
 
-export async function getAllWorkUaVacancyIds() {
-  const sql = `SELECT
-                    vacancy_id
-                FROM
-                    work_ua_pagination
-                WHERE
-                    is_active = FALSE`;
-  const vacancyIds = await db.all(sql);
-  return vacancyIds;
-}
 export async function getAnyWorkUaVacancyById({ work_ua_vacancy_id }) {
   const sql = `SELECT
                     *
@@ -116,26 +88,8 @@ export async function markWorkUaVacancyAsInactive({ work_ua_vacancy_id }) {
                     work_ua_vacancy_id = ?`;
   await db.run(sql, work_ua_vacancy_id);
 }
-
-export async function markManyWorkUaVacanciesAsActive({ vacancy_ids }) {
-  if (!vacancy_ids || vacancy_ids.length === 0) {
-    return; // No IDs to process
-  }
-
-  const placeholders = vacancy_ids.map(() => '?').join(',');
-
-  const sql = `UPDATE
-                    work_ua_pagination
-                SET
-                    is_active = TRUE,
-                    updated_date = CURRENT_TIMESTAMP
-                WHERE
-                    vacancy_id IN (${placeholders})`;
-  await db.run(sql, ...vacancy_ids);
-}
-
 export async function getAllActiveWorkUaVacancies() {
-  const sql = `SELECT * from work_ua_pagination where is_active = FALSE`;
+  const sql = `SELECT work_ua_vacancy_id, last_apply_id, last_apply_date,region from work_ua_pagination where is_active = TRUE`;
   const activeVacancies = await db.all(sql);
   return { activeVacancies };
 }
@@ -168,19 +122,19 @@ export const createWorkUaSynchronizedVacancy = async ({
   const categoryStringified = JSON.stringify(category);
 
   const sql = `INSERT INTO work_ua_pagination (bitrix_vacancy_id,work_ua_vacancy_id,is_active,region,publicationType,experience,jobtype,category,description,name) VALUES (?,?,?,?,?,?,?,?,?,?)`;
-  console.log({
-    sql,
-    bitrix_vacancy_id,
-    is_active,
-    work_ua_vacancy_id,
-    region,
-    publicationType,
-    experience,
-    jobTypeStringified,
-    categoryStringified: categoryStringified,
-    // description,
-    name,
-  });
+  // console.log({
+  //   sql,
+  //   bitrix_vacancy_id,
+  //   is_active,
+  //   work_ua_vacancy_id,
+  //   region,
+  //   publicationType,
+  //   experience,
+  //   jobTypeStringified,
+  //   categoryStringified: categoryStringified,
+  //   // description,
+  //   name,
+  // });
 
   await db.run(
     sql,
@@ -195,12 +149,6 @@ export const createWorkUaSynchronizedVacancy = async ({
     description,
     name
   );
-};
-export const deleteWorkUaSynchronizedVacancy = async ({
-  work_ua_vacancy_id,
-}) => {
-  const sql = `DELETE FROM work_ua_pagination WHERE work_ua_vacancy_id = ?`;
-  await db.run(sql, work_ua_vacancy_id);
 };
 export const updateWorkUaSynchronizedVacancy = async ({
   bitrix_vacancy_id,
