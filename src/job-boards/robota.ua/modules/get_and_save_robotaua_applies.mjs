@@ -8,6 +8,7 @@ import { assignVacancyTitleToApplies } from '../../job-board.utils.mjs';
 import { processApiResponse } from '../robotaua.business-entity.mjs';
 import { cityListWithAssignedBy as bitrixCities } from '../../../bitrix/bitrix.constants.mjs';
 import { robotaUaCities } from '../robotaua.constants.mjs';
+import { devLog } from '../../../shared/shared.utils.mjs';
 export const getAndSaveRobotaUaVacancyApplies = async () => {
   console.log({
     module: 'getAndSaveRobotaUaVacancyApplies',
@@ -35,40 +36,37 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
       vacancy_id: robota_ua_vacancy_id,
       last_apply_date,
     });
+    // console.log(
+    //   _applies.map((apply) => {
+    //     const { id, addDate } = apply;
+    //     return { id, addDate };
+    //   })
+    // );
+
+    const applies = assignVacancyTitleToApplies({
+      applies: _applies,
+      title: `${name} ${robota_ua_city.name}`,
+      bitrix_city_id,
+    });
+
+    // const processedApplies = applies.map(processApiResponse);
+    // console.log(processedApplies);
+    // return
+    // await createVacancyResponseCards({ dtos: processedApplies });
     console.log(
-      _applies.map((apply) => {
+      applies.map((apply) => {
         const { id, addDate } = apply;
         return { id, addDate };
       })
     );
-    // const filteredApplies = _applies.filter(
-    //   (apply) => apply.id > last_apply_id
-    // );
-    // console.log(filteredApplies[0]);
-    return;
-    const applies = assignVacancyTitleToApplies({
-      applies: _applies.filter((apply) => apply.id > last_apply_id),
-      title: `${vacancy_name} ${robota_ua_city.name}`,
-      bitrix_city_id,
-    });
-
-    const processedApplies = applies.map(processApiResponse);
-    await createVacancyResponseCards({ dtos: processedApplies });
-
-    const current_last_apply_id = applies.reduce(
-      (acc, apply) => (apply.id > acc ? apply.id : acc),
-      0
-    );
-    console.log(last_apply_id);
+    //robota ua employee api returns vacancy applies FROM THE NEWEST TO THE OLDEST.
+    const [theLatestApply] = applies;
+    const { addDate: theLatestApplyDate } = theLatestApply;
+    devLog({ theLatestApplyDate });
     await updateVacancyProgress({
-      vacancy_id,
-      last_page: 0,
-      last_apply_id: current_last_apply_id,
+      robota_ua_vacancy_id,
+      last_apply_date: applies[applies.length - 1].addDate,
     });
-    if (index === 2) {
-      console.log(applies);
-      break;
-    }
   }
 };
 

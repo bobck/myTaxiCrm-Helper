@@ -1,6 +1,5 @@
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
-import { robotaUaAPI } from './robotaua.utils.mjs';
 
 const db = await open({
   filename: process.env.DEV_DB,
@@ -11,10 +10,11 @@ export async function updateVacancyProgress({
   robota_ua_vacancy_id,
   last_apply_date,
 }) {
+  console.log(arguments);
   const sql = /*sql*/ `UPDATE 
                     robota_ua_pagination
                 SET 
-                    last_apply_date = ?,
+                    last_apply_date = ?
                 WHERE 
                     robota_ua_vacancy_id = ?`;
   await db.run(sql, last_apply_date, robota_ua_vacancy_id);
