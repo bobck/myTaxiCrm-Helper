@@ -117,7 +117,9 @@ export const createWorkUaSynchronizedVacancy = async ({
     category,
     description,
     name,
+    active,
   } = workUaVacancy;
+  const IS_ACTIVE = Boolean(active);
   const jobTypeStringified = JSON.stringify(jobtype);
   const categoryStringified = JSON.stringify(category);
 

@@ -22,9 +22,10 @@ exports.up = function (db, callback) {
     bitrix_vacancy_id INTEGER,
     robota_ua_city_id INTEGER NOT NULL,
     is_active BOOLEAN DEFAULT FALSE,
-    last_apply_date DATETIME,
+    last_apply_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    region INTEGER,
     PRIMARY KEY (robota_ua_vacancy_id)
-    )`;
+    );`;
   db.runSql(sql, callback);
 };
 

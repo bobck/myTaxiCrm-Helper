@@ -20,7 +20,7 @@ exports.up = function (db, callback) {
     last_apply_id INTEGER,
     bitrix_vacancy_id INTEGER,
     is_active BOOLEAN DEFAULT FALSE,
-    last_apply_date DATETIME,
+    last_apply_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     region INTEGER,
     publicationType TEXT DEFAULT 'standart_job_free',
     description TEXT,

@@ -11,6 +11,34 @@ import {
 } from '../../../bitrix/bitrix.utils.mjs'; // Adjust path if needed
 import { assignVacancyTitleToApplies } from '../../job-board.utils.mjs';
 
+const computePaginationProgress = async ({ applies }) => {
+  if (!applies || !Array.isArray(applies) || applies.length === 0) {
+    return { biggestDate: null, biggestId: null };
+  }
+
+  let maxDate = new Date(0);
+  let maxId = -1;
+
+  let biggestDateString = null;
+  let biggestIdString = null;
+
+  applies.forEach(apply => {
+    const currentDate = new Date(apply.date);
+    if (currentDate > maxDate) {
+      maxDate = currentDate;
+      biggestDateString = apply.date;
+    }
+
+    const currentId = parseInt(apply.id, 10);
+    if (currentId > maxId) {
+      maxId = currentId;
+      biggestIdString = apply.id;
+    }
+  });
+
+  return { biggestDate: biggestDateString, biggestId: biggestIdString };
+};
+
 
 
 export const getAndSaveWorkUaVacancyApplies = async () => {

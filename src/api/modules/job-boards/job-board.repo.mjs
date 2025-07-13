@@ -5,7 +5,6 @@ import {
 } from '../../../job-boards/job-board.queries.mjs';
 import {
   createRobotaUaSynchronizedVacancy,
-  deleteRobotaUaSynchronizedVacancy,
   getAnyRobotaUaVacancyByBitrixId,
   getAnyRobotaUaVacancyById,
   updateRobotaUaSynchronizedVacancy,
