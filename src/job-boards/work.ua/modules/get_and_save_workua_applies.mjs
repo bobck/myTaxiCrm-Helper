@@ -9,6 +9,7 @@ import {
   createVacancyResponseCards,
 } from '../../../bitrix/bitrix.utils.mjs';
 import { assignVacancyTitleToApplies } from '../../job-board.utils.mjs';
+import { devLog } from '../../../shared/shared.utils.mjs';
 
 const computePaginationProgress = ({ applies }) => {
   if (!applies || !Array.isArray(applies) || applies.length === 0) {
@@ -48,10 +49,9 @@ export const getAndSaveWorkUaVacancyApplies = async () => {
     await getAllActiveWorkUaVacancies();
 
   for (const vacancy of activeWorkUaVacancies) {
-    console.log(`Processing Work.ua Vacancy ID: ${vacancy.vacancy_id}`);
-
     const { last_apply_id, work_ua_vacancy_id, name, last_apply_date } =
       vacancy;
+    devLog(`Processing Work.ua Vacancy ID: ${work_ua_vacancy_id}`);
     const { responses: currentApplies } = await getVacancyResponses({
       vacancyId: work_ua_vacancy_id,
       last_id: last_apply_id,
@@ -59,16 +59,13 @@ export const getAndSaveWorkUaVacancyApplies = async () => {
     });
 
     if (currentApplies.length === 0) {
-      if (process.env.ENV === 'DEV' || process.env.ENV === 'TEST') {
-        console.log(
-          `No new applies for Work.ua Vacancy ID ${vacancy.vacancy_id}`
-        );
-      }
+      devLog(`No new applies for Work.ua Vacancy ID ${work_ua_vacancy_id}`);
+
       continue;
     }
 
-    console.log(
-      `Fetched ${currentApplies.length} applies for vacancy ${vacancy.vacancy_id}. Last Apply ID: ${last_apply_id}`
+    devLog(
+      `Fetched ${currentApplies.length} applies for vacancy ${work_ua_vacancy_id}. Last Apply ID: ${last_apply_id}`
     );
 
     const processedApplies = await Promise.all(
