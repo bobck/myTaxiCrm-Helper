@@ -89,20 +89,12 @@ export async function markWorkUaVacancyAsInactive({ work_ua_vacancy_id }) {
   await db.run(sql, work_ua_vacancy_id);
 }
 export async function getAllActiveWorkUaVacancies() {
-  const sql = `SELECT work_ua_vacancy_id, last_apply_id, last_apply_date,region from work_ua_pagination where is_active = TRUE`;
+  const sql = `SELECT wp.name, wp.work_ua_vacancy_id, wp.last_apply_id, wp.last_apply_date, wp.region 
+              from work_ua_pagination wp join bitrix_vacancies_to_job_board_vacancies bc on wp.bitrix_vacancy_id = bc.bitrix_vacancy_id
+              where wp.is_active = TRUE and bc.is_active = TRUE`;
   const activeVacancies = await db.all(sql);
   return { activeVacancies };
 }
-export const getLastWorkUaVaccancyApply = async ({ vacancy_id }) => {
-  const sql = `SELECT
-                    last_apply_id
-                FROM
-                    work_ua_pagination
-                WHERE
-                    vacancy_id = ?`;
-  const lastApplyId = await db.get(sql, vacancy_id);
-  return lastApplyId;
-};
 export const createWorkUaSynchronizedVacancy = async ({
   bitrix_vacancy_id,
   is_active,

@@ -694,14 +694,13 @@ export const createVacancyResponseCards = async ({ dtos }) => {
     params['entityTypeId'] = '1142';
     params['fields[STAGE_ID]'] = 'DT1142_64:NEW';
     batchObj[`${sourceOfApplyment}:${id}`] = { method: 'crm.item.add', params };
-    console.log(dto);
     break;
   }
   // return batchObj;
   // console.log
-  const { result: temp_result } = await bitrix.batch(batchObj);
-  const { result } = temp_result;
-  return result;
+  // const { result: temp_result } = await bitrix.batch(batchObj);
+  // const { result } = temp_result;
+  // return result;
 };
 
 export async function addManyCommentsToAnEntity({
