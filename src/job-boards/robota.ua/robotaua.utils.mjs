@@ -22,33 +22,36 @@ export const getVacancyList = async ({ last_page }) => {
   return { vacancies };
 };
 
-export const getVacancyApplies = async ({ vacancy_id: vacancyId }) => {
+export const getRobotaUaVacancyApplies = async ({
+  robota_ua_vacancy_id,
+  last_apply_date,
+}) => {
   // const { applies } = await robotaUaAPI.getApplies({ vacancyId, page: 47 });
   const applies = [];
   let data;
   let current_page = 0;
+  const targetDate = new Date(last_apply_date);
+  let theOldestApplyDate;
   do {
     data = await robotaUaAPI.getApplies({
-      vacancyId,
+      vacancyId: robota_ua_vacancy_id,
       page: current_page,
-      sort: 1,
     });
-    if (data.applies.length > 0) {
-      applies.push(...data.applies);
-      console.log({
-        vacancyId,
-        current_page,
-        applies: data.applies.length,
-        last_id: data.applies[0].id,
-      });
-      if (process.env.ENV === 'DEV' && current_page === 0) {
-        return { applies };
-      }
-    }
-    current_page++;
-  } while (data.applies.length > 0);
 
-  return { applies };
+    applies.push(...data.applies);
+
+    const { addDate: theOldestApplyDateStringified } =
+      applies[applies.length - 1];
+    theOldestApplyDate = new Date(theOldestApplyDateStringified);
+
+    current_page++;
+  } while (theOldestApplyDate > targetDate);
+
+  const filteredAppliesByDate = applies.filter(
+    (apply) => new Date(apply.addDate) > targetDate
+  );
+
+  return { applies: filteredAppliesByDate };
 };
 export const getCityList = () => robotaUaAPI.getCityValues();
 export const getRobotaUaVacancyById = async ({ vacancyId }) => {

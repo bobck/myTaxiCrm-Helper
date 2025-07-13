@@ -2,7 +2,7 @@ import {
   getAllActiveRobotaUaVacancies,
   updateVacancyProgress,
 } from '../robotaua.queries.mjs';
-import { getCityList, getVacancyApplies } from '../robotaua.utils.mjs';
+import { getCityList, getRobotaUaVacancyApplies } from '../robotaua.utils.mjs';
 import { createVacancyResponseCards } from '../../../bitrix/bitrix.utils.mjs';
 import { assignVacancyTitleToApplies } from '../../job-board.utils.mjs';
 import { processApiResponse } from '../robotaua.business-entity.mjs';
@@ -15,18 +15,32 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
   });
   // const cities = await getCityList();
   const { activeVacancies } = await getAllActiveRobotaUaVacancies();
+
   for (const [index, vacancy] of activeVacancies.entries()) {
-    // console.log(vacancy);
-    const { vacancy_name, vacancy_id, robota_ua_city_id, last_apply_id } =
-      vacancy;
-    const robota_ua_city = robotaUaCities.find(
-      (city) => city.id === robota_ua_city_id
-    );
+    console.log(vacancy);
+    const {
+      robota_ua_vacancy_id,
+      bitrix_vacancy_id,
+      is_active,
+      last_apply_date,
+      region,
+      name,
+    } = vacancy;
+
+    const robota_ua_city = robotaUaCities.find((city) => city.id === region);
     const { brandingId: bitrix_city_id } = bitrixCities.find(
       (bitrixCity) => robota_ua_city.auto_park_id === bitrixCity.auto_park_id
     );
-    const { applies: _applies } = await getVacancyApplies({ vacancy_id });
-    console.log(_applies);
+    const { applies: _applies } = await getRobotaUaVacancyApplies({
+      vacancy_id: robota_ua_vacancy_id,
+      last_apply_date,
+    });
+    console.log(
+      _applies.map((apply) => {
+        const { id, addDate } = apply;
+        return { id, addDate };
+      })
+    );
     // const filteredApplies = _applies.filter(
     //   (apply) => apply.id > last_apply_id
     // );

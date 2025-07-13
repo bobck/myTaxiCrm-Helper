@@ -17,13 +17,10 @@ exports.setup = function (options, seedLink) {
 exports.up = function (db, callback) {
   const sql = `CREATE TABLE robota_ua_pagination (
     robota_ua_vacancy_id INTEGER NOT NULL,
-    last_page INTEGER,
-    last_apply_id INTEGER,
     bitrix_vacancy_id INTEGER,
-    robota_ua_city_id INTEGER NOT NULL,
     is_active BOOLEAN DEFAULT FALSE,
     last_apply_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    region INTEGER,
+    region INTEGER NOT NULL,
     name TEXT,
     PRIMARY KEY (robota_ua_vacancy_id)
     );`;

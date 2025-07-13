@@ -54,7 +54,7 @@ const addVacancy = async ({
     bitrix_vacancy_id,
   });
   devLog({ workUaVacancy, robotaUaVacancy });
- 
+
   comments.push(..._comments1);
   if (!isAnyVacancyFound) {
     comments.push('Жодної вакансії не знайдено');
