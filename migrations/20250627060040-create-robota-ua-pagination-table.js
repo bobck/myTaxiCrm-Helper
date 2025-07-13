@@ -24,6 +24,7 @@ exports.up = function (db, callback) {
     is_active BOOLEAN DEFAULT FALSE,
     last_apply_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     region INTEGER,
+    name TEXT,
     PRIMARY KEY (robota_ua_vacancy_id)
     );`;
   db.runSql(sql, callback);

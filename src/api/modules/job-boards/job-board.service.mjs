@@ -1,3 +1,4 @@
+import { devLog } from '../../../shared/shared.utils.mjs';
 import { addCommentToEntity } from '../../../bitrix/bitrix.utils.mjs';
 import {
   markRobotaUaVacancyAsActive,
@@ -52,6 +53,8 @@ const addVacancy = async ({
     robota_ua_vacancy_id,
     bitrix_vacancy_id,
   });
+  devLog({ workUaVacancy, robotaUaVacancy });
+ 
   comments.push(..._comments1);
   if (!isAnyVacancyFound) {
     comments.push('Жодної вакансії не знайдено');

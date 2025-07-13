@@ -31,6 +31,7 @@ export const getVacancyApplies = async ({ vacancy_id: vacancyId }) => {
     data = await robotaUaAPI.getApplies({
       vacancyId,
       page: current_page,
+      sort: 1,
     });
     if (data.applies.length > 0) {
       applies.push(...data.applies);

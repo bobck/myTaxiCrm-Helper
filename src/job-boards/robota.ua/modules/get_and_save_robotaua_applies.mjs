@@ -1,5 +1,5 @@
 import {
-  getAllActiveVacancies,
+  getAllActiveRobotaUaVacancies,
   updateVacancyProgress,
 } from '../robotaua.queries.mjs';
 import { getCityList, getVacancyApplies } from '../robotaua.utils.mjs';
@@ -14,7 +14,7 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
     date: new Date(),
   });
   // const cities = await getCityList();
-  const { activeVacancies } = await getAllActiveVacancies();
+  const { activeVacancies } = await getAllActiveRobotaUaVacancies();
   for (const [index, vacancy] of activeVacancies.entries()) {
     // console.log(vacancy);
     const { vacancy_name, vacancy_id, robota_ua_city_id, last_apply_id } =
@@ -26,10 +26,11 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
       (bitrixCity) => robota_ua_city.auto_park_id === bitrixCity.auto_park_id
     );
     const { applies: _applies } = await getVacancyApplies({ vacancy_id });
-    const filteredApplies = _applies.filter(
-      (apply) => apply.id > last_apply_id
-    );
-    console.log(filteredApplies[0]);
+    console.log(_applies);
+    // const filteredApplies = _applies.filter(
+    //   (apply) => apply.id > last_apply_id
+    // );
+    // console.log(filteredApplies[0]);
     return;
     const applies = assignVacancyTitleToApplies({
       applies: _applies.filter((apply) => apply.id > last_apply_id),
