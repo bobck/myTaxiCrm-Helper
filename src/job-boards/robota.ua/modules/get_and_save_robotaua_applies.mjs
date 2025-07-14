@@ -47,11 +47,12 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
       applies: _applies,
       title: `${name} ${robota_ua_city.name}`,
       bitrix_city_id,
-    });
+    }).slice(17);
+    console.log(applies)
+    return 
+    const processedApplies = applies.map(processApiResponse);
 
-    const processedApplies = applies.map(processApiResponse).slice(0,2);
     await createVacancyResponseCardsTEST({ dtos: processedApplies });
-    console.log(processedApplies);
     return
     await createVacancyResponseCards({ dtos: processedApplies });
     console.log(

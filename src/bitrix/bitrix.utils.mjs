@@ -700,6 +700,7 @@ export const createVacancyResponseCards = async ({ dtos }) => {
     batchObj[`${sourceOfApplyment}:${id}`] = { method: 'crm.item.add', params };
     break;
   }
+
   // return batchObj;
   // console.log
   // const { result: temp_result } = await bitrix.batch(batchObj);
@@ -727,66 +728,35 @@ export async function addManyCommentsToAnEntity({
   return result;
 }
 
-/**
- * Creates Bitrix CRM Item (Vacancy Response Cards) from DTOs using the BitrixClient.
- * This function is refactored from a 2bad/bitrix-based approach to use the provided BitrixClient.
- *
- * @param {object} options - Options object.
- * @param {Array<object>} options.dtos - An array of Data Transfer Objects, each representing a vacancy response.
- * @param {BitrixClient} options.client - An instance of the BitrixClient.
- * @returns {Promise<Array<object>>} A promise that resolves with an array of results for each created item.
- */
 export const createVacancyResponseCardsTEST = async ({ dtos }) => {
-  const itemsToCreate = [];
-
+  const batchObj = {};
   for (let dto of dtos) {
-    const { sourceOfApplyment, id } = dto; // These might be useful for logging or custom fields
-    const fields = {}; // This will hold the fields for the Bitrix CRM Item
-
+    const { sourceOfApplyment, id } = dto;
+    const params = {};
     for (const param in dto) {
-      // Check if the parameter exists in our mapping and its value is not null/undefined
       if (
-        Object.prototype.hasOwnProperty.call(
-          jobBoardApplymentParametersToBitrixKeys,
-          param
-        ) &&
-        dto[param] !== null &&
-        dto[param] !== undefined
+        !Object.keys(jobBoardApplymentParametersToBitrixKeys).includes(param) ||
+        dto[param] === null ||
+        dto[param] === undefined
       ) {
-        fields[jobBoardApplymentParametersToBitrixKeys[param]] = dto[param];
+        continue;
       }
+      params[jobBoardApplymentParametersToBitrixKeys[param]] = dto[param];
     }
-
-    // Add mandatory fields for CRM Item (entityTypeId and STAGE_ID)
-    // Note: For crm.item.add, these are typically part of the 'fields' object directly.
-    // 'entityTypeId' is usually passed as a top-level parameter, but if your Bitrix
-    // setup uses it within 'fields' for 'crm.item.add', keep it here.
-    // Assuming 'entityTypeId' is a top-level parameter for 'crm.item.add' for now,
-    // it should be passed to the createItem method, or handled by the client.
-    // However, if it's a field *within* the item, it should be here.
-    // Bitrix's crm.item.add expects `fields` directly, and `entityTypeId` as a separate parameter.
-    // Let's adjust the `createItem` method to handle `crm.item` specifically.
-    // For now, we'll assume these are part of the `fields` object based on your original code's `params` structure.
-    fields['ENTITY_TYPE_ID'] = '1142'; // Corresponds to your 'entityTypeId'
-    fields['STAGE_ID'] = 'DT1142_64:NEW'; // Corresponds to your 'fields[STAGE_ID]'
-
-    // You might want to add sourceOfApplyment and id as custom fields if needed
-    // fields['UF_CRM_SOURCE_OF_APPLYMENT'] = sourceOfApplyment;
-    // fields['UF_CRM_EXTERNAL_ID'] = id;
-
-    itemsToCreate.push(fields);
+    params['entityTypeId'] = '1142';
+    params['fields[STAGE_ID]'] = 'DT1142_64:NEW';
+    batchObj[`${sourceOfApplyment}:${id}`] = { method: 'crm.item.add', params };
+    
   }
-
-  console.log(
-    `Prepared ${itemsToCreate.length} items for creation as 'crm.item'.`
-  );
-
-  // Use the client's createLargeDataItems method to handle batching
-  const results = await bitrixAPIClient.createLargeDataItems(
-    'crm.item',
-    itemsToCreate
-  );
-
-  console.log('Finished creating vacancy response cards.');
-  return results;
+  bitrixAPIClient.batch({batchObj})
+  // return batchObj;
+  // console.log
+  // const { result: temp_result } = await bitrix.batch(batchObj);
+  // const { result } = temp_result;
+  // return result;
 };
+// curl -X POST \
+// -H "Content-Type: application/json" \
+// -H "Accept: application/json" \
+// -d '{"entityTypeId":2,"fields":{"title":"New deal (specifically for the REST methods example)","typeId":"SERVICE","categoryId":9,"stageId":"C9:UC_KN8KFI","isReccurring":"Y","probability":50,"currencyId":"USD","isManualOpportunity":"Y","opportunity":999.99,"taxValue":99.9,"companyId":5,"contactId":4,"contactIds":[4,5],"quoteId":7,"begindate":"formatDate(monthAgo)","closedate":"formatDate(twelveDaysInAdvance)","opened":"N","comments":"commentsExample","assignedById":6,"sourceId":"WEB","sourceDescription":"There should be additional description about the source","leadId":102,"additionalInfo":"There should be additional information","observers":[2,3],"utmSource":"google","utmMedium":"CPC","ufCrm_1721244707107":1111.1,"parentId1220":[1,2]}}' \
+// https://taxify.bitrix24.eu/rest/173808/lfab6154ky8zb32e/batch

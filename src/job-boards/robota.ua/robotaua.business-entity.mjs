@@ -71,7 +71,7 @@ export function processApiResponse(response) {
 
   const processedData = {
     id,
-    title,
+    title:`НЕ ЧІПАТИ, ВІДГУК СТВОРЕННИЙ ПІД ЧАС РОЗРОБКИ ${title}`,
     fullName: rest.name || null,
     avatar:
       rest.photo && !rest.photo.includes('non-photo.png') ? rest.photo : null,
@@ -88,7 +88,7 @@ export function processApiResponse(response) {
       rest.gender === 'Unknown' || rest.gender === 'Other' ? null : rest.gender,
     skills: cleanHtml(rest.skillsSummary) || null,
     workExperience: workExperienceString,
-    // experience: workExperienceString,
+    experience: workExperienceString,
     currentPosition: experiences?.[0]?.position ?? null,
     currentJob: experiences?.[0]?.company ?? null,
     salaryExpectaions:
