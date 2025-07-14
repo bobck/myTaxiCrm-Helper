@@ -53,7 +53,6 @@ export const validate = async ({ query }) => {
   if (!isValid) {
     throw new Error({ message: 'invalid referral' });
   }
-  console.log({ isValid });
   const { auto_park_id, id } = isValid;
   try {
     const expiryAfter7DaysPeriod = DateTime.now()
