@@ -629,13 +629,39 @@ export async function getHandledCashBlockRulesInfo({ fired_drivers_ids }) {
   const { rows, rowCount } = result;
   return { rows };
 }
+
+export async function getAllBoltIdsByDriverPhones({ phones }) {
+  const sql = fs
+    .readFileSync('src/sql/get_all_bolt_ids_by_driver_phones.sql')
+    .toString();
+  const result = await pool.query(sql, [phones]);
+  const { rows, rowCount } = result;
+  return { rows };
+}
+
+export async function getBoltDriversToBan({
+  period_from,
+  weekNumber,
+  year,
+  driver_ids,
+}) {
+  const sql = fs.readFileSync('src/sql/get_bolt_drivers_to_ban.sql').toString();
+  const result = await pool.query(sql, [
+    period_from,
+    weekNumber,
+    year,
+    driver_ids,
+  ]);
+  const { rows, rowCount } = result;
+  return { rows };
+}
+
 export async function getAllWorkingDriverIds({
   ids,
   weekNumber,
   year,
   maxDebt,
 }) {
-  // console.log(arguments)
   const sql = fs
     .readFileSync('src/sql/get_all_working_driver_ids.sql')
     .toString();
@@ -649,6 +675,7 @@ export async function getDriversWhoPaidOff({ ids, weekNumber, year }) {
     .readFileSync('src/sql/get_drivers_who_paid_off.sql')
     .toString();
   const result = await pool.query(sql, [ids, weekNumber, year]);
+
   const { rows, rowCount } = result;
   return { rows };
 }
