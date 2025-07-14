@@ -19,5 +19,4 @@ const boltRouter = express.Router();
 boltRouter.use(authorizationMiddleware);
 boltRouter.use('/letters', lettersRouter);
 
-
 export default boltRouter;
