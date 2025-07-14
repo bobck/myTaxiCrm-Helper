@@ -445,6 +445,7 @@ export const UkrainianBrandingAutoParkIds = [
 export const jobBoardApplymentParametersToBitrixKeys = {
   //UF_CRM_56_1740150019
   title: 'fields[TITLE]',
+  comment: 'fields[COMMENTS]',
   fullName: 'fields[ufCrm56_1739363161]',
   avatar: 'fields[ufCrm56_1739365267]',
   cvURL: 'fields[ufCrm56_1748600822]',

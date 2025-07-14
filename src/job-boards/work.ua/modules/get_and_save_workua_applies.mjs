@@ -8,7 +8,7 @@ import {
   chunkArray,
   createVacancyResponseCards,
 } from '../../../bitrix/bitrix.utils.mjs';
-import { assignVacancyTitleToApplies } from '../../job-board.utils.mjs';
+import { assignPayloadToVacancyApply } from '../../job-board.utils.mjs';
 import { devLog } from '../../../shared/shared.utils.mjs';
 
 const computePaginationProgress = ({ applies }) => {
@@ -40,14 +40,13 @@ const computePaginationProgress = ({ applies }) => {
 };
 
 export const getAndSaveWorkUaVacancyApplies = async () => {
+  const { activeVacancies: activeWorkUaVacancies } =
+    await getAllActiveWorkUaVacancies();
   console.log({
     module: 'getAndSaveWorkUaVacancyApplies',
     date: new Date(),
+    activeWorkUaVacancies: activeWorkUaVacancies.length,
   });
-
-  const { activeVacancies: activeWorkUaVacancies } =
-    await getAllActiveWorkUaVacancies();
-
   for (const vacancy of activeWorkUaVacancies) {
     const { last_apply_id, work_ua_vacancy_id, name, last_apply_date } =
       vacancy;
@@ -57,7 +56,6 @@ export const getAndSaveWorkUaVacancyApplies = async () => {
       last_id: last_apply_id,
       // last_id: 370274985,
     });
-
     if (currentApplies.length === 0) {
       devLog(`No new applies for Work.ua Vacancy ID ${work_ua_vacancy_id}`);
 
@@ -69,10 +67,12 @@ export const getAndSaveWorkUaVacancyApplies = async () => {
     );
 
     const processedApplies = await Promise.all(
-      assignVacancyTitleToApplies({
+      assignPayloadToVacancyApply({
         applies: currentApplies,
         title: name,
-      }).map(processWorkUaApiResponse)
+      })
+        .map(processWorkUaApiResponse)
+        .slice(0, 2)
     );
 
     const chunkedApplies = chunkArray(processedApplies, 8);

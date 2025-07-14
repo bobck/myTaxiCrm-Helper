@@ -27,8 +27,7 @@ export async function updateWorkUaVacancyProgress({
                     work_ua_pagination
                 SET
                     last_apply_id = ?,
-                    last_apply_date = ?,
-                    updated_date = CURRENT_TIMESTAMP
+                    last_apply_date = ?
                 WHERE
                     work_ua_vacancy_id = ?`;
   await db.run(sql, last_apply_id, last_apply_date, work_ua_vacancy_id);
