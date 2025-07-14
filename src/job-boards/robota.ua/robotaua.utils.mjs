@@ -54,12 +54,23 @@ export const getRobotaUaVacancyApplies = async ({
   return { applies: filteredAppliesByDate };
 };
 export const getCityList = () => robotaUaAPI.getCityValues();
-export const getRobotaUaVacancyById = async ({ vacancyId }) => {
+export const getRobotaUaVacancyById = async ({
+  robota_ua_vacancy_id: vacancyId,
+}) => {
   try {
     return await robotaUaAPI.getVacancyById({ vacancyId });
   } catch (e) {
     return null;
   }
+};
+export const checkIfRobotaUaVacancyStaysActive = async ({
+  robota_ua_vacancy_id: vacancyId,
+}) => {
+  const { state } = await getRobotaUaVacancyById({
+    robota_ua_vacancy_id: vacancyId,
+  });
+  const is_active = state === 'Publicated';
+  return { is_active };
 };
 export const activateRobotaUaVacancy = async ({ vacancyId }) => {
   console.log({

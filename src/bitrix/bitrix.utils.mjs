@@ -680,34 +680,6 @@ export async function getDealsByIdsVerifyingStageConstancy({
   }
 }
 
-export const createVacancyResponseCards = async ({ dtos }) => {
-  const batchObj = {};
-  for (let dto of dtos) {
-    const { sourceOfApplyment, id } = dto;
-    const params = {};
-    for (const param in dto) {
-      if (
-        !Object.keys(jobBoardApplymentParametersToBitrixKeys).includes(param) ||
-        dto[param] === null ||
-        dto[param] === undefined
-      ) {
-        continue;
-      }
-      params[jobBoardApplymentParametersToBitrixKeys[param]] = dto[param];
-    }
-    params['entityTypeId'] = '1142';
-    params['fields[STAGE_ID]'] = 'DT1142_64:NEW';
-    batchObj[`${sourceOfApplyment}:${id}`] = { method: 'crm.item.add', params };
-    break;
-  }
-
-  // return batchObj;
-  // console.log
-  // const { result: temp_result } = await bitrix.batch(batchObj);
-  // const { result } = temp_result;
-  // return result;
-};
-
 export async function addManyCommentsToAnEntity({
   comments,
   entityId,
@@ -728,7 +700,7 @@ export async function addManyCommentsToAnEntity({
   return result;
 }
 
-export const createVacancyResponseCardsTEST = async ({ dtos }) => {
+export const createVacancyResponseCards = async ({ dtos }) => {
   const batchObj = {};
   for (let dto of dtos) {
     const { sourceOfApplyment, id } = dto;
@@ -746,14 +718,8 @@ export const createVacancyResponseCardsTEST = async ({ dtos }) => {
     params['entityTypeId'] = '1142';
     params['fields[STAGE_ID]'] = 'DT1142_64:NEW';
     batchObj[`${sourceOfApplyment}:${id}`] = { method: 'crm.item.add', params };
-    
   }
-  bitrixAPIClient.batch({batchObj})
-  // return batchObj;
-  // console.log
-  // const { result: temp_result } = await bitrix.batch(batchObj);
-  // const { result } = temp_result;
-  // return result;
+  return await bitrixAPIClient.batch({ batchObj });
 };
 // curl -X POST \
 // -H "Content-Type: application/json" \

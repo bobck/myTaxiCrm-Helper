@@ -14,11 +14,10 @@ export class BitrixAPIClient {
       timeout: 30000,
     });
   }
-  
 
   async batch({ batchObj, halt }) {
     // devLog({ batchObj, halt });
-    devLog(batchObj)
+    devLog(batchObj);
     // return
     const url = `${this.webhookUrl}batch`;
     const cmd = {};
@@ -27,7 +26,6 @@ export class BitrixAPIClient {
       let command = `${method}?`;
       for (const param in params) {
         command += `${param}=${params[param]}&`;
-
       }
       command = command.slice(0, -1);
       cmd[id] = command;
@@ -38,13 +36,9 @@ export class BitrixAPIClient {
     };
     devLog({ url, body });
     const response = await this.axiosInstance.post(url, body);
-    const {data}=response;
-    const {result:resuletGethered}=data;
-    const {result} = resuletGethered
-    for (const id in result) {
-      devLog({ id, result: result[id] });
-    }
-    devLog({ result });
-    return response;
+    const { data } = response;
+    const { result: resuletGethered } = data;
+    console.log(resuletGethered);
+    return resuletGethered;
   }
 }
