@@ -395,6 +395,10 @@ export const cityTextRecruitToPayments = {
     id: '2938',
     assigned_by_id: '173554',
   },
+  "Кам'янське": {
+    id: '2924',
+    assigned_by_id: '197858',
+  },
 };
 export const procentageRewardAutoParkIds = [
   '2964e082-0e86-4695-b5f5-98915d190518',
