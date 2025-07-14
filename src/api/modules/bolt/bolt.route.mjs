@@ -18,6 +18,5 @@ lettersRouter.post(
 const boltRouter = express.Router();
 boltRouter.use(authorizationMiddleware);
 boltRouter.use('/letters', lettersRouter);
-boltRouter.use('/ban', banRouter);
 
 export default boltRouter;
