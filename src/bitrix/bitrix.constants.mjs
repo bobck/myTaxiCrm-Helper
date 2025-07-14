@@ -442,44 +442,88 @@ export const UkrainianBrandingAutoParkIds = [
   '65844e7d-5e8a-4582-9ac3-c8cdaa988726',
   '45dcaa21-bceb-45f2-bba9-5c72bbac441f',
 ];
+// export const jobBoardApplymentParametersToBitrixKeys = {
+//   //UF_CRM_56_1740150019
+//   title: 'fields[title]',
+//   fullName: 'fields[ufCrm56_1739363161]',
+//   avatar: 'fields[ufCrm56_1739365267]',
+//   cvURL: 'fields[ufCrm56_1748600822]',
+//   cvFile: 'fields[ufCrm56_1740146734]',
+//   status: 'fields[ufCrm56_1740147016]',
+//   email: 'fields[ufCrm56_1740146479]',
+//   phone: 'fields[ufCrm56_1740146425]',
+//   socialNetwork: 'fields[ufCrm56_1739364752]',
+//   dateOfBirth: 'fields[ufCrm56_1739364365]',
+//   applyingForPosition: 'fields[ufCrm56_1744977632]',
+//   responsibleRecruiter: 'fields[ufCrm56_1740150074]',
+//   hrCity: 'fields[ufCrm56_1740756395]',
+//   city: 'fields[ufCrm56_1740150019]',
+//   isVolunteerToMove: 'fields[ufCrm56_1739364300]',
+//   country: 'fields[ufCrm56_1739364205]',
+//   uni: 'fields[ufCrm56_1740149024]',
+//   education: 'fields[ufCrm56_1739365108]',
+//   faculty: 'fields[ufCrm56_1740148949]',
+//   degreeLevel: 'fields[ufCrm56_1740148616]',
+//   educationDetails: 'fields[ufCrm56_1740149258]',
+//   educationYears: 'fields[ufCrm56_1740149175]',
+//   skills: 'fields[ufCrm56_1740149099]',
+//   languageLevel: 'fields[ufCrm56_1740148427]',
+//   languageName: 'fields[ufCrm56_1740147974]',
+//   categoryOfWork: 'fields[ufCrm56_1740147510]',
+//   kindOfJob: 'fields[ufCrm56_1740146155]',
+//   isFullTime: 'fields[ufCrm56_1740145996]',
+//   sex: 'fields[ufCrm56_1739370696]',
+//   workExperience: 'fields[ufCrm56_1740158299]',
+//   experience: 'fields[ufCrm56_1739365038]',
+//   'level????': 'fields[ufCrm56_1739364031]',
+//   currentPosition: 'fields[ufCrm56_1739363968]',
+//   currentJob: 'fields[ufCrm56_1739363891]',
+//   kindOfCurrentJob: 'fields[ufCrm56_1739363699]',
+//   salaryExpectaions: 'fields[ufCrm56_1739363608]',
+//   positionExpectaions: 'fields[ufCrm56_1739363418]',
+//   sourceOfApplyment: 'fields[ufCrm56_1739198502]',
+// };
+
+// --- Placeholder for jobBoardApplymentParametersToBitrixKeys ---
+// You need to define this object based on your actual data mapping.
+// Example:
 export const jobBoardApplymentParametersToBitrixKeys = {
-  //UF_CRM_56_1740150019
-  title: 'fields[title]',
-  fullName: 'fields[ufCrm56_1739363161]',
-  avatar: 'fields[ufCrm56_1739365267]',
-  cvURL: 'fields[ufCrm56_1748600822]',
-  cvFile: 'fields[ufCrm56_1740146734]',
-  status: 'fields[ufCrm56_1740147016]',
-  email: 'fields[ufCrm56_1740146479]',
-  phone: 'fields[ufCrm56_1740146425]',
-  socialNetwork: 'fields[ufCrm56_1739364752]',
-  dateOfBirth: 'fields[ufCrm56_1739364365]',
-  applyingForPosition: 'fields[ufCrm56_1744977632]',
-  responsibleRecruiter: 'fields[ufCrm56_1740150074]',
-  hrCity: 'fields[ufCrm56_1740756395]',
-  city: 'fields[ufCrm56_1740150019]',
-  isVolunteerToMove: 'fields[ufCrm56_1739364300]',
-  country: 'fields[ufCrm56_1739364205]',
-  uni: 'fields[ufCrm56_1740149024]',
-  education: 'fields[ufCrm56_1739365108]',
-  faculty: 'fields[ufCrm56_1740148949]',
-  degreeLevel: 'fields[ufCrm56_1740148616]',
-  educationDetails: 'fields[ufCrm56_1740149258]',
-  educationYears: 'fields[ufCrm56_1740149175]',
-  skills: 'fields[ufCrm56_1740149099]',
-  languageLevel: 'fields[ufCrm56_1740148427]',
-  languageName: 'fields[ufCrm56_1740147974]',
-  categoryOfWork: 'fields[ufCrm56_1740147510]',
-  kindOfJob: 'fields[ufCrm56_1740146155]',
-  isFullTime: 'fields[ufCrm56_1740145996]',
-  sex: 'fields[ufCrm56_1739370696]',
-  workExperience: 'fields[ufCrm56_1740158299]',
-  experience: 'fields[ufCrm56_1739365038]',
-  'level????': 'fields[ufCrm56_1739364031]',
-  currentPosition: 'fields[ufCrm56_1739363968]',
-  currentJob: 'fields[ufCrm56_1739363891]',
-  kindOfCurrentJob: 'fields[ufCrm56_1739363699]',
-  salaryExpectaions: 'fields[ufCrm56_1739363608]',
-  positionExpectaions: 'fields[ufCrm56_1739363418]',
-  sourceOfApplyment: 'fields[ufCrm56_1739198502]',
+  title: 'TITLE', // Changed from 'fields[title]'
+  fullName: 'UF_CRM_56_1739363161', // Changed from 'fields[ufCrm56_1739363161]'
+  avatar: 'UF_CRM_56_1739365267', // Changed from 'fields[ufCrm56_1739365267]'
+  cvURL: 'UF_CRM_56_1748600822', // Changed from 'fields[ufCrm56_1748600822]'
+  cvFile: 'UF_CRM_56_1740146734', // Changed from 'fields[ufCrm56_1740146734]'
+  status: 'UF_CRM_56_1740147016', // Changed from 'fields[ufCrm56_1740147016]'
+  email: 'UF_CRM_56_1740146479', // Changed from 'fields[ufCrm56_1740146479]'
+  phone: 'UF_CRM_56_1740146425', // Changed from 'fields[ufCrm56_1740146425]'
+  socialNetwork: 'UF_CRM_56_1739364752', // Changed from 'fields[ufCrm56_1739364752]'
+  dateOfBirth: 'UF_CRM_56_1739364365', // Changed from 'fields[ufCrm56_1739364365]'
+  applyingForPosition: 'UF_CRM_56_1744977632', // Changed from 'fields[ufCrm56_1744977632]'
+  responsibleRecruiter: 'UF_CRM_56_1740150074', // Changed from 'fields[ufCrm56_1740150074]'
+  hrCity: 'UF_CRM_56_1740756395', // Changed from 'fields[ufCrm56_1740756395]'
+  city: 'UF_CRM_56_1740150019', // Changed from 'fields[ufCrm56_1740150019]'
+  isVolunteerToMove: 'UF_CRM_56_1739364300', // Changed from 'fields[ufCrm56_1739364300]'
+  country: 'UF_CRM_56_1739364205', // Changed from 'fields[ufCrm56_1739364205]'
+  uni: 'UF_CRM_56_1740149024', // Changed from 'fields[ufCrm56_1740149024]'
+  education: 'UF_CRM_56_1739365108', // Changed from 'fields[ufCrm56_1739365108]'
+  faculty: 'UF_CRM_56_1740148949', // Changed from 'fields[ufCrm56_1740148949]'
+  degreeLevel: 'UF_CRM_56_1740148616', // Changed from 'fields[ufCrm56_1740148616]'
+  educationDetails: 'UF_CRM_56_1740149258', // Changed from 'fields[ufCrm56_1740149258]'
+  educationYears: 'UF_CRM_56_1740149175', // Changed from 'fields[ufCrm56_1740149175]'
+  skills: 'UF_CRM_56_1740149099', // Changed from 'fields[ufCrm56_1740149099]'
+  languageLevel: 'UF_CRM_56_1740148427', // Changed from 'fields[ufCrm56_1740148427]'
+  languageName: 'UF_CRM_56_1740147974', // Changed from 'fields[ufCrm56_1740147974]'
+  categoryOfWork: 'UF_CRM_56_1740147510', // Changed from 'fields[ufCrm56_1740147510]'
+  kindOfJob: 'UF_CRM_56_1740146155', // Changed from 'fields[ufCrm56_1740146155]'
+  isFullTime: 'UF_CRM_56_1740145996', // Changed from 'fields[ufCrm56_1740145996]'
+  sex: 'UF_CRM_56_1739370696', // Changed from 'fields[ufCrm56_1739370696]'
+  workExperience: 'UF_CRM_56_1740158299', // Changed from 'fields[ufCrm56_1740158299]'
+  experience: 'UF_CRM_56_1739365038', // Changed from 'fields[ufCrm56_1739365038]'
+  'level????': 'UF_CRM_56_1739364031', // Changed from 'fields[ufCrm56_1739364031]'
+  currentPosition: 'UF_CRM_56_1739363968', // Changed from 'fields[ufCrm56_1739363968]'
+  currentJob: 'UF_CRM_56_1739363891', // Changed from 'fields[ufCrm56_1739363891]'
+  kindOfCurrentJob: 'UF_CRM_56_1739363699', // Changed from 'fields[ufCrm56_1739363699]'
+  salaryExpectaions: 'UF_CRM_56_1739363608', // Changed from 'fields[ufCrm56_1739363608]'
+  positionExpectaions: 'UF_CRM_56_1739363418', // Changed from 'fields[ufCrm56_1739363418]'
+  sourceOfApplyment: 'UF_CRM_56_1739198502', // Changed from 'fields[ufCrm56_1739198502]'
 };

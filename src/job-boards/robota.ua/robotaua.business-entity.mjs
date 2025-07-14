@@ -87,7 +87,7 @@ export function processApiResponse(response) {
     sex:
       rest.gender === 'Unknown' || rest.gender === 'Other' ? null : rest.gender,
     skills: cleanHtml(rest.skillsSummary) || null,
-    // workExperience: workExperienceString,
+    workExperience: workExperienceString,
     // experience: workExperienceString,
     currentPosition: experiences?.[0]?.position ?? null,
     currentJob: experiences?.[0]?.company ?? null,
@@ -96,7 +96,7 @@ export function processApiResponse(response) {
     positionExpectaions: rest.speciality || null,
     sourceOfApplyment: `rabota.ua (${rest.resumeType})`,
     uni: educations?.[0]?.title ?? null,
-    // education: educationString,
+    education: educationString,
     faculty: educations?.[0]?.speciality ?? null,
     educationDetails: educationString,
     educationYears: educations?.[0]?.yearOfGraduation?.toString() ?? null,

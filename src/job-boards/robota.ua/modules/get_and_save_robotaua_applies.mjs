@@ -3,7 +3,7 @@ import {
   updateVacancyProgress,
 } from '../robotaua.queries.mjs';
 import { getCityList, getRobotaUaVacancyApplies } from '../robotaua.utils.mjs';
-import { createVacancyResponseCards } from '../../../bitrix/bitrix.utils.mjs';
+import { createVacancyResponseCards, createVacancyResponseCardsTEST } from '../../../bitrix/bitrix.utils.mjs';
 import { assignVacancyTitleToApplies } from '../../job-board.utils.mjs';
 import { processApiResponse } from '../robotaua.business-entity.mjs';
 import { cityListWithAssignedBy as bitrixCities } from '../../../bitrix/bitrix.constants.mjs';
@@ -49,10 +49,11 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
       bitrix_city_id,
     });
 
-    // const processedApplies = applies.map(processApiResponse);
-    // console.log(processedApplies);
-    // return
-    // await createVacancyResponseCards({ dtos: processedApplies });
+    const processedApplies = applies.map(processApiResponse).slice(0,2);
+    await createVacancyResponseCardsTEST({ dtos: processedApplies });
+    console.log(processedApplies);
+    return
+    await createVacancyResponseCards({ dtos: processedApplies });
     console.log(
       applies.map((apply) => {
         const { id, addDate } = apply;

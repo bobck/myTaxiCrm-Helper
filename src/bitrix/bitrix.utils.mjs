@@ -2,7 +2,11 @@ import { Bitrix, Method } from '@2bad/bitrix';
 import fs from 'fs';
 import { pool } from './../api/pool.mjs';
 import { jobBoardApplymentParametersToBitrixKeys } from './bitrix.constants.mjs';
+import { BitrixAPIClient } from './bitrix.api.mjs';
 const bitrix = Bitrix(
+  `https://${process.env.BITRIX_PORTAL_HOST}/rest/${process.env.BITRIX_USER_ID}/${process.env.BITRIX_API_KEY}/`
+);
+const bitrixAPIClient = new BitrixAPIClient(
   `https://${process.env.BITRIX_PORTAL_HOST}/rest/${process.env.BITRIX_USER_ID}/${process.env.BITRIX_API_KEY}/`
 );
 
@@ -722,3 +726,67 @@ export async function addManyCommentsToAnEntity({
 
   return result;
 }
+
+/**
+ * Creates Bitrix CRM Item (Vacancy Response Cards) from DTOs using the BitrixClient.
+ * This function is refactored from a 2bad/bitrix-based approach to use the provided BitrixClient.
+ *
+ * @param {object} options - Options object.
+ * @param {Array<object>} options.dtos - An array of Data Transfer Objects, each representing a vacancy response.
+ * @param {BitrixClient} options.client - An instance of the BitrixClient.
+ * @returns {Promise<Array<object>>} A promise that resolves with an array of results for each created item.
+ */
+export const createVacancyResponseCardsTEST = async ({ dtos }) => {
+  const itemsToCreate = [];
+
+  for (let dto of dtos) {
+    const { sourceOfApplyment, id } = dto; // These might be useful for logging or custom fields
+    const fields = {}; // This will hold the fields for the Bitrix CRM Item
+
+    for (const param in dto) {
+      // Check if the parameter exists in our mapping and its value is not null/undefined
+      if (
+        Object.prototype.hasOwnProperty.call(
+          jobBoardApplymentParametersToBitrixKeys,
+          param
+        ) &&
+        dto[param] !== null &&
+        dto[param] !== undefined
+      ) {
+        fields[jobBoardApplymentParametersToBitrixKeys[param]] = dto[param];
+      }
+    }
+
+    // Add mandatory fields for CRM Item (entityTypeId and STAGE_ID)
+    // Note: For crm.item.add, these are typically part of the 'fields' object directly.
+    // 'entityTypeId' is usually passed as a top-level parameter, but if your Bitrix
+    // setup uses it within 'fields' for 'crm.item.add', keep it here.
+    // Assuming 'entityTypeId' is a top-level parameter for 'crm.item.add' for now,
+    // it should be passed to the createItem method, or handled by the client.
+    // However, if it's a field *within* the item, it should be here.
+    // Bitrix's crm.item.add expects `fields` directly, and `entityTypeId` as a separate parameter.
+    // Let's adjust the `createItem` method to handle `crm.item` specifically.
+    // For now, we'll assume these are part of the `fields` object based on your original code's `params` structure.
+    fields['ENTITY_TYPE_ID'] = '1142'; // Corresponds to your 'entityTypeId'
+    fields['STAGE_ID'] = 'DT1142_64:NEW'; // Corresponds to your 'fields[STAGE_ID]'
+
+    // You might want to add sourceOfApplyment and id as custom fields if needed
+    // fields['UF_CRM_SOURCE_OF_APPLYMENT'] = sourceOfApplyment;
+    // fields['UF_CRM_EXTERNAL_ID'] = id;
+
+    itemsToCreate.push(fields);
+  }
+
+  console.log(
+    `Prepared ${itemsToCreate.length} items for creation as 'crm.item'.`
+  );
+
+  // Use the client's createLargeDataItems method to handle batching
+  const results = await bitrixAPIClient.createLargeDataItems(
+    'crm.item',
+    itemsToCreate
+  );
+
+  console.log('Finished creating vacancy response cards.');
+  return results;
+};
