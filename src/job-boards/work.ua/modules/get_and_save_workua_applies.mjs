@@ -2,9 +2,10 @@ import {
   getAllActiveWorkUaVacancies,
   updateWorkUaVacancyProgress,
 } from '../workua.queries.mjs';
-import { getVacancyResponses } from '../workua.utils.mjs';
+import { getVacancies, getVacancyResponses } from '../workua.utils.mjs';
 import { processResponse as processWorkUaApiResponse } from '../workua.business-entity.mjs';
 import {
+  addCommentToEntity,
   chunkArray,
   createVacancyResponseCards,
 } from '../../../bitrix/bitrix.utils.mjs';
@@ -38,23 +39,47 @@ const computePaginationProgress = ({ applies }) => {
 
   return { biggestDate: biggestDateString, biggestId: biggestIdString };
 };
-
+const checkIfWorkUaVacancyStaysActive = async ({
+  work_ua_vacancy_id,
+  allVacancies,
+}) => {
+  return {
+    is_active: allVacancies.some((vacancy) => {
+      return vacancy.id === work_ua_vacancy_id && vacancy.active;
+    }),
+  };
+};
 export const getAndSaveWorkUaVacancyApplies = async () => {
-  const { activeVacancies: activeWorkUaVacancies } =
+  const { activeVacancies: trackedActiveWorkUaVacancies } =
     await getAllActiveWorkUaVacancies();
   console.log({
     module: 'getAndSaveWorkUaVacancyApplies',
     date: new Date(),
-    activeWorkUaVacancies: activeWorkUaVacancies.length,
+    activeWorkUaVacancies: trackedActiveWorkUaVacancies.length,
   });
-  for (const vacancy of activeWorkUaVacancies) {
-    const { last_apply_id, work_ua_vacancy_id, name, last_apply_date } =
-      vacancy;
+  const { vacancies: allActiveWorkUaVacancies } = await getVacancies();
+  for (const vacancy of trackedActiveWorkUaVacancies) {
+    const { last_apply_id, work_ua_vacancy_id, name } = vacancy;
     devLog(`Processing Work.ua Vacancy ID: ${work_ua_vacancy_id}`);
+
+    const { is_active } = await checkIfWorkUaVacancyStaysActive({
+      work_ua_vacancy_id,
+      allVacancies: allActiveWorkUaVacancies,
+    });
+
+    if (!is_active) {
+      const comment = `Вакансія work.ua id:${work_ua_vacancy_id} не активна. Щоб її активувати - необхідно перенести до стадії "оновити-додати до системи", потім знову до "Пошук"`;
+      devLog({ comment });
+      await addCommentToEntity({
+        comment,
+        typeId: vacancyRequestTypeId,
+        entityId: bitrix_vacancy_id,
+      });
+      continue;
+    }
     const { responses: currentApplies } = await getVacancyResponses({
       vacancyId: work_ua_vacancy_id,
       last_id: last_apply_id,
-      // last_id: 370274985,
     });
     if (currentApplies.length === 0) {
       devLog(`No new applies for Work.ua Vacancy ID ${work_ua_vacancy_id}`);
