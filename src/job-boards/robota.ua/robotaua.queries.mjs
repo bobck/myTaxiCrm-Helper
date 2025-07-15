@@ -49,7 +49,6 @@ export async function getAnyRobotaUaVacancyByBitrixId({ bitrix_vacancy_id }) {
 export const createRobotaUaSynchronizedVacancy = async ({
   bitrix_vacancy_id,
   robotaUaVacancy,
-  is_active,
 }) => {
   const {
     vacancyId: robota_ua_vacancy_id,
@@ -57,7 +56,7 @@ export const createRobotaUaSynchronizedVacancy = async ({
     state,
     vacancyName: name,
   } = robotaUaVacancy;
-  const IS_ACTIVE = state == 'Publicated';
+  const is_active = state == 'Publicated';
   const sql = /*sql*/ `INSERT INTO robota_ua_pagination (bitrix_vacancy_id,robota_ua_vacancy_id,is_active,region, name) VALUES (?,?,?,?,?)`;
   await db.run(
     sql,
@@ -70,12 +69,26 @@ export const createRobotaUaSynchronizedVacancy = async ({
 };
 export const updateRobotaUaSynchronizedVacancy = async ({
   bitrix_vacancy_id,
-  robota_ua_vacancy_id,
-  is_active,
+  robotaUaVacancy,
 }) => {
-  const sql = /*sql*/ `UPDATE robota_ua_pagination SET robota_ua_vacancy_id = ?, is_active = ? WHERE bitrix_vacancy_id = ?`;
+  const {
+    vacancyId: robota_ua_vacancy_id,
+    cityId: region,
+    state,
+    vacancyName: name,
+  } = robotaUaVacancy;
 
-  await db.run(sql, robota_ua_vacancy_id, is_active, bitrix_vacancy_id);
+  const is_active = state == 'Publicated';
+  const sql = /*sql*/ `UPDATE robota_ua_pagination SET robota_ua_vacancy_id = ?, is_active = ?, region=?, name=? WHERE bitrix_vacancy_id = ?`;
+
+  await db.run(
+    sql,
+    robota_ua_vacancy_id,
+    is_active,
+    region,
+    name,
+    bitrix_vacancy_id
+  );
 };
 export const getAllActiveRobotaUaVacancies = async () => {
   const sql = /*sql*/ `SELECT rp.*

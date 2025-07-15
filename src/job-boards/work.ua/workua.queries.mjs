@@ -114,19 +114,6 @@ export const createWorkUaSynchronizedVacancy = async ({
   const categoryStringified = JSON.stringify(category);
 
   const sql = `INSERT INTO work_ua_pagination (bitrix_vacancy_id,work_ua_vacancy_id,is_active,region,publicationType,experience,jobtype,category,description,name) VALUES (?,?,?,?,?,?,?,?,?,?)`;
-  // console.log({
-  //   sql,
-  //   bitrix_vacancy_id,
-  //   is_active,
-  //   work_ua_vacancy_id,
-  //   region,
-  //   publicationType,
-  //   experience,
-  //   jobTypeStringified,
-  //   categoryStringified: categoryStringified,
-  //   // description,
-  //   name,
-  // });
 
   await db.run(
     sql,
@@ -144,15 +131,35 @@ export const createWorkUaSynchronizedVacancy = async ({
 };
 export const updateWorkUaSynchronizedVacancy = async ({
   bitrix_vacancy_id,
-  work_ua_vacancy_id,
-  is_active,
+  workUaVacancy,
 }) => {
-  const sql = /*sql */ `UPDATE work_ua_pagination SET work_ua_vacancy_id = ?, is_active = ? WHERE bitrix_vacancy_id = ?`;
-  console.log({
+  const {
+    id: work_ua_vacancy_id,
+    region,
+    publication: publicationType,
+    experience,
+    jobtype,
+    category,
+    description,
+    name,
+    active,
+  } = workUaVacancy;
+  const is_active = Boolean(active);
+  const jobTypeStringified = JSON.stringify(jobtype);
+  const categoryStringified = JSON.stringify(category);
+  const sql = /*sql */ `UPDATE work_ua_pagination SET work_ua_vacancy_id = ?, is_active = ?,region=?,publicationType=?,experience=?,jobtype=?,category=?,description=?,name=? WHERE bitrix_vacancy_id = ?`;
+ 
+  await db.run(
     sql,
-    bitrix_vacancy_id,
     work_ua_vacancy_id,
     is_active,
-  });
-  await db.run(sql, work_ua_vacancy_id, is_active, bitrix_vacancy_id);
+    region,
+    publicationType,
+    experience,
+    jobTypeStringified,
+    categoryStringified,
+    description,
+    name,
+    bitrix_vacancy_id
+  );
 };

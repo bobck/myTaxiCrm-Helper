@@ -120,8 +120,7 @@ export const updateVacancySynchronously = async ({
       if (existingRobotaUaVacancy.bitrix_vacancy_id == bitrix_vacancy_id) {
         await updateRobotaUaSynchronizedVacancy({
           bitrix_vacancy_id,
-          robota_ua_vacancy_id,
-          is_active,
+          robotaUaVacancy
         });
         payload.robota_ua_vacancy_id = robota_ua_vacancy_id;
         console.log('robota vacancy updated');
@@ -160,8 +159,7 @@ export const updateVacancySynchronously = async ({
       if (existingWorkUaVacancy.bitrix_vacancy_id == bitrix_vacancy_id) {
         await updateWorkUaSynchronizedVacancy({
           bitrix_vacancy_id,
-          work_ua_vacancy_id,
-          is_active,
+          workUaVacancy
         });
         payload.work_ua_vacancy_id = work_ua_vacancy_id;
       } else {
