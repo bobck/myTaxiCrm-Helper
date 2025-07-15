@@ -53,14 +53,16 @@
     "remonlineAssetsToBQManual": "ENV=TEST node -r dotenv/config src/bq/modules/load-remonline-assets.mjs",
     "remonlineEmployeesToBQManual": "ENV=TEST node -r dotenv/config src/bq/modules/load-remonline-employees.mjs",
     "remonlineUOMsToBQManual": "ENV=TEST node -r dotenv/config src/bq/modules/load-remonline-uoms.mjs",
+    "launchAPI:dev": "ENV=DEV API_HOST=localhost node -r dotenv/config src/api/api.mjs",
+    "launchAPI:prod": "ENV=PROD API_HOST=0.0.0.0 node -r dotenv/config src/api/api.mjs",
     "saveWorkingDriversManual": "ENV=TEST node -r dotenv/config src/web.api/gdc-report/modules/save-working-drivers-with-history-status.mjs",
     "getAndSaveClosedPolishBitrixDealsManual": "ENV=TEST node -r dotenv/config src/web.api/gdc-report/modules/get-and-save-closed-polish-bitrix-deals.mjs",
     "testDriverCashBlockRulesManually": "ENV=TEST node -r dotenv/config src/web.api/modules/driver-cash-block-rules.mjs",
     "moveReferralToClosedManually": "ENV=TEST node -r dotenv/config src/bitrix/modules/move-referral-to-closed.mjs",
     "testRobotaUaAppliesManually": "ENV=DEV node -r dotenv/config src/job-boards/robota.ua/modules/get_and_save_robotaua_applies.mjs",
-    "testWorkUaAppliesManually": "ENV=DEV node -r dotenv/config src/job-boards/work.ua/modules/get_and_save_workua_applies.mjs",
-    "launchAPI:dev": "ENV=DEV API_HOST=localhost node -r dotenv/config src/api/api.mjs",
-    "launchAPI:prod": "ENV=PROD API_HOST=0.0.0.0 node -r dotenv/config src/api/api.mjs"
+    "testWorkUaAppliesManually": "ENV=DEV node -r dotenv/config src/job-boards/work.ua/modules/get_and_save_workua_applies.mjs",    
+    "moveBoltDriversBanCardsManually": "ENV=TEST BOLT_DRIVERS_BAN_CARDS=17 CHUNK_SIZE=11 node -r dotenv/config src/bitrix/modules/move-bolt-drivers-to-ban.mjs"
+
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",
@@ -75,6 +77,7 @@
     "db-migrate-sqlite3": "^0.5.0",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "google-libphonenumber": "^3.2.42",
     "lodash": "^4.17.21",
     "luxon": "^3.4.4",
     "node-fetch": "^3.3.2",

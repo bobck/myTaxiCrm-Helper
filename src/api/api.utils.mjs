@@ -1,12 +1,16 @@
+import googleLibphonenumber from 'google-libphonenumber';
+import { cityListWithAssignedBy } from '../bitrix/bitrix.constants.mjs';
+import { getAllBoltIdsByDriverPhones } from '../web.api/web.api.utlites.mjs';
 import { api_status_codes } from './api.constants.mjs';
 
+const { PhoneNumberUtil } = googleLibphonenumber;
+const phoneUtil = PhoneNumberUtil.getInstance();
 const {
   OK: SUCCESS_AUTH,
   BAD_REQUEST,
   MISSING_API_KEY,
   INTERNAL_SERVER_ERROR,
 } = api_status_codes;
-
 export const controllerWrapper = ({
   handlerCB,
   handlingServiceName,
@@ -16,13 +20,16 @@ export const controllerWrapper = ({
     try {
       await handlerCB(req, res);
     } catch (error) {
+
+      console.error(`error occured in ${handlingServiceName}`, error);
+      const { code, message } = error;
       if (error instanceof Error) {
-        console.error(error);
         res
           .status(INTERNAL_SERVER_ERROR)
           .json({ message: 'Internal Server Error', status: 'error' });
         return;
       }
+
       if (errorHandler) {
         await errorHandler(error);
         res

@@ -721,8 +721,62 @@ export const createVacancyResponseCards = async ({ dtos }) => {
   }
   return await bitrixAPIClient.batch({ batchObj });
 };
-// curl -X POST \
-// -H "Content-Type: application/json" \
-// -H "Accept: application/json" \
-// -d '{"entityTypeId":2,"fields":{"title":"New deal (specifically for the REST methods example)","typeId":"SERVICE","categoryId":9,"stageId":"C9:UC_KN8KFI","isReccurring":"Y","probability":50,"currencyId":"USD","isManualOpportunity":"Y","opportunity":999.99,"taxValue":99.9,"companyId":5,"contactId":4,"contactIds":[4,5],"quoteId":7,"begindate":"formatDate(monthAgo)","closedate":"formatDate(twelveDaysInAdvance)","opened":"N","comments":"commentsExample","assignedById":6,"sourceId":"WEB","sourceDescription":"There should be additional description about the source","leadId":102,"additionalInfo":"There should be additional information","observers":[2,3],"utmSource":"google","utmMedium":"CPC","ufCrm_1721244707107":1111.1,"parentId1220":[1,2]}}' \
-// https://taxify.bitrix24.eu/rest/173808/lfab6154ky8zb32e/batch
+
+export async function updateRequestedDrivers({ cards }) {
+  const batchObj = {};
+  for (const card of cards) {
+    const {
+      driver_id,
+      debt,
+      isDebtorState,
+      messageType,
+      bitrix_deal_id,
+      city_id,
+      bolt_id,
+    } = card;
+    const params = {
+      id: bitrix_deal_id,
+      entityTypeId: '1132',
+      'fields[STAGE_ID]': 'DT1132_60:NEW', //листи на відправлення
+
+      // 'fields[STAGE_ID]': 'DT1132_60:UC_7W6FFZ', //Заявка на відправку листа
+    };
+    if (bolt_id) {
+      params['fields[ufCrm52_1738324675]'] = bolt_id;
+    }
+    if (city_id) {
+      params['fields[ufCrm52_1738326821]'] = city_id;
+    }
+    if (debt) {
+      params['fields[ufCrm52_1738837120]'] = debt;
+    }
+    if (isDebtorState) {
+      params['fields[ufCrm52_1738739843]'] = isDebtorState;
+    }
+    if (messageType) {
+      params['fields[ufCrm52_1738324546]'] = messageType;
+    }
+
+    batchObj[driver_id] = { method: 'crm.item.update', params };
+  }
+  const { result: resp, time } = await bitrix.batch(batchObj);
+  const { result: itemObj } = resp;
+  return itemObj;
+}
+export async function moveRequestedDriversToCheckStage({ cards }) {
+  const batchObj = {};
+  for (const card of cards) {
+    const { bitrix_deal_id, phone } = card;
+    const params = {
+      id: bitrix_deal_id,
+      entityTypeId: '1132',
+      'fields[STAGE_ID]': 'DT1132_60:UC_WX9FQC', //Перевірити
+    };
+
+    batchObj[phone] = { method: 'crm.item.update', params };
+  }
+  const { result: resp, time } = await bitrix.batch(batchObj);
+  const { result: itemObj } = resp;
+  return itemObj;
+}
+

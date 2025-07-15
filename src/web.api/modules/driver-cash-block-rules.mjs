@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon';
 import { openSShTunnel } from '../../../ssh.mjs';
 import {
+  getDriversIgnoringCashBlockRules,
   getDriversWithActiveCashBlockRules,
   insertDriverWithCashBlockRules,
   markDriverCashBlockRulesAsDeleted,
@@ -84,11 +85,15 @@ export const setDriverCashBlockRules = async () => {
   const IdsOfDriversWithCashBlockRules = (
     await getDriversWithActiveCashBlockRules()
   ).map(({ driver_id }) => driver_id);
+  const driversToIgnore = (await getDriversIgnoringCashBlockRules()).map(
+    ({ driver_id }) => driver_id
+  );
   const { rows: drivers } = await getAllWorkingDriverIds({
     ids: IdsOfDriversWithCashBlockRules,
     year,
     weekNumber,
     activationValue: activationValue * -1,
+    driversToIgnore,
   });
 
   console.log({
@@ -96,6 +101,7 @@ export const setDriverCashBlockRules = async () => {
     date: new Date(),
     env: process.env.ENV,
     drivers: drivers.length,
+    driversToIgnore: driversToIgnore.length,
     IdsOfDriversWithCashBlockRules: IdsOfDriversWithCashBlockRules.length,
   });
   for (const driver of drivers) {
