@@ -87,18 +87,15 @@ export const getAndSaveWorkUaVacancyApplies = async () => {
       work_ua_vacancy_id,
       allVacancies: allActiveWorkUaVacancies,
     });
-    // const target = allActiveWorkUaVacancies.find(
-    //   (vacancy) => vacancy.id === work_ua_vacancy_id
-    // );
-    // devLog({ target });
+
     if (!is_active) {
       const comment = `Вакансія work.ua id:${work_ua_vacancy_id} не активна. Щоб її активувати - необхідно перенести до стадії "оновити-додати до системи", потім знову до "Пошук"`;
       devLog({ comment });
-      // await addCommentToEntity({
-      //   comment,
-      //   typeId: vacancyRequestTypeId,
-      //   entityId: bitrix_vacancy_id,
-      // });
+      await addCommentToEntity({
+        comment,
+        typeId: vacancyRequestTypeId,
+        entityId: bitrix_vacancy_id,
+      });
       continue;
     }
     const { responses: currentApplies } = await getWorkUaVacancyResponses({
@@ -122,10 +119,8 @@ export const getAndSaveWorkUaVacancyApplies = async () => {
           title: name,
           city: `${city.name_ua}, ${city.region}`,
         },
-      }).map(processWorkUaApiResponse).slice(0,1)
+      }).map(processWorkUaApiResponse)
     );
-    // devLog({ processedApplies });
-    // return;
     const chunkedApplies = chunkArray(processedApplies, 8);
     for (const chunk of chunkedApplies) {
       await createVacancyResponseCards({

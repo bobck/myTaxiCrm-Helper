@@ -32,6 +32,4 @@ export const workUaPublicationTypes = [
     name_en: 'Anonymous',
   },
 ];
-export const workUaRegions=[
-  
-]
+export const workUaRegions = [];
