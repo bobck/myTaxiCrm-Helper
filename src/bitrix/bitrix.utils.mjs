@@ -779,4 +779,3 @@ export async function moveRequestedDriversToCheckStage({ cards }) {
   const { result: itemObj } = resp;
   return itemObj;
 }
-

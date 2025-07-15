@@ -20,7 +20,6 @@ export const controllerWrapper = ({
     try {
       await handlerCB(req, res);
     } catch (error) {
-
       console.error(`error occured in ${handlingServiceName}`, error);
       const { code, message } = error;
       if (error instanceof Error) {
@@ -38,7 +37,6 @@ export const controllerWrapper = ({
         return;
       }
       console.error(`error occured in ${handlingServiceName}`, error);
-      const { code, message } = error;
 
       res.status(code).json({ message, status: 'error' });
     }

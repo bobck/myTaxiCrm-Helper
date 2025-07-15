@@ -7,7 +7,6 @@ import jobBoardRouter from '../modules/job-boards/job-board.route.mjs';
 
 import boltRouter from '../modules/bolt/bolt.route.mjs';
 
-
 const coreRouter = express.Router();
 
 coreRouter.use('/bolt', boltRouter);
