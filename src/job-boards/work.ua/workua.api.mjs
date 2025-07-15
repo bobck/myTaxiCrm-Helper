@@ -220,6 +220,10 @@ class WorkUaApiClient {
 
     return data;
   }
+  async getAvailablePublications() {
+    const { data } = await this.api.get('/available-publications');
+    return { availablePublications: data };
+  }
   handleApiError(error) {
     if (error.response) {
       switch (error.response.status) {

@@ -8,6 +8,7 @@ import { updateWorkUaVacancyActivityState } from '../../../job-boards/work.ua/wo
 import {
   activateWorkUaVacancy,
   deactivateWorkUaVacancy,
+  getWorkUaAvailablePublications,
 } from '../../../job-boards/work.ua/workua.utils.mjs';
 import {
   assignManyCommentsToVacancyRequest,
@@ -164,7 +165,7 @@ export const add_update_vacancy_fork = async ({ query }) => {
 };
 export const activateVacancy = async ({ query }) => {
   devLog({ query });
-  const { bitrix_vacancy_id } = query;
+  const { bitrix_vacancy_id, work_ua_publication_type } = query;
   const { bitrixVacancy } = await jobBoardRepo.getExistingVacancy({
     bitrix_vacancy_id,
   });
@@ -191,16 +192,30 @@ export const activateVacancy = async ({ query }) => {
     });
   }
   if (work_ua_vacancy_id) {
+    let is_active = true;
     const { active } = workUaVacancy;
     const is_work_ua_vacancy_active = Boolean(active);
     if (!is_work_ua_vacancy_active) {
-      await activateWorkUaVacancy({
-        workUaVacancy,
-      });
+      const { availablePublications } = await getWorkUaAvailablePublications();
+      const requiredPublications = availablePublications.find(
+        (ap) => ap.id == work_ua_publication_type
+      );
+      if (requiredPublications.total > 0) {
+        await activateWorkUaVacancy({
+          workUaVacancy,
+        });
+      } else {
+        is_active = false;
+        const comments = [
+          `Не залишилося жодної публікації work.ua вибраного типу. Виберіть іншу в стадії "оновити-додати до системи", та перенесіть назад до "Пошук"`,
+          `Залишки публікацій: Стандарт:${availablePublications[0].total}, СтандартПлюс:${availablePublications[1].total}, Гаряча:${availablePublications[2].total}, Анонімна:${availablePublications[3].total}`,
+        ];
+        await assignManyCommentsToVacancyRequest({ comments });
+      }
     }
     await updateWorkUaVacancyActivityState({
       work_ua_vacancy_id,
-      is_active: true,
+      is_active,
     });
   }
   return 'vacancy activated';
