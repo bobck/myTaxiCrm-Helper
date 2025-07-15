@@ -674,3 +674,60 @@ export async function getDealsByIdsVerifyingStageConstancy({
     return null; // Indicate failure
   }
 }
+export async function updateRequestedDrivers({ cards }) {
+  const batchObj = {};
+  for (const card of cards) {
+    const {
+      driver_id,
+      debt,
+      isDebtorState,
+      messageType,
+      bitrix_deal_id,
+      city_id,
+      bolt_id,
+    } = card;
+    const params = {
+      id: bitrix_deal_id,
+      entityTypeId: '1132',
+      'fields[STAGE_ID]': 'DT1132_60:NEW', //листи на відправлення
+
+      // 'fields[STAGE_ID]': 'DT1132_60:UC_7W6FFZ', //Заявка на відправку листа
+    };
+    if (bolt_id) {
+      params['fields[ufCrm52_1738324675]'] = bolt_id;
+    }
+    if (city_id) {
+      params['fields[ufCrm52_1738326821]'] = city_id;
+    }
+    if (debt) {
+      params['fields[ufCrm52_1738837120]'] = debt;
+    }
+    if (isDebtorState) {
+      params['fields[ufCrm52_1738739843]'] = isDebtorState;
+    }
+    if (messageType) {
+      params['fields[ufCrm52_1738324546]'] = messageType;
+    }
+
+    batchObj[driver_id] = { method: 'crm.item.update', params };
+  }
+  const { result: resp, time } = await bitrix.batch(batchObj);
+  const { result: itemObj } = resp;
+  return itemObj;
+}
+export async function moveRequestedDriversToCheckStage({ cards }) {
+  const batchObj = {};
+  for (const card of cards) {
+    const { bitrix_deal_id, phone } = card;
+    const params = {
+      id: bitrix_deal_id,
+      entityTypeId: '1132',
+      'fields[STAGE_ID]': 'DT1132_60:UC_WX9FQC', //Перевірити
+    };
+
+    batchObj[phone] = { method: 'crm.item.update', params };
+  }
+  const { result: resp, time } = await bitrix.batch(batchObj);
+  const { result: itemObj } = resp;
+  return itemObj;
+}
