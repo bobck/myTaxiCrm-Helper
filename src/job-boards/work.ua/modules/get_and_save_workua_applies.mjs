@@ -2,7 +2,10 @@ import {
   getAllActiveWorkUaVacancies,
   updateWorkUaVacancyProgress,
 } from '../workua.queries.mjs';
-import { getVacancies, getVacancyResponses } from '../workua.utils.mjs';
+import {
+  getAllWorkUaVacanciesFromAPI,
+  getWorkUaVacancyResponses,
+} from '../workua.utils.mjs';
 import { processResponse as processWorkUaApiResponse } from '../workua.business-entity.mjs';
 import {
   addCommentToEntity,
@@ -57,7 +60,8 @@ export const getAndSaveWorkUaVacancyApplies = async () => {
     date: new Date(),
     activeWorkUaVacancies: trackedActiveWorkUaVacancies.length,
   });
-  const { vacancies: allActiveWorkUaVacancies } = await getVacancies();
+  const { vacancies: allActiveWorkUaVacancies } =
+    await getAllWorkUaVacanciesFromAPI();
   for (const vacancy of trackedActiveWorkUaVacancies) {
     const { last_apply_id, work_ua_vacancy_id, name } = vacancy;
     devLog(`Processing Work.ua Vacancy ID: ${work_ua_vacancy_id}`);
@@ -77,7 +81,7 @@ export const getAndSaveWorkUaVacancyApplies = async () => {
       });
       continue;
     }
-    const { responses: currentApplies } = await getVacancyResponses({
+    const { responses: currentApplies } = await getWorkUaVacancyResponses({
       vacancyId: work_ua_vacancy_id,
       last_id: last_apply_id,
     });
