@@ -15,7 +15,7 @@ export const getRobotaAndWokUaVacanciesById = async ({
   if (robota_ua_vacancy_id) {
     commentsLimit++;
     robotaUaVacancy = await getRobotaUaVacancyById({
-      vacancyId: robota_ua_vacancy_id,
+      robota_ua_vacancy_id,
     });
     if (!robotaUaVacancy && robota_ua_vacancy_id) {
       _comments.push(

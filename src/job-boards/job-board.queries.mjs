@@ -6,7 +6,7 @@ const db = await open({
   driver: sqlite3.Database,
 });
 
-export const getVacancyById = async ({ bitrix_vacancy_id }) => {
+export const getBitrixVacancyById = async ({ bitrix_vacancy_id }) => {
   const sql = `SELECT * FROM bitrix_vacancies_to_job_board_vacancies WHERE bitrix_vacancy_id = ${bitrix_vacancy_id}`;
   return await db.get(sql);
 };
@@ -23,6 +23,7 @@ export const createBitrixVacancy = async ({
     vacancy_name,
     work_ua_vacancy_id,
     robota_ua_vacancy_id,
+    is_active,
   });
   let columns = 'bitrix_vacancy_id,vacancy_name';
   let values = `${bitrix_vacancy_id},'${vacancy_name}'`;
@@ -34,7 +35,7 @@ export const createBitrixVacancy = async ({
     columns += ',work_ua_vacancy_id';
     values += `,${work_ua_vacancy_id}`;
   }
-  if (is_active) {
+  if (is_active !== undefined && is_active !== null) {
     columns += ',is_active';
     values += `,${is_active}`;
   }

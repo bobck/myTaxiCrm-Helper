@@ -69,7 +69,7 @@ export async function getAnyWorkUaVacancyByBitrixId({ bitrix_vacancy_id }) {
  * @param {object} params - The parameters for the operation.
  * @param {string} params.work_ua_vacancy_id - The ID of the vacancy to mark as .
  */
-export async function markWorkUaVacancyAsActive({ work_ua_vacancy_id }) {
+export async function updateWorkUaVacancyActivityState({ work_ua_vacancy_id }) {
   const sql = /*sql*/ `UPDATE
                     work_ua_pagination
                 SET
@@ -148,7 +148,7 @@ export const updateWorkUaSynchronizedVacancy = async ({
   const jobTypeStringified = JSON.stringify(jobtype);
   const categoryStringified = JSON.stringify(category);
   const sql = /*sql */ `UPDATE work_ua_pagination SET work_ua_vacancy_id = ?, is_active = ?,region=?,publicationType=?,experience=?,jobtype=?,category=?,description=?,name=? WHERE bitrix_vacancy_id = ?`;
- 
+
   await db.run(
     sql,
     work_ua_vacancy_id,

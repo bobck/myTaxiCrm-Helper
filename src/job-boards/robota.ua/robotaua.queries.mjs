@@ -20,24 +20,19 @@ export async function updateVacancyProgress({
   await db.run(sql, last_apply_date, robota_ua_vacancy_id);
 }
 
-export async function markRobotaUaVacancyAsActive({ robota_ua_vacancy_id }) {
+export async function updateRobotaUaVacancyActivityState({
+  robota_ua_vacancy_id,
+  is_active,
+}) {
   const sql = /*sql*/ `UPDATE 
                     robota_ua_pagination
                 SET 
-                    is_active = TRUE
+                    is_active = ?
                 WHERE 
                     robota_ua_vacancy_id = ?`;
-  await db.run(sql, robota_ua_vacancy_id);
+  await db.run(sql, is_active, robota_ua_vacancy_id);
 }
-export async function markRobotaUaVacancyAsInactive({ robota_ua_vacancy_id }) {
-  const sql = /*sql*/ `UPDATE 
-                    robota_ua_pagination
-                SET 
-                    is_active = FALSE
-                WHERE 
-                    robota_ua_vacancy_id = ?`;
-  await db.run(sql, robota_ua_vacancy_id);
-}
+
 export async function getAnyRobotaUaVacancyById({ robota_ua_vacancy_id }) {
   const sql = /*sql*/ `SELECT * from robota_ua_pagination where robota_ua_vacancy_id = ?`;
   return await db.get(sql, robota_ua_vacancy_id);
@@ -96,4 +91,9 @@ export const getAllActiveRobotaUaVacancies = async () => {
               where rp.is_active = TRUE and bc.is_active = TRUE`;
   const activeVacancies = await db.all(sql);
   return { activeVacancies };
+};
+
+export const getLocalRobotaUaVacancy = async ({ bitrix_vacancy_id }) => {
+  const sql = /*sql*/ `SELECT * from robota_ua_pagination where bitrix_vacancy_id = ?`;
+  return await db.get(sql, bitrix_vacancy_id);
 };

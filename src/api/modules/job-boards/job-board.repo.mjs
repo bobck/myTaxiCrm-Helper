@@ -1,6 +1,6 @@
 import {
   createBitrixVacancy,
-  getVacancyById,
+  getBitrixVacancyById,
   updateBitrixVacancy,
 } from '../../../job-boards/job-board.queries.mjs';
 import {
@@ -17,10 +17,25 @@ import {
 } from '../../../job-boards/work.ua/workua.queries.mjs';
 
 export const getExistingVacancy = async ({ bitrix_vacancy_id }) => {
-  const vacancy = await getVacancyById({ bitrix_vacancy_id });
+  const payload = {};
+  payload.bitrixVacancy = await getBitrixVacancyById({ bitrix_vacancy_id });
+  if (!payload.bitrixVacancy) {
+    return null;
+  }
+  const { work_ua_vacancy_id, robota_ua_vacancy_id } = payload.bitrixVacancy;
+  if (work_ua_vacancy_id) {
+    payload.localWorkUaVacancy = await getAnyWorkUaVacancyByBitrixId({
+      bitrix_vacancy_id,
+    });
+  }
+  if (robota_ua_vacancy_id) {
+    payload.localRobotaUaVacancy = await getAnyWorkUaVacancyByBitrixId({
+      bitrix_vacancy_id,
+    });
+  }
   // console.log(vacancy);
 
-  return { vacancy };
+  return payload;
 };
 export const addVacancySynchronously = async ({
   bitrix_vacancy_id,
@@ -51,7 +66,6 @@ export const addVacancySynchronously = async ({
       await createWorkUaSynchronizedVacancy({
         bitrix_vacancy_id,
         workUaVacancy,
-        is_active,
       });
       payload.work_ua_vacancy_id = work_ua_vacancy_id;
       console.log('work vacancy created');
@@ -73,7 +87,6 @@ export const addVacancySynchronously = async ({
       await createRobotaUaSynchronizedVacancy({
         bitrix_vacancy_id,
         robotaUaVacancy,
-        is_active,
       });
       payload.robota_ua_vacancy_id = robota_ua_vacancy_id;
       console.log('robota vacancy created');
@@ -120,7 +133,7 @@ export const updateVacancySynchronously = async ({
       if (existingRobotaUaVacancy.bitrix_vacancy_id == bitrix_vacancy_id) {
         await updateRobotaUaSynchronizedVacancy({
           bitrix_vacancy_id,
-          robotaUaVacancy
+          robotaUaVacancy,
         });
         payload.robota_ua_vacancy_id = robota_ua_vacancy_id;
         console.log('robota vacancy updated');
@@ -135,14 +148,12 @@ export const updateVacancySynchronously = async ({
       if (existingRobotaUaVacancyByBitrixId) {
         await updateRobotaUaSynchronizedVacancy({
           bitrix_vacancy_id,
-          robota_ua_vacancy_id,
-          is_active,
+          robotaUaVacancy,
         });
       } else {
         await createRobotaUaSynchronizedVacancy({
           bitrix_vacancy_id,
           robotaUaVacancy,
-          is_active,
         });
       }
 
@@ -159,7 +170,7 @@ export const updateVacancySynchronously = async ({
       if (existingWorkUaVacancy.bitrix_vacancy_id == bitrix_vacancy_id) {
         await updateWorkUaSynchronizedVacancy({
           bitrix_vacancy_id,
-          workUaVacancy
+          workUaVacancy,
         });
         payload.work_ua_vacancy_id = work_ua_vacancy_id;
       } else {
@@ -173,14 +184,12 @@ export const updateVacancySynchronously = async ({
       if (existingWorkUaVacancyByBitrixId) {
         await updateWorkUaSynchronizedVacancy({
           bitrix_vacancy_id,
-          work_ua_vacancy_id,
-          is_active,
+          workUaVacancy,
         });
       } else {
         await createWorkUaSynchronizedVacancy({
           bitrix_vacancy_id,
           workUaVacancy,
-          is_active,
         });
       }
       payload.work_ua_vacancy_id = work_ua_vacancy_id;
@@ -204,7 +213,7 @@ export const getVacancySynchronously = async ({ bitrix_vacancy_id }) => {
     message: 'getting vacancy',
     bitrix_vacancy_id,
   });
-  const bitrixVacancy = await getVacancyById({ bitrix_vacancy_id });
+  const bitrixVacancy = await getBitrixVacancyById({ bitrix_vacancy_id });
   const robotaUaVacancy = await getAnyRobotaUaVacancyByBitrixId({
     bitrix_vacancy_id,
   });
