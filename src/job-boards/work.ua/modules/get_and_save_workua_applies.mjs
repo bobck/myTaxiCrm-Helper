@@ -4,6 +4,7 @@ import {
 } from '../workua.queries.mjs';
 import {
   getAllWorkUaVacanciesFromAPI,
+  getWorkUaRegions,
   getWorkUaVacancyResponses,
 } from '../workua.utils.mjs';
 import { processResponse as processWorkUaApiResponse } from '../workua.business-entity.mjs';
@@ -14,6 +15,7 @@ import {
 } from '../../../bitrix/bitrix.utils.mjs';
 import { assignPayloadToVacancyApply } from '../../job-board.utils.mjs';
 import { devLog } from '../../../shared/shared.utils.mjs';
+import { vacancyRequestTypeId } from '../../job-board.constants.mjs';
 
 const computePaginationProgress = ({ applies }) => {
   if (!applies || !Array.isArray(applies) || applies.length === 0) {
@@ -48,37 +50,55 @@ const checkIfWorkUaVacancyStaysActive = async ({
 }) => {
   return {
     is_active: allVacancies.some((vacancy) => {
-      return vacancy.id === work_ua_vacancy_id && vacancy.active;
+      return (
+        Number(vacancy.id) === Number(work_ua_vacancy_id) && vacancy.active
+      );
     }),
   };
 };
 export const getAndSaveWorkUaVacancyApplies = async () => {
   const { activeVacancies: trackedActiveWorkUaVacancies } =
     await getAllActiveWorkUaVacancies();
+
   console.log({
     module: 'getAndSaveWorkUaVacancyApplies',
     date: new Date(),
     activeWorkUaVacancies: trackedActiveWorkUaVacancies.length,
   });
+  if (trackedActiveWorkUaVacancies.length === 0) {
+    return;
+  }
+  const regions = await getWorkUaRegions();
   const { vacancies: allActiveWorkUaVacancies } =
     await getAllWorkUaVacanciesFromAPI();
+
   for (const vacancy of trackedActiveWorkUaVacancies) {
-    const { last_apply_id, work_ua_vacancy_id, name } = vacancy;
+    const {
+      last_apply_id,
+      work_ua_vacancy_id,
+      name,
+      bitrix_vacancy_id,
+      region,
+    } = vacancy;
+
     devLog(`Processing Work.ua Vacancy ID: ${work_ua_vacancy_id}`);
 
     const { is_active } = await checkIfWorkUaVacancyStaysActive({
       work_ua_vacancy_id,
       allVacancies: allActiveWorkUaVacancies,
     });
-
+    // const target = allActiveWorkUaVacancies.find(
+    //   (vacancy) => vacancy.id === work_ua_vacancy_id
+    // );
+    // devLog({ target });
     if (!is_active) {
       const comment = `Вакансія work.ua id:${work_ua_vacancy_id} не активна. Щоб її активувати - необхідно перенести до стадії "оновити-додати до системи", потім знову до "Пошук"`;
       devLog({ comment });
-      await addCommentToEntity({
-        comment,
-        typeId: vacancyRequestTypeId,
-        entityId: bitrix_vacancy_id,
-      });
+      // await addCommentToEntity({
+      //   comment,
+      //   typeId: vacancyRequestTypeId,
+      //   entityId: bitrix_vacancy_id,
+      // });
       continue;
     }
     const { responses: currentApplies } = await getWorkUaVacancyResponses({
@@ -94,16 +114,18 @@ export const getAndSaveWorkUaVacancyApplies = async () => {
     devLog(
       `Fetched ${currentApplies.length} applies for vacancy ${work_ua_vacancy_id}. Last Apply ID: ${last_apply_id}`
     );
-
+    const city = regions.find((r) => r.id == region);
     const processedApplies = await Promise.all(
       assignPayloadToVacancyApply({
         applies: currentApplies,
-        title: name,
-      })
-        .map(processWorkUaApiResponse)
-        .slice(0, 2)
+        payload: {
+          title: name,
+          city: `${city.name_ua}, ${city.region}`,
+        },
+      }).map(processWorkUaApiResponse).slice(0,1)
     );
-
+    // devLog({ processedApplies });
+    // return;
     const chunkedApplies = chunkArray(processedApplies, 8);
     for (const chunk of chunkedApplies) {
       await createVacancyResponseCards({
@@ -117,6 +139,7 @@ export const getAndSaveWorkUaVacancyApplies = async () => {
         last_apply_id: biggestId,
         last_apply_date: biggestDate,
       });
+      return;
     }
   }
 };

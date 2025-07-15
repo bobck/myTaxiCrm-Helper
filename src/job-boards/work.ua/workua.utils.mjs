@@ -35,7 +35,6 @@ export const getWorkUaVacancyResponses = async ({ vacancyId, last_id }) => {
       );
 
       if (responses && responses.length > 0) {
-
         allResponses.push(...responses);
         currentLastId = responses[responses.length - 1].id;
 
@@ -77,5 +76,11 @@ export const activateWorkUaVacancy = async ({ workUaVacancy }) => {
 export const deactivateWorkUaVacancy = async ({ vacancyId }) => {
   console.log({
     message: `worku.ua vacancy ${vacancyId} is being activated...`,
+  });
+};
+
+export const getWorkUaRegions = () => {
+  return workUaAPI.getDictionary({
+    location: 'town',
   });
 };

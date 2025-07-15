@@ -38,7 +38,8 @@ export class BitrixAPIClient {
     const response = await this.axiosInstance.post(url, body);
     const { data } = response;
     const { result: resuletGethered } = data;
-    console.log(resuletGethered);
-    return resuletGethered;
+    const { result, result_error, result_total, result_next, result_time } =
+      resuletGethered;
+    return { result, result_error, result_total, result_next, result_time };
   }
 }

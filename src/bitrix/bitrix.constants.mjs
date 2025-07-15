@@ -450,6 +450,7 @@ export const jobBoardApplymentParametersToBitrixKeys = {
   avatar: 'fields[ufCrm56_1739365267]',
   cvURL: 'fields[ufCrm56_1748600822]',
   cvFile: 'fields[ufCrm56_1740146734]',
+  cvText: 'fields[ufCrm56_1752567875]',
   status: 'fields[ufCrm56_1740147016]',
   email: 'fields[ufCrm56_1740146479]',
   phone: 'fields[ufCrm56_1740146425]',

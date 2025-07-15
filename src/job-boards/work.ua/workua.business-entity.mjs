@@ -12,8 +12,9 @@ export const processResponse = async (resumeResponse) => {
     title,
     cover,
     text,
+    city,
   } = resumeResponse;
-  const comment = cover ? cover + '\n\n' + text : text;
+  const cvText = cover ? cover + '\n\n' + text : text;
 
   const cvURL = with_file
     ? `https://www.work.ua/sent-resume-file/${id}/view/pdf/`
@@ -29,6 +30,7 @@ export const processResponse = async (resumeResponse) => {
     cvURL,
     date,
     title,
-    comment,
+    cvText,
+    country: city,
   };
 };

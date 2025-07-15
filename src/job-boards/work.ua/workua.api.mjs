@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { Buffer } from 'buffer'; // Import Buffer for Node.js environment
+import { devLog } from '../../shared/shared.utils.mjs';
 
 export const MAX_RESPONSES_PER_REQ = 50;
 
@@ -214,7 +215,11 @@ class WorkUaApiClient {
       // this.handleApiError(error);
     }
   }
+  async getDictionary({ location }) {
+    const { data } = await this.api.get(`/dictionaries/${location}`);
 
+    return data;
+  }
   handleApiError(error) {
     if (error.response) {
       switch (error.response.status) {
