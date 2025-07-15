@@ -15,7 +15,7 @@ exports.setup = function (options, seedLink) {
 };
 
 exports.up = function (db, callback) {
-  const sql = `CREATE TABLE work_ua_pagination (
+  const sql = /*sql*/ `CREATE TABLE work_ua_pagination (
     work_ua_vacancy_id INTEGER NOT NULL,
     last_apply_id INTEGER,
     bitrix_vacancy_id INTEGER,

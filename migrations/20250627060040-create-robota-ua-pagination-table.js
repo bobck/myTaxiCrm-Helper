@@ -15,7 +15,7 @@ exports.setup = function (options, seedLink) {
 };
 
 exports.up = function (db, callback) {
-  const sql = `CREATE TABLE robota_ua_pagination (
+  const sql = /*sql*/ `CREATE TABLE robota_ua_pagination (
     robota_ua_vacancy_id INTEGER NOT NULL,
     bitrix_vacancy_id INTEGER,
     is_active BOOLEAN DEFAULT FALSE,
