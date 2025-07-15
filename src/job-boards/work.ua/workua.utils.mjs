@@ -64,10 +64,7 @@ export const getWorkUaVacancyById = async ({ vacancyId }) => {
   // const data = await workUaAPI.getVacancyById({ vacancyId });
   // return data;
 };
-export const activateWorkUaVacancy = async ({
-  workUaVacancy,
-  workUaPublicationType,
-}) => {
+export const activateWorkUaVacancy = async ({ workUaVacancy }) => {
   console.log({
     message: `worku.ua vacancy ${workUaVacancy.work_ua_vacancy_id} is being activated...`,
   });

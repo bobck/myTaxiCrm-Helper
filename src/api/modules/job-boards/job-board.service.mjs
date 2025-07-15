@@ -4,7 +4,10 @@ import {
   activateRobotaUaVacancy,
   deactivateRobotaUaVacancy,
 } from '../../../job-boards/robota.ua/robotaua.utils.mjs';
-import { updateWorkUaVacancyActivityState } from '../../../job-boards/work.ua/workua.queries.mjs';
+import {
+  updateWorkUaVacancyActivityState,
+  updateWorkUaVacancyPublicationType,
+} from '../../../job-boards/work.ua/workua.queries.mjs';
 import {
   activateWorkUaVacancy,
   deactivateWorkUaVacancy,
@@ -34,6 +37,7 @@ const addVacancy = async ({
   vacancy_name,
   work_ua_vacancy_id,
   robota_ua_vacancy_id,
+  work_ua_publication_type,
 }) => {
   const comments = [];
   const {
@@ -58,6 +62,7 @@ const addVacancy = async ({
   if (workUaVacancy) {
     // console.log({ workUaVacancy, message: 'found' });
     payload.workUaVacancy = workUaVacancy;
+    payload.work_ua_publication_type = work_ua_publication_type;
   }
   if (robotaUaVacancy) {
     // console.log({ robotaUaVacancy, message: 'found' });
@@ -85,7 +90,9 @@ const updateVacancy = async ({
   vacancy_name,
   work_ua_vacancy_id,
   robota_ua_vacancy_id,
+  work_ua_publication_type,
   bitrixVacancy,
+  localWorkUaVacancy,
 }) => {
   const comments = [];
   const {
@@ -106,8 +113,12 @@ const updateVacancy = async ({
   }
   const payload = { vacancy: bitrixVacancy };
   if (workUaVacancy) {
-    if (Number(bitrixVacancy.work_ua_vacancy_id) !== Number(workUaVacancy.id)) {
+    if (
+      Number(bitrixVacancy.work_ua_vacancy_id) !== Number(workUaVacancy.id) ||
+      work_ua_publication_type !== localWorkUaVacancy.publicationType
+    ) {
       payload.workUaVacancy = workUaVacancy;
+      payload.work_ua_publication_type = work_ua_publication_type;
     }
   }
   if (robotaUaVacancy) {
@@ -142,6 +153,7 @@ export const add_update_vacancy_fork = async ({ query }) => {
     vacancy_name,
     work_ua_vacancy_id,
     robota_ua_vacancy_id,
+    work_ua_publication_type,
   } = query;
   const synchronizedVacancy = await jobBoardRepo.getExistingVacancy({
     bitrix_vacancy_id,
@@ -152,23 +164,27 @@ export const add_update_vacancy_fork = async ({ query }) => {
       vacancy_name,
       work_ua_vacancy_id,
       robota_ua_vacancy_id,
+      work_ua_publication_type,
     });
   }
-  const { bitrixVacancy } = synchronizedVacancy;
+  const { bitrixVacancy, localWorkUaVacancy } = synchronizedVacancy;
   return await updateVacancy({
     bitrix_vacancy_id,
     vacancy_name,
     work_ua_vacancy_id,
     robota_ua_vacancy_id,
+    work_ua_publication_type,
     bitrixVacancy,
+    localWorkUaVacancy,
   });
 };
 export const activateVacancy = async ({ query }) => {
   devLog({ query });
-  const { bitrix_vacancy_id, work_ua_publication_type } = query;
-  const { bitrixVacancy } = await jobBoardRepo.getExistingVacancy({
-    bitrix_vacancy_id,
-  });
+  const { bitrix_vacancy_id } = query;
+  const { bitrixVacancy, localWorkUaVacancy } =
+    await jobBoardRepo.getExistingVacancy({
+      bitrix_vacancy_id,
+    });
 
   const { work_ua_vacancy_id, robota_ua_vacancy_id } = bitrixVacancy;
   devLog({ work_ua_vacancy_id, robota_ua_vacancy_id });
@@ -193,21 +209,26 @@ export const activateVacancy = async ({ query }) => {
   }
   if (work_ua_vacancy_id) {
     let is_active = true;
+
     const { active } = workUaVacancy;
     const is_work_ua_vacancy_active = Boolean(active);
     if (!is_work_ua_vacancy_active) {
       const { availablePublications } = await getWorkUaAvailablePublications();
-      const requiredPublications = availablePublications.find(
+      const { publicationType: work_ua_publication_type } = localWorkUaVacancy;
+      const demandedPublications = availablePublications.find(
         (ap) => ap.id == work_ua_publication_type
       );
-      if (requiredPublications.total > 0) {
+      if (!demandedPublications) {
+        console.error(`unkonwn publication type ${work_ua_publication_type}`);
+        is_active = false;
+      } else if (demandedPublications.total > 0) {
         await activateWorkUaVacancy({
-          workUaVacancy,
+          workUaVacancy: localWorkUaVacancy,
         });
       } else {
         is_active = false;
         const comments = [
-          `Не залишилося жодної публікації work.ua вибраного типу. Виберіть іншу в стадії "оновити-додати до системи", та перенесіть назад до "Пошук"`,
+          `Не залишилося жодної публікації work.ua вибраного типу(${demandedPublications.id}). Виберіть іншу в стадії "оновити-додати до системи", та перенесіть назад до "Пошук"`,
           `Залишки публікацій: Стандарт:${availablePublications[0].total}, СтандартПлюс:${availablePublications[1].total}, Гаряча:${availablePublications[2].total}, Анонімна:${availablePublications[3].total}`,
         ];
         await assignManyCommentsToVacancyRequest({ comments });

@@ -43,6 +43,7 @@ export const addVacancySynchronously = async ({
   workUaVacancy,
   robotaUaVacancy,
   is_active,
+  work_ua_publication_type,
 }) => {
   console.log({
     message: 'creating vacancy',
@@ -66,6 +67,7 @@ export const addVacancySynchronously = async ({
       await createWorkUaSynchronizedVacancy({
         bitrix_vacancy_id,
         workUaVacancy,
+        work_ua_publication_type,
       });
       payload.work_ua_vacancy_id = work_ua_vacancy_id;
       console.log('work vacancy created');
@@ -112,6 +114,7 @@ export const updateVacancySynchronously = async ({
   is_active,
   workUaVacancy,
   robotaUaVacancy,
+  work_ua_publication_type,
 }) => {
   console.log({
     message: 'updating vacancy',
@@ -171,6 +174,7 @@ export const updateVacancySynchronously = async ({
         await updateWorkUaSynchronizedVacancy({
           bitrix_vacancy_id,
           workUaVacancy,
+          work_ua_publication_type,
         });
         payload.work_ua_vacancy_id = work_ua_vacancy_id;
       } else {
@@ -185,11 +189,13 @@ export const updateVacancySynchronously = async ({
         await updateWorkUaSynchronizedVacancy({
           bitrix_vacancy_id,
           workUaVacancy,
+          work_ua_publication_type,
         });
       } else {
         await createWorkUaSynchronizedVacancy({
           bitrix_vacancy_id,
           workUaVacancy,
+          work_ua_publication_type,
         });
       }
       payload.work_ua_vacancy_id = work_ua_vacancy_id;
