@@ -661,11 +661,19 @@ export async function getAllWorkingDriverIds({
   weekNumber,
   year,
   maxDebt,
+  driversToIgnore,
 }) {
   const sql = fs
     .readFileSync('src/sql/get_all_working_driver_ids.sql')
     .toString();
-  const result = await pool.query(sql, [ids, weekNumber, year, maxDebt]);
+
+  const result = await pool.query(sql, [
+    ids,
+    weekNumber,
+    year,
+    maxDebt,
+    driversToIgnore,
+  ]);
   const { rows, rowCount } = result;
   return { rows };
 }
