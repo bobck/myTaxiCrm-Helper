@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { devLog } from '../../shared/shared.utils.mjs';
 
 class RobotaUaApiClient {
   constructor(token) {
@@ -115,7 +116,8 @@ class RobotaUaApiClient {
   }
   async changeVacancyState({ vacancyId, state }) {
     try {
-      this.employerApi.post(`/vacancy/state/${vacancyId}?state=${state}`);
+      const {data} = await this.employerApi.post(`/vacancy/state/${vacancyId}?state=${state}`);
+      devLog(data)
     } catch (error) {
       this.handleApiError(error);
     }

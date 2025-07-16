@@ -194,6 +194,9 @@ export const activateVacancy = async ({ query }) => {
       robota_ua_vacancy_id,
       bitrix_vacancy_id,
     });
+  devLog({ workUaVacancy, robotaUaVacancy });
+
+  
 
   if (robota_ua_vacancy_id) {
     const { state } = robotaUaVacancy;
