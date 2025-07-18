@@ -77,13 +77,13 @@ export const activateRobotaUaVacancy = async ({ vacancyId }) => {
   console.log({
     message: `robota.ua vacancy ${vacancyId} is being activated...`,
   });
-  await robotaUaAPI.changeVacancyState({ vacancyId, state: 'Publicated' });
+  // await robotaUaAPI.changeVacancyState({ vacancyId, state: 'Publicated' });
 };
 export const deactivateRobotaUaVacancy = async ({ vacancyId }) => {
   console.log({
     message: `robota.ua vacancy ${vacancyId} is being activated...`,
   });
-  await robotaUaAPI.changeVacancyState({ vacancyId, state: 'Closed' });
+  // await robotaUaAPI.changeVacancyState({ vacancyId, state: 'Closed' });
 };
 export const changeRobotaUaVacancyPublicationType = async ({
   robotaUaVacancy,

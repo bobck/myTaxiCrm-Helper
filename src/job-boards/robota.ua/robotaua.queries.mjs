@@ -99,3 +99,9 @@ export const getLocalRobotaUaVacancy = async ({ bitrix_vacancy_id }) => {
   const sql = /*sql*/ `SELECT * from robota_ua_pagination where bitrix_vacancy_id = ?`;
   return await db.get(sql, bitrix_vacancy_id);
 };
+export const deleteRobotaUaSynchronizedVacancy = async ({
+  bitrix_vacancy_id,
+}) => {
+  const sql = `DELETE FROM robota_ua_pagination WHERE bitrix_vacancy_id = ?`;
+  await db.run(sql, bitrix_vacancy_id);
+};

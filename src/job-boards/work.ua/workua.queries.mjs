@@ -168,3 +168,9 @@ export const updateWorkUaSynchronizedVacancy = async ({
     bitrix_vacancy_id
   );
 };
+export const deleteWorkUaSynchronizedVacancy = async ({
+  bitrix_vacancy_id,
+}) => {
+  const sql = `DELETE FROM work_ua_pagination WHERE bitrix_vacancy_id = ?`;
+  await db.run(sql, bitrix_vacancy_id);
+};

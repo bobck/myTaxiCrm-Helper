@@ -1,16 +1,19 @@
 import {
   createBitrixVacancy,
+  deleteBitrixVacancyById,
   getBitrixVacancyById,
   updateBitrixVacancy,
 } from '../../../job-boards/job-board.queries.mjs';
 import {
   createRobotaUaSynchronizedVacancy,
+  deleteRobotaUaSynchronizedVacancy,
   getAnyRobotaUaVacancyByBitrixId,
   getAnyRobotaUaVacancyById,
   updateRobotaUaSynchronizedVacancy,
 } from '../../../job-boards/robota.ua/robotaua.queries.mjs';
 import {
   createWorkUaSynchronizedVacancy,
+  deleteWorkUaSynchronizedVacancy,
   getAnyWorkUaVacancyByBitrixId,
   getAnyWorkUaVacancyById,
   updateWorkUaSynchronizedVacancy,
@@ -117,6 +120,7 @@ export const updateVacancySynchronously = async ({
   workUaVacancy,
   robotaUaVacancy,
   work_ua_publication_type,
+  robota_ua_publication_type,
 }) => {
   console.log({
     message: 'updating vacancy',
@@ -229,4 +233,17 @@ export const getVacancySynchronously = async ({ bitrix_vacancy_id }) => {
     bitrix_vacancy_id,
   });
   return { bitrixVacancy, robotaUaVacancy, workUaVacancy };
+};
+export const deleteVacancySynchronously = async ({ bitrix_vacancy_id }) => {
+  devLog({
+    message: 'deleting vacancy',
+    bitrix_vacancy_id,
+  });
+  await deleteRobotaUaSynchronizedVacancy({ bitrix_vacancy_id });
+  await deleteWorkUaSynchronizedVacancy({ bitrix_vacancy_id });
+  await deleteBitrixVacancyById({ bitrix_vacancy_id });
+  devLog({
+    message: 'vacancy deleted',
+    bitrix_vacancy_id,
+  });
 };

@@ -49,7 +49,11 @@ export const assignManyCommentsToVacancyRequest = async ({
   bitrix_vacancy_id,
 }) => {
   vacancyRequestTypeId;
-  console.log('assigning comments to vacancy request', comments);
+  console.log(
+    'assigning comments to vacancy request',
+    bitrix_vacancy_id,
+    comments
+  );
   // await addManyCommentsToEntity({
   //   entityId: bitrix_vacancy_id,
   //   typeId: vacancyRequestTypeId,

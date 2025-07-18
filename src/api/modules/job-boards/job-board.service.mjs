@@ -138,8 +138,6 @@ const updateVacancy = async ({
       payload.robotaUaVacancy = robotaUaVacancy;
     }
   }
-  devLog({ payload });
-  return;
   const { _comments: _comments2, isAnyVacancyUpdated } =
     await jobBoardRepo.updateVacancySynchronously({
       bitrix_vacancy_id,
@@ -253,30 +251,45 @@ export const activateVacancy = async ({ query }) => {
       is_active,
     });
   }
-  return 'vacancy activated';
+  const comments=[`Вакансія успішно активована.`]
+  await assignManyCommentsToVacancyRequest({ comments, bitrix_vacancy_id });
+
 };
 
 export const deactivateVacancy = async ({ query }) => {
   console.log({ query });
   const { bitrix_vacancy_id } = query;
-  const { bitrixVacancy, localRobotaUaVacancy, localWorkUaVacancy } =
-    await jobBoardRepo.getExistingVacancy({
+  const { work_ua_vacancy_id, robota_ua_vacancy_id } = vacancy;
+  const { workUaVacancy, robotaUaVacancy } =
+    await getRobotaAndWokUaVacanciesById({
+      work_ua_vacancy_id,
+      robota_ua_vacancy_id,
       bitrix_vacancy_id,
     });
-  const { work_ua_vacancy_id, robota_ua_vacancy_id } = vacancy;
   if (robota_ua_vacancy_id) {
-    await deactivateRobotaUaVacancy({ vacancyId: robota_ua_vacancy_id });
-    await markRobotaUaVacancyAsInactive(vacancy);
+    const { state } = robotaUaVacancy;
+    const is_robota_ua_vacancy_active = state == 'Publicated';
+    if (is_robota_ua_vacancy_active) {
+      await deactivateRobotaUaVacancy({ vacancyId: robota_ua_vacancy_id });
+    }
   }
   if (work_ua_vacancy_id) {
-    await deactivateWorkUaVacancy({ vacancyId: work_ua_vacancy_id });
-    await markWorkUaVacancyAsInactive(vacancy);
+    const { active } = workUaVacancy;
+    const is_work_ua_vacancy_active = Boolean(active);
+    if (is_work_ua_vacancy_active) {
+      await deactivateWorkUaVacancy({ vacancyId: work_ua_vacancy_id });
+    }
   }
-  return 'velcome to disable vacancy';
+  await jobBoardRepo.deleteVacancySynchronously({ bitrix_vacancy_id });
+  const comments = [`Вакансія успішно деактивована.`];
+  await assignManyCommentsToVacancyRequest({ comments, bitrix_vacancy_id });
 };
 
 export const dev = async ({ query }) => {
   devLog(query);
+
+  devLog(await getWorkUaAvailablePublications());
+  return;
   const devRobotaUavacancy = {
     vacancyId: 10646940,
     notebookId: 7973901,
@@ -374,7 +387,7 @@ export const dev = async ({ query }) => {
   };
 
   const { robota_ua_vacancy_id, robota_ua_publication_type } = query;
- 
+
   //  const { robotaUaVacancy } = await getRobotaAndWokUaVacanciesById({
   //   robota_ua_vacancy_id,
   // });
@@ -387,8 +400,8 @@ export const dev = async ({ query }) => {
     robotaUaVacancy: devRobotaUavacancy,
     robota_ua_publication_type,
   });
-  devLog({resp})
-   const { robotaUaVacancy } = await getRobotaAndWokUaVacanciesById({
+  devLog({ resp });
+  const { robotaUaVacancy } = await getRobotaAndWokUaVacanciesById({
     robota_ua_vacancy_id,
   });
   devLog({ robotaUaVacancy });

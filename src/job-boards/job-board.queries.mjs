@@ -62,3 +62,8 @@ export const updateBitrixVacancy = async ({
     WHERE bitrix_vacancy_id = ${bitrix_vacancy_id}`;
   await db.run(sql);
 };
+
+export const deleteBitrixVacancyById = async ({ bitrix_vacancy_id }) => {
+  const sql = `DELETE FROM bitrix_vacancies_to_job_board_vacancies WHERE bitrix_vacancy_id = ${bitrix_vacancy_id}`;
+  await db.run(sql);
+};
