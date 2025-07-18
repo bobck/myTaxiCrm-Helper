@@ -1,4 +1,7 @@
-import { addCommentToEntity, addManyCommentsToAnEntity } from '../../../bitrix/bitrix.utils.mjs';
+import {
+  addCommentToEntity,
+  addManyCommentsToAnEntity,
+} from '../../../bitrix/bitrix.utils.mjs';
 import { vacancyRequestTypeId } from '../../../job-boards/job-board.constants.mjs';
 import { getRobotaUaVacancyById } from '../../../job-boards/robota.ua/robotaua.utils.mjs';
 import { getWorkUaVacancyById } from '../../../job-boards/work.ua/workua.utils.mjs';
