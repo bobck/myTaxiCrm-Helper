@@ -136,6 +136,7 @@ const updateVacancy = async ({
       robota_ua_publication_type !== robotaUaVacancy.publishType
     ) {
       payload.robotaUaVacancy = robotaUaVacancy;
+      payload.robota_ua_publication_type = robota_ua_publication_type;
     }
   }
   const { _comments: _comments2, isAnyVacancyUpdated } =

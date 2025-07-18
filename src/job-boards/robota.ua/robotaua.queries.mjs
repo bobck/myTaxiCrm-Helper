@@ -52,31 +52,63 @@ export const createRobotaUaSynchronizedVacancy = async ({
     state,
     vacancyName: name,
     publishType,
+    desctiprion,
+    salary,
+    sendResumeType,
+    contactEMail,
+    endingType,
+    designId,
   } = robotaUaVacancy;
   const is_active = state == 'Publicated';
-  const sql = /*sql*/ `INSERT INTO robota_ua_pagination (bitrix_vacancy_id,robota_ua_vacancy_id,is_active,region, name) VALUES (?,?,?,?,?)`;
+  const sql = /*sql*/ `INSERT INTO robota_ua_pagination (bitrix_vacancy_id, robota_ua_vacancy_id, is_active,region, name, robota_ua_publication_type, desctiprion, salary, sendResumeType, contactEMail, endingType, designId) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`;
   await db.run(
     sql,
     bitrix_vacancy_id,
     robota_ua_vacancy_id,
     is_active,
     region,
-    name
+    name,
+    robota_ua_publication_type,
+    desctiprion,
+    salary,
+    sendResumeType,
+    contactEMail,
+    endingType,
+    designId
   );
 };
+/**
+ * CREATE TABLE robota_ua_pagination (
+
+    designId INTEGER,
+   
+    robota_ua_publication_type TEXT,
+    PRIMARY KEY (robota_ua_vacancy_id)
+    );
+ */
 export const updateRobotaUaSynchronizedVacancy = async ({
   bitrix_vacancy_id,
   robotaUaVacancy,
+  robota_ua_publication_type,
 }) => {
   const {
     vacancyId: robota_ua_vacancy_id,
     cityId: region,
     state,
     vacancyName: name,
+    publishType,
+    desctiprion,
+    salary,
+    sendResumeType,
+    contactEMail,
+    endingType,
+    designId,
   } = robotaUaVacancy;
 
   const is_active = state == 'Publicated';
-  const sql = /*sql*/ `UPDATE robota_ua_pagination SET robota_ua_vacancy_id = ?, is_active = ?, region=?, name=? WHERE bitrix_vacancy_id = ?`;
+  const sql = /*sql*/ `UPDATE robota_ua_pagination 
+                       SET robota_ua_vacancy_id = ?, is_active = ?, region=?, name=?,robota_ua_publication_type=?,desctiprion=?,salary=?,sendResumeType=?,contactEMail=?,endingType=?,designId=? 
+                       WHERE bitrix_vacancy_id = ?`;
 
   await db.run(
     sql,
@@ -84,6 +116,13 @@ export const updateRobotaUaSynchronizedVacancy = async ({
     is_active,
     region,
     name,
+    robota_ua_publication_type,
+    desctiprion,
+    salary,
+    sendResumeType,
+    contactEMail,
+    endingType,
+    designId,
     bitrix_vacancy_id
   );
 };

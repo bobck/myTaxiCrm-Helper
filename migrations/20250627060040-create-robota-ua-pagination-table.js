@@ -22,6 +22,13 @@ exports.up = function (db, callback) {
     last_apply_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     region INTEGER NOT NULL,
     name TEXT,
+    description TEXT,
+    salary INTEGER,
+    designId INTEGER,
+    sendResumeType TEXT,
+    contactEMail TEXT,
+    endingType TEXT,
+    robota_ua_publication_type TEXT,
     PRIMARY KEY (robota_ua_vacancy_id)
     );`;
   db.runSql(sql, callback);

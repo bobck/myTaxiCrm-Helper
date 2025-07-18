@@ -143,6 +143,7 @@ export const updateVacancySynchronously = async ({
         await updateRobotaUaSynchronizedVacancy({
           bitrix_vacancy_id,
           robotaUaVacancy,
+          robota_ua_publication_type,
         });
         payload.robota_ua_vacancy_id = robota_ua_vacancy_id;
         console.log('robota vacancy updated');
