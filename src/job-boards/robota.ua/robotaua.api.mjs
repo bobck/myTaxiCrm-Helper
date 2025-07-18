@@ -130,10 +130,10 @@ class RobotaUaApiClient {
         contactEMail: 'abc@gmail.com',
         endingType: 'AutoRepublish',
       };
-      console.log({ vacancyId, vacancyName ,arguments});
-    
+      console.log({ vacancyId, vacancyName, arguments });
+
       const response = await this.employerApi.post('/vacancy/add', {
-        id:vacancyId,
+        id: vacancyId,
         publishType,
         Name: vacancyName,
         description,
@@ -144,7 +144,7 @@ class RobotaUaApiClient {
         contactEMail,
         endingType,
       });
-      devLog('request sent +',response)
+      devLog('request sent +', response);
       return response.data;
     } catch (error) {
       // console.error(error)

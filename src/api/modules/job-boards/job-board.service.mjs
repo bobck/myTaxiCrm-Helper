@@ -251,9 +251,8 @@ export const activateVacancy = async ({ query }) => {
       is_active,
     });
   }
-  const comments=[`Вакансія успішно активована.`]
+  const comments = [`Вакансія успішно активована.`];
   await assignManyCommentsToVacancyRequest({ comments, bitrix_vacancy_id });
-
 };
 
 export const deactivateVacancy = async ({ query }) => {
