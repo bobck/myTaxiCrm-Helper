@@ -6,7 +6,11 @@ const {
   MISSING_API_KEY,
   INTERNAL_SERVER_ERROR,
 } = api_status_codes;
-export const controllerWrapper = ({ handlerCB, handlingServiceName }) => {
+export const controllerWrapper = ({
+  handlerCB,
+  handlingServiceName,
+  errorHandler,
+}) => {
   return async (req, res) => {
     try {
       await handlerCB(req, res);
@@ -19,6 +23,16 @@ export const controllerWrapper = ({ handlerCB, handlingServiceName }) => {
           .json({ message: 'Internal Server Error', status: 'error' });
         return;
       }
+
+      if (errorHandler) {
+        await errorHandler(error);
+        res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({ message: 'Internal Server Error', status: 'error' });
+        return;
+      }
+      console.error(`error occured in ${handlingServiceName}`, error);
+
       res.status(code).json({ message, status: 'error' });
     }
   };
