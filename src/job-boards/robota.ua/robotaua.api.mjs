@@ -97,15 +97,58 @@ class RobotaUaApiClient {
       this.handleApiError(error);
     }
   }
-  async changeVacancyPublicationType({ vacancyId, publishType }) {
+  async getPublicationLeftOvers({ page }) {
     try {
-      const response = await this.employerApi.post('/vacancy/add', {
-        vacancyId,
-        publishType,
-      });
+      const response = await this.employerApi.get(`/api/service/list${page}`);
       return response.data;
     } catch (error) {
       this.handleApiError(error);
+    }
+  }
+  async changeVacancyPublicationType({ vacancy, publishType }) {
+    try {
+      const {
+        vacancyId,
+        vacancyName,
+        description,
+        cityId,
+        salary,
+        designId,
+        sendResumeType,
+        contactEMail,
+        endingType,
+      } = vacancy;
+      const payload = {
+        id: 0,
+        name: 'Your vacancy title',
+        description: 'Your vacancy description',
+        cityId: 1,
+        salary: 15000,
+        publishType: 'Professional',
+        designId: 321,
+        sendResumeType: 'EmailAndCvArchive',
+        contactEMail: 'abc@gmail.com',
+        endingType: 'AutoRepublish',
+      };
+      console.log({ vacancyId, vacancyName ,arguments});
+    
+      const response = await this.employerApi.post('/vacancy/add', {
+        id:vacancyId,
+        publishType,
+        Name: vacancyName,
+        description,
+        cityId,
+        salary,
+        designId,
+        sendResumeType,
+        contactEMail,
+        endingType,
+      });
+      devLog('request sent +',response)
+      return response.data;
+    } catch (error) {
+      // console.error(error)
+      console.log(error.response.data);
     }
   }
   async getCityList() {
@@ -131,6 +174,14 @@ class RobotaUaApiClient {
         `/vacancy/state/${vacancyId}?state=${state}`
       );
       devLog(data);
+    } catch (error) {
+      this.handleApiError(error);
+    }
+  }
+  async customGet({ url }) {
+    try {
+      const response = await this.employerApi.get(url);
+      return response.data;
     } catch (error) {
       this.handleApiError(error);
     }

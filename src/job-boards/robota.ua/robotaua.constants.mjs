@@ -138,3 +138,21 @@ export const robotaUaCities = [
     auto_park_id: '45dcaa21-bceb-45f2-bba9-5c72bbac441f',
   },
 ];
+export const robotaUaPublicationTypes = [
+  {
+    id: 16,
+    name: 'Anonymous',
+  },
+  {
+    id: 18,
+    name: 'Optimum',
+  },
+  {
+    id: -2,
+    name: 'Professional',
+  },
+  {
+    id: -1,
+    name: 'Standard',
+  },
+];

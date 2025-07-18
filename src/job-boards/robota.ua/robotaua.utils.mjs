@@ -86,12 +86,22 @@ export const deactivateRobotaUaVacancy = async ({ vacancyId }) => {
   await robotaUaAPI.changeVacancyState({ vacancyId, state: 'Closed' });
 };
 export const changeRobotaUaVacancyPublicationType = async ({
-  robota_ua_vacancy_id,
+  robotaUaVacancy,
   robota_ua_publication_type,
 }) => {
-  devLog({ robota_ua_vacancy_id, robota_ua_publication_type });
+  devLog({
+    robota_ua_vacancy_id: robotaUaVacancy.vacancyId,
+    robota_ua_publication_type,
+  });
   const resp = await robotaUaAPI.changeVacancyPublicationType({
-    vacancyId: robota_ua_vacancy_id,
+    vacancy: robotaUaVacancy,
     publishType: robota_ua_publication_type,
   });
+  return resp;
 };
+export const getRobotaUaPublicationLeftOvers = async ({ page }) => {
+  return await robotaUaAPI.getPublicationLeftOvers({ page });
+};
+
+export const robotaUaCustomGet = async ({ url }) =>
+  robotaUaAPI.customGet({ url });
