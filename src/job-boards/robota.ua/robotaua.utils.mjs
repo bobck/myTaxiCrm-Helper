@@ -88,12 +88,10 @@ export const deactivateRobotaUaVacancy = async ({ vacancyId }) => {
 export const changeRobotaUaVacancyPublicationType = async ({
   robota_ua_vacancy_id,
   robota_ua_publication_type,
-}) =>{
-  
-  devLog({robota_ua_vacancy_id,robota_ua_publication_type})
-  const resp= await robotaUaAPI.changeVacancyPublicationType({
+}) => {
+  devLog({ robota_ua_vacancy_id, robota_ua_publication_type });
+  const resp = await robotaUaAPI.changeVacancyPublicationType({
     vacancyId: robota_ua_vacancy_id,
     publishType: robota_ua_publication_type,
   });
-  
-}
+};

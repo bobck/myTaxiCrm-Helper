@@ -44,14 +44,14 @@ export async function getAnyRobotaUaVacancyByBitrixId({ bitrix_vacancy_id }) {
 export const createRobotaUaSynchronizedVacancy = async ({
   bitrix_vacancy_id,
   robotaUaVacancy,
-  robota_ua_publication_type
+  robota_ua_publication_type,
 }) => {
   const {
     vacancyId: robota_ua_vacancy_id,
     cityId: region,
     state,
     vacancyName: name,
-    publishType
+    publishType,
   } = robotaUaVacancy;
   const is_active = state == 'Publicated';
   const sql = /*sql*/ `INSERT INTO robota_ua_pagination (bitrix_vacancy_id,robota_ua_vacancy_id,is_active,region, name) VALUES (?,?,?,?,?)`;
