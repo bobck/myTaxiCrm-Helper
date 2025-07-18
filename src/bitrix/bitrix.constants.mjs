@@ -313,7 +313,7 @@ export const cityTextRecruitToPayments = {
   },
   Харків: {
     id: '2882',
-    assigned_by_id: '60870',
+    assigned_by_id: '166486',
   },
   Одеса: {
     id: '2884',
@@ -395,6 +395,10 @@ export const cityTextRecruitToPayments = {
     id: '2938',
     assigned_by_id: '173554',
   },
+  "Кам'янське": {
+    id: '2924',
+    assigned_by_id: '197858',
+  },
 };
 export const procentageRewardAutoParkIds = [
   '2964e082-0e86-4695-b5f5-98915d190518',
@@ -418,6 +422,7 @@ export const procentageRewardAutoParkIds = [
   '472c4d3e-3fe7-45ea-9c94-a77f364bbd86',
   'b0328dc5-71be-485d-b6ec-786d9ce52112',
   'e4df553f-4ec2-43a8-b012-4795259e983a',
+  'a7bb17b7-fc87-4617-a915-d2f9ec83cfa0',
 ];
 
 const positionCodes = {
