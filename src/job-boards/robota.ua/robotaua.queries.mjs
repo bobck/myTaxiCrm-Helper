@@ -52,7 +52,7 @@ export const createRobotaUaSynchronizedVacancy = async ({
     state,
     vacancyName: name,
     publishType,
-    desctiprion,
+    description,
     salary,
     sendResumeType,
     contactEMail,
@@ -60,7 +60,7 @@ export const createRobotaUaSynchronizedVacancy = async ({
     designId,
   } = robotaUaVacancy;
   const is_active = state == 'Publicated';
-  const sql = /*sql*/ `INSERT INTO robota_ua_pagination (bitrix_vacancy_id, robota_ua_vacancy_id, is_active,region, name, robota_ua_publication_type, desctiprion, salary, sendResumeType, contactEMail, endingType, designId) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`;
+  const sql = /*sql*/ `INSERT INTO robota_ua_pagination (bitrix_vacancy_id, robota_ua_vacancy_id, is_active,region, name, robota_ua_publication_type, description, salary, sendResumeType, contactEMail, endingType, designId) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`;
   await db.run(
     sql,
     bitrix_vacancy_id,
@@ -69,7 +69,7 @@ export const createRobotaUaSynchronizedVacancy = async ({
     region,
     name,
     robota_ua_publication_type,
-    desctiprion,
+    description,
     salary,
     sendResumeType,
     contactEMail,

@@ -25,7 +25,7 @@ exports.up = function (db, callback) {
     description TEXT,
     salary INTEGER,
     designId INTEGER,
-    sendResumeType TEXT,
+    sendResumeType TEXT,desctiprion
     contactEMail TEXT,
     endingType TEXT,
     robota_ua_publication_type TEXT,

@@ -18,12 +18,13 @@ import {
   getAnyWorkUaVacancyById,
   updateWorkUaSynchronizedVacancy,
 } from '../../../job-boards/work.ua/workua.queries.mjs';
+import { devLog } from '../../../shared/shared.utils.mjs';
 
 export const getExistingVacancy = async ({ bitrix_vacancy_id }) => {
   const payload = {};
   payload.bitrixVacancy = await getBitrixVacancyById({ bitrix_vacancy_id });
   if (!payload.bitrixVacancy) {
-    return null;
+    return payload;
   }
   const { work_ua_vacancy_id, robota_ua_vacancy_id } = payload.bitrixVacancy;
   if (work_ua_vacancy_id) {
