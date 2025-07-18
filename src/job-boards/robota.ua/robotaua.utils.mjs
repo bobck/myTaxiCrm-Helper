@@ -1,3 +1,4 @@
+import { devLog } from '../../shared/shared.utils.mjs';
 import RobotaUaApiClient from './robotaua.api.mjs';
 
 export const robotaUaAPI = await RobotaUaApiClient.initialize({
@@ -84,3 +85,15 @@ export const deactivateRobotaUaVacancy = async ({ vacancyId }) => {
   });
   await robotaUaAPI.changeVacancyState({ vacancyId, state: 'Closed' });
 };
+export const changeRobotaUaVacancyPublicationType = async ({
+  robota_ua_vacancy_id,
+  robota_ua_publication_type,
+}) =>{
+  
+  devLog({robota_ua_vacancy_id,robota_ua_publication_type})
+  const resp= await robotaUaAPI.changeVacancyPublicationType({
+    vacancyId: robota_ua_vacancy_id,
+    publishType: robota_ua_publication_type,
+  });
+  
+}

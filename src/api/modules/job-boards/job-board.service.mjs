@@ -38,6 +38,7 @@ const addVacancy = async ({
   work_ua_vacancy_id,
   robota_ua_vacancy_id,
   work_ua_publication_type,
+  robota_ua_publication_type,
 }) => {
   const comments = [];
   const {
@@ -67,6 +68,7 @@ const addVacancy = async ({
   if (robotaUaVacancy) {
     // console.log({ robotaUaVacancy, message: 'found' });
     payload.robotaUaVacancy = robotaUaVacancy;
+    payload.robota_ua_publication_type = robota_ua_publication_type;
   }
 
   const { _comments: _comments2, isAnyVacancyCreated } =
@@ -91,6 +93,7 @@ const updateVacancy = async ({
   work_ua_vacancy_id,
   robota_ua_vacancy_id,
   work_ua_publication_type,
+  robota_ua_publication_type,
   bitrixVacancy,
   localWorkUaVacancy,
 }) => {
@@ -105,6 +108,7 @@ const updateVacancy = async ({
     robota_ua_vacancy_id,
     bitrix_vacancy_id,
   });
+
   comments.push(..._comments1);
   if (!isAnyVacancyFound) {
     comments.push('Жодної вакансії не знайдено');
@@ -115,7 +119,7 @@ const updateVacancy = async ({
   if (workUaVacancy) {
     if (
       Number(bitrixVacancy.work_ua_vacancy_id) !== Number(workUaVacancy.id) ||
-      work_ua_publication_type !== localWorkUaVacancy.publicationType
+      work_ua_publication_type !== workUaVacancy.publicationType
     ) {
       payload.workUaVacancy = workUaVacancy;
       payload.work_ua_publication_type = work_ua_publication_type;
@@ -124,12 +128,14 @@ const updateVacancy = async ({
   if (robotaUaVacancy) {
     if (
       Number(bitrixVacancy.robota_ua_vacancy_id) !==
-      Number(robotaUaVacancy.vacancyId)
+        Number(robotaUaVacancy.vacancyId) ||
+      robota_ua_publication_type !== robotaUaVacancy.publishType
     ) {
       payload.robotaUaVacancy = robotaUaVacancy;
     }
   }
-
+  devLog({ payload });
+  return;
   const { _comments: _comments2, isAnyVacancyUpdated } =
     await jobBoardRepo.updateVacancySynchronously({
       bitrix_vacancy_id,
@@ -154,6 +160,7 @@ export const add_update_vacancy_fork = async ({ query }) => {
     work_ua_vacancy_id,
     robota_ua_vacancy_id,
     work_ua_publication_type,
+    robota_ua_publication_type,
   } = query;
   const synchronizedVacancy = await jobBoardRepo.getExistingVacancy({
     bitrix_vacancy_id,
@@ -165,6 +172,7 @@ export const add_update_vacancy_fork = async ({ query }) => {
       work_ua_vacancy_id,
       robota_ua_vacancy_id,
       work_ua_publication_type,
+      robota_ua_publication_type,
     });
   }
   const { bitrixVacancy, localWorkUaVacancy } = synchronizedVacancy;
@@ -174,6 +182,7 @@ export const add_update_vacancy_fork = async ({ query }) => {
     work_ua_vacancy_id,
     robota_ua_vacancy_id,
     work_ua_publication_type,
+    robota_ua_publication_type,
     bitrixVacancy,
     localWorkUaVacancy,
   });
@@ -195,8 +204,6 @@ export const activateVacancy = async ({ query }) => {
       bitrix_vacancy_id,
     });
   devLog({ workUaVacancy, robotaUaVacancy });
-
-  
 
   if (robota_ua_vacancy_id) {
     const { state } = robotaUaVacancy;

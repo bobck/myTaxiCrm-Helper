@@ -44,6 +44,7 @@ export const addVacancySynchronously = async ({
   robotaUaVacancy,
   is_active,
   work_ua_publication_type,
+  robota_ua_publication_type,
 }) => {
   console.log({
     message: 'creating vacancy',
@@ -89,6 +90,7 @@ export const addVacancySynchronously = async ({
       await createRobotaUaSynchronizedVacancy({
         bitrix_vacancy_id,
         robotaUaVacancy,
+        robota_ua_publication_type,
       });
       payload.robota_ua_vacancy_id = robota_ua_vacancy_id;
       console.log('robota vacancy created');

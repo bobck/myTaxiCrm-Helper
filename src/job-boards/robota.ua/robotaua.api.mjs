@@ -97,6 +97,17 @@ class RobotaUaApiClient {
       this.handleApiError(error);
     }
   }
+  async changeVacancyPublicationType({ vacancyId, publishType }) {
+    try {
+      const response = await this.employerApi.post('/vacancy/add', {
+        vacancyId,
+        publishType,
+      });
+      return response.data;
+    } catch (error) {
+      this.handleApiError(error);
+    }
+  }
   async getCityList() {
     const response = await this.employerApi.get('/vacancy/cityList');
     return response.data;
@@ -116,8 +127,10 @@ class RobotaUaApiClient {
   }
   async changeVacancyState({ vacancyId, state }) {
     try {
-      const {data} = await this.employerApi.post(`/vacancy/state/${vacancyId}?state=${state}`);
-      devLog(data)
+      const { data } = await this.employerApi.post(
+        `/vacancy/state/${vacancyId}?state=${state}`
+      );
+      devLog(data);
     } catch (error) {
       this.handleApiError(error);
     }
