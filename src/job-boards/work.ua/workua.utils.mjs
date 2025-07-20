@@ -68,14 +68,15 @@ export const activateWorkUaVacancy = async ({ workUaVacancy }) => {
   console.log({
     message: `worku.ua vacancy ${workUaVacancy.work_ua_vacancy_id} is being activated...`,
   });
-  // return await workUaAPI.activateVacancy({
-  //   vacancy: workUaVacancy,
-  // });
+  return await workUaAPI.activateVacancy({
+    vacancy: workUaVacancy,
+  });
 };
 export const deactivateWorkUaVacancy = async ({ vacancyId }) => {
   console.log({
     message: `worku.ua vacancy ${vacancyId} is being deactivated...`,
   });
+  return await workUaAPI.deactivateVacancy({ vacancyId });
 };
 
 export const getWorkUaRegions = () => {
