@@ -349,7 +349,7 @@ export const cityTextRecruitToPayments = {
   },
   'Кривий Ріг': {
     id: '2902',
-    assigned_by_id: '201',
+    assigned_by_id: '181746',
   },
   Хмельницький: {
     id: '2904',
