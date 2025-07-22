@@ -448,7 +448,7 @@ export async function getActiveRefferalsProcentageReward({
                     referrer_position,
                     city_id
                 FROM referral 
-                WHERE date(expiry_after) >= '${date}'
+                WHERE date(procent_reward_expiry_after) >= '${date}'
                 AND referral_id is not null 
                 AND is_approved is TRUE
                 ${autoParkFilter}`;
