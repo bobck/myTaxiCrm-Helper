@@ -167,7 +167,8 @@ export const add_update_vacancy_fork = async ({ query }) => {
   const synchronizedVacancy = await jobBoardRepo.getExistingVacancy({
     bitrix_vacancy_id,
   });
-  if (!synchronizedVacancy) {
+  if (!synchronizedVacancy.bitrixVacancy) {
+    devLog('creating...');
     return await addVacancy({
       bitrix_vacancy_id,
       vacancy_name,
@@ -177,6 +178,7 @@ export const add_update_vacancy_fork = async ({ query }) => {
       robota_ua_publication_type,
     });
   }
+  devLog('updating...');
   const { bitrixVacancy, localWorkUaVacancy } = synchronizedVacancy;
   return await updateVacancy({
     bitrix_vacancy_id,
@@ -209,7 +211,10 @@ export const activateVacancy = async ({ query }) => {
       bitrix_vacancy_id,
     });
   devLog({ workUaVacancy, robotaUaVacancy });
-
+  const activityState = {
+    is_work_ua_vacancy_activated: false,
+    is_robota_ua_vacancy_activated: false,
+  };
   if (robota_ua_vacancy_id) {
     const { state } = robotaUaVacancy;
     const is_robota_ua_vacancy_active = state == 'Publicated';
@@ -240,20 +245,32 @@ export const activateVacancy = async ({ query }) => {
         await activateWorkUaVacancy({
           workUaVacancy: localWorkUaVacancy,
         });
+        activityState.is_work_ua_vacancy_activated = true;
       } else {
         is_active = false;
         const comments = [
-          `Не залишилося жодної публікації work.ua вибраного типу(${demandedPublications.id}). Виберіть іншу в стадії "оновити-додати до системи", та перенесіть назад до "Пошук"`,
-          `Залишки публікацій: Стандарт:${availablePublications[0].total}, СтандартПлюс:${availablePublications[1].total}, Гаряча:${availablePublications[2].total}, Анонімна:${availablePublications[3].total}`,
+          `Залишки публікацій work.ua: Стандарт:${availablePublications[0].total}, СтандартПлюс:${availablePublications[1].total}, Гаряча:${availablePublications[2].total}, Анонімна:${availablePublications[3].total}`,
+          `Не залишилося жодної публікації work.ua вибраного типу(${demandedPublications.id}). Виберіть інший тип публікації, перенесіть до стадії "Додати/Оновити вакансію у системі", та назад до "Пошук"`,
         ];
-        await assignManyCommentsToVacancyRequest({ comments });
+        await assignManyCommentsToVacancyRequest({
+          comments,
+          bitrix_vacancy_id,
+        });
+        return;
       }
     }
     await updateWorkUaVacancyActivityState({
       work_ua_vacancy_id,
       is_active,
     });
+    activityState.is_work_ua_vacancy_activated = true;
   }
+  console.log({ activityState });
+  await jobBoardRepo.changeVacancyActivityState({
+    bitrix_vacancy_id,
+    activityState,
+  });
+
   const comments = [`Вакансія успішно активована.`];
   await assignManyCommentsToVacancyRequest({ comments, bitrix_vacancy_id });
 };

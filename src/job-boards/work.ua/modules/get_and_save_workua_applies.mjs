@@ -79,6 +79,7 @@ export const getAndSaveWorkUaVacancyApplies = async () => {
       name,
       bitrix_vacancy_id,
       region,
+      last_apply_date,
     } = vacancy;
 
     devLog(`Processing Work.ua Vacancy ID: ${work_ua_vacancy_id}`);
@@ -98,7 +99,7 @@ export const getAndSaveWorkUaVacancyApplies = async () => {
       });
       continue;
     }
-    const { responses: currentApplies } = await getWorkUaVacancyResponses({
+    let { responses: currentApplies } = await getWorkUaVacancyResponses({
       vacancyId: work_ua_vacancy_id,
       last_id: last_apply_id,
     });
@@ -107,7 +108,27 @@ export const getAndSaveWorkUaVacancyApplies = async () => {
 
       continue;
     }
+    if (!last_apply_id) {
+      currentApplies= currentApplies.filter((apply) => {
+        const applyDate = new Date(apply.date);
+        const lastApplyDate = new Date(last_apply_date);
+        
 
+        // Check if both dates are valid
+        if (isNaN(applyDate.getTime()) || isNaN(lastApplyDate.getTime())) {
+          console.warn(
+            'Invalid date found in filtering:',
+            apply.date,
+            last_apply_date
+          );
+          return false; // Or handle as appropriate
+        }
+
+        return applyDate > lastApplyDate;
+      });
+      
+    }
+   
     devLog(
       `Fetched ${currentApplies.length} applies for vacancy ${work_ua_vacancy_id}. Last Apply ID: ${last_apply_id}`
     );

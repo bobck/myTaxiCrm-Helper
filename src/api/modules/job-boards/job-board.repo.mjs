@@ -1,4 +1,5 @@
 import {
+  changeBitrixVacancyActivityState,
   createBitrixVacancy,
   deleteBitrixVacancyById,
   getBitrixVacancyById,
@@ -248,4 +249,23 @@ export const deleteVacancySynchronously = async ({ bitrix_vacancy_id }) => {
     message: 'vacancy deleted',
     bitrix_vacancy_id,
   });
+};
+export const changeVacancyActivityState = async ({
+  bitrix_vacancy_id,
+  activityState,
+}) => {
+  console.log({
+    message: 'changing activity state',
+    bitrix_vacancy_id,
+    activityState,
+  });
+  if (
+    activityState.is_work_ua_vacancy_activated ||
+    activityState.is_robota_ua_vacancy_activated
+  ) {
+    await changeBitrixVacancyActivityState({
+      bitrix_vacancy_id,
+      is_active: true,
+    });
+  }
 };

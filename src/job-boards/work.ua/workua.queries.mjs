@@ -117,8 +117,8 @@ export const createWorkUaSynchronizedVacancy = async ({
   const jobTypeStringified = JSON.stringify(jobtype);
   const categoryStringified = JSON.stringify(category);
 
-  const sql = `INSERT INTO work_ua_pagination (bitrix_vacancy_id,work_ua_vacancy_id,is_active,region,publicationType,experience,jobtype,category,description,name) VALUES (?,?,?,?,?,?,?,?,?,?)`;
-
+  const sql = `INSERT INTO work_ua_pagination (bitrix_vacancy_id,work_ua_vacancy_id,is_active,region,publicationType,experience,jobtype,category,description,name,last_apply_date) VALUES (?,?,?,?,?,?,?,?,?,?,?)`;
+  const last_apply_date = new Date().toISOString();
   await db.run(
     sql,
     bitrix_vacancy_id,
@@ -130,7 +130,8 @@ export const createWorkUaSynchronizedVacancy = async ({
     jobTypeStringified,
     categoryStringified,
     description,
-    name
+    name,
+    last_apply_date
   );
 };
 export const updateWorkUaSynchronizedVacancy = async ({
