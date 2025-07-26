@@ -180,7 +180,18 @@ class RobotaUaApiClient {
   }
   async customGet({ url }) {
     try {
+      console.log('querying ...', url);
       const response = await this.employerApi.get(url);
+      return response.data;
+    } catch (error) {
+      this.handleApiError(error);
+    }
+  }
+  async getTicketRest({ ticketType }) {
+    try {
+      const response = await this.employerApi.get(
+        `/api/service/tickets/${ticketType}`
+      );
       return response.data;
     } catch (error) {
       this.handleApiError(error);

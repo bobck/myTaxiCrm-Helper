@@ -5,6 +5,7 @@ import {
   changeRobotaUaVacancyPublicationType,
   deactivateRobotaUaVacancy,
   getRobotaUaPublicationLeftOvers,
+  getRobotaUaTicketRest,
   robotaUaCustomGet,
 } from '../../../job-boards/robota.ua/robotaua.utils.mjs';
 import {
@@ -312,10 +313,39 @@ export const deactivateVacancy = async ({ query }) => {
 };
 
 export const dev = async ({ query }) => {
-  devLog(query);
-
-  devLog(await getWorkUaAvailablePublications());
-  return;
+  const resps = [];
+  const ticketTypes = [
+    'All',
+    'Business',
+    'Optimum',
+    'Professional',
+    'Anonym',
+    'Hot',
+  ];
+  for (const ticketType of ticketTypes) {
+    try {
+      resps.push(await getRobotaUaTicketRest({ ticketType }));
+    } catch (e) {
+      console.log({ ticketType }, 'failed');
+    }
+  }
+  return resps;
+  // devLog(query);
+  // for (let i = 1; i < 2; i++) {
+  //   try{
+  //     const a = await robotaUaCustomGet({ url: `/api/service/list/${i}` });
+  //     // devLog({ i }, a);
+  //     resps.push(a)
+  //     for (const service of a) {
+  //       devLog(service)
+  //     }
+  //   }
+  //   catch(e){
+  //     // devLog(e.status)
+  //   }
+  // }
+  // // devLog(await getWorkUaAvailablePublications());
+  // return resps;
   const devRobotaUavacancy = {
     vacancyId: 10646940,
     notebookId: 7973901,

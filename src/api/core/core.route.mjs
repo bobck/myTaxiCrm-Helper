@@ -6,9 +6,11 @@ import referralRouter from '../modules/referrals/referrals.route.mjs';
 import jobBoardRouter from '../modules/job-boards/job-board.route.mjs';
 
 import boltRouter from '../modules/bolt/bolt.route.mjs';
+import { loggerMiddleware } from './middleware/core.middlewares.mjs';
 
 const coreRouter = express.Router();
 
+coreRouter.use(loggerMiddleware);
 coreRouter.use('/bolt', boltRouter);
 
 coreRouter.use('/query', queryRouter);

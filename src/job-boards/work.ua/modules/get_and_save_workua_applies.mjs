@@ -109,10 +109,9 @@ export const getAndSaveWorkUaVacancyApplies = async () => {
       continue;
     }
     if (!last_apply_id) {
-      currentApplies= currentApplies.filter((apply) => {
+      currentApplies = currentApplies.filter((apply) => {
         const applyDate = new Date(apply.date);
         const lastApplyDate = new Date(last_apply_date);
-        
 
         // Check if both dates are valid
         if (isNaN(applyDate.getTime()) || isNaN(lastApplyDate.getTime())) {
@@ -126,9 +125,8 @@ export const getAndSaveWorkUaVacancyApplies = async () => {
 
         return applyDate > lastApplyDate;
       });
-      
     }
-   
+
     devLog(
       `Fetched ${currentApplies.length} applies for vacancy ${work_ua_vacancy_id}. Last Apply ID: ${last_apply_id}`
     );

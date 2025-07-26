@@ -104,4 +104,6 @@ export const getRobotaUaPublicationLeftOvers = async ({ page }) => {
 };
 
 export const robotaUaCustomGet = async ({ url }) =>
-  robotaUaAPI.customGet({ url });
+  await robotaUaAPI.customGet({ url });
+export const getRobotaUaTicketRest = async ({ ticketType }) =>
+  await robotaUaAPI.getTicketRest({ ticketType });
