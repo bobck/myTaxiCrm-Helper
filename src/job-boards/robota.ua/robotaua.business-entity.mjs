@@ -21,6 +21,7 @@ export function processApiResponse(response) {
     educations,
     contacts,
     bitrix_city_id,
+    assigned_by_id,
     ...rest
   } = response;
 
@@ -98,6 +99,7 @@ export function processApiResponse(response) {
     educationDetails: educationString,
     educationYears: educations?.[0]?.yearOfGraduation?.toString(),
     hrCity: bitrix_city_id,
+    assigned_by_id
   };
 
   return processedData;

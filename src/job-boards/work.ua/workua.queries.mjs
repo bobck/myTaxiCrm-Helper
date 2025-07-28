@@ -93,9 +93,16 @@ export const updateWorkUaVacancyPublicationType = async ({
   await db.run(sql, publicationType, work_ua_vacancy_id);
 };
 export async function getAllActiveWorkUaVacancies() {
-  const sql = `SELECT wp.name, wp.work_ua_vacancy_id, wp.last_apply_id, wp.last_apply_date, wp.region, wp.bitrix_vacancy_id 
-              from work_ua_pagination wp join bitrix_vacancies_to_job_board_vacancies bc on wp.bitrix_vacancy_id = bc.bitrix_vacancy_id
-              where wp.is_active = TRUE and bc.is_active = TRUE`;
+  const sql = /*sql*/`
+            SELECT wp.name, wp.work_ua_vacancy_id, wp.last_apply_id, wp.last_apply_date, wp.region, wp.bitrix_vacancy_id, bc.assigned_by_id 
+              from work_ua_pagination wp 
+              join bitrix_vacancies_to_job_board_vacancies bc 
+                  on wp.bitrix_vacancy_id = bc.bitrix_vacancy_id
+              where wp.is_active = TRUE 
+                  and bc.is_active = TRUE     
+                  and wp.is_deleted = FALSE 
+                  and bc.is_deleted = FALSE;
+                  `;
   const activeVacancies = await db.all(sql);
   return { activeVacancies };
 }

@@ -129,9 +129,15 @@ export const updateRobotaUaSynchronizedVacancy = async ({
   );
 };
 export const getAllActiveRobotaUaVacancies = async () => {
-  const sql = /*sql*/ `SELECT rp.*
-              from robota_ua_pagination rp join bitrix_vacancies_to_job_board_vacancies bc on rp.bitrix_vacancy_id = bc.bitrix_vacancy_id
-              where rp.is_active = TRUE and bc.is_active = TRUE and rp.is_deleted = FALSE and bc.is_deleted = FALSE`;
+  const sql = /*sql*/ `
+            SELECT rp.*, bc.assigned_by_id 
+              from robota_ua_pagination rp 
+                join bitrix_vacancies_to_job_board_vacancies bc 
+                on rp.bitrix_vacancy_id = bc.bitrix_vacancy_id
+              where rp.is_active = TRUE 
+                and bc.is_active = TRUE 
+                and rp.is_deleted = FALSE 
+                and bc.is_deleted = FALSE`;
   const activeVacancies = await db.all(sql);
   return { activeVacancies };
 };

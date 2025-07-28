@@ -23,7 +23,7 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
     date: new Date(),
     activeVacancies: activeVacancies.length,
   });
-
+ 
   for (const [index, vacancy] of activeVacancies.entries()) {
     devLog(vacancy);
     const {
@@ -32,6 +32,7 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
       last_apply_date,
       region,
       name,
+      assigned_by_id,
     } = vacancy;
     const { is_active } = await checkIfRobotaUaVacancyStaysActive({
       robota_ua_vacancy_id,
@@ -61,13 +62,16 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
 
     const applies = assignPayloadToVacancyApply({
       applies: _applies,
-      title: `${name} ${robota_ua_city.name}`,
-      bitrix_city_id,
-      bitrix_vacancy_id,
+      payload:{
+        title: `${name} ${robota_ua_city.name}`,
+        bitrix_city_id,
+        bitrix_vacancy_id,
+        assigned_by_id,
+      }
     });
-
     const processedApplies = applies.map(processApiResponse);
-
+    devLog(processedApplies);
+    return
     await createVacancyResponseCards({ dtos: processedApplies });
     devLog(
       applies.map((apply) => {

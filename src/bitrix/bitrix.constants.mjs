@@ -512,6 +512,7 @@ export const jobBoardApplymentParametersToBitrixKeys = {
   salaryExpectaions: 'fields[ufCrm56_1739363608]',
   positionExpectaions: 'fields[ufCrm56_1739363418]',
   sourceOfApplyment: 'fields[ufCrm56_1739198502]',
+  assigned_by_id: 'fields[ASSIGNED_BY_ID]',
 };
 
 // // --- Placeholder for jobBoardApplymentParametersToBitrixKeys ---
