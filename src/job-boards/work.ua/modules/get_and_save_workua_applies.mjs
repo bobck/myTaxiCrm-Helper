@@ -59,12 +59,14 @@ const checkIfWorkUaVacancyStaysActive = async ({
 export const getAndSaveWorkUaVacancyApplies = async () => {
   const { activeVacancies: trackedActiveWorkUaVacancies } =
     await getAllActiveWorkUaVacancies();
-
+  
   console.log({
     module: 'getAndSaveWorkUaVacancyApplies',
     date: new Date(),
     activeWorkUaVacancies: trackedActiveWorkUaVacancies.length,
   });
+  devLog(trackedActiveWorkUaVacancies);
+  return
   if (trackedActiveWorkUaVacancies.length === 0) {
     return;
   }
