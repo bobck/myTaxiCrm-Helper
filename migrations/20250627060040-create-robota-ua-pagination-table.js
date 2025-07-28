@@ -29,8 +29,7 @@ exports.up = function (db, callback) {
     contactEMail TEXT,
     endingType TEXT,
     robota_ua_publication_type TEXT,
-    is_deleted BOOLEAN DEFAULT FALSE,
-    PRIMARY KEY (robota_ua_vacancy_id)
+    is_deleted BOOLEAN DEFAULT FALSE
     );`;
   db.runSql(sql, callback);
 };

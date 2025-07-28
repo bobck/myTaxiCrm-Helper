@@ -34,11 +34,11 @@ export async function updateRobotaUaVacancyActivityState({
 }
 
 export async function getAnyRobotaUaVacancyById({ robota_ua_vacancy_id }) {
-  const sql = /*sql*/ `SELECT * from robota_ua_pagination where robota_ua_vacancy_id = ?`;
+  const sql = /*sql*/ `SELECT * from robota_ua_pagination where robota_ua_vacancy_id = ? and is_deleted = FALSE`;
   return await db.get(sql, robota_ua_vacancy_id);
 }
 export async function getAnyRobotaUaVacancyByBitrixId({ bitrix_vacancy_id }) {
-  const sql = /*sql*/ `SELECT * from robota_ua_pagination where bitrix_vacancy_id = ?`;
+  const sql = /*sql*/ `SELECT * from robota_ua_pagination where bitrix_vacancy_id = ? and is_deleted = FALSE`;
   return await db.get(sql, bitrix_vacancy_id);
 }
 export const createRobotaUaSynchronizedVacancy = async ({
@@ -140,9 +140,9 @@ export const getLocalRobotaUaVacancy = async ({ bitrix_vacancy_id }) => {
   const sql = /*sql*/ `SELECT * from robota_ua_pagination where bitrix_vacancy_id = ? and is_deleted = FALSE`;
   return await db.get(sql, bitrix_vacancy_id);
 };
-export const deleteRobotaUaSynchronizedVacancy = async ({
+export const markRobotaUaSynchronizedVacancyAsDeleted = async ({
   bitrix_vacancy_id,
 }) => {
-  const sql = /*sql*/ `DELETE FROM robota_ua_pagination WHERE bitrix_vacancy_id = ? and is_deleted = FALSE`;
+  const sql = /*sql*/ `UPDATE robota_ua_pagination SET is_deleted = TRUE WHERE bitrix_vacancy_id = ?`;
   await db.run(sql, bitrix_vacancy_id);
 };

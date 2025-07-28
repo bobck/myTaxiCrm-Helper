@@ -256,7 +256,8 @@ export const activateVacancy = async ({ query }) => {
         is_active = false;
         const comments = [
           `Залишки публікацій work.ua: Стандарт:${availablePublications[0].total}, СтандартПлюс:${availablePublications[1].total}, Гаряча:${availablePublications[2].total}, Анонімна:${availablePublications[3].total}`,
-          `Не залишилося жодної публікації work.ua вибраного типу(${demandedPublications.id}). Виберіть інший тип публікації, перенесіть до стадії "Додати/Оновити вакансію у системі", та назад до "Пошук"`,
+          `Не залишилося жодної публікації work.ua вибраного типу(${demandedPublications.id}).`,
+        // `Не залишилося жодної публікації work.ua вибраного типу(${demandedPublications.id}). Виберіть інший тип публікації, перенесіть до стадії "Додати/Оновити вакансію у системі", та назад до "Пошук"`
         ];
         await assignManyCommentsToVacancyRequest({
           comments,
@@ -312,7 +313,7 @@ export const deactivateVacancy = async ({ query }) => {
       await deactivateWorkUaVacancy({ vacancyId: work_ua_vacancy_id });
     }
   }
-  await jobBoardRepo.deleteVacancySynchronously({ bitrix_vacancy_id });
+  await jobBoardRepo.markVacancyAsDeletedSynchronously({ bitrix_vacancy_id });
   const comments = [`Вакансія успішно деактивована.`];
   await assignManyCommentsToVacancyRequest({ comments, bitrix_vacancy_id });
 };

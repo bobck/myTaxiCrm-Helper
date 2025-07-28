@@ -51,7 +51,8 @@ export async function getAnyWorkUaVacancyById({ work_ua_vacancy_id }) {
                 FROM
                     work_ua_pagination
                 WHERE
-                    work_ua_vacancy_id = ?`;
+                    work_ua_vacancy_id = ?
+                    AND is_deleted = FALSE`;
   return await db.get(sql, work_ua_vacancy_id);
 }
 export async function getAnyWorkUaVacancyByBitrixId({ bitrix_vacancy_id }) {
@@ -60,7 +61,8 @@ export async function getAnyWorkUaVacancyByBitrixId({ bitrix_vacancy_id }) {
                 FROM
                     work_ua_pagination
                 WHERE
-                    bitrix_vacancy_id = ?`;
+                    bitrix_vacancy_id = ?
+                    AND is_deleted = FALSE`;
   return await db.get(sql, bitrix_vacancy_id);
 }
 /**
@@ -171,9 +173,9 @@ export const updateWorkUaSynchronizedVacancy = async ({
     bitrix_vacancy_id
   );
 };
-export const deleteWorkUaSynchronizedVacancy = async ({
+export const markWorkUaSynchronizedVacancyAsDeleted = async ({
   bitrix_vacancy_id,
 }) => {
-  const sql = `DELETE FROM work_ua_pagination WHERE bitrix_vacancy_id = ?`;
+  const sql = /*sql*/ `UPDATE work_ua_pagination SET is_deleted = TRUE WHERE bitrix_vacancy_id = ?`;
   await db.run(sql, bitrix_vacancy_id);
 };

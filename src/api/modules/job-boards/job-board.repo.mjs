@@ -1,20 +1,20 @@
 import {
   changeBitrixVacancyActivityState,
   createBitrixVacancy,
-  deleteBitrixVacancyById,
+  markBitrixVacancyAsDeleted,
   getBitrixVacancyById,
   updateBitrixVacancy,
 } from '../../../job-boards/job-board.queries.mjs';
 import {
   createRobotaUaSynchronizedVacancy,
-  deleteRobotaUaSynchronizedVacancy,
+  markRobotaUaSynchronizedVacancyAsDeleted,
   getAnyRobotaUaVacancyByBitrixId,
   getAnyRobotaUaVacancyById,
   updateRobotaUaSynchronizedVacancy,
 } from '../../../job-boards/robota.ua/robotaua.queries.mjs';
 import {
   createWorkUaSynchronizedVacancy,
-  deleteWorkUaSynchronizedVacancy,
+  markWorkUaSynchronizedVacancyAsDeleted,
   getAnyWorkUaVacancyByBitrixId,
   getAnyWorkUaVacancyById,
   updateWorkUaSynchronizedVacancy,
@@ -242,14 +242,14 @@ export const getVacancySynchronously = async ({ bitrix_vacancy_id }) => {
   });
   return { bitrixVacancy, robotaUaVacancy, workUaVacancy };
 };
-export const deleteVacancySynchronously = async ({ bitrix_vacancy_id }) => {
+export const markVacancyAsDeletedSynchronously = async ({ bitrix_vacancy_id }) => {
   devLog({
     message: 'deleting vacancy',
     bitrix_vacancy_id,
   });
-  await deleteRobotaUaSynchronizedVacancy({ bitrix_vacancy_id });
-  await deleteWorkUaSynchronizedVacancy({ bitrix_vacancy_id });
-  await deleteBitrixVacancyById({ bitrix_vacancy_id });
+  await markRobotaUaSynchronizedVacancyAsDeleted({ bitrix_vacancy_id });
+  await markWorkUaSynchronizedVacancyAsDeleted({ bitrix_vacancy_id });
+  await markBitrixVacancyAsDeleted({ bitrix_vacancy_id });
   devLog({
     message: 'vacancy deleted',
     bitrix_vacancy_id,
