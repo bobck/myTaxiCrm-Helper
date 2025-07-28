@@ -832,7 +832,9 @@ export async function getBoltDriverById({ driver_id }) {
 export async function getALLBoltDriversToBan() {
   const sql = /*sql*/ `
       SELECT driver_id, bolt_id, bitrix_deal_id, phone, is_first_letter_approved, is_second_letter_approved
-      FROM bolt_drivers_to_ban;
+      FROM bolt_drivers_to_ban
+      WHERE is_second_letter_approved = FALSE;
+      ;
   `;
   return db.all(sql);
 }
@@ -840,3 +842,13 @@ export const markReferralAsClosed = ({ referral_id }) => {
   const sql = `UPDATE referral SET is_closed = TRUE WHERE referral_id = ?`;
   return db.run(sql, [referral_id]);
 };
+export async function markManyDriversAsSent({ drivers }) {
+  let ids = drivers.reduce((acc, curr) => {
+    return (acc += `'${curr.driver_id}',`);
+  }, '');
+
+  ids = String(ids).slice(0, ids.length - 1);
+  const sql = /*sql*/ `UPDATE bolt_drivers_to_ban SET is_second_letter_approved = TRUE WHERE driver_id in (${ids});`;
+
+  await db.run(sql);
+}
