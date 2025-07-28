@@ -42,8 +42,9 @@ const addVacancy = async ({
   vacancy_name,
   work_ua_vacancy_id,
   robota_ua_vacancy_id,
-  work_ua_publication_type,
-  robota_ua_publication_type,
+  assigned_by_id,
+  // work_ua_publication_type,
+  // robota_ua_publication_type,
 }) => {
   const comments = [];
   const {
@@ -64,16 +65,16 @@ const addVacancy = async ({
     await assignManyCommentsToVacancyRequest({ comments, bitrix_vacancy_id });
     return;
   }
-  const payload = {};
+  const payload = { assigned_by_id };
   if (workUaVacancy) {
     // console.log({ workUaVacancy, message: 'found' });
     payload.workUaVacancy = workUaVacancy;
-    payload.work_ua_publication_type = work_ua_publication_type;
+    // payload.work_ua_publication_type = work_ua_publication_type;
   }
   if (robotaUaVacancy) {
     // console.log({ robotaUaVacancy, message: 'found' });
     payload.robotaUaVacancy = robotaUaVacancy;
-    payload.robota_ua_publication_type = robota_ua_publication_type;
+    // payload.robota_ua_publication_type = robota_ua_publication_type;
   }
 
   const { _comments: _comments2, isAnyVacancyCreated } =
@@ -97,8 +98,9 @@ const updateVacancy = async ({
   vacancy_name,
   work_ua_vacancy_id,
   robota_ua_vacancy_id,
-  work_ua_publication_type,
-  robota_ua_publication_type,
+  assigned_by_id,
+  // work_ua_publication_type,
+  // robota_ua_publication_type,
   bitrixVacancy,
 }) => {
   const comments = [];
@@ -119,24 +121,24 @@ const updateVacancy = async ({
     await assignManyCommentsToVacancyRequest({ comments });
     return;
   }
-  const payload = { vacancy: bitrixVacancy };
+  const payload = { bitrixVacancy, assigned_by_id };
   if (workUaVacancy) {
     if (
-      Number(bitrixVacancy.work_ua_vacancy_id) !== Number(workUaVacancy.id) ||
-      work_ua_publication_type !== workUaVacancy.publicationType
+      Number(bitrixVacancy.work_ua_vacancy_id) !== Number(workUaVacancy.id)
+      // || work_ua_publication_type !== workUaVacancy.publicationType
     ) {
       payload.workUaVacancy = workUaVacancy;
-      payload.work_ua_publication_type = work_ua_publication_type;
+      // payload.work_ua_publication_type = work_ua_publication_type;
     }
   }
   if (robotaUaVacancy) {
     if (
       Number(bitrixVacancy.robota_ua_vacancy_id) !==
-        Number(robotaUaVacancy.vacancyId) ||
-      robota_ua_publication_type !== robotaUaVacancy.publishType
+      Number(robotaUaVacancy.vacancyId)
+      // ||robota_ua_publication_type !== robotaUaVacancy.publishType
     ) {
       payload.robotaUaVacancy = robotaUaVacancy;
-      payload.robota_ua_publication_type = robota_ua_publication_type;
+      // payload.robota_ua_publication_type = robota_ua_publication_type;
     }
   }
   const { _comments: _comments2, isAnyVacancyUpdated } =
@@ -162,8 +164,9 @@ export const add_update_vacancy_fork = async ({ query }) => {
     vacancy_name,
     work_ua_vacancy_id,
     robota_ua_vacancy_id,
-    work_ua_publication_type,
-    robota_ua_publication_type,
+    assigned_by_id,
+    // work_ua_publication_type,
+    // robota_ua_publication_type,
   } = query;
   const synchronizedVacancy = await jobBoardRepo.getExistingVacancy({
     bitrix_vacancy_id,
@@ -175,8 +178,9 @@ export const add_update_vacancy_fork = async ({ query }) => {
       vacancy_name,
       work_ua_vacancy_id,
       robota_ua_vacancy_id,
-      work_ua_publication_type,
-      robota_ua_publication_type,
+      assigned_by_id,
+      // work_ua_publication_type,
+      // robota_ua_publication_type,
     });
   }
   devLog('updating...');
@@ -186,8 +190,9 @@ export const add_update_vacancy_fork = async ({ query }) => {
     vacancy_name,
     work_ua_vacancy_id,
     robota_ua_vacancy_id,
-    work_ua_publication_type,
-    robota_ua_publication_type,
+    assigned_by_id,
+    // work_ua_publication_type,
+    // robota_ua_publication_type,
     bitrixVacancy,
     localWorkUaVacancy,
   });

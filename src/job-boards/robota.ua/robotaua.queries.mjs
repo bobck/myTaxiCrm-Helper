@@ -44,7 +44,7 @@ export async function getAnyRobotaUaVacancyByBitrixId({ bitrix_vacancy_id }) {
 export const createRobotaUaSynchronizedVacancy = async ({
   bitrix_vacancy_id,
   robotaUaVacancy,
-  robota_ua_publication_type,
+  // robota_ua_publication_type,
 }) => {
   const {
     vacancyId: robota_ua_vacancy_id,
@@ -68,7 +68,8 @@ export const createRobotaUaSynchronizedVacancy = async ({
     is_active,
     region,
     name,
-    robota_ua_publication_type,
+    // robota_ua_publication_type,
+    publishType,
     description,
     salary,
     sendResumeType,
@@ -89,7 +90,7 @@ export const createRobotaUaSynchronizedVacancy = async ({
 export const updateRobotaUaSynchronizedVacancy = async ({
   bitrix_vacancy_id,
   robotaUaVacancy,
-  robota_ua_publication_type,
+  // robota_ua_publication_type,
 }) => {
   const {
     vacancyId: robota_ua_vacancy_id,
@@ -116,7 +117,8 @@ export const updateRobotaUaSynchronizedVacancy = async ({
     is_active,
     region,
     name,
-    robota_ua_publication_type,
+    // robota_ua_publication_type,
+    publishType,
     desctiprion,
     salary,
     sendResumeType,
@@ -129,18 +131,18 @@ export const updateRobotaUaSynchronizedVacancy = async ({
 export const getAllActiveRobotaUaVacancies = async () => {
   const sql = /*sql*/ `SELECT rp.*
               from robota_ua_pagination rp join bitrix_vacancies_to_job_board_vacancies bc on rp.bitrix_vacancy_id = bc.bitrix_vacancy_id
-              where rp.is_active = TRUE and bc.is_active = TRUE`;
+              where rp.is_active = TRUE and bc.is_active = TRUE and rp.is_deleted = FALSE and bc.is_deleted = FALSE`;
   const activeVacancies = await db.all(sql);
   return { activeVacancies };
 };
 
 export const getLocalRobotaUaVacancy = async ({ bitrix_vacancy_id }) => {
-  const sql = /*sql*/ `SELECT * from robota_ua_pagination where bitrix_vacancy_id = ?`;
+  const sql = /*sql*/ `SELECT * from robota_ua_pagination where bitrix_vacancy_id = ? and is_deleted = FALSE`;
   return await db.get(sql, bitrix_vacancy_id);
 };
 export const deleteRobotaUaSynchronizedVacancy = async ({
   bitrix_vacancy_id,
 }) => {
-  const sql = `DELETE FROM robota_ua_pagination WHERE bitrix_vacancy_id = ?`;
+  const sql = /*sql*/ `DELETE FROM robota_ua_pagination WHERE bitrix_vacancy_id = ? and is_deleted = FALSE`;
   await db.run(sql, bitrix_vacancy_id);
 };

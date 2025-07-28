@@ -17,6 +17,7 @@ export const createBitrixVacancy = async ({
   work_ua_vacancy_id,
   robota_ua_vacancy_id,
   is_active,
+  assigned_by_id,
 }) => {
   console.log({
     bitrix_vacancy_id,
@@ -24,6 +25,7 @@ export const createBitrixVacancy = async ({
     work_ua_vacancy_id,
     robota_ua_vacancy_id,
     is_active,
+    assigned_by_id,
   });
   let columns = 'bitrix_vacancy_id,vacancy_name';
   let values = `${bitrix_vacancy_id},'${vacancy_name}'`;
@@ -39,6 +41,10 @@ export const createBitrixVacancy = async ({
     columns += ',is_active';
     values += `,${is_active}`;
   }
+  if (assigned_by_id) {
+    columns += ',assigned_by_id';
+    values += `,${assigned_by_id}`;
+  }
 
   const sql = `INSERT INTO bitrix_vacancies_to_job_board_vacancies (${columns}) VALUES (${values})`;
   await db.run(sql);
@@ -48,6 +54,7 @@ export const updateBitrixVacancy = async ({
   vacancy_name,
   work_ua_vacancy_id,
   robota_ua_vacancy_id,
+  assigned_by_id,
 }) => {
   let toSet = `vacancy_name = '${vacancy_name}'`;
   if (robota_ua_vacancy_id) {
@@ -56,10 +63,14 @@ export const updateBitrixVacancy = async ({
   if (work_ua_vacancy_id) {
     toSet += `,work_ua_vacancy_id = ${work_ua_vacancy_id}`;
   }
+  if (assigned_by_id) {
+    toSet += `,assigned_by_id = ${assigned_by_id}`;
+  }
 
   const sql = /*sql*/ `UPDATE bitrix_vacancies_to_job_board_vacancies 
     SET ${toSet}
     WHERE bitrix_vacancy_id = ${bitrix_vacancy_id}`;
+  console.log(sql);
   await db.run(sql);
 };
 export const changeBitrixVacancyActivityState = async ({

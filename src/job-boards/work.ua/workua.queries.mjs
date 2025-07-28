@@ -100,7 +100,7 @@ export async function getAllActiveWorkUaVacancies() {
 export const createWorkUaSynchronizedVacancy = async ({
   bitrix_vacancy_id,
   workUaVacancy,
-  work_ua_publication_type,
+  // work_ua_publication_type,
 }) => {
   const {
     id: work_ua_vacancy_id,
@@ -125,7 +125,8 @@ export const createWorkUaSynchronizedVacancy = async ({
     work_ua_vacancy_id,
     is_active,
     region,
-    work_ua_publication_type || publicationType,
+    // work_ua_publication_type || publicationType,
+    publicationType,
     experience,
     jobTypeStringified,
     categoryStringified,
@@ -137,7 +138,7 @@ export const createWorkUaSynchronizedVacancy = async ({
 export const updateWorkUaSynchronizedVacancy = async ({
   bitrix_vacancy_id,
   workUaVacancy,
-  work_ua_publication_type,
+  // work_ua_publication_type,
 }) => {
   const {
     id: work_ua_vacancy_id,
@@ -160,7 +161,8 @@ export const updateWorkUaSynchronizedVacancy = async ({
     work_ua_vacancy_id,
     is_active,
     region,
-    work_ua_publication_type || publicationType,
+    // work_ua_publication_type || publicationType,
+    publicationType,
     experience,
     jobTypeStringified,
     categoryStringified,

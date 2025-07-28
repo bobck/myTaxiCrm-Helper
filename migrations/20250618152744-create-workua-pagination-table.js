@@ -28,6 +28,7 @@ exports.up = function (db, callback) {
     jobtype TEXT,
     category TEXT,
     name TEXT,
+    is_deleted BOOLEAN DEFAULT FALSE,
     PRIMARY KEY (work_ua_vacancy_id)
     );`;
   db.runSql(sql, callback);

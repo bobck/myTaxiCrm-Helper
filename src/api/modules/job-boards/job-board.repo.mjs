@@ -48,8 +48,9 @@ export const addVacancySynchronously = async ({
   workUaVacancy,
   robotaUaVacancy,
   is_active,
-  work_ua_publication_type,
-  robota_ua_publication_type,
+  assigned_by_id,
+  // work_ua_publication_type,
+  // robota_ua_publication_type,
 }) => {
   console.log({
     message: 'creating vacancy',
@@ -57,7 +58,7 @@ export const addVacancySynchronously = async ({
   });
   const _comments = [];
   let commentsLimit = 0;
-  const payload = {};
+  const payload = { assigned_by_id };
   if (workUaVacancy) {
     const { id: work_ua_vacancy_id } = workUaVacancy;
     const existingWorkUaVacancy = await getAnyWorkUaVacancyById({
@@ -73,13 +74,12 @@ export const addVacancySynchronously = async ({
       await createWorkUaSynchronizedVacancy({
         bitrix_vacancy_id,
         workUaVacancy,
-        work_ua_publication_type,
+        // work_ua_publication_type,
       });
       payload.work_ua_vacancy_id = work_ua_vacancy_id;
       console.log('work vacancy created');
     }
   }
-  console.log({ payload });
 
   if (robotaUaVacancy) {
     const { vacancyId: robota_ua_vacancy_id } = robotaUaVacancy;
@@ -95,7 +95,7 @@ export const addVacancySynchronously = async ({
       await createRobotaUaSynchronizedVacancy({
         bitrix_vacancy_id,
         robotaUaVacancy,
-        robota_ua_publication_type,
+        // robota_ua_publication_type,
       });
       payload.robota_ua_vacancy_id = robota_ua_vacancy_id;
       console.log('robota vacancy created');
@@ -105,7 +105,6 @@ export const addVacancySynchronously = async ({
   if (commentsLimit <= _comments.length) {
     return { _comments, isAnyVacancyCreated: false };
   }
-  console.log({ payload });
   await createBitrixVacancy({
     bitrix_vacancy_id,
     vacancy_name,
@@ -121,8 +120,10 @@ export const updateVacancySynchronously = async ({
   is_active,
   workUaVacancy,
   robotaUaVacancy,
-  work_ua_publication_type,
-  robota_ua_publication_type,
+  bitrixVacancy,
+  assigned_by_id,
+  // work_ua_publication_type,
+  // robota_ua_publication_type,
 }) => {
   console.log({
     message: 'updating vacancy',
@@ -145,7 +146,7 @@ export const updateVacancySynchronously = async ({
         await updateRobotaUaSynchronizedVacancy({
           bitrix_vacancy_id,
           robotaUaVacancy,
-          robota_ua_publication_type,
+          // robota_ua_publication_type,
         });
         payload.robota_ua_vacancy_id = robota_ua_vacancy_id;
         console.log('robota vacancy updated');
@@ -183,7 +184,7 @@ export const updateVacancySynchronously = async ({
         await updateWorkUaSynchronizedVacancy({
           bitrix_vacancy_id,
           workUaVacancy,
-          work_ua_publication_type,
+          // work_ua_publication_type,
         });
         payload.work_ua_vacancy_id = work_ua_vacancy_id;
       } else {
@@ -198,17 +199,21 @@ export const updateVacancySynchronously = async ({
         await updateWorkUaSynchronizedVacancy({
           bitrix_vacancy_id,
           workUaVacancy,
-          work_ua_publication_type,
+          // work_ua_publication_type,
         });
       } else {
         await createWorkUaSynchronizedVacancy({
           bitrix_vacancy_id,
           workUaVacancy,
-          work_ua_publication_type,
+          // work_ua_publication_type,
         });
       }
       payload.work_ua_vacancy_id = work_ua_vacancy_id;
     }
+  }
+  if (assigned_by_id && bitrixVacancy.assigned_by_id !== assigned_by_id) {
+    commentsLimit++;
+    payload.assigned_by_id = assigned_by_id;
   }
   if (_comments.length >= commentsLimit) {
     console.log('no vacancy updated');

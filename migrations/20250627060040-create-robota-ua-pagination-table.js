@@ -25,10 +25,11 @@ exports.up = function (db, callback) {
     description TEXT,
     salary INTEGER,
     designId INTEGER,
-    sendResumeType TEXT,desctiprion
+    sendResumeType TEXT,
     contactEMail TEXT,
     endingType TEXT,
     robota_ua_publication_type TEXT,
+    is_deleted BOOLEAN DEFAULT FALSE,
     PRIMARY KEY (robota_ua_vacancy_id)
     );`;
   db.runSql(sql, callback);
