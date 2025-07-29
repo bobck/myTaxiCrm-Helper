@@ -337,7 +337,7 @@ export const cityTextRecruitToPayments = {
   },
   Чернігів: {
     id: '2894',
-    assigned_by_id: '50432',
+    assigned_by_id: '197876',
   },
   Полтава: {
     id: '2896',
