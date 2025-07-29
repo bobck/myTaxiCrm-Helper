@@ -70,11 +70,18 @@ export function processApiResponse(response) {
       ? null
       : new Date(rest.birthDate).toISOString().split('T')[0];
 
+    let cvURL;
+    if(response.resumeType==='AttachedFile'){
+      cvURL = `https://robota.ua/my/vacancies/${vacancyId}/applies?id=${id}-attach`;
+    }
+    else {
+      cvURL = `https://robota.ua/my/vacancies/${vacancyId}/applies?id=${id}-prof`;
+    }
   const processedData = {
     id,
     title: `НЕ ЧІПАТИ, ВІДГУК СТВОРЕННИЙ ПІД ЧАС РОЗРОБКИ ${title}`,
     fullName: rest.name,
-    cvURL: `https://robota.ua/my/vacancies/${vacancyId}/applies?id=${id}-prof`,
+    cvURL,
     cvFile: rest.filePath,
     status: rest.tagId || 'New',
     email: primaryEmail,

@@ -66,7 +66,7 @@ export const getAndSaveWorkUaVacancyApplies = async () => {
     activeWorkUaVacancies: trackedActiveWorkUaVacancies.length,
   });
   devLog(trackedActiveWorkUaVacancies);
-  return
+
   if (trackedActiveWorkUaVacancies.length === 0) {
     return;
   }
@@ -82,6 +82,7 @@ export const getAndSaveWorkUaVacancyApplies = async () => {
       bitrix_vacancy_id,
       region,
       last_apply_date,
+      assigned_by_id,
     } = vacancy;
 
     devLog(`Processing Work.ua Vacancy ID: ${work_ua_vacancy_id}`);
@@ -139,9 +140,12 @@ export const getAndSaveWorkUaVacancyApplies = async () => {
         payload: {
           title: name,
           city: `${city.name_ua}, ${city.region}`,
+          assigned_by_id,
+          bitrix_vacancy_id,
         },
       }).map(processWorkUaApiResponse)
     );
+    
     const chunkedApplies = chunkArray(processedApplies, 8);
     for (const chunk of chunkedApplies) {
       await createVacancyResponseCards({

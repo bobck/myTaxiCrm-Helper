@@ -70,8 +70,7 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
       }
     });
     const processedApplies = applies.map(processApiResponse);
-    devLog(processedApplies);
-    return
+
     await createVacancyResponseCards({ dtos: processedApplies });
     devLog(
       applies.map((apply) => {
