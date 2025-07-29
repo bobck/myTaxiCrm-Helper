@@ -39,7 +39,7 @@ const editDriverCashBlockRulesMutation = async ({ variables }) => {
       body: bodyForEditRules,
     });
     const { editDriverCashBlockRules } = data;
-    const { success } = editDriverCashBloerckRules;
+    const { success } = editDriverCashBlockRules;
     return { success, errors };
   } catch (errors) {
     const [error] = errors;
@@ -180,7 +180,11 @@ export const updateDriverCashBlockRules = async () => {
         throw errors;
       }
     } catch (error) {
-      console.error({ date: new Date(), message: 'error while updateDriverCashBlockRules', error });
+      console.error({
+        date: new Date(),
+        message: 'error while updateDriverCashBlockRules',
+        error,
+      });
       continue;
     }
   }
@@ -188,7 +192,12 @@ export const updateDriverCashBlockRules = async () => {
 
 if (process.env.ENV == 'TEST') {
   await openSShTunnel;
-  const drivers = [{ driver_id: '38c9a2f7-c95d-4a1e-b481-661de8486539', auto_park_id: 'e2017b70-8418-4a1b-9bf8-aec8a3ad5241' }]
+  const drivers = [
+    {
+      driver_id: '38c9a2f7-c95d-4a1e-b481-661de8486539',
+      auto_park_id: 'e2017b70-8418-4a1b-9bf8-aec8a3ad5241',
+    },
+  ];
   // await setDriverCashBlockRules(drivers);
   await updateDriverCashBlockRules(drivers);
 }
