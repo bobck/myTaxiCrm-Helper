@@ -7,7 +7,10 @@ import {
   getWorkUaRegions,
   getWorkUaVacancyResponses,
 } from '../workua.utils.mjs';
-import { checkIfWorkUaVacancyStaysActive, processResponse as processWorkUaApiResponse } from '../workua.business-entity.mjs';
+import {
+  checkIfWorkUaVacancyStaysActive,
+  processResponse as processWorkUaApiResponse,
+} from '../workua.business-entity.mjs';
 import {
   addCommentToEntity,
   chunkArray,

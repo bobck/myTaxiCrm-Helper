@@ -118,7 +118,7 @@ class RobotaUaApiClient {
         contactEMail,
         endingType,
       } = vacancy;
-      
+
       console.log({ vacancyId, vacancyName, arguments });
 
       const response = await this.employerApi.post('/vacancy/add', {

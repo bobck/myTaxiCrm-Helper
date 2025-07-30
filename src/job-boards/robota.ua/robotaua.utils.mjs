@@ -27,7 +27,6 @@ export const getRobotaUaVacancyApplies = async ({
   robota_ua_vacancy_id,
   last_apply_date,
 }) => {
- 
   const applies = [];
   let data;
   let current_page = 0;

@@ -4,9 +4,7 @@ import {
   activateRobotaUaVacancy,
   deactivateRobotaUaVacancy,
 } from '../../../job-boards/robota.ua/robotaua.utils.mjs';
-import {
-  updateWorkUaVacancyActivityState,
-} from '../../../job-boards/work.ua/workua.queries.mjs';
+import { updateWorkUaVacancyActivityState } from '../../../job-boards/work.ua/workua.queries.mjs';
 import {
   activateWorkUaVacancy,
   deactivateWorkUaVacancy,
