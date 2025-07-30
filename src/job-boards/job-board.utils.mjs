@@ -5,15 +5,15 @@ import { vacancyRequestTypeId } from './job-board.constants.mjs';
 
 export const assignPayloadToVacancyApply = ({ applies, payload }) => {
   return applies.map((apply) => {
-    const  a=Object.assign({}, apply, payload);
-    devLog({a})
-     return a
-    const newApply=structuredClone(apply);
+    const a = Object.assign({}, apply, payload);
+    devLog({ a });
+    return a;
+    const newApply = structuredClone(apply);
     for (const key in payload) {
       newApply[key] = payload[key];
     }
-  
-    devLog({newApply})
+
+    devLog({ newApply });
     return newApply;
   });
 };

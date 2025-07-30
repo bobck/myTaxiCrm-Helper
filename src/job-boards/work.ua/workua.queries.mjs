@@ -93,7 +93,7 @@ export const updateWorkUaVacancyPublicationType = async ({
   await db.run(sql, publicationType, work_ua_vacancy_id);
 };
 export async function getAllActiveWorkUaVacancies() {
-  const sql = /*sql*/`
+  const sql = /*sql*/ `
             SELECT wp.name, wp.work_ua_vacancy_id, wp.last_apply_id, wp.last_apply_date, wp.region, wp.bitrix_vacancy_id, bc.assigned_by_id 
               from work_ua_pagination wp 
               join bitrix_vacancies_to_job_board_vacancies bc 

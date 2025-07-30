@@ -70,13 +70,12 @@ export function processApiResponse(response) {
       ? null
       : new Date(rest.birthDate).toISOString().split('T')[0];
 
-    let cvURL;
-    if(response.resumeType==='AttachedFile'){
-      cvURL = `https://robota.ua/my/vacancies/${vacancyId}/applies?id=${id}-attach`;
-    }
-    else {
-      cvURL = `https://robota.ua/my/vacancies/${vacancyId}/applies?id=${id}-prof`;
-    }
+  let cvURL;
+  if (response.resumeType === 'AttachedFile') {
+    cvURL = `https://robota.ua/my/vacancies/${vacancyId}/applies?id=${id}-attach`;
+  } else {
+    cvURL = `https://robota.ua/my/vacancies/${vacancyId}/applies?id=${id}-prof`;
+  }
   const processedData = {
     id,
     title: `НЕ ЧІПАТИ, ВІДГУК СТВОРЕННИЙ ПІД ЧАС РОЗРОБКИ ${title}`,
@@ -106,7 +105,7 @@ export function processApiResponse(response) {
     educationDetails: educationString,
     educationYears: educations?.[0]?.yearOfGraduation?.toString(),
     hrCity: bitrix_city_id,
-    assigned_by_id
+    assigned_by_id,
   };
 
   return processedData;

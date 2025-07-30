@@ -59,7 +59,7 @@ const checkIfWorkUaVacancyStaysActive = async ({
 export const getAndSaveWorkUaVacancyApplies = async () => {
   const { activeVacancies: trackedActiveWorkUaVacancies } =
     await getAllActiveWorkUaVacancies();
-  
+
   console.log({
     module: 'getAndSaveWorkUaVacancyApplies',
     date: new Date(),
@@ -145,7 +145,7 @@ export const getAndSaveWorkUaVacancyApplies = async () => {
         },
       }).map(processWorkUaApiResponse)
     );
-    
+
     const chunkedApplies = chunkArray(processedApplies, 8);
     for (const chunk of chunkedApplies) {
       await createVacancyResponseCards({

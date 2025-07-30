@@ -242,7 +242,9 @@ export const getVacancySynchronously = async ({ bitrix_vacancy_id }) => {
   });
   return { bitrixVacancy, robotaUaVacancy, workUaVacancy };
 };
-export const markVacancyAsDeletedSynchronously = async ({ bitrix_vacancy_id }) => {
+export const markVacancyAsDeletedSynchronously = async ({
+  bitrix_vacancy_id,
+}) => {
   devLog({
     message: 'deleting vacancy',
     bitrix_vacancy_id,
