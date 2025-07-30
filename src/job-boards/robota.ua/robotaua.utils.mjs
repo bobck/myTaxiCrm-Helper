@@ -27,7 +27,7 @@ export const getRobotaUaVacancyApplies = async ({
   robota_ua_vacancy_id,
   last_apply_date,
 }) => {
-  // const { applies } = await robotaUaAPI.getApplies({ vacancyId, page: 47 });
+ 
   const applies = [];
   let data;
   let current_page = 0;
@@ -103,7 +103,5 @@ export const getRobotaUaPublicationLeftOvers = async ({ page }) => {
   return await robotaUaAPI.getPublicationLeftOvers({ page });
 };
 
-export const robotaUaCustomGet = async ({ url }) =>
-  await robotaUaAPI.customGet({ url });
 export const getRobotaUaTicketRest = async ({ ticketType }) =>
   await robotaUaAPI.getTicketRest({ ticketType });

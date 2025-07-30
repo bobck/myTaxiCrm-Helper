@@ -31,7 +31,7 @@ export const controllerWrapper = ({
           .json({ message: 'Internal Server Error', status: 'error' });
         return;
       }
-      console.error(`error occured in ${handlingServiceName}`, error);
+      console.error({ message: `error occured in ${handlingServiceName}`, date: new Date(), error });
 
       res.status(code).json({ message, status: 'error' });
     }

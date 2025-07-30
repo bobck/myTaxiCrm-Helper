@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { devLog } from '../shared/shared.utils.mjs';
-import { getDefaultResultOrder } from 'dns';
 export class BitrixAPIClient {
   constructor(bitrixWebhookUrl) {
     if (!bitrixWebhookUrl || typeof bitrixWebhookUrl !== 'string') {

@@ -10,7 +10,6 @@ export async function updateVacancyProgress({
   robota_ua_vacancy_id,
   last_apply_date,
 }) {
-  console.log(arguments);
   const sql = /*sql*/ `UPDATE 
                     robota_ua_pagination
                 SET 
@@ -78,15 +77,6 @@ export const createRobotaUaSynchronizedVacancy = async ({
     designId
   );
 };
-/**
- * CREATE TABLE robota_ua_pagination (
-
-    designId INTEGER,
-   
-    robota_ua_publication_type TEXT,
-    PRIMARY KEY (robota_ua_vacancy_id)
-    );
- */
 export const updateRobotaUaSynchronizedVacancy = async ({
   bitrix_vacancy_id,
   robotaUaVacancy,

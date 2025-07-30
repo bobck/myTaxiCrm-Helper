@@ -38,3 +38,15 @@ export const processResponse = async (resumeResponse) => {
     bitrix_vacancy_id,
   };
 };
+export const checkIfWorkUaVacancyStaysActive = async ({
+  work_ua_vacancy_id,
+  allVacancies,
+}) => {
+  return {
+    is_active: allVacancies.some((vacancy) => {
+      return (
+        Number(vacancy.id) === Number(work_ua_vacancy_id) && vacancy.active
+      );
+    }),
+  };
+};

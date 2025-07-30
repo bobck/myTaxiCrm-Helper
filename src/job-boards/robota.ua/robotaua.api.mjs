@@ -118,18 +118,7 @@ class RobotaUaApiClient {
         contactEMail,
         endingType,
       } = vacancy;
-      const payload = {
-        id: 0,
-        name: 'Your vacancy title',
-        description: 'Your vacancy description',
-        cityId: 1,
-        salary: 15000,
-        publishType: 'Professional',
-        designId: 321,
-        sendResumeType: 'EmailAndCvArchive',
-        contactEMail: 'abc@gmail.com',
-        endingType: 'AutoRepublish',
-      };
+      
       console.log({ vacancyId, vacancyName, arguments });
 
       const response = await this.employerApi.post('/vacancy/add', {

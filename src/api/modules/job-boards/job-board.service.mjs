@@ -2,15 +2,10 @@ import { devLog } from '../../../shared/shared.utils.mjs';
 import { updateRobotaUaVacancyActivityState } from '../../../job-boards/robota.ua/robotaua.queries.mjs';
 import {
   activateRobotaUaVacancy,
-  changeRobotaUaVacancyPublicationType,
   deactivateRobotaUaVacancy,
-  getRobotaUaPublicationLeftOvers,
-  getRobotaUaTicketRest,
-  robotaUaCustomGet,
 } from '../../../job-boards/robota.ua/robotaua.utils.mjs';
 import {
   updateWorkUaVacancyActivityState,
-  updateWorkUaVacancyPublicationType,
 } from '../../../job-boards/work.ua/workua.queries.mjs';
 import {
   activateWorkUaVacancy,
@@ -22,7 +17,6 @@ import {
   getRobotaAndWokUaVacanciesById,
 } from './job-board.buisness-entity.mjs';
 import * as jobBoardRepo from './job-board.repo.mjs';
-import { robotaUaPublicationTypes } from '../../../job-boards/robota.ua/robotaua.constants.mjs';
 /**
  * 
  * `CREATE TABLE bitrix_vacancies_to_job_board_vacancies (

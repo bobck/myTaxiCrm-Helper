@@ -7,7 +7,7 @@ import {
   getWorkUaRegions,
   getWorkUaVacancyResponses,
 } from '../workua.utils.mjs';
-import { processResponse as processWorkUaApiResponse } from '../workua.business-entity.mjs';
+import { checkIfWorkUaVacancyStaysActive, processResponse as processWorkUaApiResponse } from '../workua.business-entity.mjs';
 import {
   addCommentToEntity,
   chunkArray,
@@ -43,18 +43,6 @@ const computePaginationProgress = ({ applies }) => {
   });
 
   return { biggestDate: biggestDateString, biggestId: biggestIdString };
-};
-const checkIfWorkUaVacancyStaysActive = async ({
-  work_ua_vacancy_id,
-  allVacancies,
-}) => {
-  return {
-    is_active: allVacancies.some((vacancy) => {
-      return (
-        Number(vacancy.id) === Number(work_ua_vacancy_id) && vacancy.active
-      );
-    }),
-  };
 };
 export const getAndSaveWorkUaVacancyApplies = async () => {
   const { activeVacancies: trackedActiveWorkUaVacancies } =
