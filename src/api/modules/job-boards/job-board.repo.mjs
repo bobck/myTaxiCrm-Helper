@@ -38,7 +38,6 @@ export const getExistingVacancy = async ({ bitrix_vacancy_id }) => {
       bitrix_vacancy_id,
     });
   }
-  // console.log(vacancy);
 
   return payload;
 };
@@ -52,10 +51,6 @@ export const addVacancySynchronously = async ({
   // work_ua_publication_type,
   // robota_ua_publication_type,
 }) => {
-  console.log({
-    message: 'creating vacancy',
-    bitrix_vacancy_id,
-  });
   const _comments = [];
   let commentsLimit = 0;
   const payload = { assigned_by_id };
@@ -77,7 +72,6 @@ export const addVacancySynchronously = async ({
         // work_ua_publication_type,
       });
       payload.work_ua_vacancy_id = work_ua_vacancy_id;
-      console.log('work vacancy created');
     }
   }
 
@@ -98,7 +92,6 @@ export const addVacancySynchronously = async ({
         // robota_ua_publication_type,
       });
       payload.robota_ua_vacancy_id = robota_ua_vacancy_id;
-      console.log('robota vacancy created');
     }
   }
 
@@ -111,7 +104,6 @@ export const addVacancySynchronously = async ({
     is_active,
     ...payload,
   });
-  console.log('bitrix vacancy created');
   return { _comments, isAnyVacancyCreated: true };
 };
 export const updateVacancySynchronously = async ({
@@ -125,11 +117,6 @@ export const updateVacancySynchronously = async ({
   // work_ua_publication_type,
   // robota_ua_publication_type,
 }) => {
-  console.log({
-    message: 'updating vacancy',
-    bitrix_vacancy_id,
-    vacancy_name,
-  });
   const _comments = [];
   let commentsLimit = 0;
   const payload = {};
@@ -149,7 +136,6 @@ export const updateVacancySynchronously = async ({
           // robota_ua_publication_type,
         });
         payload.robota_ua_vacancy_id = robota_ua_vacancy_id;
-        console.log('robota vacancy updated');
       } else {
         _comments.push(
           `Подана вакансія robota.ua id:${robota_ua_vacancy_id} вже існує в системі.`
@@ -216,7 +202,6 @@ export const updateVacancySynchronously = async ({
     payload.assigned_by_id = assigned_by_id;
   }
   if (_comments.length >= commentsLimit) {
-    console.log('no vacancy updated');
     return { _comments, isAnyVacancyUpdated: false };
   }
   await updateBitrixVacancy({
@@ -225,14 +210,9 @@ export const updateVacancySynchronously = async ({
     is_active,
     ...payload,
   });
-  console.log('vacancy updated');
   return { _comments, isAnyVacancyUpdated: true };
 };
 export const getVacancySynchronously = async ({ bitrix_vacancy_id }) => {
-  console.log({
-    message: 'getting vacancy',
-    bitrix_vacancy_id,
-  });
   const bitrixVacancy = await getBitrixVacancyById({ bitrix_vacancy_id });
   const robotaUaVacancy = await getAnyRobotaUaVacancyByBitrixId({
     bitrix_vacancy_id,
@@ -261,11 +241,6 @@ export const changeVacancyActivityState = async ({
   bitrix_vacancy_id,
   activityState,
 }) => {
-  console.log({
-    message: 'changing activity state',
-    bitrix_vacancy_id,
-    activityState,
-  });
   if (
     activityState.is_work_ua_vacancy_activated ||
     activityState.is_robota_ua_vacancy_activated

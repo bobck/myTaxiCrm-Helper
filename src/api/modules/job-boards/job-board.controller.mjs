@@ -28,13 +28,3 @@ export const deactivateVacancyEndpoint = controllerWrapper({
   },
   handlingServiceName: 'deactivateVacancyEndpoint',
 });
-
-export const devEndpoint = controllerWrapper({
-  handlerCB: async (req, res, next) => {
-    const { query } = req;
-    console.log({ query, endpoint: 'devEndpoint' });
-    const result = await jobBoardService.dev({ query });
-    res.send(result);
-  },
-  handlingServiceName: 'devEndpoint',
-});
