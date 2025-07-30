@@ -1,4 +1,3 @@
-import { dev } from '../api/modules/job-boards/job-board.service.mjs';
 import { addCommentToEntity } from '../bitrix/bitrix.utils.mjs';
 import { devLog } from '../shared/shared.utils.mjs';
 import { vacancyRequestTypeId } from './job-board.constants.mjs';
