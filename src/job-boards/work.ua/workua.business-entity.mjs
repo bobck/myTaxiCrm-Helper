@@ -13,6 +13,8 @@ export const processResponse = async (resumeResponse) => {
     cover,
     text,
     city,
+    assigned_by_id,
+    bitrix_vacancy_id,
   } = resumeResponse;
   const cvText = cover ? cover + '\n\n' + text : text;
 
@@ -32,5 +34,7 @@ export const processResponse = async (resumeResponse) => {
     title,
     cvText,
     country: city,
+    assigned_by_id,
+    bitrix_vacancy_id,
   };
 };

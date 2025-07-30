@@ -4,7 +4,7 @@ import { devLog } from '../../shared/shared.utils.mjs';
 class RobotaUaApiClient {
   constructor(token) {
     this.employerApi = axios.create({
-      baseURL: 'https://employer-api.robota.ua',
+      baseURL: process.env.ROBOTA_UA_API,
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -12,7 +12,7 @@ class RobotaUaApiClient {
   }
   static async initialize({ email, password }) {
     const authApi = axios.create({
-      baseURL: 'https://auth-api.robota.ua',
+      baseURL: process.env.ROBOTA_UA_AUTH_API,
     });
 
     try {
