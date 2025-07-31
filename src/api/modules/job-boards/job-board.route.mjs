@@ -12,7 +12,7 @@ vacancyRoute.post('/activate', jobBoardController.activateVacancyEndpoint);
 
 vacancyRoute.post('/deactivate', jobBoardController.deactivateVacancyEndpoint);
 
-jobBoardRouter.use(authorizationMiddleware)
+jobBoardRouter.use(authorizationMiddleware);
 
 jobBoardRouter.use('/vacancies', vacancyRoute);
 
