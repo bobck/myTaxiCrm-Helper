@@ -5,6 +5,7 @@ import {
 import { vacancyRequestTypeId } from '../../../job-boards/job-board.constants.mjs';
 import { getRobotaUaVacancyById } from '../../../job-boards/robota.ua/robotaua.utils.mjs';
 import { getWorkUaVacancyById } from '../../../job-boards/work.ua/workua.utils.mjs';
+import { devLog } from '../../../shared/shared.utils.mjs';
 
 export const getRobotaAndWokUaVacanciesById = async ({
   bitrix_vacancy_id,
@@ -51,7 +52,6 @@ export const assignManyCommentsToVacancyRequest = async ({
   comments,
   bitrix_vacancy_id,
 }) => {
-  vacancyRequestTypeId;
   devLog('assigning comments to vacancy request', {
     bitrix_vacancy_id,
     comments,
