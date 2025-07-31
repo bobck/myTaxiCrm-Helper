@@ -13,3 +13,12 @@ export const authorizationMiddleware = (req, res, next) => {
   // console.log(`successful authorization under api key ${api_key}`);
   next();
 };
+export const loggerMiddleware = (req, res, next) => {
+  console.log({
+    method: req.method,
+    url: req.url,
+    query: req.query,
+    body: req.body,
+  });
+  next();
+};
