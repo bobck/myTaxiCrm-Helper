@@ -78,7 +78,7 @@ export function processApiResponse(response) {
   }
   const processedData = {
     id,
-    title: `НЕ ЧІПАТИ, ВІДГУК СТВОРЕННИЙ ПІД ЧАС РОЗРОБКИ ${title}`,
+    title: title,
     fullName: rest.name,
     cvURL,
     cvFile: rest.filePath,

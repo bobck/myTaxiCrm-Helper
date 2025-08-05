@@ -150,7 +150,6 @@ export const getAndSaveWorkUaVacancyApplies = async () => {
         last_apply_id: biggestId,
         last_apply_date: biggestDate,
       });
-      return;
     }
   }
 };
