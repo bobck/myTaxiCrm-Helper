@@ -119,8 +119,6 @@ class RobotaUaApiClient {
         endingType,
       } = vacancy;
 
-      console.log({ vacancyId, vacancyName, arguments });
-
       const response = await this.employerApi.post('/vacancy/add', {
         id: vacancyId,
         publishType,
@@ -136,18 +134,11 @@ class RobotaUaApiClient {
       devLog('request sent +', response);
       return response.data;
     } catch (error) {
-      // console.error(error)
-      console.log(error.response.data);
+      console.error(error);
     }
   }
-  async getCityList() {
-    const response = await this.employerApi.get('/vacancy/cityList');
-    return response.data;
-  }
-  async getCityValues() {
-    const response = await this.employerApi.get('/values/cityList');
-    return response.data;
-  }
+ 
+  
   async getVacancyById({ vacancyId }) {
     try {
       const response = await this.employerApi.post(`/vacancy/get/${vacancyId}`);
@@ -167,15 +158,7 @@ class RobotaUaApiClient {
       this.handleApiError(error);
     }
   }
-  async customGet({ url }) {
-    try {
-      console.log('querying ...', url);
-      const response = await this.employerApi.get(url);
-      return response.data;
-    } catch (error) {
-      this.handleApiError(error);
-    }
-  }
+  
   async getTicketRest({ ticketType }) {
     try {
       const response = await this.employerApi.get(

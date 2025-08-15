@@ -6,7 +6,7 @@ export const startJobBoardJobs = () => {
     getAndSaveWorkUaVacancyAppliesJob.start();
     getAndSaveRobotaUaVacancyAppliesJob.start();
   } catch (err) {
-    console.log(err);
+    console.error(err);
     getAndSaveWorkUaVacancyAppliesJob.stop();
     getAndSaveRobotaUaVacancyAppliesJob.stop();
     startJobBoardJobs();

@@ -53,7 +53,6 @@ export const getRobotaUaVacancyApplies = async ({
 
   return { applies: filteredAppliesByDate };
 };
-export const getCityList = () => robotaUaAPI.getCityValues();
 export const getRobotaUaVacancyById = async ({
   robota_ua_vacancy_id: vacancyId,
 }) => {

@@ -216,9 +216,13 @@ class WorkUaApiClient {
     }
   }
   async getDictionary({ location }) {
-    const { data } = await this.api.get(`/dictionaries/${location}`);
+    try {
+      const { data } = await this.api.get(`/dictionaries/${location}`);
 
-    return data;
+      return data;
+    } catch (err) {
+      this.handleApiError(err);
+    }
   }
   async getAvailablePublications() {
     const { data } = await this.api.get('/available-publications');
