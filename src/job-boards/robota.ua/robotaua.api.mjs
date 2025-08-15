@@ -137,8 +137,7 @@ class RobotaUaApiClient {
       console.error(error);
     }
   }
- 
-  
+
   async getVacancyById({ vacancyId }) {
     try {
       const response = await this.employerApi.post(`/vacancy/get/${vacancyId}`);
@@ -158,7 +157,7 @@ class RobotaUaApiClient {
       this.handleApiError(error);
     }
   }
-  
+
   async getTicketRest({ ticketType }) {
     try {
       const response = await this.employerApi.get(
