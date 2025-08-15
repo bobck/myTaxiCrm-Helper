@@ -1,5 +1,6 @@
 import { authorizeAPIClient } from '../../api.utils.mjs';
 import { api_status_codes } from '../../api.constants.mjs';
+import { devLog } from '../../../shared/shared.utils.mjs';
 const { OK: SUCCESS_AUTH } = api_status_codes;
 export const authorizationMiddleware = (req, res, next) => {
   const { api_key } = req.query;
@@ -11,5 +12,14 @@ export const authorizationMiddleware = (req, res, next) => {
     return;
   }
   // console.log(`successful authorization under api key ${api_key}`);
+  next();
+};
+export const loggerMiddleware = (req, res, next) => {
+  devLog({
+    method: req.method,
+    url: req.url,
+    query: req.query,
+    body: req.body,
+  });
   next();
 };
