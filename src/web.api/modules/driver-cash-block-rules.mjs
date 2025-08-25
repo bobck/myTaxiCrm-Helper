@@ -12,7 +12,7 @@ import {
   getDriversWhoPaidOff,
   getTheMostRecentDriverCashBlockRuleIdByDriverId,
 } from '../web.api.utlites.mjs';
-import { readSheetData } from '../../sheets/sheets-utils.mjs';
+import { readDCBRSheetColumnA} from '../../sheets/sheets-utils.mjs';
 
 const activationValue = 200;
 const maxDebt = -1000;
@@ -192,7 +192,9 @@ export const updateDriverCashBlockRules = async () => {
 };
 
 if (process.env.ENV == 'TEST') {
-  await readSheetData();
+  const driversToOmit = await readDCBRSheetColumnA('drivers');
+  const driverToOmit = await readDCBRSheetColumnA('autoparks');
+  console.log({ driversToOmit, driverToOmit });
   // await openSShTunnel;
   // const drivers = [
   //   {
