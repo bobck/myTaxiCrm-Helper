@@ -11,6 +11,7 @@ src/.DS_Store
 service_account.json
 src/sheets/.DS_Store
 token.json
+hb-token.json
 src/remonline/.DS_Store
 main.db-journal
 _main.db

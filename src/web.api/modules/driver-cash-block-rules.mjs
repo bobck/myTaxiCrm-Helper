@@ -12,6 +12,7 @@ import {
   getDriversWhoPaidOff,
   getTheMostRecentDriverCashBlockRuleIdByDriverId,
 } from '../web.api.utlites.mjs';
+import { readSheetData } from '../../sheets/sheets-utils.mjs';
 
 const activationValue = 200;
 const maxDebt = -1000;
@@ -191,13 +192,14 @@ export const updateDriverCashBlockRules = async () => {
 };
 
 if (process.env.ENV == 'TEST') {
-  await openSShTunnel;
-  const drivers = [
-    {
-      driver_id: '38c9a2f7-c95d-4a1e-b481-661de8486539',
-      auto_park_id: 'e2017b70-8418-4a1b-9bf8-aec8a3ad5241',
-    },
-  ];
-  // await setDriverCashBlockRules(drivers);
-  await updateDriverCashBlockRules(drivers);
+  await readSheetData();
+  // await openSShTunnel;
+  // const drivers = [
+  //   {
+  //     driver_id: '38c9a2f7-c95d-4a1e-b481-661de8486539',
+  //     auto_park_id: 'e2017b70-8418-4a1b-9bf8-aec8a3ad5241',
+  //   },
+  // ];
+  // // await setDriverCashBlockRules(drivers);
+  // await updateDriverCashBlockRules(drivers);
 }
