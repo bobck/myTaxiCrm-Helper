@@ -105,14 +105,18 @@ export const setDriverCashBlockRules = async () => {
     autoParksToIgnore,
   });
 
+  console.log(drivers)
   console.log({
     message: 'setDriverCashBlockRules',
     date: new Date(),
     env: process.env.ENV,
     drivers: drivers.length,
     driversToIgnore: driversToIgnore.length,
+    autoParksToIgnore: autoParksToIgnore.length,
     IdsOfDriversWithCashBlockRules: IdsOfDriversWithCashBlockRules.length,
   });
+  
+  return;
   for (const driver of drivers) {
     try {
       const { driver_id, auto_park_id } = driver;
@@ -195,7 +199,7 @@ export const updateDriverCashBlockRules = async () => {
 };
 
 if (process.env.ENV == 'TEST') {
-  console.log({ driversToOmit, driverToOmit });
+  // console.log({ driversToOmit, driverToOmit });
   // await openSShTunnel;
   // const drivers = [
   //   {
@@ -203,6 +207,6 @@ if (process.env.ENV == 'TEST') {
   //     auto_park_id: 'e2017b70-8418-4a1b-9bf8-aec8a3ad5241',
   //   },
   // ];
-  await setDriverCashBlockRules(drivers);
-  await updateDriverCashBlockRules(drivers);
+  await setDriverCashBlockRules();
+  // await updateDriverCashBlockRules(drivers);
 }
