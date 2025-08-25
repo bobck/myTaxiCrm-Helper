@@ -1,12 +1,10 @@
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
 
-
 import { auth, sheets } from '@googleapis/sheets';
 
 const KEY_FILE_PATH = './hb-token.json';
 const SPREADSHEET_ID = process.env.DCBR_SHEET_ID;
-
 
 // Reusable authentication and client setup
 const googleAuth = new auth.GoogleAuth({
@@ -18,7 +16,6 @@ const client = sheets({
   version: 'v4',
   auth: googleAuth,
 });
-
 
 const db = await open({
   filename: process.env.DEV_DB,
@@ -40,7 +37,6 @@ export async function markAllAsNotLastVersion() {
   const result = await db.run('UPDATE plan SET is_last_version = false');
   return { result };
 }
-
 
 /**
  * Reads a single column (A) from a sheet, skipping the header row,
@@ -66,8 +62,10 @@ export async function readDCBRSheetColumnA(sheetName) {
     if (values && values.length > 0) {
       // The API returns a 2D array like [['value1'], ['value2']].
       // We use .map() to flatten it into a simple array: ['value1', 'value2'].
-      const columnData = values.map(row => row[0]);
-      console.log(`Successfully parsed ${columnData.length} rows from column A.`);
+      const columnData = values.map((row) => row[0]);
+      console.log(
+        `Successfully parsed ${columnData.length} rows from column A.`
+      );
       return columnData;
     } else {
       console.log(`No data found in column A of sheet: ${sheetName}.`);
@@ -78,4 +76,3 @@ export async function readDCBRSheetColumnA(sheetName) {
     return []; // Return an empty array on error
   }
 }
-

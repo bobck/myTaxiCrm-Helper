@@ -12,7 +12,7 @@ import {
   getDriversWhoPaidOff,
   getTheMostRecentDriverCashBlockRuleIdByDriverId,
 } from '../web.api.utlites.mjs';
-import { readDCBRSheetColumnA} from '../../sheets/sheets-utils.mjs';
+import { readDCBRSheetColumnA } from '../../sheets/sheets-utils.mjs';
 
 const activationValue = 200;
 const maxDebt = -1000;
@@ -92,14 +92,17 @@ export const setDriverCashBlockRules = async () => {
   const IdsOfDriversWithCashBlockRules = (
     await getDriversWithActiveCashBlockRules()
   ).map(({ driver_id }) => driver_id);
-  const driversToIgnore = (await getDriversIgnoringCashBlockRules()).map(
-    ({ driver_id }) => driver_id
-  );
+
+  const driversToIgnore = await readDCBRSheetColumnA('drivers');
+  const autoParksToIgnore = await readDCBRSheetColumnA('autoparks');
+
   const { rows: drivers } = await getAllWorkingDriverIds({
     ids: IdsOfDriversWithCashBlockRules,
     year,
     weekNumber,
     maxDebt,
+    driversToIgnore,
+    autoParksToIgnore,
   });
 
   console.log({
@@ -192,8 +195,6 @@ export const updateDriverCashBlockRules = async () => {
 };
 
 if (process.env.ENV == 'TEST') {
-  const driversToOmit = await readDCBRSheetColumnA('drivers');
-  const driverToOmit = await readDCBRSheetColumnA('autoparks');
   console.log({ driversToOmit, driverToOmit });
   // await openSShTunnel;
   // const drivers = [
@@ -202,6 +203,6 @@ if (process.env.ENV == 'TEST') {
   //     auto_park_id: 'e2017b70-8418-4a1b-9bf8-aec8a3ad5241',
   //   },
   // ];
-  // // await setDriverCashBlockRules(drivers);
-  // await updateDriverCashBlockRules(drivers);
+  await setDriverCashBlockRules(drivers);
+  await updateDriverCashBlockRules(drivers);
 }

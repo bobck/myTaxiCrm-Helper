@@ -662,6 +662,7 @@ export async function getAllWorkingDriverIds({
   year,
   maxDebt,
   driversToIgnore,
+  autoParksToIgnore,
 }) {
   const sql = fs
     .readFileSync('src/sql/get_all_working_driver_ids.sql')
