@@ -92,6 +92,7 @@ const calculateMutationVariables = ({
   auto_park_id,
   driver_id,
   cashBlockRules,
+  mode
 }) => {
   const variables = {
     editDriverCashBlockRulesInput: {
