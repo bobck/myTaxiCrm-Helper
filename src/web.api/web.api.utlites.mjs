@@ -674,7 +674,7 @@ export async function getAllWorkingDriverIds({
     year,
     maxDebt,
     driversToIgnore,
-    autoParksToIgnore
+    autoParksToIgnore,
   ]);
   const { rows, rowCount } = result;
   return { rows };

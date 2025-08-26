@@ -12,7 +12,10 @@ import {
   getDriversWhoPaidOff,
   getTheMostRecentDriverCashBlockRuleIdByDriverId,
 } from '../web.api.utlites.mjs';
-import { readDCBRSheetColumnA } from '../../sheets/sheets-utils.mjs';
+import {
+  getAllRowsAsObjects,
+  readDCBRSheetColumnA,
+} from '../../sheets/sheets-utils.mjs';
 
 const activationValue = 200;
 const maxDebt = -1000;
@@ -87,6 +90,23 @@ const calculateCurrentWeekAndYear = () => {
   const { year, weekNumber } = today;
   return { year, weekNumber };
 };
+const processCustomRuledAutoParks = async ({
+  autoParkCustomRules,
+  driversToIgnore,
+  year,
+  weekNumber,
+}) => {
+  console.log({
+    message: 'processing custom ruled autoparks...',
+    date: new Date(),
+    env: process.env.ENV,
+    autoParkCustomRules: autoParkCustomRules.length,
+    driversToIgnore: driversToIgnore.length,
+    year,
+    weekNumber,
+  });
+};
+
 export const setDriverCashBlockRules = async () => {
   const { year, weekNumber } = calculateCurrentWeekAndYear();
   const IdsOfDriversWithCashBlockRules = (
@@ -95,17 +115,24 @@ export const setDriverCashBlockRules = async () => {
 
   const driversToIgnore = await readDCBRSheetColumnA('drivers');
   const autoParksToIgnore = await readDCBRSheetColumnA('autoparks');
-
+  const autoParkRules = await getAllRowsAsObjects('autopark_custom_rules');
+  const [autoParkDefaultRule, ...autoParkCustomRules] = autoParkRules;
+  // const drivers = [
+  //   {
+  //     driver_id: '38c9a2f7-c95d-4a1e-b481-661de8486539',
+  //     auto_park_id: 'e2017b70-8418-4a1b-9bf8-aec8a3ad5241',
+  //   },
+  // ];
   const { rows: drivers } = await getAllWorkingDriverIds({
     ids: IdsOfDriversWithCashBlockRules,
     year,
     weekNumber,
     maxDebt,
     driversToIgnore,
-    autoParksToIgnore,
+    autoParksToIgnore: [...autoParksToIgnore, ...autoParkCustomRules.map(({ auto_park_id }) => auto_park_id)],
   });
 
-  console.log(drivers)
+  console.log({ autoParkDefaultRule, autoParkCustomRules });
   console.log({
     message: 'setDriverCashBlockRules',
     date: new Date(),
@@ -115,38 +142,13 @@ export const setDriverCashBlockRules = async () => {
     autoParksToIgnore: autoParksToIgnore.length,
     IdsOfDriversWithCashBlockRules: IdsOfDriversWithCashBlockRules.length,
   });
-  
+  await processCustomRuledAutoParks({
+    autoParkCustomRules,
+    driversToIgnore,
+    year,
+    weekNumber,
+  })
   return;
-  for (const driver of drivers) {
-    try {
-      const { driver_id, auto_park_id } = driver;
-      const { cashBlockRules } = calculateDriverCashBlockRules();
-      const { variables } = calculateMutationVariables({
-        auto_park_id,
-        driver_id,
-        cashBlockRules,
-      });
-
-      const { success, errors } = await editDriverCashBlockRulesMutation({
-        variables,
-      });
-      if (!success) {
-        throw errors;
-      }
-
-      const { rows } = await getTheMostRecentDriverCashBlockRuleIdByDriverId({
-        driver_id,
-      });
-      const { id: driver_cash_block_rule_id } = rows[0];
-      await insertDriverWithCashBlockRules({
-        driver_id,
-        driver_cash_block_rule_id,
-      });
-    } catch (error) {
-      console.error('error while setDriverCashBlockRules', error);
-      continue;
-    }
-  }
 };
 export const updateDriverCashBlockRules = async () => {
   const { year, weekNumber } = calculateCurrentWeekAndYear();
