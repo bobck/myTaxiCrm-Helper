@@ -119,6 +119,32 @@ export async function getAllRowsAsObjects(sheetName) {
         maxDebt: Number(maxDebt),
       };
       return rowObject;
+    }).filter((ap) => {
+      const {
+        auto_park_id,
+        mode,
+        target,
+        balanceActivationValue,
+        depositActivationValue,
+        maxDebt,
+      } = ap;
+      if (!auto_park_id || !mode || !target || !maxDebt) {
+        return false;
+      }
+
+      if (
+        (target == 'BOTH' || target == 'BALANCE') &&
+        !balanceActivationValue
+      ) {
+        return false;
+      }
+      if (
+        (target == 'BOTH' || target == 'DEPOSIT') &&
+        !depositActivationValue
+      ) {
+        return false;
+      }
+      return true;
     });
 
     console.log(

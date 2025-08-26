@@ -18,27 +18,34 @@ import {
   readDCBRSheetColumnA,
 } from '../../sheets/sheets-utils.mjs';
 
-const calculateDriverCashBlockRules = (activationValue, target) => {
-  const cashBlockRule = {
-    activationValue,
-    isEnabled: true,
+const calculateDriverCashBlockRules = ({ rule }) => {
+  const {
     target,
-  };
+    balanceActivationValue,
+    depositActivationValue,
+  } = rule;
 
   const cashBlockRules = [];
-  if (target == 'BOTH') {
-    const depostCashBlockRule = {
-      activationValue,
-      isEnabled: true,
-      target: 'DEPOSIT',
-    };
+  if ((target == 'BOTH' || target == 'BALANCE') && balanceActivationValue) {
     const balanceCashBlockRule = {
-      activationValue,
+      activationValue: balanceActivationValue,
       isEnabled: true,
       target: 'BALANCE',
     };
-  } else {
-    cashBlockRules.push(cashBlockRule);
+
+    cashBlockRules.push(balanceCashBlockRule,);
+
+  }
+  if ((target == 'BOTH' || target == 'DEPOSIT') && depositActivationValue) {
+
+    const depositCashBlockRule = {
+      activationValue: depositActivationValue,
+      isEnabled: true,
+      target: 'DEPOSIT',
+    };
+
+
+    cashBlockRules.push(depositCashBlockRule,);
   }
   return { cashBlockRules };
 };
@@ -146,7 +153,6 @@ export const setDriverCashBlockRules = async () => {
   });
   drivers.push(...rows);
 
-  console.log(drivers);
   console.log({
     message: 'setDriverCashBlockRules',
     date: new Date(),
@@ -158,11 +164,11 @@ export const setDriverCashBlockRules = async () => {
     customRuledAutoParks: customRuledAutoParks.length,
     defaultRule,
   });
-  return
   for (const driver of drivers) {
     try {
       const { driver_id, auto_park_id } = driver;
-      const { cashBlockRules } = calculateDriverCashBlockRules();
+      const rule = customRuledAutoParks.find(autopark => autopark.auto_park_id === auto_park_id) || defaultRule;
+      const { cashBlockRules } = calculateDriverCashBlockRules({ rule });
       const { variables } = calculateMutationVariables({
         auto_park_id,
         driver_id,
