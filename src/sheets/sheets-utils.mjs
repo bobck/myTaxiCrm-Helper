@@ -76,3 +76,57 @@ export async function readDCBRSheetColumnA(sheetName) {
     return []; // Return an empty array on error
   }
 }
+
+/**
+ * Fetches all rows from a sheet and parses them into an array of objects.
+ * The first row of the sheet is used as the keys for the objects.
+ * @param {string} sheetName The name of the sheet to read (e.g., 'autoparks').
+ * @returns {Promise<Array<Object>>} A promise that resolves to an array of row objects.
+ */
+export async function getAllRowsAsObjects(sheetName) {
+  try {
+    const response = await client.spreadsheets.values.get({
+      spreadsheetId: SPREADSHEET_ID,
+      range: sheetName, // Reading the whole sheet
+    });
+
+    const rows = response.data.values;
+
+    if (!rows || rows.length <= 1) {
+      console.log(`No data found in sheet: ${sheetName}.`);
+      return [];
+    }
+
+    // Use the first row as the headers (keys for our objects)
+    const headers = rows[0];
+
+    // Slice the array to remove the header row, then map over the remaining rows
+    const dataObjects = rows.slice(1).map((row) => {
+      const [
+        auto_park_id,
+        mode,
+        target,
+        balanceActivationValue,
+        depositActivationValue,
+        maxDebt,
+      ] = row;
+      const rowObject = {
+        auto_park_id,
+        mode,
+        target,
+        balanceActivationValue: Number(balanceActivationValue) || null,
+        depositActivationValue: Number(depositActivationValue) || null,
+        maxDebt: Number(maxDebt),
+      };
+      return rowObject;
+    });
+
+    console.log(
+      `Successfully parsed ${dataObjects.length} rows from ${sheetName}.`
+    );
+    return dataObjects;
+  } catch (err) {
+    console.error(`The API returned an error for sheet ${sheetName}:`, err);
+    return [];
+  }
+}

@@ -11,20 +11,35 @@ import {
   makeCRMRequestlimited,
   getDriversWhoPaidOff,
   getTheMostRecentDriverCashBlockRuleIdByDriverId,
+  getAllWorkingDriverIdsByAutoPark,
 } from '../web.api.utlites.mjs';
-import { readDCBRSheetColumnA } from '../../sheets/sheets-utils.mjs';
+import {
+  getAllRowsAsObjects,
+  readDCBRSheetColumnA,
+} from '../../sheets/sheets-utils.mjs';
 
-const activationValue = 200;
-const maxDebt = -1000;
-
-const calculateDriverCashBlockRules = () => {
+const calculateDriverCashBlockRules = (activationValue, target) => {
   const cashBlockRule = {
     activationValue,
     isEnabled: true,
-    target: 'BALANCE',
+    target,
   };
+
   const cashBlockRules = [];
-  if (cashBlockRule.isEnabled) cashBlockRules.push(cashBlockRule);
+  if (target == 'BOTH') {
+    const depostCashBlockRule = {
+      activationValue,
+      isEnabled: true,
+      target: 'DEPOSIT',
+    };
+    const balanceCashBlockRule = {
+      activationValue,
+      isEnabled: true,
+      target: 'BALANCE',
+    };
+  } else {
+    cashBlockRules.push(cashBlockRule);
+  }
   return { cashBlockRules };
 };
 const editDriverCashBlockRulesMutation = async ({ variables }) => {
@@ -95,17 +110,43 @@ export const setDriverCashBlockRules = async () => {
 
   const driversToIgnore = await readDCBRSheetColumnA('drivers');
   const autoParksToIgnore = await readDCBRSheetColumnA('autoparks');
+  const [defaultRule, ...customRuledAutoParks] = await getAllRowsAsObjects(
+    'autopark_custom_rules'
+  );
+  const drivers = [];
 
-  const { rows: drivers } = await getAllWorkingDriverIds({
+  if (customRuledAutoParks.length > 0) {
+    for (const autoPark of customRuledAutoParks) {
+      const {
+        auto_park_id,
+        maxDebt,
+      } = autoPark;
+      const { rows } = await getAllWorkingDriverIdsByAutoPark({
+        ids: IdsOfDriversWithCashBlockRules,
+        year,
+        weekNumber,
+        maxDebt,
+        driversToIgnore,
+        auto_park_id,
+      });
+      drivers.push(...rows);
+    }
+  }
+  const { maxDebt } = defaultRule;
+  const { rows } = await getAllWorkingDriverIds({
     ids: IdsOfDriversWithCashBlockRules,
     year,
     weekNumber,
     maxDebt,
     driversToIgnore,
-    autoParksToIgnore,
+    autoParksToIgnore: [
+      ...autoParksToIgnore,
+      ...customRuledAutoParks.map(({ auto_park_id }) => auto_park_id),
+    ],
   });
+  drivers.push(...rows);
 
-  console.log(drivers)
+  console.log(drivers);
   console.log({
     message: 'setDriverCashBlockRules',
     date: new Date(),
@@ -114,9 +155,10 @@ export const setDriverCashBlockRules = async () => {
     driversToIgnore: driversToIgnore.length,
     autoParksToIgnore: autoParksToIgnore.length,
     IdsOfDriversWithCashBlockRules: IdsOfDriversWithCashBlockRules.length,
+    customRuledAutoParks: customRuledAutoParks.length,
+    defaultRule,
   });
-  
-  return;
+  return
   for (const driver of drivers) {
     try {
       const { driver_id, auto_park_id } = driver;
