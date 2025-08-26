@@ -11,18 +11,42 @@ import {
   makeCRMRequestlimited,
   getDriversWhoPaidOff,
   getTheMostRecentDriverCashBlockRuleIdByDriverId,
+  getAllWorkingDriverIdsByAutoPark,
 } from '../web.api.utlites.mjs';
+import {
+  getAllRowsAsObjects,
+  readDCBRSheetColumnA,
+} from '../../sheets/sheets-utils.mjs';
 
-const activationValue = 200;
+const calculateDriverCashBlockRules = ({ rule }) => {
+  const {
+    target,
+    balanceActivationValue,
+    depositActivationValue,
+  } = rule;
 
-const calculateDriverCashBlockRules = () => {
-  const cashBlockRule = {
-    activationValue,
-    isEnabled: true,
-    target: 'BALANCE',
-  };
   const cashBlockRules = [];
-  if (cashBlockRule.isEnabled) cashBlockRules.push(cashBlockRule);
+  if ((target == 'BOTH' || target == 'BALANCE') && balanceActivationValue) {
+    const balanceCashBlockRule = {
+      activationValue: balanceActivationValue,
+      isEnabled: true,
+      target: 'BALANCE',
+    };
+
+    cashBlockRules.push(balanceCashBlockRule,);
+
+  }
+  if ((target == 'BOTH' || target == 'DEPOSIT') && depositActivationValue) {
+
+    const depositCashBlockRule = {
+      activationValue: depositActivationValue,
+      isEnabled: true,
+      target: 'DEPOSIT',
+    };
+
+
+    cashBlockRules.push(depositCashBlockRule,);
+  }
   return { cashBlockRules };
 };
 const editDriverCashBlockRulesMutation = async ({ variables }) => {
@@ -57,12 +81,18 @@ const deleteDriverCustomCashBlockRuleMutation = async ({
   const variables = {
     deleteDriverCustomCashboxRulesInput: { driverId, ruleId },
   };
-  await makeCRMRequestlimited({ body: { operationName, query, variables } });
+  const { data, errors } = await makeCRMRequestlimited({
+    body: { operationName, query, variables },
+  });
+  const { deleteDriverCustomCashboxRules } = data;
+  const { success } = deleteDriverCustomCashboxRules;
+  return { success, errors };
 };
 const calculateMutationVariables = ({
   auto_park_id,
   driver_id,
   cashBlockRules,
+  mode
 }) => {
   const variables = {
     editDriverCashBlockRulesInput: {
@@ -85,16 +115,44 @@ export const setDriverCashBlockRules = async () => {
   const IdsOfDriversWithCashBlockRules = (
     await getDriversWithActiveCashBlockRules()
   ).map(({ driver_id }) => driver_id);
-  const driversToIgnore = (await getDriversIgnoringCashBlockRules()).map(
-    ({ driver_id }) => driver_id
+
+  const driversToIgnore = await readDCBRSheetColumnA('drivers');
+  const autoParksToIgnore = await readDCBRSheetColumnA('autoparks');
+  const [defaultRule, ...customRuledAutoParks] = await getAllRowsAsObjects(
+    'autopark_custom_rules'
   );
-  const { rows: drivers } = await getAllWorkingDriverIds({
+  const drivers = [];
+
+  if (customRuledAutoParks.length > 0) {
+    for (const autoPark of customRuledAutoParks) {
+      const {
+        auto_park_id,
+        maxDebt,
+      } = autoPark;
+      const { rows } = await getAllWorkingDriverIdsByAutoPark({
+        ids: IdsOfDriversWithCashBlockRules,
+        year,
+        weekNumber,
+        maxDebt,
+        driversToIgnore,
+        auto_park_id,
+      });
+      drivers.push(...rows);
+    }
+  }
+  const { maxDebt } = defaultRule;
+  const { rows } = await getAllWorkingDriverIds({
     ids: IdsOfDriversWithCashBlockRules,
     year,
     weekNumber,
-    activationValue: activationValue * -1,
+    maxDebt,
     driversToIgnore,
+    autoParksToIgnore: [
+      ...autoParksToIgnore,
+      ...customRuledAutoParks.map(({ auto_park_id }) => auto_park_id),
+    ],
   });
+  drivers.push(...rows);
 
   console.log({
     message: 'setDriverCashBlockRules',
@@ -102,28 +160,29 @@ export const setDriverCashBlockRules = async () => {
     env: process.env.ENV,
     drivers: drivers.length,
     driversToIgnore: driversToIgnore.length,
+    autoParksToIgnore: autoParksToIgnore.length,
     IdsOfDriversWithCashBlockRules: IdsOfDriversWithCashBlockRules.length,
+    customRuledAutoParks: customRuledAutoParks.length,
+    defaultRule,
   });
   for (const driver of drivers) {
     try {
       const { driver_id, auto_park_id } = driver;
-      const { cashBlockRules } = calculateDriverCashBlockRules();
+      const rule = customRuledAutoParks.find(autopark => autopark.auto_park_id === auto_park_id) || defaultRule;
+      const { cashBlockRules } = calculateDriverCashBlockRules({ rule });
       const { variables } = calculateMutationVariables({
         auto_park_id,
         driver_id,
         cashBlockRules,
       });
-      try {
-        const { success, errors } = await editDriverCashBlockRulesMutation({
-          variables,
-        });
-        if (!success) {
-          throw errors;
-        }
-      } catch (e) {
-        console.error(e);
-        continue;
+
+      const { success, errors } = await editDriverCashBlockRulesMutation({
+        variables,
+      });
+      if (!success) {
+        throw errors;
       }
+
       const { rows } = await getTheMostRecentDriverCashBlockRuleIdByDriverId({
         driver_id,
       });
@@ -167,20 +226,36 @@ export const updateDriverCashBlockRules = async () => {
         (d) => d.driver_id === driver_id
       );
 
-      await deleteDriverCustomCashBlockRuleMutation({
-        driver_id,
-        driver_cash_block_rule_id,
-      });
+      const { success, errors } = await deleteDriverCustomCashBlockRuleMutation(
+        {
+          driver_id,
+          driver_cash_block_rule_id,
+        }
+      );
       await markDriverCashBlockRulesAsDeleted({ driver_id });
+      if (!success) {
+        throw errors;
+      }
     } catch (error) {
-      console.error('error while updateDriverCashBlockRules', error);
+      console.error({
+        date: new Date(),
+        message: 'error while updateDriverCashBlockRules',
+        error,
+      });
       continue;
     }
   }
 };
 
 if (process.env.ENV == 'TEST') {
-  await openSShTunnel;
-  // // await updateDriverCashBlockRules();
-  // await setDriverCashBlockRules();
+  // console.log({ driversToOmit, driverToOmit });
+  // await openSShTunnel;
+  // const drivers = [
+  //   {
+  //     driver_id: '38c9a2f7-c95d-4a1e-b481-661de8486539',
+  //     auto_park_id: 'e2017b70-8418-4a1b-9bf8-aec8a3ad5241',
+  //   },
+  // ];
+  await setDriverCashBlockRules();
+  // await updateDriverCashBlockRules(drivers);
 }

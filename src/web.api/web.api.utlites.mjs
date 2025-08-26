@@ -660,23 +660,52 @@ export async function getAllWorkingDriverIds({
   ids,
   weekNumber,
   year,
-  activationValue,
+  maxDebt,
   driversToIgnore,
+  autoParksToIgnore,
 }) {
   const sql = fs
     .readFileSync('src/sql/get_all_working_driver_ids.sql')
     .toString();
+
   const result = await pool.query(sql, [
     ids,
     weekNumber,
     year,
-    activationValue,
+    maxDebt,
     driversToIgnore,
+    autoParksToIgnore,
   ]);
   const { rows, rowCount } = result;
   return { rows };
 }
+
 //getDriversWhoPaidOff
+
+export async function getAllWorkingDriverIdsByAutoPark({
+  ids,
+  weekNumber,
+  year,
+  maxDebt,
+  driversToIgnore,
+  auto_park_id,
+}) {
+  const sql = fs
+    .readFileSync('src/sql/get_all_working_driver_ids_by_auto_park.sql')
+    .toString();
+
+  const result = await pool.query(sql, [
+    ids,
+    weekNumber,
+    year,
+    maxDebt,
+    driversToIgnore,
+    auto_park_id,
+  ]);
+  const { rows, rowCount } = result;
+  return { rows };
+}
+
 export async function getDriversWhoPaidOff({ ids, weekNumber, year }) {
   const sql = fs
     .readFileSync('src/sql/get_drivers_who_paid_off.sql')
