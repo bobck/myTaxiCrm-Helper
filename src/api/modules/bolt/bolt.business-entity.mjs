@@ -1,3 +1,8 @@
+import libphonenumber from 'google-libphonenumber';
+import { cityListWithAssignedBy } from '../../../bitrix/bitrix.constants.mjs';
+
+const phoneUtil = libphonenumber.PhoneNumberUtil.getInstance();
+
 export const checkIfDriverStaysInTheSameCity = async ({
   driver_id,
   city_id,
