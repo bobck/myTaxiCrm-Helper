@@ -178,3 +178,85 @@ export const getDriversIgnoringCashBlockRules = () => {
   const sql = `SELECT driver_id FROM drivers_ignoring_cash_block_rules WHERE is_active=TRUE`;
   return db.all(sql);
 };
+/**
+ * Deactivates a batch of drivers by setting their 'is_active' flag to false
+ * and updating their 'updated_at' timestamp.
+ *
+ * This function uses the 'sqlite' promise-based wrapper.
+ *
+ * @param {string[]} driverIds An array of driver UUIDs to deactivate.
+ * @returns {Promise<object>} A promise that resolves with the result object from the db driver,
+ * which contains 'changes' for the number of affected rows.
+ * @throws {Error} Throws an error if the update fails or if driverIds is invalid.
+ */
+export async function deactivateDriversIgnoringDCBR(driverIds) {
+  if (!Array.isArray(driverIds)) {
+    throw new Error('Input must be a non-empty array of driver IDs.');
+  }
+  if (driverIds.length === 0) {
+    return;
+  }
+  const placeholders = driverIds.map(() => '?').join(',');
+  const sql = `
+    UPDATE drivers_ignoring_cash_block_rules
+    SET
+      is_active = 0,
+      updated_at = CURRENT_TIMESTAMP
+    WHERE
+      driver_id IN (${placeholders})
+  `;
+
+  const result = await db.run(sql, driverIds);
+  return result;
+}
+/**
+ * Creates new drivers from an array of driver IDs, setting them as active.
+ *
+ * This function uses a transaction to ensure all drivers are created atomically.
+ *
+ * @param {string[]} driverIds An array of driver UUIDs to create.
+ * @returns {Promise<number>} A promise that resolves with the number of newly created drivers.
+ * @throws {Error} Throws an error if the transaction fails or if driverIds is invalid.
+ */
+export async function createDriversIgnoringDCBR(driverIds) {
+  // Validate that the input is a non-empty array.
+  if (!Array.isArray(driverIds)) {
+    throw new Error('Input must be a non-empty array of driver IDs.');
+  }
+  if (driverIds.length === 0) {
+    return;
+  }
+
+  const sql = `
+    INSERT INTO drivers_ignoring_cash_block_rules (driver_id, is_active, created_at, updated_at)
+    VALUES (?, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+  `;
+  let createdCount = 0;
+
+  try {
+    // Begin a transaction for batch insertion.
+    await db.exec('BEGIN TRANSACTION');
+
+    // Prepare the statement for reuse.
+    const stmt = await db.prepare(sql);
+
+    // Loop through each ID and execute the insert statement.
+    for (const id of driverIds) {
+      const result = await stmt.run(id);
+      createdCount += result.changes;
+    }
+
+    // Finalize the statement and commit the transaction.
+    await stmt.finalize();
+    await db.exec('COMMIT');
+
+    console.log(`Successfully created ${createdCount} new drivers.`);
+    return createdCount;
+  } catch (err) {
+    // If any error occurs, roll back the entire transaction.
+    console.error('Transaction failed, rolling back.', err.message);
+    await db.exec('ROLLBACK');
+    // Re-throw the error to be handled by the caller.
+    throw err;
+  }
+}

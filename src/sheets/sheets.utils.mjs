@@ -14,7 +14,6 @@ const client = sheets({
   auth: googleAuth,
 });
 
-
 /**
  * Reads a single column (A) from a sheet, skipping the header row,
  * and returns a simple array of its values.
