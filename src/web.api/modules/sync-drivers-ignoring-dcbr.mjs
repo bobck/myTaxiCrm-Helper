@@ -74,10 +74,7 @@ export const synchronizeDriversIgnoringDCBR = async () => {
     newDrivers: newDrivers.size,
     deletedDrivers: deletedDrivers.size,
   });
-  console.log({
-    newDrivers,
-    deletedDrivers,
-  });
+ 
 
   await deactivateDriversIgnoringDCBR([...deletedDrivers]);
   await createDriversIgnoringDCBR([...newDrivers]);
