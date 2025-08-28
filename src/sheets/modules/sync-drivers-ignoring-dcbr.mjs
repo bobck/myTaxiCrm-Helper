@@ -1,9 +1,9 @@
-import { readDCBRSheetColumnA } from '../../sheets/sheets.utils.mjs';
+import { readDCBRSheetColumnA } from '../sheets.utils.mjs';
 import {
   createDriversIgnoringDCBR,
   deactivateDriversIgnoringDCBR,
   getDriversIgnoringCashBlockRules,
-} from '../web.api.queries.mjs';
+} from '../../web.api/web.api.queries.mjs';
 
 function isUuid(str) {
   // First, check if the input is a string and not empty.
