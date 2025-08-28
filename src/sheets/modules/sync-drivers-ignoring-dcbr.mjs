@@ -6,22 +6,13 @@ import {
 } from '../../web.api/web.api.queries.mjs';
 
 function isUuid(str) {
-  // First, check if the input is a string and not empty.
   if (typeof str !== 'string' || str.length === 0) {
     return false;
   }
 
-  // Regular expression to check the UUID format, including version and variant.
-  // - ^[0-9a-f]{8}-      : Matches 8 hex characters followed by a hyphen.
-  // - [0-9a-f]{4}-      : Matches 4 hex characters followed by a hyphen.
-  // - [1-5][0-9a-f]{3}-  : Matches the version (1-5) and 3 more hex characters, followed by a hyphen.
-  // - [89ab][0-9a-f]{3}- : Matches the variant (8, 9, A, or B) and 3 more hex characters, followed by a hyphen.
-  // - [0-9a-f]{12}$      : Matches the final 12 hex characters.
-  // - i                  : Case-insensitive flag.
   const uuidRegex =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-  // Test the string against the regular expression.
   return uuidRegex.test(str);
 }
 
@@ -40,14 +31,12 @@ function getSetDifferences(setA, setB) {
   const differenceA = new Set();
   const differenceB = new Set();
 
-  // Find elements in setA that are not in setB
   for (const elem of setA) {
     if (!setB.has(elem)) {
       differenceA.add(elem);
     }
   }
 
-  // Find elements in setB that are not in setA
   for (const elem of setB) {
     if (!setA.has(elem)) {
       differenceB.add(elem);
