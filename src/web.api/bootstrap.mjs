@@ -19,7 +19,6 @@ import { saveRepairAndAccidentCarsReportJob } from './jobs/save-repair-and-accid
 import { getAndSaveClosedPolishBitrixDealsJob } from './gdc-report/jobs/get-and-save-closed-polish-bitrix-deals-job.mjs';
 import { updateAndSaveDriverCashBlockRulesJob } from './jobs/update-and-save-driver-cash-block-rules-job.mjs';
 
-
 export function driversCustomTariffJobs() {
   try {
     deleteDriversCustomTariffJob.start();

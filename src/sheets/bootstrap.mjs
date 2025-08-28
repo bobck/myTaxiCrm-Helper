@@ -7,10 +7,10 @@ export function sheetJobs() {
     // getAndSaveCurrentPlanJob.start();
     synchronizeDriversIgnoringDCBRJob.start();
   } catch (error) {
-  //   console.error('sync error, app down...');
-  //   console.error({ time: new Date(), error });
-  //   console.error('Trying to restart...');
-  //   getAndSaveCurrentPlanJob.stop();
+    //   console.error('sync error, app down...');
+    //   console.error({ time: new Date(), error });
+    //   console.error('Trying to restart...');
+    //   getAndSaveCurrentPlanJob.stop();
     synchronizeDriversIgnoringDCBRJob.stop();
     sheetJobs();
   }
