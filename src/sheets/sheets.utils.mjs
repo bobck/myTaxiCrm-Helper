@@ -1,6 +1,6 @@
 import { auth, sheets } from '@googleapis/sheets';
 
-const KEY_FILE_PATH = './hb-token.json';
+const KEY_FILE_PATH = './token.json';
 const SPREADSHEET_ID = process.env.DCBR_SHEET_ID;
 
 // Reusable authentication and client setup
@@ -22,7 +22,6 @@ const client = sheets({
  */
 export async function readDCBRSheetColumnA(sheetName) {
   const range = `${sheetName}!A2:A`;
-  console.log(`Reading range: ${range}`);
 
   try {
     const response = await client.spreadsheets.values.get({

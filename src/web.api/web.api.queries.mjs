@@ -219,7 +219,6 @@ export async function deactivateDriversIgnoringDCBR(driverIds) {
  * @throws {Error} Throws an error if the transaction fails or if driverIds is invalid.
  */
 export async function createDriversIgnoringDCBR(driverIds) {
-  // Validate that the input is a non-empty array.
   if (!Array.isArray(driverIds)) {
     throw new Error('Input must be a non-empty array of driver IDs.');
   }
@@ -234,29 +233,22 @@ export async function createDriversIgnoringDCBR(driverIds) {
   let createdCount = 0;
 
   try {
-    // Begin a transaction for batch insertion.
     await db.exec('BEGIN TRANSACTION');
 
-    // Prepare the statement for reuse.
     const stmt = await db.prepare(sql);
 
-    // Loop through each ID and execute the insert statement.
     for (const id of driverIds) {
       const result = await stmt.run(id);
       createdCount += result.changes;
     }
 
-    // Finalize the statement and commit the transaction.
     await stmt.finalize();
     await db.exec('COMMIT');
 
-    console.log(`Successfully created ${createdCount} new drivers.`);
     return createdCount;
   } catch (err) {
-    // If any error occurs, roll back the entire transaction.
     console.error('Transaction failed, rolling back.', err.message);
     await db.exec('ROLLBACK');
-    // Re-throw the error to be handled by the caller.
     throw err;
   }
 }

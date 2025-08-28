@@ -47,15 +47,18 @@ function getSetDifferences(setA, setB) {
 }
 
 export const synchronizeDriversIgnoringDCBR = async () => {
-  const driversToIgnore = new Set(
-    (await getDriversIgnoringCashBlockRules()).map(({ driver_id }) => driver_id)
-  );
-  const driversFromSheet = new Set(
-    (await readDCBRSheetColumnA('drivers')).filter(isUuid)
-  );
+  const driversToIgnore = await getDriversIgnoringCashBlockRules();
+  const driversFromSheet = await readDCBRSheetColumnA('drivers');
+
+  const driversToIgnoreIds = driversToIgnore.map(({ driver_id }) => driver_id);
+  const verifiedDriversFromSheet = driversFromSheet.filter(isUuid);
+
+  const driverToIgnoreIdSet = new Set(driversToIgnoreIds);
+  const verifiedDriversFromSheetSet = new Set(verifiedDriversFromSheet);
+
   const [newDrivers, deletedDrivers] = getSetDifferences(
-    driversToIgnore,
-    driversFromSheet
+    driverToIgnoreIdSet,
+    verifiedDriversFromSheetSet
   );
   console.log({
     message: 'synchronizeDriversIgnoringDCBR',
