@@ -21,7 +21,6 @@ const client = sheets({
  * @returns {Promise<Array<string>>} A promise that resolves to an array of strings.
  */
 export async function readDCBRSheetColumnA(sheetName) {
-
   const range = `${sheetName}!A2:A`;
   console.log(`Reading range: ${range}`);
 
