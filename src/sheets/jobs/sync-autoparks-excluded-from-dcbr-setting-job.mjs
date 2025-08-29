@@ -12,7 +12,9 @@ const job = CronJob.from({
     try {
       await synchronizeAutoParksExcludedFromDCBRSetting();
     } catch (error) {
-      console.error('Error occurred in onTick synchronizeAutoParksExcludedFromDCBRSetting');
+      console.error(
+        'Error occurred in onTick synchronizeAutoParksExcludedFromDCBRSetting'
+      );
       console.error({ time: new Date(), error });
     }
   },

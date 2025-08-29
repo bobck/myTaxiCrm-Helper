@@ -6,7 +6,6 @@ import {
 } from '../../web.api/web.api.queries.mjs';
 import { getSetDifferences, isUuid } from '../../shared/shared.utils.mjs';
 
-
 export const synchronizeDriversIgnoringDCBR = async () => {
   const driversToIgnore = await getDriversIgnoringCashBlockRules();
   const driversFromSheet = await readDCBRSheetColumnA('drivers');
