@@ -253,15 +253,10 @@ export async function createDriversIgnoringDCBR(driverIds) {
   }
 }
 
-
-
 export const getAutoParksExcludedFromCashBlockRules = () => {
   const sql = `SELECT auto_park_id FROM auto_parks_excluded_from_cash_block_rules WHERE is_active=TRUE`;
   return db.all(sql);
 };
-
-
-
 
 export async function deactivateAutoParksExcludedFromDCBR(autoParkIds) {
   if (!Array.isArray(autoParkIds)) {

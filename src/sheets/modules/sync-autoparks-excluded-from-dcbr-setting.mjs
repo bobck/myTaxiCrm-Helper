@@ -10,7 +10,9 @@ export const synchronizeAutoParksExcludedFromDCBRSetting = async () => {
   const excludedAutoParks = await getAutoParksExcludedFromCashBlockRules();
   const autoParksFromSheet = await readDCBRSheetColumnA('autoparks');
 
-  const excludedAutoParkIds = excludedAutoParks.map(({ auto_park_id }) => auto_park_id);
+  const excludedAutoParkIds = excludedAutoParks.map(
+    ({ auto_park_id }) => auto_park_id
+  );
   const verifiedAutoParksFromSheet = autoParksFromSheet.filter(isUuid);
 
   const excludedAutoParkIdsSet = new Set(excludedAutoParkIds);
