@@ -60,7 +60,8 @@
     "testDriverCashBlockRulesManually": "ENV=TEST node -r dotenv/config src/web.api/modules/driver-cash-block-rules.mjs",
     "moveReferralToClosedManually": "ENV=TEST node -r dotenv/config src/bitrix/modules/move-referral-to-closed.mjs",
     "moveBoltDriversBanCardsManually": "ENV=TEST BOLT_DRIVERS_BAN_CARDS=17 CHUNK_SIZE=11 node -r dotenv/config src/bitrix/modules/move-bolt-drivers-to-ban.mjs",
-    "syncDriverIgnoringDCBRManually": "ENV=TEST node -r dotenv/config src/sheets/modules/sync-drivers-ignoring-dcbr.mjs"
+    "syncDriverIgnoringDCBRManually": "ENV=TEST node -r dotenv/config src/sheets/modules/sync-drivers-ignoring-dcbr.mjs",
+    "syncAutoParksExcludedFromDCBRManually": "ENV=TEST node -r dotenv/config src/sheets/modules/sync-autoparks-excluded-from-dcbr-setting.mjs"
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",

@@ -252,3 +252,64 @@ export async function createDriversIgnoringDCBR(driverIds) {
     throw err;
   }
 }
+
+export const getAutoParksExcludedFromCashBlockRules = () => {
+  const sql = `SELECT auto_park_id FROM auto_parks_excluded_from_cash_block_rules WHERE is_active=TRUE`;
+  return db.all(sql);
+};
+
+export async function deactivateAutoParksExcludedFromDCBR(autoParkIds) {
+  if (!Array.isArray(autoParkIds)) {
+    throw new Error('Input must be a non-empty array of auto park IDs.');
+  }
+  if (autoParkIds.length === 0) {
+    return;
+  }
+  const placeholders = autoParkIds.map(() => '?').join(',');
+  const sql = `
+    UPDATE auto_parks_excluded_from_cash_block_rules
+    SET
+      is_active = 0,
+      updated_at = CURRENT_TIMESTAMP
+    WHERE
+      auto_park_id IN (${placeholders})
+  `;
+
+  const result = await db.run(sql, autoParkIds);
+  return result;
+}
+
+export async function createAutoParksExcludedFromDCBR(autoParkIds) {
+  if (!Array.isArray(autoParkIds)) {
+    throw new Error('Input must be a non-empty array of auto park IDs.');
+  }
+  if (autoParkIds.length === 0) {
+    return;
+  }
+
+  const sql = `
+    INSERT INTO auto_parks_excluded_from_cash_block_rules (auto_park_id, is_active, created_at, updated_at)
+    VALUES (?, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+  `;
+  let createdCount = 0;
+
+  try {
+    await db.exec('BEGIN TRANSACTION');
+
+    const stmt = await db.prepare(sql);
+
+    for (const id of autoParkIds) {
+      const result = await stmt.run(id);
+      createdCount += result.changes;
+    }
+
+    await stmt.finalize();
+    await db.exec('COMMIT');
+
+    return createdCount;
+  } catch (err) {
+    console.error('Transaction failed, rolling back.', err.message);
+    await db.exec('ROLLBACK');
+    throw err;
+  }
+}
