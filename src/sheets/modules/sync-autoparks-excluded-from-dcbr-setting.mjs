@@ -1,34 +1,34 @@
 import { readDCBRSheetColumnA } from '../sheets.utils.mjs';
 import {
-  createDriversIgnoringDCBR,
-  deactivateDriversIgnoringDCBR,
-  getDriversIgnoringCashBlockRules,
+  createAutoParksExcludedFromDCBR,
+  deactivateAutoParksExcludedFromDCBR,
+  getAutoParksExcludedFromCashBlockRules,
 } from '../../web.api/web.api.queries.mjs';
 import { getSetDifferences, isUuid } from '../../shared/shared.utils.mjs';
 
 export const synchronizeAutoParksExcludedFromDCBRSetting = async () => {
-  const driversToIgnore = await getDriversIgnoringCashBlockRules();
-  const driversFromSheet = await readDCBRSheetColumnA('autoparks');
+  const excludedAutoParks = await getAutoParksExcludedFromCashBlockRules();
+  const autoParksFromSheet = await readDCBRSheetColumnA('autoparks');
 
-  const driversToIgnoreIds = driversToIgnore.map(({ driver_id }) => driver_id);
-  const verifiedDriversFromSheet = driversFromSheet.filter(isUuid);
+  const excludedAutoParkIds = excludedAutoParks.map(({ auto_park_id }) => auto_park_id);
+  const verifiedAutoParksFromSheet = autoParksFromSheet.filter(isUuid);
 
-  const driverToIgnoreIdSet = new Set(driversToIgnoreIds);
-  const verifiedDriversFromSheetSet = new Set(verifiedDriversFromSheet);
+  const excludedAutoParkIdsSet = new Set(excludedAutoParkIds);
+  const verifiedAutoParksFromSheetSet = new Set(verifiedAutoParksFromSheet);
 
-  const [newDrivers, deletedDrivers] = getSetDifferences(
-    driverToIgnoreIdSet,
-    verifiedDriversFromSheetSet
+  const [newAutoParks, deletedAutoParks] = getSetDifferences(
+    excludedAutoParkIdsSet,
+    verifiedAutoParksFromSheetSet
   );
   console.log({
     message: 'synchronizeAutoParksExcludedFromDCBRSetting',
     date: new Date(),
-    newDrivers: newDrivers.size,
-    deletedDrivers: deletedDrivers.size,
+    newAutoParks: newAutoParks.size,
+    deletedAutoParks: deletedAutoParks.size,
   });
 
-  await deactivateDriversIgnoringDCBR([...deletedDrivers]);
-  await createDriversIgnoringDCBR([...newDrivers]);
+  await deactivateAutoParksExcludedFromDCBR([...deletedAutoParks]);
+  await createAutoParksExcludedFromDCBR([...newAutoParks]);
 };
 
 if (process.env.ENV == 'TEST') {
