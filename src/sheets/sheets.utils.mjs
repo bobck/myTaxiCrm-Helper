@@ -67,14 +67,26 @@ export async function getAllRowsAsObjects() {
         maxDebt,
       ] = row;
 
-      const balanceActivationValueNullVerified = balanceActivationValue === '' ? null : Number(balanceActivationValue)
-      const balanceActivationValueIsNaNVerified = isNaN(balanceActivationValueNullVerified) ? null : balanceActivationValueNullVerified
+      const balanceActivationValueNullVerified =
+        balanceActivationValue === '' ? null : Number(balanceActivationValue);
+      const balanceActivationValueIsNaNVerified = isNaN(
+        balanceActivationValueNullVerified
+      )
+        ? null
+        : balanceActivationValueNullVerified;
 
-      const depositActivationValueNullVerified = depositActivationValue === '' ? null : Number(depositActivationValue)
-      const depositActivationValueIsNaNVerified = isNaN(depositActivationValueNullVerified) ? null : depositActivationValueNullVerified
+      const depositActivationValueNullVerified =
+        depositActivationValue === '' ? null : Number(depositActivationValue);
+      const depositActivationValueIsNaNVerified = isNaN(
+        depositActivationValueNullVerified
+      )
+        ? null
+        : depositActivationValueNullVerified;
 
-      const maxDebtNullVerified = maxDebt === '' ? null : Number(maxDebt)
-      const maxDebtIsNaNVerified = isNaN(maxDebtNullVerified) ? null : maxDebtNullVerified
+      const maxDebtNullVerified = maxDebt === '' ? null : Number(maxDebt);
+      const maxDebtIsNaNVerified = isNaN(maxDebtNullVerified)
+        ? null
+        : maxDebtNullVerified;
       const rowObject = {
         auto_park_id,
         mode,

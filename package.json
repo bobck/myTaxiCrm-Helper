@@ -63,7 +63,6 @@
     "syncDriverIgnoringDCBRManually": "ENV=TEST node -r dotenv/config src/sheets/modules/sync-drivers-ignoring-dcbr.mjs",
     "syncAutoParksExcludedFromDCBRRulesManually": "ENV=TEST node -r dotenv/config src/sheets/modules/sync-autoparks-excluded-from-dcbr-setting.mjs",
     "syncAutoParkCustomCashBlockRulesManually": "ENV=TEST node -r dotenv/config src/sheets/modules/sync-autopark-custom-cash-block-rules.mjs"
- 
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",

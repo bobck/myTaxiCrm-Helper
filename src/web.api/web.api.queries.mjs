@@ -314,15 +314,15 @@ export async function createAutoParksExcludedFromDCBR(autoParkIds) {
   }
 }
 
-
 export const getAutoParkCustomCashBlockRules = () => {
   const sql = `SELECT * FROM auto_park_custom_cash_block_rules WHERE is_active=TRUE`;
   return db.all(sql);
 };
 
-
-
-export async function synchronizeAutoParkRulesTransaction({ newAutoParkRules, deletedAutoParkRuleIds }) {
+export async function synchronizeAutoParkRulesTransaction({
+  newAutoParkRules,
+  deletedAutoParkRuleIds,
+}) {
   try {
     // Start the transaction
     await db.run('BEGIN TRANSACTION;');
@@ -365,10 +365,12 @@ export async function synchronizeAutoParkRulesTransaction({ newAutoParkRules, de
 
     // Commit the transaction if all operations succeed
     await db.run('COMMIT;');
-
   } catch (error) {
     // If any error occurs, rollback the entire transaction
-    console.error('Error during synchronization, rolling back transaction.', error);
+    console.error(
+      'Error during synchronization, rolling back transaction.',
+      error
+    );
     await db.run('ROLLBACK;');
     // Re-throw the error so the calling code is aware of the failure
     throw error;
