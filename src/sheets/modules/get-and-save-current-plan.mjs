@@ -1,5 +1,5 @@
 import { auth, sheets } from '@googleapis/sheets';
-import { savePlanRow, markAllAsNotLastVersion } from '../sheets-utils.mjs';
+import { savePlanRow, markAllAsNotLastVersion } from '../sheets.queries.mjs';
 
 export async function getAndSaveCurrentPlan() {
   console.log({ time: new Date(), message: 'getAndSaveCurrentPlan' });

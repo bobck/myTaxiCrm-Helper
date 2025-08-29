@@ -14,6 +14,7 @@ import {
 } from '../web.api.utlites.mjs';
 
 const activationValue = 200;
+const maxDebt = -1000;
 
 const calculateDriverCashBlockRules = () => {
   const cashBlockRule = {
@@ -57,7 +58,12 @@ const deleteDriverCustomCashBlockRuleMutation = async ({
   const variables = {
     deleteDriverCustomCashboxRulesInput: { driverId, ruleId },
   };
-  await makeCRMRequestlimited({ body: { operationName, query, variables } });
+  const { data, errors } = await makeCRMRequestlimited({
+    body: { operationName, query, variables },
+  });
+  const { deleteDriverCustomCashboxRules } = data;
+  const { success } = deleteDriverCustomCashboxRules;
+  return { success, errors };
 };
 const calculateMutationVariables = ({
   auto_park_id,
@@ -92,8 +98,7 @@ export const setDriverCashBlockRules = async () => {
     ids: IdsOfDriversWithCashBlockRules,
     year,
     weekNumber,
-    activationValue: activationValue * -1,
-    driversToIgnore,
+    maxDebt,
   });
 
   console.log({
@@ -167,11 +172,16 @@ export const updateDriverCashBlockRules = async () => {
         (d) => d.driver_id === driver_id
       );
 
-      await deleteDriverCustomCashBlockRuleMutation({
-        driver_id,
-        driver_cash_block_rule_id,
-      });
+      const { success, errors } = await deleteDriverCustomCashBlockRuleMutation(
+        {
+          driver_id,
+          driver_cash_block_rule_id,
+        }
+      );
       await markDriverCashBlockRulesAsDeleted({ driver_id });
+      if (!success) {
+        throw errors;
+      }
     } catch (error) {
       console.error('error while updateDriverCashBlockRules', error);
       continue;
@@ -181,6 +191,6 @@ export const updateDriverCashBlockRules = async () => {
 
 if (process.env.ENV == 'TEST') {
   await openSShTunnel;
-  // // await updateDriverCashBlockRules();
+  await updateDriverCashBlockRules();
   // await setDriverCashBlockRules();
 }
