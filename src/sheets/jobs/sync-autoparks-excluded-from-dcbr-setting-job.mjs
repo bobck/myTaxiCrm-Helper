@@ -1,4 +1,5 @@
 import { CronJob } from 'cron';
+import { synchronizeAutoParksExcludedFromDCBRSetting } from '../modules/sync-autoparks-excluded-from-dcbr-setting.mjs';
 
 const cronTime = '0 3 * * *';
 
@@ -11,7 +12,7 @@ const job = CronJob.from({
     try {
       await synchronizeAutoParksExcludedFromDCBRSetting();
     } catch (error) {
-      console.error('Error occurred in onTick synchronizeDriversIgnoringDCBR');
+      console.error('Error occurred in onTick synchronizeAutoParksExcludedFromDCBRSetting');
       console.error({ time: new Date(), error });
     }
   },
