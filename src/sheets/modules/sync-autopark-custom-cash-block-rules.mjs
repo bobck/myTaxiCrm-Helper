@@ -1,10 +1,11 @@
-import { getAllRowsAsObjects, readDCBRSheetColumnA } from '../sheets.utils.mjs';
+import { getAllRowsAsObjects } from '../sheets.utils.mjs';
 import {
   createAutoParksExcludedFromDCBR,
   deactivateAutoParksExcludedFromDCBR,
-  getAutoParksExcludedFromCashBlockRules,
+  getAutoParkCustomCashBlockRules,
+  synchronizeAutoParkRulesTransaction,
 } from '../../web.api/web.api.queries.mjs';
-import { getSetDifferences, isUuid } from '../../shared/shared.utils.mjs';
+import { isUuid } from '../../shared/shared.utils.mjs';
 
 const verifyAutoParkCustomCashBlockRule = async (rule) => {
 
@@ -19,7 +20,7 @@ const verifyAutoParkCustomCashBlockRule = async (rule) => {
   if (!auto_park_id || !mode || !target || !maxDebt) {
     return false;
   }
-  if (!isUuid(auto_park_id)) {
+  if (!isUuid(auto_park_id) || auto_park_id == 'DEFAULT') {
     return false;
   }
   if (
@@ -52,32 +53,45 @@ const ifRulesAreEqueal = (rule1, rule2) => {
 
 
 export const synchronizeAutoParkCustomCashBlockRules = async () => {
-  // const autoParkRules = await getAutoParksExcludedFromCashBlockRules();
+  const activeAutoParkRules = await getAutoParkCustomCashBlockRules();
   const autoParkRulesFromSheet = await getAllRowsAsObjects();
 
-  console.log(autoParkRulesFromSheet)
+  // console.log(autoParkRulesFromSheet)
   // return;
   // const excludedAutoParkIds = autoParkRules.map(
   //   ({ auto_park_id }) => auto_park_id
   // );
   const verifiedAutoParksFromSheet = autoParkRulesFromSheet.filter(verifyAutoParkCustomCashBlockRule);
 
-  const excludedAutoParkIdsSet = new Set(excludedAutoParkIds);
-  const verifiedAutoParksFromSheetSet = new Set(verifiedAutoParksFromSheet);
 
-  const [newAutoParks, deletedAutoParks] = getSetDifferences(
-    excludedAutoParkIdsSet,
-    verifiedAutoParksFromSheetSet
+  const newAutoParkRules = verifiedAutoParksFromSheet.reduce((acc, rule) => {
+
+    if (!activeAutoParkRules.some(activeRule => ifRulesAreEqueal(activeRule, rule))) {
+      acc.push(rule);
+    }
+
+    return acc;
+  },
+    []
+  )
+  const deletedAutoParkRules = activeAutoParkRules.reduce((acc, rule) => {
+    if (!verifiedAutoParksFromSheet.some(activeRule => ifRulesAreEqueal(activeRule, rule))) {
+      acc.push(rule);
+    }
+    return acc;
+  }, []);
+  const deletedAutoParkRuleIds = deletedAutoParkRules.map(
+    ({ rule_id }) => rule_id
   );
+
+  console.log({ newAutoParkRules, deletedAutoParkRules })
   console.log({
     message: 'synchronizeAutoParksExcludedFromDCBRSetting',
     date: new Date(),
-    newAutoParks: newAutoParks.size,
-    deletedAutoParks: deletedAutoParks.size,
+    newAutoParks: newAutoParkRules.length,
+    deletedAutoParks: deletedAutoParkRules.length,
   });
-
-  await deactivateAutoParksExcludedFromDCBR([...deletedAutoParks]);
-  await createAutoParksExcludedFromDCBR([...newAutoParks]);
+  await synchronizeAutoParkRulesTransaction({ newAutoParkRules, deletedAutoParkRuleIds });
 };
 
 if (process.env.ENV == 'TEST') {

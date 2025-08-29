@@ -313,3 +313,64 @@ export async function createAutoParksExcludedFromDCBR(autoParkIds) {
     throw err;
   }
 }
+
+
+export const getAutoParkCustomCashBlockRules = () => {
+  const sql = `SELECT * FROM auto_park_custom_cash_block_rules WHERE is_active=TRUE`;
+  return db.all(sql);
+};
+
+
+
+export async function synchronizeAutoParkRulesTransaction({ newAutoParkRules, deletedAutoParkRuleIds }) {
+  try {
+    // Start the transaction
+    await db.run('BEGIN TRANSACTION;');
+
+    // Step 1: Deactivate rules based on the deletedAutoParkRules array.
+    // This will set is_active to false for all existing rules matching the auto_park_id.
+    if (deletedAutoParkRuleIds && deletedAutoParkRuleIds.length > 0) {
+      const placeholders = deletedAutoParkRuleIds.map(() => '?').join(',');
+      const updateSql = `
+        UPDATE auto_park_custom_cash_block_rules
+        SET is_active = false, updated_at = CURRENT_TIMESTAMP
+        WHERE rule_id IN (${placeholders});
+      `;
+      await db.run(updateSql, deletedAutoParkRuleIds);
+    }
+
+    // Step 2: Insert all new rules from the newAutoParkRules array.
+    // Since auto_park_id can be repeated, we perform a simple insert for each new rule.
+    if (newAutoParkRules && newAutoParkRules.length > 0) {
+      const insertSql = `
+        INSERT INTO auto_park_custom_cash_block_rules
+        (auto_park_id, mode, target, balanceActivationValue, depositActivationValue, maxDebt)
+        VALUES (?, ?, ?, ?, ?, ?);
+      `;
+
+      // For optimal performance, a database driver's "prepare" statement method
+      // should be used before looping to execute the same query multiple times.
+      for (const rule of newAutoParkRules) {
+        const params = [
+          rule.auto_park_id,
+          rule.mode,
+          rule.target,
+          rule.balanceActivationValue,
+          rule.depositActivationValue,
+          rule.maxDebt,
+        ];
+        await db.run(insertSql, params);
+      }
+    }
+
+    // Commit the transaction if all operations succeed
+    await db.run('COMMIT;');
+
+  } catch (error) {
+    // If any error occurs, rollback the entire transaction
+    console.error('Error during synchronization, rolling back transaction.', error);
+    await db.run('ROLLBACK;');
+    // Re-throw the error so the calling code is aware of the failure
+    throw error;
+  }
+}
