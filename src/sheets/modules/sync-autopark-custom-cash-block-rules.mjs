@@ -1,7 +1,5 @@
 import { getAllRowsAsObjects } from '../sheets.utils.mjs';
 import {
-  createAutoParksExcludedFromDCBR,
-  deactivateAutoParksExcludedFromDCBR,
   getAutoParkCustomCashBlockRules,
   synchronizeAutoParkRulesTransaction,
 } from '../../web.api/web.api.queries.mjs';
@@ -55,12 +53,6 @@ const ifRulesAreEqueal = (rule1, rule2) => {
 export const synchronizeAutoParkCustomCashBlockRules = async () => {
   const activeAutoParkRules = await getAutoParkCustomCashBlockRules();
   const autoParkRulesFromSheet = await getAllRowsAsObjects();
-
-  // console.log(autoParkRulesFromSheet)
-  // return;
-  // const excludedAutoParkIds = autoParkRules.map(
-  //   ({ auto_park_id }) => auto_park_id
-  // );
   const verifiedAutoParksFromSheet = autoParkRulesFromSheet.filter(verifyAutoParkCustomCashBlockRule);
 
 

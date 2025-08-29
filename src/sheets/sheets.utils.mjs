@@ -47,20 +47,16 @@ export async function getAllRowsAsObjects() {
     const sheetName = 'autopark_custom_rules';
     const response = await client.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
-      range: sheetName, // Reading the whole sheet
+      range: sheetName,
     });
 
     const rows = response.data.values;
-    // console.log(response.data);
+
     if (!rows || rows.length <= 1) {
       console.log(`No data found in sheet: ${sheetName}.`);
       return [];
     }
 
-    // Use the first row as the headers (keys for our objects)
-    const headers = rows[0];
-
-    // Slice the array to remove the header row, then map over the remaining rows
     const dataObjects = rows.slice(1).map((row) => {
       const [
         auto_park_id,
@@ -70,13 +66,22 @@ export async function getAllRowsAsObjects() {
         depositActivationValue,
         maxDebt,
       ] = row;
+
+      const balanceActivationValueNullVerified = balanceActivationValue === '' ? null : Number(balanceActivationValue)
+      const balanceActivationValueIsNaNVerified = isNaN(balanceActivationValueNullVerified) ? null : balanceActivationValueNullVerified
+
+      const depositActivationValueNullVerified = depositActivationValue === '' ? null : Number(depositActivationValue)
+      const depositActivationValueIsNaNVerified = isNaN(depositActivationValueNullVerified) ? null : depositActivationValueNullVerified
+
+      const maxDebtNullVerified = maxDebt === '' ? null : Number(maxDebt)
+      const maxDebtIsNaNVerified = isNaN(maxDebtNullVerified) ? null : maxDebtNullVerified
       const rowObject = {
         auto_park_id,
         mode,
         target,
-        balanceActivationValue: Number(balanceActivationValue) || null,
-        depositActivationValue: Number(depositActivationValue) || null,
-        maxDebt: Number(maxDebt),
+        balanceActivationValue: balanceActivationValueIsNaNVerified,
+        depositActivationValue: depositActivationValueIsNaNVerified,
+        maxDebt: maxDebtIsNaNVerified,
       };
       return rowObject;
     });
