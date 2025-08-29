@@ -8,7 +8,7 @@ import { getSetDifferences, isUuid } from '../../shared/shared.utils.mjs';
 
 export const synchronizeAutoParksExcludedFromDCBRSetting = async () => {
   const driversToIgnore = await getDriversIgnoringCashBlockRules();
-  const driversFromSheet = await readDCBRSheetColumnA('drivers');
+  const driversFromSheet = await readDCBRSheetColumnA('autoparks');
 
   const driversToIgnoreIds = driversToIgnore.map(({ driver_id }) => driver_id);
   const verifiedDriversFromSheet = driversFromSheet.filter(isUuid);
