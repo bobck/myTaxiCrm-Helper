@@ -51,7 +51,7 @@ export async function getAllRowsAsObjects() {
     });
 
     const rows = response.data.values;
-
+    // console.log(response.data);
     if (!rows || rows.length <= 1) {
       console.log(`No data found in sheet: ${sheetName}.`);
       return [];
@@ -79,32 +79,6 @@ export async function getAllRowsAsObjects() {
         maxDebt: Number(maxDebt),
       };
       return rowObject;
-    }).filter((ap) => {
-      const {
-        auto_park_id,
-        mode,
-        target,
-        balanceActivationValue,
-        depositActivationValue,
-        maxDebt,
-      } = ap;
-      if (!auto_park_id || !mode || !target || !maxDebt) {
-        return false;
-      }
-
-      if (
-        (target == 'BOTH' || target == 'BALANCE') &&
-        !balanceActivationValue
-      ) {
-        return false;
-      }
-      if (
-        (target == 'BOTH' || target == 'DEPOSIT') &&
-        !depositActivationValue
-      ) {
-        return false;
-      }
-      return true;
     });
 
     console.log(
