@@ -13,8 +13,9 @@ import {
   makeCRMRequestlimited,
   getDriversWhoPaidOff,
   getTheMostRecentDriverCashBlockRuleIdByDriverId,
+  getAllWorkingDriverIdsByAutoPark,
 } from '../web.api.utlites.mjs';
-import { get } from 'lodash';
+
 
 const activationValue = 200;
 const maxDebt = -1000;
@@ -115,7 +116,7 @@ export const setDriverCashBlockRules = async () => {
   const IdsOfDriversWithCashBlockRules = (
     await getDriversWithActiveCashBlockRules()
   ).map(({ driver_id }) => driver_id);
-  const idsOfAutoparksExcludedFromCashBlockRuleSetting = (await getAutoParksExcludedFromCashBlockRules()).map(({ auto_park_id }) => auto_park_id)
+  const autoParksToIgnore = (await getAutoParksExcludedFromCashBlockRules()).map(({ auto_park_id }) => auto_park_id)
   const driversToIgnore = (await getDriversIgnoringCashBlockRules()).map(
     ({ driver_id }) => driver_id
   );
@@ -150,12 +151,19 @@ export const setDriverCashBlockRules = async () => {
 
 
 
+  const { maxDebt } = defaultRule;
   const { rows } = await getAllWorkingDriverIds({
     ids: IdsOfDriversWithCashBlockRules,
     year,
     weekNumber,
     maxDebt,
+    driversToIgnore,
+    autoParksToIgnore: [
+      ...autoParksToIgnore,
+      ...customAutoParkRules.map(({ auto_park_id }) => auto_park_id),
+    ],
   });
+  drivers.push(...rows);
 
   console.log({
     message: 'setDriverCashBlockRules',
@@ -163,8 +171,13 @@ export const setDriverCashBlockRules = async () => {
     env: process.env.ENV,
     drivers: drivers.length,
     driversToIgnore: driversToIgnore.length,
+    autoParksToIgnore: autoParksToIgnore.length,
     IdsOfDriversWithCashBlockRules: IdsOfDriversWithCashBlockRules.length,
+    customAutoParkRules: customAutoParkRules.length,
+    defaultRule,
   });
+
+  return
   for (const driver of drivers) {
     try {
       const { driver_id, auto_park_id } = driver;
