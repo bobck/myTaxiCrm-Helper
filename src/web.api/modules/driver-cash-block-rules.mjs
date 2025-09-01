@@ -1,8 +1,6 @@
 import { DateTime } from 'luxon';
 import { openSShTunnel } from '../../../ssh.mjs';
 import {
-  getAutoParkCustomCashBlockRules,
-  getAutoParksExcludedFromCashBlockRules,
   getDriversIgnoringCashBlockRules,
   getDriversWithActiveCashBlockRules,
   insertDriverWithCashBlockRules,
@@ -14,40 +12,18 @@ import {
   getDriversWhoPaidOff,
   getTheMostRecentDriverCashBlockRuleIdByDriverId,
 } from '../web.api.utlites.mjs';
-import { get } from 'lodash';
 
 const activationValue = 200;
 const maxDebt = -1000;
 
-const calculateDriverCashBlockRules = ({ rule }) => {
-  const {
-    target,
-    balanceActivationValue,
-    depositActivationValue,
-  } = rule;
-
+const calculateDriverCashBlockRules = () => {
+  const cashBlockRule = {
+    activationValue,
+    isEnabled: true,
+    target: 'BALANCE',
+  };
   const cashBlockRules = [];
-  if ((target == 'BOTH' || target == 'BALANCE') && balanceActivationValue) {
-    const balanceCashBlockRule = {
-      activationValue: balanceActivationValue,
-      isEnabled: true,
-      target: 'BALANCE',
-    };
-
-    cashBlockRules.push(balanceCashBlockRule,);
-
-  }
-  if ((target == 'BOTH' || target == 'DEPOSIT') && depositActivationValue) {
-
-    const depositCashBlockRule = {
-      activationValue: depositActivationValue,
-      isEnabled: true,
-      target: 'DEPOSIT',
-    };
-
-
-    cashBlockRules.push(depositCashBlockRule,);
-  }
+  if (cashBlockRule.isEnabled) cashBlockRules.push(cashBlockRule);
   return { cashBlockRules };
 };
 const editDriverCashBlockRulesMutation = async ({ variables }) => {
@@ -115,42 +91,10 @@ export const setDriverCashBlockRules = async () => {
   const IdsOfDriversWithCashBlockRules = (
     await getDriversWithActiveCashBlockRules()
   ).map(({ driver_id }) => driver_id);
-  const idsOfAutoparksExcludedFromCashBlockRuleSetting = (await getAutoParksExcludedFromCashBlockRules()).map(({ auto_park_id }) => auto_park_id)
   const driversToIgnore = (await getDriversIgnoringCashBlockRules()).map(
     ({ driver_id }) => driver_id
   );
-  const autoParkRules = await getAutoParkCustomCashBlockRules();
-  const defaultRule = autoParkRules.find(({ auto_park_id }) => auto_park_id === 'DEFAULT')
-  const customAutoParkRules = autoParkRules.filter(({ auto_park_id }) => auto_park_id !== 'DEFAULT')
-
-  const drivers = [];
-
-
-
-  if (customAutoParkRules.length > 0) {
-    for (const autoParkRule of customAutoParkRules) {
-      const {
-        auto_park_id,
-        maxDebt,
-      } = autoParkRule;
-      const { rows } = await getAllWorkingDriverIdsByAutoPark({
-        ids: IdsOfDriversWithCashBlockRules,
-        year,
-        weekNumber,
-        maxDebt,
-        driversToIgnore,
-        auto_park_id,
-      });
-      drivers.push(...rows);
-    }
-  }
-
-
-
-
-
-
-  const { rows } = await getAllWorkingDriverIds({
+  const { rows: drivers } = await getAllWorkingDriverIds({
     ids: IdsOfDriversWithCashBlockRules,
     year,
     weekNumber,
@@ -248,5 +192,5 @@ export const updateDriverCashBlockRules = async () => {
 if (process.env.ENV == 'TEST') {
   await openSShTunnel;
   await updateDriverCashBlockRules();
-  await setDriverCashBlockRules();
+  // await setDriverCashBlockRules();
 }
