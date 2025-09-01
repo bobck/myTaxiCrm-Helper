@@ -20,10 +20,10 @@ const verifyAutoParkCustomCashBlockRule = async (rule) => {
   if (!isUuid(auto_park_id) || auto_park_id == 'DEFAULT') {
     return false;
   }
-  if ((target == 'BOTH' || target == 'BALANCE') && !balanceActivationValue) {
+  if ((target == 'BOTH' || target == 'BALANCE') && !(Number(balanceActivationValue) > 0)) {
     return false;
   }
-  if ((target == 'BOTH' || target == 'DEPOSIT') && !depositActivationValue) {
+  if ((target == 'BOTH' || target == 'DEPOSIT') && !(Number(depositActivationValue) > 0)) {
     return false;
   }
   return true;
@@ -54,9 +54,13 @@ const ifRulesAreEqueal = (rule1, rule2) => {
 export const synchronizeAutoParkCustomCashBlockRules = async () => {
   const activeAutoParkRules = await getAutoParkCustomCashBlockRules();
   const autoParkRulesFromSheet = await getAllRowsAsObjects();
+
   const verifiedAutoParksFromSheet = autoParkRulesFromSheet.filter(
     verifyAutoParkCustomCashBlockRule
   );
+  // console.log({ verifiedAutoParksFromSheet, activeAutoParkRules })
+  // return;
+
 
   const newAutoParkRules = verifiedAutoParksFromSheet.reduce((acc, rule) => {
     if (
@@ -83,7 +87,6 @@ export const synchronizeAutoParkCustomCashBlockRules = async () => {
     ({ rule_id }) => rule_id
   );
 
-  console.log({ newAutoParkRules, deletedAutoParkRules });
   console.log({
     message: 'synchronizeAutoParksExcludedFromDCBRSetting',
     date: new Date(),
