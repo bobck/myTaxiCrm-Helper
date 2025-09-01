@@ -94,13 +94,14 @@ const calculateMutationVariables = ({
   auto_park_id,
   driver_id,
   cashBlockRules,
+  mode
 }) => {
   const variables = {
     editDriverCashBlockRulesInput: {
       autoParkId: auto_park_id,
       driverId: driver_id,
       isEnabled: cashBlockRules.length > 0,
-      mode: 'MIN_DEBT', // MAX_DEBT | MIN_DEBT
+      mode,
       rules: cashBlockRules,
     },
   };
@@ -177,27 +178,34 @@ export const setDriverCashBlockRules = async () => {
     defaultRule,
   });
 
-  return
   for (const driver of drivers) {
     try {
       const { driver_id, auto_park_id } = driver;
-      const { cashBlockRules } = calculateDriverCashBlockRules();
+      const rule = customAutoParkRules.find(autopark => autopark.auto_park_id === auto_park_id) || defaultRule;
+      const { cashBlockRules } = calculateDriverCashBlockRules({ rule });
       const { variables } = calculateMutationVariables({
         auto_park_id,
         driver_id,
         cashBlockRules,
+        mode: rule.mode
       });
-      try {
-        const { success, errors } = await editDriverCashBlockRulesMutation({
-          variables,
-        });
-        if (!success) {
-          throw errors;
-        }
-      } catch (e) {
-        console.error(e);
-        continue;
+
+      const { success, errors } = await editDriverCashBlockRulesMutation({
+        variables,
+      });
+      if (!success) {
+        throw {
+          error: e,
+          date: new Date(),
+          module: 'setDriverCashBlockRules',
+          driver_id,
+          auto_park_id,
+          cashBlockRules,
+          rule,
+          errors
+        };
       }
+
       const { rows } = await getTheMostRecentDriverCashBlockRuleIdByDriverId({
         driver_id,
       });
@@ -205,6 +213,7 @@ export const setDriverCashBlockRules = async () => {
       await insertDriverWithCashBlockRules({
         driver_id,
         driver_cash_block_rule_id,
+        rule_id: rule.rule_id
       });
     } catch (error) {
       console.error('error while setDriverCashBlockRules', error);
@@ -260,6 +269,6 @@ export const updateDriverCashBlockRules = async () => {
 
 if (process.env.ENV == 'TEST') {
   await openSShTunnel;
-  await updateDriverCashBlockRules();
+  // await updateDriverCashBlockRules();
   await setDriverCashBlockRules();
 }
