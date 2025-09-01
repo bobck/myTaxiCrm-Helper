@@ -62,7 +62,9 @@
     "testRobotaUaAppliesManually": "ENV=DEV node -r dotenv/config src/job-boards/robota.ua/modules/get_and_save_robotaua_applies.mjs",
     "testWorkUaAppliesManually": "ENV=DEV node -r dotenv/config src/job-boards/work.ua/modules/get_and_save_workua_applies.mjs",
     "moveBoltDriversBanCardsManually": "ENV=TEST BOLT_DRIVERS_BAN_CARDS=17 CHUNK_SIZE=11 node -r dotenv/config src/bitrix/modules/move-bolt-drivers-to-ban.mjs",
-    "launchAPI:test": "ENV=TEST API_HOST=0.0.0.0 node -r dotenv/config src/api/api.mjs"
+    "launchAPI:test": "ENV=TEST API_HOST=0.0.0.0 node -r dotenv/config src/api/api.mjs",
+    "moveBoltDriversBanCardsManually": "ENV=TEST BOLT_DRIVERS_BAN_CARDS=17 CHUNK_SIZE=11 node -r dotenv/config src/bitrix/modules/move-bolt-drivers-to-ban.mjs",
+    "syncDriverIgnoringDCBRManually": "ENV=TEST node -r dotenv/config src/sheets/modules/sync-drivers-ignoring-dcbr.mjs"
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",

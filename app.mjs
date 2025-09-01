@@ -15,7 +15,7 @@ await openSShTunnel;
 await initApi();
 
 // telegramJobs();
-// sheetJobs();
+sheetJobs();
 bqJobs();
 
 await remonlineTokenToEnv();
