@@ -20,10 +20,16 @@ const verifyAutoParkCustomCashBlockRule = async (rule) => {
   if (!isUuid(auto_park_id) || auto_park_id == 'DEFAULT') {
     return false;
   }
-  if ((target == 'BOTH' || target == 'BALANCE') && !(Number(balanceActivationValue) > 0)) {
+  if (
+    (target == 'BOTH' || target == 'BALANCE') &&
+    !(Number(balanceActivationValue) > 0)
+  ) {
     return false;
   }
-  if ((target == 'BOTH' || target == 'DEPOSIT') && !(Number(depositActivationValue) > 0)) {
+  if (
+    (target == 'BOTH' || target == 'DEPOSIT') &&
+    !(Number(depositActivationValue) > 0)
+  ) {
     return false;
   }
   return true;
@@ -60,7 +66,6 @@ export const synchronizeAutoParkCustomCashBlockRules = async () => {
   );
   // console.log({ verifiedAutoParksFromSheet, activeAutoParkRules })
   // return;
-
 
   const newAutoParkRules = verifiedAutoParksFromSheet.reduce((acc, rule) => {
     if (

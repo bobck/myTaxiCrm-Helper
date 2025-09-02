@@ -16,16 +16,11 @@ import {
   getAllWorkingDriverIdsByAutoPark,
 } from '../web.api.utlites.mjs';
 
-
 const activationValue = 200;
 const maxDebt = -1000;
 
 const calculateDriverCashBlockRules = ({ rule }) => {
-  const {
-    target,
-    balanceActivationValue,
-    depositActivationValue,
-  } = rule;
+  const { target, balanceActivationValue, depositActivationValue } = rule;
 
   const cashBlockRules = [];
   if ((target == 'BOTH' || target == 'BALANCE') && balanceActivationValue) {
@@ -35,19 +30,16 @@ const calculateDriverCashBlockRules = ({ rule }) => {
       target: 'BALANCE',
     };
 
-    cashBlockRules.push(balanceCashBlockRule,);
-
+    cashBlockRules.push(balanceCashBlockRule);
   }
   if ((target == 'BOTH' || target == 'DEPOSIT') && depositActivationValue) {
-
     const depositCashBlockRule = {
       activationValue: depositActivationValue,
       isEnabled: true,
       target: 'DEPOSIT',
     };
 
-
-    cashBlockRules.push(depositCashBlockRule,);
+    cashBlockRules.push(depositCashBlockRule);
   }
   return { cashBlockRules };
 };
@@ -94,7 +86,7 @@ const calculateMutationVariables = ({
   auto_park_id,
   driver_id,
   cashBlockRules,
-  mode
+  mode,
 }) => {
   const variables = {
     editDriverCashBlockRulesInput: {
@@ -117,24 +109,25 @@ export const setDriverCashBlockRules = async () => {
   const IdsOfDriversWithCashBlockRules = (
     await getDriversWithActiveCashBlockRules()
   ).map(({ driver_id }) => driver_id);
-  const autoParksToIgnore = (await getAutoParksExcludedFromCashBlockRules()).map(({ auto_park_id }) => auto_park_id)
+  const autoParksToIgnore = (
+    await getAutoParksExcludedFromCashBlockRules()
+  ).map(({ auto_park_id }) => auto_park_id);
   const driversToIgnore = (await getDriversIgnoringCashBlockRules()).map(
     ({ driver_id }) => driver_id
   );
   const autoParkRules = await getAutoParkCustomCashBlockRules();
-  const defaultRule = autoParkRules.find(({ auto_park_id }) => auto_park_id === 'DEFAULT')
-  const customAutoParkRules = autoParkRules.filter(({ auto_park_id }) => auto_park_id !== 'DEFAULT')
+  const defaultRule = autoParkRules.find(
+    ({ auto_park_id }) => auto_park_id === 'DEFAULT'
+  );
+  const customAutoParkRules = autoParkRules.filter(
+    ({ auto_park_id }) => auto_park_id !== 'DEFAULT'
+  );
 
   const drivers = [];
 
-
-
   if (customAutoParkRules.length > 0) {
     for (const autoParkRule of customAutoParkRules) {
-      const {
-        auto_park_id,
-        maxDebt,
-      } = autoParkRule;
+      const { auto_park_id, maxDebt } = autoParkRule;
       const { rows } = await getAllWorkingDriverIdsByAutoPark({
         ids: IdsOfDriversWithCashBlockRules,
         year,
@@ -146,11 +139,6 @@ export const setDriverCashBlockRules = async () => {
       drivers.push(...rows);
     }
   }
-
-
-
-
-
 
   const { maxDebt } = defaultRule;
   const { rows } = await getAllWorkingDriverIds({
@@ -181,13 +169,16 @@ export const setDriverCashBlockRules = async () => {
   for (const driver of drivers) {
     try {
       const { driver_id, auto_park_id } = driver;
-      const rule = customAutoParkRules.find(autopark => autopark.auto_park_id === auto_park_id) || defaultRule;
+      const rule =
+        customAutoParkRules.find(
+          (autopark) => autopark.auto_park_id === auto_park_id
+        ) || defaultRule;
       const { cashBlockRules } = calculateDriverCashBlockRules({ rule });
       const { variables } = calculateMutationVariables({
         auto_park_id,
         driver_id,
         cashBlockRules,
-        mode: rule.mode
+        mode: rule.mode,
       });
 
       const { success, errors } = await editDriverCashBlockRulesMutation({
@@ -202,7 +193,7 @@ export const setDriverCashBlockRules = async () => {
           auto_park_id,
           cashBlockRules,
           rule,
-          errors
+          errors,
         };
       }
 
@@ -213,7 +204,7 @@ export const setDriverCashBlockRules = async () => {
       await insertDriverWithCashBlockRules({
         driver_id,
         driver_cash_block_rule_id,
-        rule_id: rule.rule_id
+        rule_id: rule.rule_id,
       });
     } catch (error) {
       console.error('error while setDriverCashBlockRules', error);
