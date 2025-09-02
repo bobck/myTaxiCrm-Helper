@@ -168,7 +168,7 @@ export const insertDriverWithCashBlockRules = ({
   driver_cash_block_rule_id,
   rule_id,
 }) => {
-  const sql = `INSERT INTO driver_cash_block_rules(driver_id,driver_cash_block_rule_id,rule_id) VALUES(?,?,?)`;
+  const sql = `INSERT INTO driver_cash_block_rules(driver_id,driver_cash_block_rule_id,auto_park_rule_id) VALUES(?,?,?)`;
   return db.run(sql, driver_id, driver_cash_block_rule_id, rule_id);
 };
 export const markDriverCashBlockRulesAsDeleted = ({ driver_id }) => {
