@@ -160,7 +160,7 @@ export async function updateExistedDriversWithRevenue(
   }
 }
 export const getDriversWithActiveCashBlockRules = () => {
-  const sql = `SELECT driver_id,driver_cash_block_rule_id FROM driver_cash_block_rules WHERE is_deleted=FALSE`;
+  const sql = `SELECT driver_id,driver_cash_block_rule_id,auto_park_rule_id FROM driver_cash_block_rules WHERE is_deleted=FALSE`;
   return db.all(sql);
 };
 export const insertDriverWithCashBlockRules = ({
@@ -376,4 +376,9 @@ export async function synchronizeAutoParkRulesTransaction({
     // Re-throw the error so the calling code is aware of the failure
     throw error;
   }
+}
+export async function getAutoParkRulesByIds({ rule_ids }) {
+  const placeholders = rule_ids.map(() => '?').join(',');
+  const sql = `SELECT * FROM auto_park_custom_cash_block_rules WHERE rule_id IN (${placeholders})`;
+  return await db.all(sql, rule_ids);
 }

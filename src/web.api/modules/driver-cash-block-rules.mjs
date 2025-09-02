@@ -2,6 +2,7 @@ import { DateTime } from 'luxon';
 import { openSShTunnel } from '../../../ssh.mjs';
 import {
   getAutoParkCustomCashBlockRules,
+  getAutoParkRulesByIds,
   getAutoParksExcludedFromCashBlockRules,
   getDriversIgnoringCashBlockRules,
   getDriversWithActiveCashBlockRules,
@@ -15,9 +16,6 @@ import {
   getTheMostRecentDriverCashBlockRuleIdByDriverId,
   getAllWorkingDriverIdsByAutoPark,
 } from '../web.api.utlites.mjs';
-
-const activationValue = 200;
-const maxDebt = -1000;
 
 const calculateDriverCashBlockRules = ({ rule }) => {
   const { target, balanceActivationValue, depositActivationValue } = rule;
@@ -218,6 +216,11 @@ export const updateDriverCashBlockRules = async () => {
   const IdsOfDriversWithCashBlockRules = driversWithCashBlockRules.map(
     ({ driver_id }) => driver_id
   );
+  const autoParkRuleIds = new Set(driversWithCashBlockRules.map(({ auto_park_rule_id }) => auto_park_rule_id));
+
+  const autoParkRules = await getAutoParkRulesByIds({ rule_ids: [...autoParkRuleIds] });
+
+  const autoParkRuleMap = new Map(autoParkRules.map(rule => [rule.rule_id, rule]));
 
   const { rows: drivers } = await getDriversWhoPaidOff({
     year,
@@ -229,6 +232,7 @@ export const updateDriverCashBlockRules = async () => {
     date: new Date(),
     env: process.env.ENV,
     drivers: drivers.length,
+    autoParkRuleIds:autoParkRuleIds.size,
     IdsOfDriversWithCashBlockRules: IdsOfDriversWithCashBlockRules.length,
   });
   if (drivers.length === 0) {
@@ -236,10 +240,19 @@ export const updateDriverCashBlockRules = async () => {
   }
   for (const driver of drivers) {
     try {
-      const { driver_id } = driver;
-      const { driver_cash_block_rule_id } = driversWithCashBlockRules.find(
+      const { driver_id, driver_balance } = driver;
+      const driverCashBlockRule = driversWithCashBlockRules.find(
         (d) => d.driver_id === driver_id
       );
+      const { auto_park_rule_id, driver_cash_block_rule_id } = driverCashBlockRule;
+      const rule = autoParkRuleMap.get(auto_park_rule_id);
+      const { maxDebt } = rule;
+
+
+      if (driver_balance < maxDebt) {
+        continue;
+      }
+     
 
       const { success, errors } = await deleteDriverCustomCashBlockRuleMutation(
         {
@@ -260,6 +273,6 @@ export const updateDriverCashBlockRules = async () => {
 
 if (process.env.ENV == 'TEST') {
   await openSShTunnel;
-  // await updateDriverCashBlockRules();
-  await setDriverCashBlockRules();
+  await updateDriverCashBlockRules();
+  // await setDriverCashBlockRules();
 }
