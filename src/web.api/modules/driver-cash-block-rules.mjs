@@ -216,11 +216,17 @@ export const updateDriverCashBlockRules = async () => {
   const IdsOfDriversWithCashBlockRules = driversWithCashBlockRules.map(
     ({ driver_id }) => driver_id
   );
-  const autoParkRuleIds = new Set(driversWithCashBlockRules.map(({ auto_park_rule_id }) => auto_park_rule_id));
+  const autoParkRuleIds = new Set(
+    driversWithCashBlockRules.map(({ auto_park_rule_id }) => auto_park_rule_id)
+  );
 
-  const autoParkRules = await getAutoParkRulesByIds({ rule_ids: [...autoParkRuleIds] });
+  const autoParkRules = await getAutoParkRulesByIds({
+    rule_ids: [...autoParkRuleIds],
+  });
 
-  const autoParkRuleMap = new Map(autoParkRules.map(rule => [rule.rule_id, rule]));
+  const autoParkRuleMap = new Map(
+    autoParkRules.map((rule) => [rule.rule_id, rule])
+  );
 
   const { rows: drivers } = await getDriversWhoPaidOff({
     year,
@@ -232,7 +238,7 @@ export const updateDriverCashBlockRules = async () => {
     date: new Date(),
     env: process.env.ENV,
     drivers: drivers.length,
-    autoParkRuleIds:autoParkRuleIds.size,
+    autoParkRuleIds: autoParkRuleIds.size,
     IdsOfDriversWithCashBlockRules: IdsOfDriversWithCashBlockRules.length,
   });
   if (drivers.length === 0) {
@@ -244,15 +250,14 @@ export const updateDriverCashBlockRules = async () => {
       const driverCashBlockRule = driversWithCashBlockRules.find(
         (d) => d.driver_id === driver_id
       );
-      const { auto_park_rule_id, driver_cash_block_rule_id } = driverCashBlockRule;
+      const { auto_park_rule_id, driver_cash_block_rule_id } =
+        driverCashBlockRule;
       const rule = autoParkRuleMap.get(auto_park_rule_id);
       const { maxDebt } = rule;
-
 
       if (driver_balance < maxDebt) {
         continue;
       }
-     
 
       const { success, errors } = await deleteDriverCustomCashBlockRuleMutation(
         {
