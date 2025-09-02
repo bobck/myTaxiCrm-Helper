@@ -160,15 +160,16 @@ export async function updateExistedDriversWithRevenue(
   }
 }
 export const getDriversWithActiveCashBlockRules = () => {
-  const sql = `SELECT driver_id,driver_cash_block_rule_id FROM driver_cash_block_rules WHERE is_deleted=FALSE`;
+  const sql = `SELECT driver_id,driver_cash_block_rule_id,auto_park_rule_id FROM driver_cash_block_rules WHERE is_deleted=FALSE`;
   return db.all(sql);
 };
 export const insertDriverWithCashBlockRules = ({
   driver_id,
   driver_cash_block_rule_id,
+  rule_id,
 }) => {
-  const sql = `INSERT INTO driver_cash_block_rules(driver_id,driver_cash_block_rule_id) VALUES(?,?)`;
-  return db.run(sql, driver_id, driver_cash_block_rule_id);
+  const sql = `INSERT INTO driver_cash_block_rules(driver_id,driver_cash_block_rule_id,auto_park_rule_id) VALUES(?,?,?)`;
+  return db.run(sql, driver_id, driver_cash_block_rule_id, rule_id);
 };
 export const markDriverCashBlockRulesAsDeleted = ({ driver_id }) => {
   const sql = `UPDATE driver_cash_block_rules SET is_deleted=true WHERE driver_id = ?`;
@@ -251,4 +252,133 @@ export async function createDriversIgnoringDCBR(driverIds) {
     await db.exec('ROLLBACK');
     throw err;
   }
+}
+
+export const getAutoParksExcludedFromCashBlockRules = () => {
+  const sql = `SELECT auto_park_id FROM auto_parks_excluded_from_cash_block_rules WHERE is_active=TRUE`;
+  return db.all(sql);
+};
+
+export async function deactivateAutoParksExcludedFromDCBR(autoParkIds) {
+  if (!Array.isArray(autoParkIds)) {
+    throw new Error('Input must be a non-empty array of auto park IDs.');
+  }
+  if (autoParkIds.length === 0) {
+    return;
+  }
+  const placeholders = autoParkIds.map(() => '?').join(',');
+  const sql = `
+    UPDATE auto_parks_excluded_from_cash_block_rules
+    SET
+      is_active = 0,
+      updated_at = CURRENT_TIMESTAMP
+    WHERE
+      auto_park_id IN (${placeholders})
+  `;
+
+  const result = await db.run(sql, autoParkIds);
+  return result;
+}
+
+export async function createAutoParksExcludedFromDCBR(autoParkIds) {
+  if (!Array.isArray(autoParkIds)) {
+    throw new Error('Input must be a non-empty array of auto park IDs.');
+  }
+  if (autoParkIds.length === 0) {
+    return;
+  }
+
+  const sql = `
+    INSERT INTO auto_parks_excluded_from_cash_block_rules (auto_park_id, is_active, created_at, updated_at)
+    VALUES (?, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+  `;
+  let createdCount = 0;
+
+  try {
+    await db.exec('BEGIN TRANSACTION');
+
+    const stmt = await db.prepare(sql);
+
+    for (const id of autoParkIds) {
+      const result = await stmt.run(id);
+      createdCount += result.changes;
+    }
+
+    await stmt.finalize();
+    await db.exec('COMMIT');
+
+    return createdCount;
+  } catch (err) {
+    console.error('Transaction failed, rolling back.', err.message);
+    await db.exec('ROLLBACK');
+    throw err;
+  }
+}
+
+export const getAutoParkCustomCashBlockRules = () => {
+  const sql = `SELECT * FROM auto_park_custom_cash_block_rules WHERE is_active=TRUE`;
+  return db.all(sql);
+};
+
+export async function synchronizeAutoParkRulesTransaction({
+  newAutoParkRules,
+  deletedAutoParkRuleIds,
+}) {
+  try {
+    // Start the transaction
+    await db.run('BEGIN TRANSACTION;');
+
+    // Step 1: Deactivate rules based on the deletedAutoParkRules array.
+    // This will set is_active to false for all existing rules matching the auto_park_id.
+    if (deletedAutoParkRuleIds && deletedAutoParkRuleIds.length > 0) {
+      const placeholders = deletedAutoParkRuleIds.map(() => '?').join(',');
+      const updateSql = `
+        UPDATE auto_park_custom_cash_block_rules
+        SET is_active = false, updated_at = CURRENT_TIMESTAMP
+        WHERE rule_id IN (${placeholders});
+      `;
+      await db.run(updateSql, deletedAutoParkRuleIds);
+    }
+
+    // Step 2: Insert all new rules from the newAutoParkRules array.
+    // Since auto_park_id can be repeated, we perform a simple insert for each new rule.
+    if (newAutoParkRules && newAutoParkRules.length > 0) {
+      const insertSql = `
+        INSERT INTO auto_park_custom_cash_block_rules
+        (auto_park_id, mode, target, balanceActivationValue, depositActivationValue, maxDebt)
+        VALUES (?, ?, ?, ?, ?, ?);
+      `;
+
+      // For optimal performance, a database driver's "prepare" statement method
+      // should be used before looping to execute the same query multiple times.
+      for (const rule of newAutoParkRules) {
+        const params = [
+          rule.auto_park_id,
+          rule.mode,
+          rule.target,
+          rule.balanceActivationValue,
+          rule.depositActivationValue,
+          rule.maxDebt,
+        ];
+        await db.run(insertSql, params);
+      }
+    }
+
+    // Commit the transaction if all operations succeed
+    await db.run('COMMIT;');
+  } catch (error) {
+    // If any error occurs, rollback the entire transaction
+    console.error(
+      'Error during synchronization, rolling back transaction.',
+      error
+    );
+    await db.run('ROLLBACK;');
+    // Re-throw the error so the calling code is aware of the failure
+    throw error;
+  }
+}
+export async function getAutoParkRulesByIds({ rule_ids }) {
+  const placeholders = rule_ids.map(() => '?').join(',');
+  const sql = `SELECT * FROM auto_park_custom_cash_block_rules WHERE rule_id IN (${placeholders})`;
+  return await db.all(sql, rule_ids);
 }

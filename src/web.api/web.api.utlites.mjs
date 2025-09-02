@@ -655,7 +655,29 @@ export async function getBoltDriversToBan({
   const { rows, rowCount } = result;
   return { rows };
 }
+export async function getAllWorkingDriverIdsByAutoPark({
+  ids,
+  weekNumber,
+  year,
+  maxDebt,
+  driversToIgnore,
+  auto_park_id,
+}) {
+  const sql = fs
+    .readFileSync('src/sql/get_all_working_driver_ids_by_auto_park.sql')
+    .toString();
 
+  const result = await pool.query(sql, [
+    ids,
+    weekNumber,
+    year,
+    maxDebt,
+    driversToIgnore,
+    auto_park_id,
+  ]);
+  const { rows, rowCount } = result;
+  return { rows };
+}
 export async function getAllWorkingDriverIds({
   ids,
   weekNumber,
