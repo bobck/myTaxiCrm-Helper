@@ -4,7 +4,6 @@ const KEY_FILE_PATH = './token.json';
 const DCBR_SPREADSHEET_ID = process.env.DCBR_SHEET_ID;
 const TARIFF_SPREADSHEET_ID = process.env.TARIFF_SHEET_ID;
 
-
 // Reusable authentication and client setup
 const googleAuth = new auth.GoogleAuth({
   keyFilename: KEY_FILE_PATH,
@@ -45,7 +44,6 @@ export async function readDCBRSheetColumnA(sheetName) {
   }
 }
 
-
 export async function getAutoParksToSetTariffRules() {
   try {
     const sheetName = 'trackedCities';
@@ -62,14 +60,11 @@ export async function getAutoParksToSetTariffRules() {
     }
 
     const dataObjects = rows.slice(1).map((row) => {
-      const [
-        auto_park_sheet_name,
-        auto_park_id
-      ] = row;
+      const [auto_park_sheet_name, auto_park_id] = row;
 
       const rowObject = {
         auto_park_id,
-        auto_park_sheet_name
+        auto_park_sheet_name,
       };
       return rowObject;
     });
@@ -84,7 +79,9 @@ export async function getAutoParksToSetTariffRules() {
   }
 }
 
-export async function getNewDriverTariffRulesByAutoParkSheetName(autoParkSheetName) {
+export async function getNewDriverTariffRulesByAutoParkSheetName(
+  autoParkSheetName
+) {
   try {
     const response = await client.spreadsheets.values.get({
       spreadsheetId: TARIFF_SPREADSHEET_ID,
@@ -99,15 +96,7 @@ export async function getNewDriverTariffRulesByAutoParkSheetName(autoParkSheetNa
     }
 
     const dataObjects = rows.slice(1).map((row) => {
-      const [
-        percentage,
-        monday,
-        tuesday,
-        wednesday,
-        thursday,
-        friday,
-        
-      ] = row;
+      const [percentage, monday, tuesday, wednesday, thursday, friday] = row;
 
       const rowObject = {
         percentage,
@@ -125,7 +114,10 @@ export async function getNewDriverTariffRulesByAutoParkSheetName(autoParkSheetNa
     );
     return dataObjects;
   } catch (err) {
-    console.error(`The API returned an error for sheet ${autoParkSheetName}:`, err);
+    console.error(
+      `The API returned an error for sheet ${autoParkSheetName}:`,
+      err
+    );
     return [];
   }
 }
