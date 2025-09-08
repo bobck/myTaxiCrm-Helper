@@ -83,7 +83,6 @@ export const synchronizeAutoParkCustomCashBlockRules = async () => {
     ({ rule_id }) => rule_id
   );
 
-  console.log({ newAutoParkRules, deletedAutoParkRules });
   console.log({
     message: 'synchronizeAutoParksExcludedFromDCBRSetting',
     date: new Date(),
