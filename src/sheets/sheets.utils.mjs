@@ -43,7 +43,7 @@ export async function readDCBRSheetColumnA(sheetName) {
     return []; // Return an empty array on error
   }
 }
-export async function getAllRowsAsObjects() {
+export async function getAllCustomRuledAutoParksFromSpreadSheet() {
   try {
     const sheetName = 'autopark_custom_rules';
     const response = await client.spreadsheets.values.get({
@@ -102,6 +102,6 @@ export async function getAllRowsAsObjects() {
     return dataObjects;
   } catch (err) {
     console.error(`The API returned an error for sheet ${sheetName}:`, err);
-    return [];
+    return null;
   }
 }

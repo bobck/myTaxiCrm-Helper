@@ -1,11 +1,14 @@
-import { getAllRowsAsObjects } from '../sheets.utils.mjs';
+import { getAllCustomRuledAutoParksFromSpreadSheet } from '../sheets.utils.mjs';
 import {
   getAutoParkCustomCashBlockRules,
   synchronizeAutoParkRulesTransaction,
 } from '../../web.api/web.api.queries.mjs';
 import { isUuid } from '../../shared/shared.utils.mjs';
+import { message } from 'telegraf/filters';
 
 const verifyAutoParkCustomCashBlockRule = async (rule) => {
+  let result = true;
+  const errors = [];
   const {
     auto_park_id,
     mode,
@@ -15,18 +18,34 @@ const verifyAutoParkCustomCashBlockRule = async (rule) => {
     maxDebt,
   } = rule;
   if (!auto_park_id || !mode || !target || !maxDebt) {
-    return false;
+    errors.push('!auto_park_id || !mode || !target || !maxDebt is true');
+    result = false;
   }
   if (!isUuid(auto_park_id) || auto_park_id == 'DEFAULT') {
-    return false;
+    errors.push('!isUuid(auto_park_id) || auto_park_id == "DEFAULT" is true');
+    result = false;
   }
   if ((target == 'BOTH' || target == 'BALANCE') && !balanceActivationValue) {
-    return false;
+    errors.push(
+      '(target == "BOTH" || target == "BALANCE") && !balanceActivationValue is true'
+    );
+    result = false;
   }
   if ((target == 'BOTH' || target == 'DEPOSIT') && !depositActivationValue) {
-    return false;
+    errors.push(
+      '(target == "BOTH" || target == "DEPOSIT") && !depositActivationValue is true'
+    );
+    result = false;
   }
-  return true;
+  if (!result) {
+    console.error({
+      function: 'verifyAutoParkCustomCashBlockRule',
+      date: new Date(),
+      errors,
+      rule,
+    });
+  }
+  return result;
 };
 const ifRulesAreEqueal = (rule1, rule2) => {
   if (rule1.auto_park_id !== rule2.auto_park_id) {
@@ -53,7 +72,17 @@ const ifRulesAreEqueal = (rule1, rule2) => {
 
 export const synchronizeAutoParkCustomCashBlockRules = async () => {
   const activeAutoParkRules = await getAutoParkCustomCashBlockRules();
-  const autoParkRulesFromSheet = await getAllRowsAsObjects();
+  const autoParkRulesFromSheet =
+    await getAllCustomRuledAutoParksFromSpreadSheet();
+  if (!autoParkRulesFromSheet) {
+    console.error({
+      module: 'synchronizeAutoParkCustomCashBlockRules',
+      date: new Date(),
+      autoParkRulesFromSheet,
+      message:'google spread sheet API failed',
+    });
+    return;
+  }
   const verifiedAutoParksFromSheet = autoParkRulesFromSheet.filter(
     verifyAutoParkCustomCashBlockRule
   );
