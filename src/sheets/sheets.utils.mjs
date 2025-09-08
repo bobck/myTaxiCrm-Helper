@@ -99,13 +99,14 @@ export async function getNewDriverTariffRulesByAutoParkSheetName(
       const [percentage, monday, tuesday, wednesday, thursday, friday] = row;
 
       const rowObject = {
-        percentage,
-        monday,
-        tuesday,
-        wednesday,
-        thursday,
-        friday,
+        percentage: parseFloat(percentage.replace('%', '')),
+        monday: parseFloat(monday.replace(/,/g, '')),
+        tuesday: parseFloat(tuesday.replace(/,/g, '')),
+        wednesday: parseFloat(wednesday.replace(/,/g, '')),
+        thursday: parseFloat(thursday.replace(/,/g, '')),
+        friday: parseFloat(friday.replace(/,/g, '')),
       };
+
       return rowObject;
     });
 

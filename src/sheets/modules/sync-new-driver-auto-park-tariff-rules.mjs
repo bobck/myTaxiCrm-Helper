@@ -17,8 +17,7 @@ export const synchronizeNewDriverAutoParkTariffRules = async () => {
 
   for (const autoPark of verifiedAutoParks) {
     const { auto_park_id, auto_park_sheet_name } = autoPark;
-    const tariffRules =
-      await getNewDriverTariffRulesByAutoParkSheetName(auto_park_sheet_name);
+    const tariffRules = await getNewDriverTariffRulesByAutoParkSheetName(auto_park_sheet_name);
     console.log(tariffRules);
   }
 };
