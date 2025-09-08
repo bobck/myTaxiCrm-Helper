@@ -79,7 +79,7 @@ export const synchronizeAutoParkCustomCashBlockRules = async () => {
       module: 'synchronizeAutoParkCustomCashBlockRules',
       date: new Date(),
       autoParkRulesFromSheet,
-      message:'google spread sheet API failed',
+      message: 'google spread sheet API failed',
     });
     return;
   }
