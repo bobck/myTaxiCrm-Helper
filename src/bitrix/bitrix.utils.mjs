@@ -1,7 +1,12 @@
 import { Bitrix, Method } from '@2bad/bitrix';
 import fs from 'fs';
 import { pool } from './../api/pool.mjs';
+import { jobBoardApplymentParametersToBitrixKeys } from './bitrix.constants.mjs';
+import { BitrixAPIClient } from './bitrix.api.mjs';
 const bitrix = Bitrix(
+  `https://${process.env.BITRIX_PORTAL_HOST}/rest/${process.env.BITRIX_USER_ID}/${process.env.BITRIX_API_KEY}/`
+);
+const bitrixAPIClient = new BitrixAPIClient(
   `https://${process.env.BITRIX_PORTAL_HOST}/rest/${process.env.BITRIX_USER_ID}/${process.env.BITRIX_API_KEY}/`
 );
 
@@ -674,6 +679,49 @@ export async function getDealsByIdsVerifyingStageConstancy({
     return null; // Indicate failure
   }
 }
+
+export async function addManyCommentsToAnEntity({
+  comments,
+  entityId,
+  typeId,
+}) {
+  let batchArray = [];
+
+  for (let comment of comments) {
+    const params = {
+      'fields[ENTITY_ID]': entityId,
+      'fields[ENTITY_TYPE]': `DYNAMIC_${typeId}`,
+      'fields[COMMENT]': comment,
+    };
+    batchArray.push({ method: 'crm.timeline.comment.add', params });
+  }
+  const { result, time } = await bitrix.batch(batchArray);
+
+  return result;
+}
+
+export const createVacancyResponseCards = async ({ dtos }) => {
+  const batchObj = {};
+  for (let dto of dtos) {
+    const { sourceOfApplyment, id } = dto;
+    const params = {};
+    for (const param in dto) {
+      if (
+        !Object.keys(jobBoardApplymentParametersToBitrixKeys).includes(param) ||
+        dto[param] === null ||
+        dto[param] === undefined
+      ) {
+        continue;
+      }
+      params[jobBoardApplymentParametersToBitrixKeys[param]] = dto[param];
+    }
+    params['entityTypeId'] = '1142';
+    params['fields[STAGE_ID]'] = 'DT1142_64:NEW';
+    batchObj[`${sourceOfApplyment}:${id}`] = { method: 'crm.item.add', params };
+  }
+  return await bitrixAPIClient.batch({ batchObj });
+};
+
 export async function updateRequestedDrivers({ cards }) {
   const batchObj = {};
   for (const card of cards) {
