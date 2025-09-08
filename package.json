@@ -59,9 +59,13 @@
     "getAndSaveClosedPolishBitrixDealsManual": "ENV=TEST node -r dotenv/config src/web.api/gdc-report/modules/get-and-save-closed-polish-bitrix-deals.mjs",
     "testDriverCashBlockRulesManually": "ENV=TEST node -r dotenv/config src/web.api/modules/driver-cash-block-rules.mjs",
     "moveReferralToClosedManually": "ENV=TEST node -r dotenv/config src/bitrix/modules/move-referral-to-closed.mjs",
+    "testRobotaUaAppliesManually": "ENV=DEV node -r dotenv/config src/job-boards/robota.ua/modules/get_and_save_robotaua_applies.mjs",
+    "testWorkUaAppliesManually": "ENV=DEV node -r dotenv/config src/job-boards/work.ua/modules/get_and_save_workua_applies.mjs",
     "moveBoltDriversBanCardsManually": "ENV=TEST BOLT_DRIVERS_BAN_CARDS=17 CHUNK_SIZE=11 node -r dotenv/config src/bitrix/modules/move-bolt-drivers-to-ban.mjs",
     "syncDriverIgnoringDCBRManually": "ENV=TEST node -r dotenv/config src/sheets/modules/sync-drivers-ignoring-dcbr.mjs",
-    "syncAutoParksExcludedFromDCBRManually": "ENV=TEST node -r dotenv/config src/sheets/modules/sync-autoparks-excluded-from-dcbr-setting.mjs"
+    "syncAutoParksExcludedFromDCBRManually": "ENV=TEST node -r dotenv/config src/sheets/modules/sync-autoparks-excluded-from-dcbr-setting.mjs",
+    "launchAPI:test": "ENV=TEST API_HOST=0.0.0.0 node -r dotenv/config src/api/api.mjs"
+
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",
@@ -69,6 +73,7 @@
     "@2bad/bitrix": "^2.5.1",
     "@google-cloud/bigquery": "^7.3.0",
     "@googleapis/sheets": "^5.0.5",
+    "axios": "^1.10.0",
     "bottleneck": "^2.19.5",
     "cron": "^3.1.6",
     "db-migrate": "^0.11.14",
