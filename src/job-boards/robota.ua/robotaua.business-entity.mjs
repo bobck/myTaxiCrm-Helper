@@ -21,6 +21,7 @@ export function processApiResponse(response) {
     educations,
     contacts,
     bitrix_city_id,
+    bitrix_vacancy_id,
     assigned_by_id,
     ...rest
   } = response;
@@ -78,7 +79,7 @@ export function processApiResponse(response) {
   }
   const processedData = {
     id,
-    title: title,
+    title: `TEST!!! ${title}`,
     fullName: rest.name,
     cvURL,
     cvFile: rest.filePath,
@@ -106,6 +107,7 @@ export function processApiResponse(response) {
     educationYears: educations?.[0]?.yearOfGraduation?.toString(),
     hrCity: bitrix_city_id,
     assigned_by_id,
+    bitrix_vacancy_id
   };
 
   return processedData;

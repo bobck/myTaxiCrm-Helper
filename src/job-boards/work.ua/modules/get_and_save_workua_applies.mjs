@@ -136,7 +136,8 @@ export const getAndSaveWorkUaVacancyApplies = async () => {
         },
       }).map(processWorkUaApiResponse)
     );
-
+    console.log(processedApplies)
+    continue;
     const chunkedApplies = chunkArray(processedApplies, 8);
     for (const chunk of chunkedApplies) {
       await createVacancyResponseCards({

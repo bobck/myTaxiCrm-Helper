@@ -25,7 +25,6 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
   });
 
   for (const [index, vacancy] of activeVacancies.entries()) {
-    devLog(vacancy);
     const {
       robota_ua_vacancy_id,
       bitrix_vacancy_id,
@@ -34,17 +33,18 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
       name,
       assigned_by_id,
     } = vacancy;
+    devLog({ index, name, robota_ua_vacancy_id, bitrix_vacancy_id });
     const { is_active } = await checkIfRobotaUaVacancyStaysActive({
       robota_ua_vacancy_id,
     });
     if (!is_active) {
       const comment = `Вакансія robota.ua id:${robota_ua_vacancy_id} не активна. Щоб її активувати - необхідно перенести до стадії "оновити-додати до системи", потім знову до "Пошук"`;
       devLog({ comment });
-      await addCommentToEntity({
-        comment,
-        typeId: vacancyRequestTypeId,
-        entityId: bitrix_vacancy_id,
-      });
+      // await addCommentToEntity({
+      //   comment,
+      //   typeId: vacancyRequestTypeId,
+      //   entityId: bitrix_vacancy_id,
+      // });
       continue;
     }
     const { applies: _applies } = await getRobotaUaVacancyApplies({
@@ -52,6 +52,7 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
       last_apply_date,
     });
     if (_applies.length === 0) {
+      console.log('no new applies');
       continue;
     }
 
@@ -69,7 +70,8 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
         assigned_by_id,
       },
     });
-    const processedApplies = applies.map(processApiResponse);
+    const processedApplies = applies.map(processApiResponse).slice(0, 1);
+    console.log(processedApplies)
 
     await createVacancyResponseCards({ dtos: processedApplies });
     devLog(
@@ -77,7 +79,9 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
         const { id, addDate } = apply;
         return { id, addDate };
       })
+
     );
+    return;
     //robota ua employee api returns vacancy applies FROM THE NEWEST TO THE OLDEST.
     const [theLatestApply] = applies;
     const { addDate: theLatestApplyDate } = theLatestApply;
