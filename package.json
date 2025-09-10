@@ -63,6 +63,8 @@
     "testWorkUaAppliesManually": "ENV=DEV node -r dotenv/config src/job-boards/work.ua/modules/get_and_save_workua_applies.mjs",
     "moveBoltDriversBanCardsManually": "ENV=TEST BOLT_DRIVERS_BAN_CARDS=17 CHUNK_SIZE=11 node -r dotenv/config src/bitrix/modules/move-bolt-drivers-to-ban.mjs",
     "syncDriverIgnoringDCBRManually": "ENV=TEST node -r dotenv/config src/sheets/modules/sync-drivers-ignoring-dcbr.mjs",
+    "syncAutoParksExcludedFromDCBRRulesManually": "ENV=TEST node -r dotenv/config src/sheets/modules/sync-autoparks-excluded-from-dcbr-setting.mjs",
+    "syncAutoParkCustomCashBlockRulesManually": "ENV=TEST node -r dotenv/config src/sheets/modules/sync-autopark-custom-cash-block-rules.mjs",
     "syncAutoParksExcludedFromDCBRManually": "ENV=TEST node -r dotenv/config src/sheets/modules/sync-autoparks-excluded-from-dcbr-setting.mjs",
     "launchAPI:test": "ENV=TEST API_HOST=0.0.0.0 node -r dotenv/config src/api/api.mjs"
   },
