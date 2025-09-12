@@ -19,31 +19,37 @@ import { devLog } from '../../../shared/shared.utils.mjs';
 
 export const getAndSaveRobotaUaVacancyApplies = async () => {
   const { activeVacancies } = await getAllActiveRobotaUaVacancies();
-  const activeVacanciesMap = new Map(activeVacancies.map(vacancy => [vacancy.robota_ua_vacancy_id, vacancy]))
-  const activeVacancyAppliesMap = new Map(activeVacancies.map(vacancy => [vacancy.robota_ua_vacancy_id, []]))
+  const activeVacanciesMap = new Map(
+    activeVacancies.map((vacancy) => [vacancy.robota_ua_vacancy_id, vacancy])
+  );
+  const activeVacancyAppliesMap = new Map(
+    activeVacancies.map((vacancy) => [vacancy.robota_ua_vacancy_id, []])
+  );
 
   //getting applies by the newest last update date
   const { last_apply_date } = await getLastRobotaUaApplyDate();
   const { applies } = await getRobotaUaVacancyApplies({
-    last_apply_date
+    last_apply_date,
   });
   const logInfo = {
     module: 'getAndSaveRobotaUaVacancyApplies',
     date: new Date(),
     activeVacancies: activeVacancies.length,
     processedApplies: 0,
-    last_apply_date
+    last_apply_date,
   };
   //aggregating
   for (const apply of applies) {
-    if (!activeVacancyAppliesMap.has(apply.vacancyId)) { continue; }
-    activeVacancyAppliesMap.get(apply.vacancyId).push(apply)
+    if (!activeVacancyAppliesMap.has(apply.vacancyId)) {
+      continue;
+    }
+    activeVacancyAppliesMap.get(apply.vacancyId).push(apply);
   }
 
   //applies processing
   for (const [vacancyId, applies] of activeVacancyAppliesMap) {
     if (applies.length === 0) {
-      devLog('no new applies', vacancyId)
+      devLog('no new applies', vacancyId);
       continue;
     }
     const {
@@ -82,9 +88,11 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
         assigned_by_id,
       },
     });
-    const processedApplies = appliesWithAssignedPayload.map(processApiResponse).slice(0, 1);
+    const processedApplies = appliesWithAssignedPayload
+      .map(processApiResponse)
+      .slice(0, 1);
     await createVacancyResponseCards({ dtos: processedApplies });
-    devLog({ vacancyId, applies: applies.length })
+    devLog({ vacancyId, applies: applies.length });
     //robota ua employee api returns vacancy applies FROM THE NEWEST TO THE OLDEST.
     const [theLatestApply] = applies;
     const { addDate: theLatestApplyDate } = theLatestApply;
@@ -95,8 +103,8 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
     });
     logInfo.processedApplies += applies.length;
   }
-  console.log(logInfo)
-}
+  console.log(logInfo);
+};
 if (process.env.ENV === 'DEV' || process.env.ENV === 'TEST') {
   await getAndSaveRobotaUaVacancyApplies();
 }

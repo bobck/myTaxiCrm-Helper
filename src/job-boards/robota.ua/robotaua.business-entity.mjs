@@ -107,7 +107,7 @@ export function processApiResponse(response) {
     educationYears: educations?.[0]?.yearOfGraduation?.toString(),
     hrCity: bitrix_city_id,
     assigned_by_id,
-    bitrix_vacancy_id
+    bitrix_vacancy_id,
   };
 
   return processedData;
