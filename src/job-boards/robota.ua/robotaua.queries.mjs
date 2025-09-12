@@ -142,3 +142,9 @@ export const markRobotaUaSynchronizedVacancyAsDeleted = async ({
   const sql = /*sql*/ `UPDATE robota_ua_pagination SET is_deleted = TRUE WHERE bitrix_vacancy_id = ?`;
   await db.run(sql, bitrix_vacancy_id);
 };
+export const getLastRobotaUaApplyDate = async () => {
+  const sql = /*sql*/ `SELECT MAX(last_apply_date) as last_apply_date
+FROM robota_ua_pagination
+WHERE is_active = 1`
+  return await db.get(sql);
+}

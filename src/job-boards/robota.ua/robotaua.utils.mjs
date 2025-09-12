@@ -30,7 +30,8 @@ export const getRobotaUaVacancyApplies = async ({
   const applies = [];
   let data;
   let current_page = 0;
-  const targetDate = new Date(last_apply_date);
+  const targetDate = new Date(last_apply_date ?? 0);
+  console.log(targetDate)
   let theOldestApplyDate;
   do {
     data = await robotaUaAPI.getApplies({
@@ -45,6 +46,11 @@ export const getRobotaUaVacancyApplies = async ({
     theOldestApplyDate = new Date(theOldestApplyDateStringified);
 
     current_page++;
+    console.log({
+      theOldestApplyDate,
+      current_page,
+      applies: data.applies.length,
+    })
   } while (theOldestApplyDate > targetDate);
 
   const filteredAppliesByDate = applies.filter(
