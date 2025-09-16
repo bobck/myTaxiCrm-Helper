@@ -357,7 +357,7 @@ export const cityTextRecruitToPayments = {
   },
   Житомир: {
     id: '2906',
-    assigned_by_id: '6587',
+    assigned_by_id: '144246',
   },
   Суми: {
     id: '3148',
