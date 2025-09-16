@@ -99,6 +99,7 @@ export const setDriverCashBlockRules = async () => {
     year,
     weekNumber,
     maxDebt,
+    driversToIgnore,
   });
 
   console.log({
@@ -109,6 +110,7 @@ export const setDriverCashBlockRules = async () => {
     driversToIgnore: driversToIgnore.length,
     IdsOfDriversWithCashBlockRules: IdsOfDriversWithCashBlockRules.length,
   });
+
   for (const driver of drivers) {
     try {
       const { driver_id, auto_park_id } = driver;
@@ -191,6 +193,6 @@ export const updateDriverCashBlockRules = async () => {
 
 if (process.env.ENV == 'TEST') {
   await openSShTunnel;
-  await updateDriverCashBlockRules();
-  // await setDriverCashBlockRules();
+  // await updateDriverCashBlockRules();
+  await setDriverCashBlockRules();
 }
