@@ -1,5 +1,6 @@
 import {
   getAllActiveRobotaUaVacancies,
+  getLastRobotaUaApplyDate,
   updateVacancyProgress,
 } from '../robotaua.queries.mjs';
 import {
@@ -15,43 +16,61 @@ import { processApiResponse } from '../robotaua.business-entity.mjs';
 import { cityListWithAssignedBy as bitrixCities } from '../../../bitrix/bitrix.constants.mjs';
 import { robotaUaCities } from '../robotaua.constants.mjs';
 import { devLog } from '../../../shared/shared.utils.mjs';
-import { vacancyRequestTypeId } from '../../job-board.constants.mjs';
+
 export const getAndSaveRobotaUaVacancyApplies = async () => {
   const { activeVacancies } = await getAllActiveRobotaUaVacancies();
-  console.log({
+  const activeVacanciesMap = new Map(
+    activeVacancies.map((vacancy) => [vacancy.robota_ua_vacancy_id, vacancy])
+  );
+  const activeVacancyAppliesMap = new Map(
+    activeVacancies.map((vacancy) => [vacancy.robota_ua_vacancy_id, []])
+  );
+
+  //getting applies by the newest last update date
+  const { last_apply_date } = await getLastRobotaUaApplyDate();
+  const { applies } = await getRobotaUaVacancyApplies({
+    last_apply_date,
+  });
+  const logInfo = {
     module: 'getAndSaveRobotaUaVacancyApplies',
     date: new Date(),
     activeVacancies: activeVacancies.length,
-  });
+    processedApplies: 0,
+    last_apply_date,
+  };
+  //aggregating
+  for (const apply of applies) {
+    if (!activeVacancyAppliesMap.has(apply.vacancyId)) {
+      continue;
+    }
+    activeVacancyAppliesMap.get(apply.vacancyId).push(apply);
+  }
 
-  for (const [index, vacancy] of activeVacancies.entries()) {
-    devLog(vacancy);
+  //applies processing
+  for (const [vacancyId, applies] of activeVacancyAppliesMap) {
+    if (applies.length === 0) {
+      devLog('no new applies', vacancyId);
+      continue;
+    }
     const {
       robota_ua_vacancy_id,
       bitrix_vacancy_id,
-      last_apply_date,
       region,
       name,
       assigned_by_id,
-    } = vacancy;
+    } = activeVacanciesMap.get(vacancyId);
+
     const { is_active } = await checkIfRobotaUaVacancyStaysActive({
       robota_ua_vacancy_id,
     });
     if (!is_active) {
       const comment = `Вакансія robota.ua id:${robota_ua_vacancy_id} не активна. Щоб її активувати - необхідно перенести до стадії "оновити-додати до системи", потім знову до "Пошук"`;
       devLog({ comment });
-      await addCommentToEntity({
-        comment,
-        typeId: vacancyRequestTypeId,
-        entityId: bitrix_vacancy_id,
-      });
-      continue;
-    }
-    const { applies: _applies } = await getRobotaUaVacancyApplies({
-      vacancy_id: robota_ua_vacancy_id,
-      last_apply_date,
-    });
-    if (_applies.length === 0) {
+      // await addCommentToEntity({
+      //   comment,
+      //   typeId: vacancyRequestTypeId,
+      //   entityId: bitrix_vacancy_id,
+      // });
       continue;
     }
 
@@ -60,8 +79,8 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
       (bitrixCity) => robota_ua_city.auto_park_id === bitrixCity.auto_park_id
     );
 
-    const applies = assignPayloadToVacancyApply({
-      applies: _applies,
+    const appliesWithAssignedPayload = assignPayloadToVacancyApply({
+      applies,
       payload: {
         title: `${name} ${robota_ua_city.name}`,
         bitrix_city_id,
@@ -69,15 +88,11 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
         assigned_by_id,
       },
     });
-    const processedApplies = applies.map(processApiResponse);
-
+    const processedApplies = appliesWithAssignedPayload
+      .map(processApiResponse)
+      .slice(0, 1);
     await createVacancyResponseCards({ dtos: processedApplies });
-    devLog(
-      applies.map((apply) => {
-        const { id, addDate } = apply;
-        return { id, addDate };
-      })
-    );
+    devLog({ vacancyId, applies: applies.length });
     //robota ua employee api returns vacancy applies FROM THE NEWEST TO THE OLDEST.
     const [theLatestApply] = applies;
     const { addDate: theLatestApplyDate } = theLatestApply;
@@ -86,9 +101,10 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
       robota_ua_vacancy_id,
       last_apply_date: theLatestApplyDate,
     });
+    logInfo.processedApplies += applies.length;
   }
+  console.log(logInfo);
 };
-
 if (process.env.ENV === 'DEV' || process.env.ENV === 'TEST') {
   await getAndSaveRobotaUaVacancyApplies();
 }
