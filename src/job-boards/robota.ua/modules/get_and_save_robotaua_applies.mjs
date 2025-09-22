@@ -66,11 +66,11 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
     if (!is_active) {
       const comment = `Вакансія robota.ua id:${robota_ua_vacancy_id} не активна. Щоб її активувати - необхідно перенести до стадії "оновити-додати до системи", потім знову до "Пошук"`;
       devLog({ comment });
-      // await addCommentToEntity({
-      //   comment,
-      //   typeId: vacancyRequestTypeId,
-      //   entityId: bitrix_vacancy_id,
-      // });
+      await addCommentToEntity({
+        comment,
+        typeId: vacancyRequestTypeId,
+        entityId: bitrix_vacancy_id,
+      });
       continue;
     }
 
@@ -88,9 +88,7 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
         assigned_by_id,
       },
     });
-    const processedApplies = appliesWithAssignedPayload
-      .map(processApiResponse)
-      .slice(0, 1);
+    const processedApplies = appliesWithAssignedPayload.map(processApiResponse);
     await createVacancyResponseCards({ dtos: processedApplies });
     devLog({ vacancyId, applies: applies.length });
     //robota ua employee api returns vacancy applies FROM THE NEWEST TO THE OLDEST.
