@@ -31,7 +31,7 @@ export const processResponse = async (resumeResponse) => {
     phone,
     cvURL,
     date,
-    title:`test ${title}`,
+    title,
     cvText,
     country: city,
     assigned_by_id,
