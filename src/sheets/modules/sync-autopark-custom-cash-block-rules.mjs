@@ -4,7 +4,6 @@ import {
   synchronizeAutoParkRulesTransaction,
 } from '../../web.api/web.api.queries.mjs';
 import { isUuid } from '../../shared/shared.utils.mjs';
-import { message } from 'telegraf/filters';
 
 const verifyAutoParkCustomCashBlockRule = async (rule) => {
   let result = true;
@@ -86,6 +85,15 @@ export const synchronizeAutoParkCustomCashBlockRules = async () => {
   const verifiedAutoParksFromSheet = autoParkRulesFromSheet.filter(
     verifyAutoParkCustomCashBlockRule
   );
+
+  if (verifiedAutoParksFromSheet.length < autoParkRulesFromSheet.length) {
+    console.error({
+      date: new Date(),
+      module: 'synchronizeAutoParkCustomCashBlockRules',
+      message: 'Some rules are invalid',
+    });
+    return;
+  }
 
   const newAutoParkRules = verifiedAutoParksFromSheet.reduce((acc, rule) => {
     if (
