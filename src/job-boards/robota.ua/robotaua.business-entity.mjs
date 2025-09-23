@@ -79,7 +79,7 @@ export function processApiResponse(response) {
   }
   const processedData = {
     id,
-    title: `TEST!!! ${title}`,
+    title: title,
     fullName: rest.name,
     cvURL,
     cvFile: rest.filePath,
