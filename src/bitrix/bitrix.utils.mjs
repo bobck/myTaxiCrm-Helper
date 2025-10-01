@@ -779,3 +779,25 @@ export async function moveRequestedDriversToCheckStage({ cards }) {
   const { result: itemObj } = resp;
   return itemObj;
 }
+export async function getInsuranceInvoices({ date }) {
+  const response = await bitrix.deals.list({
+    filter: {
+      '>=UF_CRM_1642522045721': `${date}T00:00:00`,
+      '>UF_CRM_1654075469': 0,
+      CATEGORY_ID: '46',
+    },
+    order:{
+      'DATE_CREATE':'ASC'
+    },
+    select: [
+      'ID',
+      'DATE_CREATE',
+      'UF_CRM_1654075469',
+      'UF_CRM_1642522045721',
+      'UF_CRM_1527615815',
+    ],
+  });
+
+  const { result } = response;
+  return result;
+}
