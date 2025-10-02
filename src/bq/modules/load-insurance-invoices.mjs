@@ -4,6 +4,8 @@ import { devLog } from '../../shared/shared.utils.mjs';
 import { createOrResetTableByName, loadRowsViaJSONFile } from '../bq-utils.mjs';
 import { insuranceInvoicesTableSchema } from '../schemas.mjs';
 
+const insuranceInvoiceBegginingDate='2025-08-01'
+
 export async function resetInsuranceInvoicesTable() {
   await createOrResetTableByName({
     bqTableId: 'insurance_invoices',
@@ -19,7 +21,7 @@ export const loadInsuranceInvoices = async () => {
   };
   let invoices;
   try {
-    invoices = await getInsuranceInvoices({ date: '2025-08-01' });
+    invoices = await getInsuranceInvoices({ date: insuranceInvoiceBegginingDate});
   } catch (error) {
     console.error({
       logData,
