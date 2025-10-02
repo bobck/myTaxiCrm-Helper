@@ -145,10 +145,12 @@ export const setDriverCashBlockRules = async () => {
     weekNumber,
     maxDebt,
     driversToIgnore,
+
     autoParksToIgnore: [
       ...autoParksToIgnore,
       ...customAutoParkRules.map(({ auto_park_id }) => auto_park_id),
     ],
+
   });
   drivers.push(...rows);
 
@@ -278,6 +280,6 @@ export const updateDriverCashBlockRules = async () => {
 
 if (process.env.ENV == 'TEST') {
   await openSShTunnel;
-  await updateDriverCashBlockRules();
-  // await setDriverCashBlockRules();
+  // await updateDriverCashBlockRules();
+  await setDriverCashBlockRules();
 }

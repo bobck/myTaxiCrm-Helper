@@ -1,4 +1,5 @@
 import { auth, sheets } from '@googleapis/sheets';
+import { devLog } from '../shared/shared.utils.mjs';
 
 const KEY_FILE_PATH = './token.json';
 const SPREADSHEET_ID = process.env.DCBR_SHEET_ID;
@@ -42,7 +43,7 @@ export async function readDCBRSheetColumnA(sheetName) {
     return []; // Return an empty array on error
   }
 }
-export async function getAllRowsAsObjects() {
+export async function getAllCustomRuledAutoParksFromSpreadSheet() {
   try {
     const sheetName = 'autopark_custom_rules';
     const response = await client.spreadsheets.values.get({
@@ -53,7 +54,6 @@ export async function getAllRowsAsObjects() {
     const rows = response.data.values;
 
     if (!rows || rows.length <= 1) {
-      console.log(`No data found in sheet: ${sheetName}.`);
       return [];
     }
 
@@ -98,12 +98,10 @@ export async function getAllRowsAsObjects() {
       return rowObject;
     });
 
-    console.log(
-      `Successfully parsed ${dataObjects.length} rows from ${sheetName}.`
-    );
+    devLog(`Successfully parsed ${dataObjects.length} rows from ${sheetName}.`);
     return dataObjects;
   } catch (err) {
     console.error(`The API returned an error for sheet ${sheetName}:`, err);
-    return [];
+    return null;
   }
 }
