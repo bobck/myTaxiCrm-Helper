@@ -780,8 +780,6 @@ export async function moveRequestedDriversToCheckStage({ cards }) {
   return itemObj;
 }
 export async function getInsuranceInvoices({ date }) {
-  try {
-  } catch (e) {}
   const response = await bitrix.deals.list({
     filter: {
       '>=UF_CRM_1642522045721': `${date}T00:00:00`,

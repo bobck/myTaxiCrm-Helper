@@ -51,6 +51,7 @@ export const loadInsuranceInvoices = async () => {
       rows: processedInvoices,
       schema: insuranceInvoicesTableSchema,
     });
+    logData.processedInvoices = processedInvoices.length;
   } catch (error) {
     console.error({
       logData,
