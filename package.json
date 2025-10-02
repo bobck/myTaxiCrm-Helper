@@ -65,7 +65,7 @@
     "syncDriverIgnoringDCBRManually": "ENV=TEST node -r dotenv/config src/sheets/modules/sync-drivers-ignoring-dcbr.mjs",
     "syncAutoParksExcludedFromDCBRManually": "ENV=TEST node -r dotenv/config src/sheets/modules/sync-autoparks-excluded-from-dcbr-setting.mjs",
     "launchAPI:test": "ENV=TEST API_HOST=0.0.0.0 node -r dotenv/config src/api/api.mjs",
-    "testInsuranceInvoiceLoadoutManually":"ENV=TEST node -r dotenv/config src/bq/modules/load-insurance-invoices.mjs"
+    "testInsuranceInvoiceLoadoutManually": "ENV=TEST node -r dotenv/config src/bq/modules/load-insurance-invoices.mjs"
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",

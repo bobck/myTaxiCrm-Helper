@@ -780,14 +780,16 @@ export async function moveRequestedDriversToCheckStage({ cards }) {
   return itemObj;
 }
 export async function getInsuranceInvoices({ date }) {
+  try {
+  } catch (e) {}
   const response = await bitrix.deals.list({
     filter: {
       '>=UF_CRM_1642522045721': `${date}T00:00:00`,
       '>UF_CRM_1654075469': 0,
       CATEGORY_ID: '46',
     },
-    order:{
-      'DATE_CREATE':'ASC'
+    order: {
+      DATE_CREATE: 'ASC',
     },
     select: [
       'ID',
