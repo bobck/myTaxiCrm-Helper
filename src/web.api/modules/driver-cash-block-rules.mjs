@@ -150,7 +150,6 @@ export const setDriverCashBlockRules = async () => {
       ...autoParksToIgnore,
       ...customAutoParkRules.map(({ auto_park_id }) => auto_park_id),
     ],
-
   });
   drivers.push(...rows);
 
