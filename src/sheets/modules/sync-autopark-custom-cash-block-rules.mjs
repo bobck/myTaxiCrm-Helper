@@ -20,8 +20,8 @@ const verifyAutoParkCustomCashBlockRule = async (rule) => {
     errors.push('!auto_park_id || !mode || !target || !maxDebt is true');
     result = false;
   }
-  if (!isUuid(auto_park_id) || auto_park_id == 'DEFAULT') {
-    errors.push('!isUuid(auto_park_id) || auto_park_id == "DEFAULT" is true');
+  if (!(isUuid(auto_park_id) || auto_park_id == 'DEFAULT')) {
+    errors.push('!(isUuid(auto_park_id) || auto_park_id == "DEFAULT") is true');
     result = false;
   }
 
