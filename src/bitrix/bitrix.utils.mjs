@@ -779,3 +779,130 @@ export async function moveRequestedDriversToCheckStage({ cards }) {
   const { result: itemObj } = resp;
   return itemObj;
 }
+/**
+ * Fetches the primary DTP Deals (Category 19) and their custom fields.
+ * @param {Object} bitrix - The initialized 2bad/bitrix API instance.
+ * @returns {Promise<Array<Object>>} List of DTP deals.
+ */
+export async function getDTPDeals() {
+  const fieldsToSelect = [
+    'ID',
+    'CONTACT_NAME',
+    'STAGE_NAME',
+    'OPPORTUNITY_ACCOUNT',
+    'CLOSEDATE',
+    'UF_CRM_1635407076479',
+    'UF_CRM_1672920789484',
+    'UF_CRM_1527615815',
+    'UF_CRM_1635248711959',
+    'UF_CRM_1635249720750',
+    'UF_CRM_1635249881382',
+    'UF_CRM_1621229719074',
+    'UF_CRM_1659106666',
+    'UF_CRM_1657614140',
+    'UF_CRM_1679065789167',
+    'UF_CRM_1654075851',
+    'UF_CRM_1642520789361',
+    'UF_CRM_1654075784',
+    'UF_CRM_1654075469',
+    'UF_CRM_1654075693',
+    'UF_CRM_1654075624',
+    'UF_CRM_1654076033',
+    'UF_CRM_1654076083',
+    'UF_CRM_1654602086875', // Link ID
+  ];
+
+  const params = {
+    filter: { CATEGORY_ID: '19' },
+    select: fieldsToSelect,
+  };
+
+  try {
+    const response = await bitrix.call('crm.deal.list', params);
+    return response.result;
+  } catch (error) {
+    console.error('Error fetching DTP Deals:', error);
+    return [];
+  }
+}
+
+/**
+ * Fetches VZYS (Category 42) and PAYMEN (Category 46) Deals concurrently.
+ * @param {Object} bitrix - The initialized 2bad/bitrix API instance.
+ * @returns {Promise<{vzys: Array<Object>, paymen: Array<Object>}>} The fetched linked deals.
+ */
+export async function getLinkedDeals() {
+  const vzysSelect = [
+    'ID',
+    'ASSIGNED_BY_NAME',
+    'OPPORTUNITY',
+    'UF_CRM_1658782991',
+    'UF_CRM_1667980814193',
+    'UF_CRM_1667983478811',
+    'UF_CRM_1654602086875',
+  ];
+
+  const paymenSelect = [
+    'ID',
+    'ASSIGNED_BY_NAME',
+    'OPPORTUNITY',
+    'UF_CRM_1635409690210',
+    'UF_CRM_1637135188721',
+    'UF_CRM_1642522388994',
+    'UF_CRM_1654075469',
+    'UF_CRM_1654602086875',
+  ];
+
+  const vzysParams = { filter: { CATEGORY_ID: '42' }, select: vzysSelect };
+  const paymenParams = { filter: { CATEGORY_ID: '46' }, select: paymenSelect };
+
+  try {
+    const [vzysResponse, paymenResponse] = await Promise.all([
+      bitrix.call('crm.deal.list', vzysParams),
+      bitrix.call('crm.deal.list', paymenParams),
+    ]);
+
+    return { vzys: vzysResponse.result, paymen: paymenResponse.result };
+  } catch (error) {
+    console.error('Error fetching linked deals:', error);
+    return { vzys: [], paymen: [] };
+  }
+}
+/**
+ * Fetches Car SPA Items (Type 138).
+ * (The @param {Object} bitrix doc is misleading since you're relying on the client 
+ * being initialized in the utils file's scope)
+ */
+export async function getCarSPAItems() {
+  const spaItemTypeId = 138;
+  const fieldsToSelect = [
+    'ID',
+    'TITLE',
+    'UF_CRM_4_1654813441319',
+    'UF_CRM_4_1756727906',
+    'UF_CRM_4_1654801798307',
+    'UF_CRM_4_1654801509478',
+    'UF_CRM_4_1654801485646',
+    'UF_CRM_4_1654801619341',
+    'UF_CRM_4_1741607811',
+    'UF_CRM_4_1743597840',
+    'UF_CRM_4_1655367397930',
+    'UF_CRM_4_1654802341211',
+  ];
+
+  const params = {
+    entityTypeId: spaItemTypeId,
+    select: fieldsToSelect,
+  };
+
+  try {
+    // FIX: Changed API method from 'crm.dynamic.item.list' to 'crm.item.list'
+    const response = await bitrix.call('crm.item.list', params); 
+    
+    // The structure for crm.item.list is typically result.items
+    return response.result.items;
+  } catch (error) {
+    console.error('Error fetching SPA Items (Cars):', error);
+    return [];
+  }
+}
