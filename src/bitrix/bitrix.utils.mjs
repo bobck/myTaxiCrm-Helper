@@ -835,12 +835,8 @@ async function fetchAll(method, initialParams) {
 export async function getDTPDeals() {
   const fieldsToSelect = [
     'ID',
-    'CONTACT_NAME',
     'CONTACT_ID',
-    'STAGE_NAME',
     'STAGE_ID',
-    'OPPORTUNITY_ACCOUNT',
-    'OPPORTUNITY_ID',
     'OPPORTUNITY',
     'CLOSEDATE',
     'UF_CRM_1635407076479',
@@ -927,9 +923,7 @@ export async function getLinkedDeals() {
 export async function getCarSPAItems() {
   const spaItemTypeId = 138;
   const fieldsToSelect = [
-    'ID',
     'TITLE',
-    'STAGE_ID',
     'ufCrm4_1654813441319',
     'ufCrm4_1756727906',
     'ufCrm4_1654801798307',
