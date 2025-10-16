@@ -11,17 +11,6 @@ import {
 } from '../../bitrix/bitrix.utils.mjs';
 import { parseCyrillicToLatinChars } from '../../shared/shared.utils.mjs';
 
-// NOTE: Since the utility functions use the Bitrix client initialized in their own file,
-// we will assume they are modified to handle pagination internally, or we must
-// define a paginating helper here and use the raw options.
-// Given the complexity of modifying the imported functions, I'll provide the module
-// logic that *should* be done if you had full control over a sequential API client.
-
-// --- 1. UTILITY FUNCTION (KEPT IN MODULE) ---
-/**
- * Renames object properties based on a provided map.
- * ... (unchanged)
- */
 const renameFields = (data, map) => {
   const newData = {};
   for (const key in data) {
@@ -50,14 +39,11 @@ export async function generateUkrainianReport() {
     return acc;
   }, {});
 
-  // Map PAYMEN Deals by the DTP Deal ID field value (UF_CRM_1654602086875)
   const paymenMap = paymenDeals.reduce((acc, deal) => {
     const translated = renameFields(deal, PAYMEN_ALIASES);
     acc[deal.UF_CRM_1654602086875] = translated;
     return acc;
   }, {});
-
-  // Map Car SPA Items by License Plate (TITLE)
   const carsMap = carItems.reduce((acc, item) => {
     const translated = renameFields(item, CAR_ALIASES);
     const licensePlate = parseCyrillicToLatinChars(item.title);
@@ -66,24 +52,18 @@ export async function generateUkrainianReport() {
     return acc;
   }, {});
 
-  // 5. Perform the FINAL JOIN on the DTP Deals
   const reportWithoutConatctsAndAssignedBy = dtpDeals.map((dtpDeal) => {
-    // Apply renames to the primary DTP deal
-
     const mainRecord = renameFields(dtpDeal, FIELD_ALIASES);
 
-    // Get the linking IDs
     const dtpDealId = dtpDeal.ID;
     const licensePlate = parseCyrillicToLatinChars(
       dtpDeal.UF_CRM_1635249720750
     );
 
-    // Merge Linked Data (LEFT JOIN equivalent)
     const vzysRecord = vzysMap[dtpDealId] || {};
     const paymenRecord = paymenMap[dtpDealId] || {};
     const carRecord = carsMap[licensePlate] || {};
 
-    // Assemble the Final Row
     const assembledRecord = {
       ...mainRecord,
       ...vzysRecord,
@@ -92,7 +72,6 @@ export async function generateUkrainianReport() {
     };
     console.log(assembledRecord);
 
-    // 6. Ensure all keys from aliases are present (for BQ schema consistency)
     const allAliases = {
       ...FIELD_ALIASES,
       ...VZYS_ALIASES,
@@ -111,7 +90,18 @@ export async function generateUkrainianReport() {
 
   const processedReport = reportWithoutConatctsAndAssignedBy.map((dl) => {
     const deal = structuredClone(dl);
-
+    const {
+      dtp_registration_type,
+      is_dtp_culprit,
+      transfer_to_collector,
+      vehicle_model,
+      vehicle_owner,
+      vehicle_status_in_company,
+      branding,
+      license_status,
+      leasing_status,
+      city
+    } = deal;
     delete deal['UF_CRM_1654602086875'];
   });
   return processedReport;
