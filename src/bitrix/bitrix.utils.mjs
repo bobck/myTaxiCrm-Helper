@@ -3,6 +3,7 @@ import fs from 'fs';
 import { pool } from './../api/pool.mjs';
 import { jobBoardApplymentParametersToBitrixKeys } from './bitrix.constants.mjs';
 import { BitrixAPIClient } from './bitrix.api.mjs';
+import { devLog } from '../shared/shared.utils.mjs';
 const bitrix = Bitrix(
   `https://${process.env.BITRIX_PORTAL_HOST}/rest/${process.env.BITRIX_USER_ID}/${process.env.BITRIX_API_KEY}/`
 );
@@ -779,10 +780,57 @@ export async function moveRequestedDriversToCheckStage({ cards }) {
   const { result: itemObj } = resp;
   return itemObj;
 }
+
+async function fetchAll(method, initialParams) {
+  let allResults = [];
+  // Use 0 for the first page start index
+  let next = 0;
+  let pageCount = 0;
+
+  devLog(
+    `[Pagination Start] Method: ${method}, Filter: ${JSON.stringify(initialParams.filter)}`
+  );
+
+  while (next !== null) {
+    const params = {
+      ...initialParams,
+      start: next,
+    };
+
+    try {
+      const response = await bitrix.call(method, params);
+
+      // Determine where the results array is located in the response
+      // 'crm.item.list' uses result.items, 'crm.deal.list' uses result
+      const currentResults = response.result?.items || response.result || [];
+
+      allResults.push(...currentResults);
+      pageCount++;
+
+      // Get the next start index from the 'next' property
+      next = response.next || null;
+
+      devLog(
+        `[Pagination] ${method} fetched page ${pageCount} (Records on page: ${currentResults.length}, Total: ${allResults.length}, Next Start: ${next})`
+      );
+    } catch (error) {
+      devLog(
+        `[Pagination Error] Method: ${method} failed at start=${next}. Error: ${error.message}`
+      );
+      // Stop pagination on error but return collected results
+      next = null;
+    }
+  }
+
+  devLog(
+    `[Pagination End] Method: ${method} finished. Total records retrieved: ${allResults.length}`
+  );
+  return allResults;
+}
+// -------------------------
 /**
  * Fetches the primary DTP Deals (Category 19) and their custom fields.
- * @param {Object} bitrix - The initialized 2bad/bitrix API instance.
- * @returns {Promise<Array<Object>>} List of DTP deals.
+ * FIX: Handles pagination and orders by ID ASC.
  */
 export async function getDTPDeals() {
   const fieldsToSelect = [
@@ -816,24 +864,18 @@ export async function getDTPDeals() {
     'UF_CRM_1654602086875', // Link ID
   ];
 
-  const params = {
+  const initialParams = {
     filter: { CATEGORY_ID: '19' },
     select: fieldsToSelect,
+    order: { ID: 'ASC' }, // Order by ID ASC
   };
 
-  try {
-    const response = await bitrix.call('crm.deal.list', params);
-    return response.result;
-  } catch (error) {
-    console.error('Error fetching DTP Deals:', error);
-    return [];
-  }
+  return fetchAll('crm.deal.list', initialParams);
 }
 
 /**
  * Fetches VZYS (Category 42) and PAYMEN (Category 46) Deals concurrently.
- * @param {Object} bitrix - The initialized 2bad/bitrix API instance.
- * @returns {Promise<{vzys: Array<Object>, paymen: Array<Object>}>} The fetched linked deals.
+ * FIX: Handles pagination for both concurrently and orders by ID ASC.
  */
 export async function getLinkedDeals() {
   const vzysSelect = [
@@ -857,25 +899,30 @@ export async function getLinkedDeals() {
     'UF_CRM_1654602086875',
   ];
 
-  const vzysParams = { filter: { CATEGORY_ID: '42' }, select: vzysSelect };
-  const paymenParams = { filter: { CATEGORY_ID: '46' }, select: paymenSelect };
+  const vzysParams = {
+    filter: { CATEGORY_ID: '42' },
+    select: vzysSelect,
+    order: { ID: 'ASC' },
+  };
 
-  try {
-    const [vzysResponse, paymenResponse] = await Promise.all([
-      bitrix.call('crm.deal.list', vzysParams),
-      bitrix.call('crm.deal.list', paymenParams),
-    ]);
+  const paymenParams = {
+    filter: { CATEGORY_ID: '46' },
+    select: paymenSelect,
+    order: { ID: 'ASC' },
+  };
 
-    return { vzys: vzysResponse.result, paymen: paymenResponse.result };
-  } catch (error) {
-    console.error('Error fetching linked deals:', error);
-    return { vzys: [], paymen: [] };
-  }
+  // Fetch both deal types concurrently (more efficient)
+  const [vzysDeals, paymenDeals] = await Promise.all([
+    fetchAll('crm.deal.list', vzysParams),
+    fetchAll('crm.deal.list', paymenParams),
+  ]);
+
+  return { vzys: vzysDeals, paymen: paymenDeals };
 }
+
 /**
  * Fetches Car SPA Items (Type 138).
- * (The @param {Object} bitrix doc is misleading since you're relying on the client
- * being initialized in the utils file's scope)
+ * FIX: Handles pagination for SPA items and orders by ID ASC.
  */
 export async function getCarSPAItems() {
   const spaItemTypeId = 138;
@@ -895,19 +942,12 @@ export async function getCarSPAItems() {
     'ufCrm4_1654802341211',
   ];
 
-  const params = {
+  const initialParams = {
     entityTypeId: spaItemTypeId,
     select: fieldsToSelect,
+    order: { ID: 'ASC' }, // Order by ID ASC
   };
 
-  try {
-    // FIX: Changed API method from 'crm.dynamic.item.list' to 'crm.item.list'
-    const response = await bitrix.call('crm.item.list', params);
-
-    // The structure for crm.item.list is typically result.items
-    return response.result.items;
-  } catch (error) {
-    console.error('Error fetching SPA Items (Cars):', error);
-    return [];
-  }
+  // Uses the corrected 'crm.item.list' method
+  return fetchAll('crm.item.list', initialParams);
 }

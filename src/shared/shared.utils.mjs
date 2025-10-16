@@ -44,3 +44,25 @@ export function getSetDifferences(setA, setB) {
 
   return [differenceB, differenceA];
 }
+
+const cyrillicToLatinMap = {
+  А: 'A',
+  В: 'B',
+  Е: 'E',
+  К: 'K',
+  М: 'M',
+  Н: 'H',
+  О: 'O',
+  Р: 'P',
+  С: 'C',
+  Т: 'T',
+  Х: 'X',
+};
+export function parseCyrillicToLatinChars(str) {
+  const s = String(str);
+  return s
+    .split('')
+    .map((char) =>
+      cyrillicToLatinMap[char] ? cyrillicToLatinMap[char] : char
+    );
+}

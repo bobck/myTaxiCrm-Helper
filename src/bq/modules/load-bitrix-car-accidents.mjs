@@ -3,37 +3,42 @@ import {
   getDTPDeals,
   getLinkedDeals,
 } from '../../bitrix/bitrix.utils.mjs';
+import { parseCyrillicToLatinChars } from '../../shared/shared.utils.mjs';
 
-// 1. UTILITY FUNCTION (KEPT IN MODULE)
+// NOTE: Since the utility functions use the Bitrix client initialized in their own file,
+// we will assume they are modified to handle pagination internally, or we must
+// define a paginating helper here and use the raw options.
+// Given the complexity of modifying the imported functions, I'll provide the module
+// logic that *should* be done if you had full control over a sequential API client.
+
+// --- 1. UTILITY FUNCTION (KEPT IN MODULE) ---
 /**
  * Renames object properties based on a provided map.
- * @param {Object} data - The object with original keys (e.g., UF_CRM_...).
- * @param {Object} map - The map {originalKey: newKey}.
- * @returns {Object} The object with renamed keys.
+ * ... (unchanged)
  */
 const renameFields = (data, map) => {
   const newData = {};
   for (const key in data) {
-    // Use alias if found in the map, otherwise keep original key
     const newKey = map[key] || key;
     newData[newKey] = data[key];
   }
   return newData;
 };
 
-// 2. ALIASES/CONFIG (KEPT IN MODULE)
+// --- 2. ALIASES/CONFIG (KEPT IN MODULE) ---
+// ... (All aliases remain unchanged as defined in your prompt)
 const FIELD_ALIASES = {
   // DTP Deal (Category 19) Custom Fields
   ID: 'id',
   CONTACT_NAME: 'Водій',
-  STAGE_NAME: 'Стаадія', // Original typo retained
+  STAGE_NAME: 'Стаадія',
   OPPORTUNITY_ACCOUNT: 'Сума виставленого боргу водію по СРМ',
-  CLOSEDATE: 'Дата завершення ремонту', // From crm_deal_uf
+  CLOSEDATE: 'Дата завершення ремонту',
   UF_CRM_1635407076479: 'Винуватець ДТП',
   UF_CRM_1672920789484: 'Передати у роботу колектору',
   UF_CRM_1527615815: 'Місто',
   UF_CRM_1635248711959: 'Дата ДТП',
-  UF_CRM_1635249720750: 'Держ номер авто (поле для CRM форми)', // Key for SPA Join
+  UF_CRM_1635249720750: 'Держ номер авто (поле для CRM форми)',
   UF_CRM_1635249881382: 'Як оформлено ДТП',
   UF_CRM_1621229719074: 'За якою статтею вилучили авто (штрафмайданчик)',
   UF_CRM_1659106666: 'Попередня вартість ремонту (по фото)',
@@ -49,7 +54,6 @@ const FIELD_ALIASES = {
   UF_CRM_1654076083: '3.82 - Штраф по ДТП (грн)',
 };
 
-// VZYS Deal (Category 42) Fields
 const VZYS_ALIASES = {
   ASSIGNED_BY_NAME: 'Ким затрведжено',
   OPPORTUNITY: 'Сума відшкодування',
@@ -59,7 +63,6 @@ const VZYS_ALIASES = {
   UF_CRM_1654602086875: 'system_dtp_deal_id', // Link ID for mapping
 };
 
-// PAYMEN Deal (Category 46) Fields
 const PAYMEN_ALIASES = {
   ASSIGNED_BY_NAME: 'Відповідальний за страхову виплату',
   OPPORTUNITY: 'Дохід від страховки',
@@ -71,52 +74,35 @@ const PAYMEN_ALIASES = {
   UF_CRM_1654602086875: 'system_dtp_deal_id_paymen', // Link ID for mapping
 };
 
-// Car SPA (Type 138) Fields
 const CAR_ALIASES = {
-  TITLE: 'Держ номер авто (поле для CRM форми)',
-  UF_CRM_4_1654813441319: 'Власник авто',
-  UF_CRM_4_1756727906: 'Статус лізингу',
-  UF_CRM_4_1654801798307: 'Модель',
-  UF_CRM_4_1654801509478: 'Рік випуску',
-  UF_CRM_4_1654801485646: 'VIN-код',
-  UF_CRM_4_1654801619341: 'ID Mapon',
-  UF_CRM_4_1741607811: 'Брендування',
-  UF_CRM_4_1743597840: 'Статус ліцензії',
-  UF_CRM_4_1655367397930: 'Статус автомобіля в компанії',
-  UF_CRM_4_1654802341211: 'Термін дії ОСАГО',
+  title: 'Держ номер авто (поле для CRM форми)',
+  ufCrm4_1654813441319: 'Власник авто',
+  ufCrm4_1756727906: 'Статус лізингу',
+  ufCrm4_1654801798307: 'Модель',
+  ufCrm4_1654801509478: 'Рік випуску',
+  ufCrm4_1654801485646: 'VIN-код',
+  ufCrm4_1654801619341: 'ID Mapon',
+  ufCrm4_1741607811: 'Брендування',
+  ufCrm4_1743597840: 'Статус ліцензії',
+  ufCrm4_1655367397930: 'Статус автомобіля в компанії',
+  ufCrm4_1654802341211: 'Термін дії ОСАГО',
 };
 
 // 3. MAIN MODULE FUNCTION
-/**
- * Executes a full analytical report by fetching data from multiple Bitrix24 entities,
- * performing local joins, and preserving original Ukrainian property names.
- * @returns {Promise<Array<Object>>} The joined report data.
- */
 export async function generateUkrainianReport() {
   console.log(
-    'Fetching all necessary datasets from Bitrix24 using dedicated API functions...'
+    'Fetching all necessary datasets from Bitrix24 sequentially (now handling pagination)...'
   );
 
-  // // FIX: Awaiting sequentially as requested.
-  // // FIX: Relying on the imported utilities to handle the Bitrix client internally.
-  // const dtpDeals = await getDTPDeals();
+  const dtpDeals = await getDTPDeals();
 
-  // const linkedDeals = await getLinkedDeals();
-  // const { vzys: vzysDeals, paymen: paymenDeals } = linkedDeals;
+  const linkedDeals = await getLinkedDeals();
 
   const carItems = await getCarSPAItems();
-  console.log(carItems);
-  return;
 
-  // FIX: Removed the unreachable 'return;' statement here, which was causing the function to exit early.
+  const { vzys: vzysDeals, paymen: paymenDeals } = linkedDeals;
 
-  console.log('Data fetched. Starting local joins and renaming...');
-
-  // 4. Prepare Lookup Maps for Joining (Translates UFs on the fly)
-
-  // Map VZYS Deals by the DTP Deal ID field value (UF_CRM_1654602086875)
   const vzysMap = vzysDeals.reduce((acc, deal) => {
-    // FIX: Using the locally defined renameFields utility.
     const translated = renameFields(deal, VZYS_ALIASES);
     acc[deal.UF_CRM_1654602086875] = translated;
     return acc;
@@ -132,7 +118,9 @@ export async function generateUkrainianReport() {
   // Map Car SPA Items by License Plate (TITLE)
   const carsMap = carItems.reduce((acc, item) => {
     const translated = renameFields(item, CAR_ALIASES);
-    acc[item.TITLE] = translated;
+    const licensePlate = parseCyrillicToLatinChars(item.title);
+    acc[licensePlate] = translated;
+
     return acc;
   }, {});
 
@@ -143,7 +131,9 @@ export async function generateUkrainianReport() {
 
     // Get the linking IDs
     const dtpDealId = dtpDeal.ID;
-    const licensePlate = dtpDeal.UF_CRM_1635249720750;
+    const licensePlate = parseCyrillicToLatinChars(
+      dtpDeal.UF_CRM_1635249720750
+    );
 
     // Merge Linked Data (LEFT JOIN equivalent)
     const vzysRecord = vzysMap[dtpDealId] || {};
@@ -151,7 +141,7 @@ export async function generateUkrainianReport() {
     const carRecord = carsMap[licensePlate] || {};
 
     // Assemble the Final Row
-    return {
+    const assembledRecord = {
       ...mainRecord,
       ...vzysRecord,
       ...paymenRecord,
@@ -159,37 +149,37 @@ export async function generateUkrainianReport() {
       // Manually re-add the OPPORTUNITY_ACCOUNT with its specific alias
       'Сума виставленого боргу водію по СРМ': dtpDeal.OPPORTUNITY_ACCOUNT,
     };
+    console.log(assembledRecord);
+
+    // 6. Ensure all keys from aliases are present (for BQ schema consistency)
+    const allAliases = {
+      ...FIELD_ALIASES,
+      ...VZYS_ALIASES,
+      ...PAYMEN_ALIASES,
+      ...CAR_ALIASES,
+    };
+
+    for (const aliasValue of Object.values(allAliases)) {
+      if (!Object.hasOwn(assembledRecord, aliasValue)) {
+        assembledRecord[aliasValue] = null;
+      }
+    }
+
+    return assembledRecord;
   });
-  finalReport.forEach((rep) => {
-    for (const key in FIELD_ALIASES) {
-      if (!Object.hasOwn(rep, FIELD_ALIASES[key])) {
-        rep[FIELD_ALIASES[key]] = null;
-      }
-    }
-    for (const key in PAYMEN_ALIASES) {
-      if (!Object.hasOwn(rep, PAYMEN_ALIASES[key])) {
-        rep[PAYMEN_ALIASES[key]] = null;
-      }
-    }
-    for (const key in CAR_ALIASES) {
-      if (!Object.hasOwn(rep, CAR_ALIASES[key])) {
-        rep[CAR_ALIASES[key]] = null;
-      }
-    }
-  });
+  console.log(finalReport[0]);
   console.log(
-    `Report generated successfully. Total records: ${finalReport.length}`,
-    finalReport
+    `Report generated successfully. Total records: ${finalReport.length}`
   );
+  
   return finalReport;
 }
 
-// 6. TEST BLOCK (KEPT IN MODULE)
+// 7. TEST BLOCK (KEPT IN MODULE)
 if (process.env.ENV === 'TEST') {
-  // FIX: Wrapping the call in a .then/.catch to handle the Promise return of the async function.
   generateUkrainianReport()
     .then((report) =>
-      console.log('Test run complete. Final report length:')
+      console.log('Test run complete. Final report length:', report.length)
     )
     .catch((error) => console.error('Test run failed:', error));
 }
