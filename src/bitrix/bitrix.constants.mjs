@@ -520,3 +520,157 @@ export const jobBoardApplymentParametersToBitrixKeys = {
   assigned_by_id: 'fields[ufCrm56_1740150074]',
   bitrix_vacancy_id: 'fields[ufCrm56_1748608748]',
 };
+
+export const FIELD_ALIASES = {
+  // Стандартні поля
+  ID: 'id',
+  CONTACT_NAME: 'driver_contact_name', // Водій
+  STAGE_NAME: 'stage_name', // Стаадія (Виправлено до stage_name)
+  OPPORTUNITY_ACCOUNT: 'debt_amount_crm', // Сума виставленого боргу водію по СРМ
+  CLOSEDATE: 'repair_completion_date', // Дата завершення ремонту
+
+  // Користувацькі поля (UF_CRM_...)
+  UF_CRM_1635407076479: 'is_dtp_culprit', // Винуватець ДТП
+  UF_CRM_1672920789484: 'transfer_to_collector', // Передати у роботу колектору
+  UF_CRM_1527615815: 'city', // Місто
+  UF_CRM_1635248711959: 'dtp_date', // Дата ДТП
+  UF_CRM_1635249720750: 'vehicle_license_plate', // Держ номер авто (поле для CRM форми)
+  UF_CRM_1635249881382: 'dtp_registration_type', // Як оформлено ДТП
+  UF_CRM_1621229719074: 'car_seizure_article', // За якою статтею вилучили авто (штрафмайданчик)
+  UF_CRM_1659106666: 'preliminary_repair_cost_photo', // Попередня вартість ремонту (по фото)
+  UF_CRM_1657614140: 'remonline_repair_sid', // SID ремонту RemOnline
+  UF_CRM_1679065789167: 'repair_cost_by_sid', // Вартість ремонта по СІДу
+  UF_CRM_1654075851: 'actual_repair_cost_paid', // Реальна вартість ремонту з врахуванням оплат за ремонт
+  UF_CRM_1642520789361: 'agreed_repair_amount', // Погоджена сума ремонту
+  UF_CRM_1654075784: 'additional_repair_expenses_uah', // Додаткові витрати на ремонт (грн)
+  UF_CRM_1654075469: 'credited_from_ins_co_uah', // Зараховано від СК (грн)
+  UF_CRM_1654075693: 'repair_paid_by_3rd_party_uah', // Ремонт оплачено від 3-й сторони (грн)
+  UF_CRM_1654075624: 'repair_paid_by_driver_collected', // Оплачено за ремонт водієм (стягнуто)
+  UF_CRM_1654076033: 'dtp_driver_debt_uah', // 3.79 - ДТП борг Водія (грн)
+  UF_CRM_1654076083: 'dtp_fine_uah', // 3.82 - Штраф по ДТП (грн)
+};
+export const VZYS_ALIASES = {
+  ASSIGNED_BY_NAME: 'approved_by', // Ким затрведжено
+  OPPORTUNITY: 'reimbursement_amount', // Сума відшкодування
+  UF_CRM_1658782991: 'independent_expert_evaluation', // Оцінка незалежного експерта
+  UF_CRM_1667980814193: 'was_property_found', // Вдалося знайти власність??
+  UF_CRM_1667983478811: 'court_case_number', // Номер судової справи
+  UF_CRM_1654602086875: 'system_dtp_deal_id', // Link ID for mapping
+};
+export const PAYMEN_ALIASES = {
+  ASSIGNED_BY_NAME: 'responsible_for_ins_payment', // Відповідальний за страхову виплату
+  OPPORTUNITY: 'insurance_revenue', // Дохід від страховки
+  UF_CRM_1635409690210: 'ins_co_application_date', // Дата подачі заяви про виплату СК
+  UF_CRM_1637135188721: 'ins_case_number', // Номер справи (Страхової)
+  UF_CRM_1642522388994: 'funds_destination', // Куди будуть зараховані кошти
+  UF_CRM_1654075469: 'credited_from_ins_co_uah_1', // Зараховано від СК (грн)__1
+  UF_CRM_1654602086875: 'system_dtp_deal_id_paymen', // Link ID for mapping
+};
+export const CAR_ALIASES = {
+  TITLE: 'vehicle_license_plate', // Держ номер авто (використовується для з'єднання)
+  ufCrm4_1654813441319: 'vehicle_owner', // Власник авто
+  ufCrm4_1756727906: 'leasing_status', // Статус лізингу
+  ufCrm4_1654801798307: 'vehicle_model', // Модель
+  ufCrm4_1654801509478: 'production_year', // Рік випуску
+  ufCrm4_1654801485646: 'vin_code', // VIN-код
+  ufCrm4_1654801619341: 'mapon_id', // ID Mapon
+  ufCrm4_1741607811: 'branding', // Брендування
+  ufCrm4_1743597840: 'license_status', // Статус ліцензії
+  ufCrm4_1655367397930: 'vehicle_status_in_company', // Статус автомобіля в компанії
+  ufCrm4_1654802341211: 'osago_expiry_date', // Термін дії ОСАГО
+};
+export const DTP_REGISTRATION_MAP = {
+  1044: 'Оплата ущерба на месте',
+  1046: 'Оформила полиция',
+  1048: 'Европротокол',
+  1338: 'Внутренний ремонт',
+  1050: 'Другое',
+};
+export const CAR_SEIZURE_MAP = {
+  783: '130',
+  785: 'інша',
+};
+export const CAR_OWNER_MAP = {
+  6112: 'ТОВ "ІНДАСТРІ ІНКОРПОРЕЙШН"',
+  6114: 'ТОВ "ДГ ІНТЕРНЕШНЛ ГРУП"',
+  6116: 'ТОВ "ГЛОРІС КОРП"',
+  6118: 'ТОВ "БЦ БРИТАНІЯ"',
+  9274: 'ТОВ "СМАРТ РАЙД"',
+  9276: 'ТОВ "СІТІ ДЕВЕЛОПМЕН ГРУПП"',
+  1654: 'INDUSTRY INCORPORATION',
+  1656: 'DG INTERNATIONAL',
+  1658: 'GLORIS CORP',
+  1660: 'SMART RIDE',
+  1662: 'BC BRITAIN',
+  1664: 'TSIREN',
+  1956: 'PLANET OF CARS',
+  2128: 'CITY DEVELOPMENT GROUP',
+  2364: 'ULF',
+  2554: 'AUTO SWAT SPOLKA Z O.O.',
+  4036: 'PKO LEASING SPOLKA AKCYJNA',
+};
+export const LEASING_STATUS_MAP = {
+  9258: 'В лізингу',
+  9260: 'Виплачена',
+  9262: 'Переоформлена',
+};
+export const MODEL_MAP = {
+  1616: 'HYUNDAI ELANTRA',
+  1618: 'FORD FIESTA',
+  1620: 'NISSAN VERSA',
+  1622: 'VOLKSWAGEN JETTA',
+  1624: 'CHEVROLET CRUZE',
+  1626: 'RENAULT LOGAN',
+  1628: 'PEUGEOT 301',
+  1630: 'HYUNDAI SOLARIS',
+  1632: 'RENAULT SYMBOL',
+  1634: 'SKODA FABIA',
+  1636: 'SKODA SCALA',
+  1638: 'SKODA RAPID',
+  1640: 'FORD TRANSIT',
+  1642: 'RENAULT MASTER',
+  1644: 'HYUNDAI ACCENT',
+  1646: 'SKODA SPACEBACK',
+  1648: 'RENAULT SANDERO',
+  1650: 'VOLKSWAGEN CRAFTER',
+  1652: 'RENAULT TRAFIC',
+  1958: 'TOYOTA PRIUS',
+  1954: 'TOYOTA AURIS',
+  2538: 'TOYOTA AURIS (HYBRID) HATCHBACK',
+  1972: 'TOYOTA COROLLA',
+  2552: 'TOYOTA COROLLA (HYBRID)',
+  2540: 'TOYOTA AVENSIS',
+  2110: 'VOLKSWAGEN GOLF 7',
+  2126: 'ГАЗ 3302 АЗУ',
+  2130: 'HYUNDAI I30',
+  2352: 'БОГДАН DF-47',
+  2354: 'FIAT DUCATO',
+  2366: 'SKODA KAMIQ',
+  2532: 'AUDI A3',
+  2534: 'PEUGEOUT 308',
+  2536: 'RENAULT SCENIC',
+  2542: 'VOLKSWAGEN PASSAT B8',
+  2544: 'FORD FOCUS',
+  9520: 'RENAULT CLIO SYMBOL',
+};
+export const BRANDING_MAP = {
+  4042: 'Присутнє',
+  4044: 'Немає',
+  6976: 'Не відомо',
+};
+export const LICENSE_STATUS_MAP = {
+  4042: 'Присутнє',
+  4044: 'Немає',
+  6976: 'Не відомо',
+};
+export const FUNDS_DESTINATION_MAP = {
+  1314: 'Касса автопарк',
+  1316: 'ФОП Владимир',
+  1318: 'ФОП Дмитрий',
+  1320: 'ФОП Ярослав',
+  1322: 'ТОВ DG INT Group',
+  1324: 'ТОВ Глорис',
+  1326: 'ТОВ Индастри',
+  1328: 'ТОВ БЦ Британия',
+  2112: 'ТОВ Смарт Райд',
+};
