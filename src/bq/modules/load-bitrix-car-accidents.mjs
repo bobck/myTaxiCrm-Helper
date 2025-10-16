@@ -12,13 +12,13 @@ import {
  * @returns {Object} The object with renamed keys.
  */
 const renameFields = (data, map) => {
-    const newData = {};
-    for (const key in data) {
-        // Use alias if found in the map, otherwise keep original key
-        const newKey = map[key] || key;
-        newData[newKey] = data[key];
-    }
-    return newData;
+  const newData = {};
+  for (const key in data) {
+    // Use alias if found in the map, otherwise keep original key
+    const newKey = map[key] || key;
+    newData[newKey] = data[key];
+  }
+  return newData;
 };
 
 // 2. ALIASES/CONFIG (KEPT IN MODULE)
@@ -96,26 +96,24 @@ export async function generateUkrainianReport() {
   console.log(
     'Fetching all necessary datasets from Bitrix24 using dedicated API functions...'
   );
-  
-  // FIX: Awaiting sequentially as requested.
-  // FIX: Relying on the imported utilities to handle the Bitrix client internally.
-  const dtpDeals = await getDTPDeals(); 
-  console.log({dtpDeals:dtpDeals.length})
-  
-  const linkedDeals = await getLinkedDeals(); 
-  console.log({linkedDeals})
-  
-  const carItems = await getCarSPAItems(); 
-  console.log({carItems})
-  
+
+  // // FIX: Awaiting sequentially as requested.
+  // // FIX: Relying on the imported utilities to handle the Bitrix client internally.
+  // const dtpDeals = await getDTPDeals();
+
+  // const linkedDeals = await getLinkedDeals();
+  // const { vzys: vzysDeals, paymen: paymenDeals } = linkedDeals;
+
+  const carItems = await getCarSPAItems();
+  console.log(carItems);
+  return;
+
   // FIX: Removed the unreachable 'return;' statement here, which was causing the function to exit early.
-  
-  const { vzys: vzysDeals, paymen: paymenDeals } = linkedDeals;
 
   console.log('Data fetched. Starting local joins and renaming...');
 
   // 4. Prepare Lookup Maps for Joining (Translates UFs on the fly)
-  
+
   // Map VZYS Deals by the DTP Deal ID field value (UF_CRM_1654602086875)
   const vzysMap = vzysDeals.reduce((acc, deal) => {
     // FIX: Using the locally defined renameFields utility.
@@ -162,9 +160,26 @@ export async function generateUkrainianReport() {
       'Сума виставленого боргу водію по СРМ': dtpDeal.OPPORTUNITY_ACCOUNT,
     };
   });
-
+  finalReport.forEach((rep) => {
+    for (const key in FIELD_ALIASES) {
+      if (!Object.hasOwn(rep, FIELD_ALIASES[key])) {
+        rep[FIELD_ALIASES[key]] = null;
+      }
+    }
+    for (const key in PAYMEN_ALIASES) {
+      if (!Object.hasOwn(rep, PAYMEN_ALIASES[key])) {
+        rep[PAYMEN_ALIASES[key]] = null;
+      }
+    }
+    for (const key in CAR_ALIASES) {
+      if (!Object.hasOwn(rep, CAR_ALIASES[key])) {
+        rep[CAR_ALIASES[key]] = null;
+      }
+    }
+  });
   console.log(
-    `Report generated successfully. Total records: ${finalReport.length}`,finalReport
+    `Report generated successfully. Total records: ${finalReport.length}`,
+    finalReport
   );
   return finalReport;
 }
@@ -173,6 +188,8 @@ export async function generateUkrainianReport() {
 if (process.env.ENV === 'TEST') {
   // FIX: Wrapping the call in a .then/.catch to handle the Promise return of the async function.
   generateUkrainianReport()
-    .then(report => console.log('Test run complete. Final report length:', report.length))
-    .catch(error => console.error('Test run failed:', error));
+    .then((report) =>
+      console.log('Test run complete. Final report length:')
+    )
+    .catch((error) => console.error('Test run failed:', error));
 }

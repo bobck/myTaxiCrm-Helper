@@ -788,8 +788,12 @@ export async function getDTPDeals() {
   const fieldsToSelect = [
     'ID',
     'CONTACT_NAME',
+    'CONTACT_ID',
     'STAGE_NAME',
+    'STAGE_ID',
     'OPPORTUNITY_ACCOUNT',
+    'OPPORTUNITY_ID',
+    'OPPORTUNITY',
     'CLOSEDATE',
     'UF_CRM_1635407076479',
     'UF_CRM_1672920789484',
@@ -870,7 +874,7 @@ export async function getLinkedDeals() {
 }
 /**
  * Fetches Car SPA Items (Type 138).
- * (The @param {Object} bitrix doc is misleading since you're relying on the client 
+ * (The @param {Object} bitrix doc is misleading since you're relying on the client
  * being initialized in the utils file's scope)
  */
 export async function getCarSPAItems() {
@@ -878,16 +882,17 @@ export async function getCarSPAItems() {
   const fieldsToSelect = [
     'ID',
     'TITLE',
-    'UF_CRM_4_1654813441319',
-    'UF_CRM_4_1756727906',
-    'UF_CRM_4_1654801798307',
-    'UF_CRM_4_1654801509478',
-    'UF_CRM_4_1654801485646',
-    'UF_CRM_4_1654801619341',
-    'UF_CRM_4_1741607811',
-    'UF_CRM_4_1743597840',
-    'UF_CRM_4_1655367397930',
-    'UF_CRM_4_1654802341211',
+    'STAGE_ID',
+    'ufCrm4_1654813441319',
+    'ufCrm4_1756727906',
+    'ufCrm4_1654801798307',
+    'ufCrm4_1654801509478',
+    'ufCrm4_1654801485646',
+    'ufCrm4_1654801619341',
+    'ufCrm4_1741607811',
+    'ufCrm4_1743597840',
+    'ufCrm4_1655367397930',
+    'ufCrm4_1654802341211',
   ];
 
   const params = {
@@ -897,8 +902,8 @@ export async function getCarSPAItems() {
 
   try {
     // FIX: Changed API method from 'crm.dynamic.item.list' to 'crm.item.list'
-    const response = await bitrix.call('crm.item.list', params); 
-    
+    const response = await bitrix.call('crm.item.list', params);
+
     // The structure for crm.item.list is typically result.items
     return response.result.items;
   } catch (error) {
