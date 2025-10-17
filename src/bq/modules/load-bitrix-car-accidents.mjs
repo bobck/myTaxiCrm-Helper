@@ -1,6 +1,15 @@
 import {
+  BRANDING_MAP,
   CAR_ALIASES,
+  CAR_OWNER_MAP,
+  CAR_SEIZURE_MAP,
+  cityListWithAssignedBy,
+  DTP_BLAME_MAP,
+  DTP_REGISTRATION_MAP,
   FIELD_ALIASES,
+  LEASING_STATUS_MAP,
+  LICENSE_STATUS_MAP,
+  MODEL_MAP,
   PAYMEN_ALIASES,
   VZYS_ALIASES,
 } from '../../bitrix/bitrix.constants.mjs';
@@ -87,7 +96,7 @@ export async function generateUkrainianReport() {
 
     return assembledRecord;
   });
-
+  const newAPS = [];
   const processedReport = reportWithoutConatctsAndAssignedBy.map((dl) => {
     const deal = structuredClone(dl);
     const {
@@ -100,18 +109,49 @@ export async function generateUkrainianReport() {
       branding,
       license_status,
       leasing_status,
-      city
+      city,
     } = deal;
+
+    deal.dtp_registration_type = DTP_REGISTRATION_MAP[dtp_registration_type];
+    deal.blame = DTP_BLAME_MAP[is_dtp_culprit];
+    deal.transfer_to_collector = Boolean(Number(transfer_to_collector));
+    deal.vehicle_model = MODEL_MAP[vehicle_model];
+    deal.vehicle_owner = CAR_OWNER_MAP[vehicle_owner];
+    deal.vehicle_status_in_company = vehicle_status_in_company;
+    deal.branding = BRANDING_MAP[branding];
+
+    deal.license_status = LICENSE_STATUS_MAP[license_status];
+    deal.leasing_status = LEASING_STATUS_MAP[leasing_status];
+
+    delete deal.is_dtp_culprit;
+    delete deal.title;
     delete deal['UF_CRM_1654602086875'];
+
+    const cityData = cityListWithAssignedBy.find((ct) => ct.cityId == city);
+
+    if (!cityData) {
+      newAPS.push(deal.city);
+      return deal;
+    }
+
+    const { auto_park_id, cityName } = cityData;
+    deal.city = cityName;
+    deal.auto_park_id = auto_park_id;
+
+    return deal;
   });
-  return processedReport;
+  return { processedReport, newAPS };
 }
 
 // 7. TEST BLOCK (KEPT IN MODULE)
 if (process.env.ENV === 'TEST') {
   generateUkrainianReport()
     .then((report) =>
-      console.log('Test run complete. Final report length:', report.length)
+      console.log(
+        report,
+        'Test run complete. Final report length:',
+        report.length
+      )
     )
     .catch((error) => console.error('Test run failed:', error));
 }
