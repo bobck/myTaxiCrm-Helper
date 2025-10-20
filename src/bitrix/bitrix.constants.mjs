@@ -255,6 +255,62 @@ export const cityListWithAssignedBy = [
     cityName: "Кам'янське",
     supportCityId: '',
   },
+  {
+    assignedBy: '',
+    auto_park_id: '',
+    cityId: '407',
+    brandingId: '',
+    cityName: 'Херсон',
+    supportCityId: '',
+  },
+  {
+    assignedBy: '',
+    auto_park_id: '',
+    cityId: '813',
+    brandingId: '',
+    cityName: 'unknown',
+    supportCityId: '',
+  },
+  {
+    assignedBy: '',
+    auto_park_id: '',
+    cityId: '1764',
+    brandingId: '',
+    cityName: 'unknown',
+    supportCityId: '',
+  },
+  {
+    assignedBy: '',
+    auto_park_id: 'de4bf8ba-30c2-452c-a688-104063052961',
+    cityId: '1842',
+    brandingId: '',
+    cityName: 'Warsaw',
+    supportCityId: '',
+  },
+  {
+    assignedBy: '',
+    auto_park_id: '444afd80-52d5-4c87-b02a-c43db8982bef',
+    cityId: '2758',
+    brandingId: '',
+    cityName: 'Katowice',
+    supportCityId: '',
+  },
+  {
+    assignedBy: '',
+    auto_park_id: 'be6ab23a-d6ba-4add-b0f7-cfb8abd0586b',
+    cityId: '2506',
+    brandingId: '',
+    cityName: 'Krakow',
+    supportCityId: '',
+  },
+  {
+    assignedBy: '',
+    auto_park_id: '',
+    cityId: '463',
+    brandingId: '',
+    cityName: "Кам'янське",
+    supportCityId: '',
+  },
 ];
 
 export const specialBrandingCities = [
@@ -526,7 +582,7 @@ export const FIELD_ALIASES = {
   ID: 'id',
   CONTACT_NAME: 'driver_contact_name', // Водій
   STAGE_NAME: 'stage_name', // Стаадія (Виправлено до stage_name)
-  OPPORTUNITY_ACCOUNT: 'debt_amount_crm', // Сума виставленого боргу водію по СРМ
+  OPPORTUNITY: 'debt_amount_crm', // Сума виставленого боргу водію по СРМ
   CLOSEDATE: 'repair_completion_date', // Дата завершення ремонту
 
   // Користувацькі поля (UF_CRM_...)
@@ -550,7 +606,7 @@ export const FIELD_ALIASES = {
   UF_CRM_1654076083: 'dtp_fine_uah', // 3.82 - Штраф по ДТП (грн)
 };
 export const VZYS_ALIASES = {
-  ASSIGNED_BY_NAME: 'approved_by', // Ким затрведжено
+  ASSIGNED_BY_ID: 'approved_by', // Ким затрведжено
   OPPORTUNITY: 'reimbursement_amount', // Сума відшкодування
   UF_CRM_1658782991: 'independent_expert_evaluation', // Оцінка незалежного експерта
   UF_CRM_1667980814193: 'was_property_found', // Вдалося знайти власність??
@@ -558,7 +614,7 @@ export const VZYS_ALIASES = {
   UF_CRM_1654602086875: 'system_dtp_deal_id', // Link ID for mapping
 };
 export const PAYMEN_ALIASES = {
-  ASSIGNED_BY_NAME: 'responsible_for_ins_payment', // Відповідальний за страхову виплату
+  ASSIGNED_BY_ID: 'responsible_for_ins_payment', // Відповідальний за страхову виплату
   OPPORTUNITY: 'insurance_revenue', // Дохід від страховки
   UF_CRM_1635409690210: 'ins_co_application_date', // Дата подачі заяви про виплату СК
   UF_CRM_1637135188721: 'ins_case_number', // Номер справи (Страхової)
@@ -576,7 +632,7 @@ export const CAR_ALIASES = {
   ufCrm4_1654801619341: 'mapon_id', // ID Mapon
   ufCrm4_1741607811: 'branding', // Брендування
   ufCrm4_1743597840: 'license_status', // Статус ліцензії
-  ufCrm4_1655367397930: 'vehicle_status_in_company', // Статус автомобіля в компанії
+  stageId: 'vehicle_status_in_company', // Статус автомобіля в компанії
   ufCrm4_1654802341211: 'osago_expiry_date', // Термін дії ОСАГО
 };
 export const DTP_REGISTRATION_MAP = {
@@ -659,10 +715,11 @@ export const BRANDING_MAP = {
   6976: 'Не відомо',
 };
 export const LICENSE_STATUS_MAP = {
-  4042: 'Присутнє',
-  4044: 'Немає',
-  6976: 'Не відомо',
+  6966: 'Діюча',
+  6968: 'Подана на розгляд',
+  6970: 'Відсутня',
 };
+
 export const FUNDS_DESTINATION_MAP = {
   1314: 'Касса автопарк',
   1316: 'ФОП Владимир',
@@ -694,4 +751,30 @@ export const DTP_BLAME_MAP = {
   1078: 'Обоюдка',
   1074: 'Не наш водитель',
   1076: 'Не определен',
+};
+export const VEHICLE_STATUS_IN_COMPANY_MAP = {
+  'DT138_4:NEW': 'В работе',
+  'DT138_4:UC_GIF8FT': 'Викуп',
+  'DT138_4:UC_UGGE27': 'Парковий автомобіль',
+  'DT138_4:UC_W927Y8': 'Угон',
+  'DT138_4:PREPARATION': 'Подготовка',
+  'DT138_4:CLIENT': 'Списана',
+  'DT138_4:UC_B0W80X': 'Авто використовуються Самокатами',
+  'DT138_4:UC_WL04OW': 'Авто використовуються СТО',
+  'DT138_4:UC_3LGE8U': 'Не работают в такси',
+};
+export const DTP_STAGE_MAP = {
+  'C19:2': 'Дефектовка/Счет',
+  'C19:3': 'Ожидание Эксперта',
+  'C19:4': 'Ремонт',
+  'C19:5': 'Висяк (нужно решение по авто)',
+  'C19:LOSE': 'Списание авто',
+  'C19:NEW': 'Сбор документов',
+  'C19:UC_38BZFA': 'Погодження рахунку',
+  'C19:UC_41NRCQ': 'В работе без ремонта',
+  'C19:UC_52YM1F': 'Штрафплощадка',
+  'C19:UC_CDXMZ3': 'Проишествие',
+  'C19:UC_N0UMB9': 'Рахунок погодженно',
+  'C19:UC_RY9VBG': 'Ожидание запчастей',
+  'C19:WON': 'В работе',
 };

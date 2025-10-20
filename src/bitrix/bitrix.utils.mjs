@@ -820,6 +820,7 @@ async function fetchAll(method, initialParams) {
       // Stop pagination on error but return collected results
       next = null;
     }
+    return allResults;
   }
 
   devLog(
@@ -876,7 +877,7 @@ export async function getDTPDeals() {
 export async function getLinkedDeals() {
   const vzysSelect = [
     'ID',
-    'ASSIGNED_BY_NAME',
+    'ASSIGNED_BY_ID',
     'OPPORTUNITY',
     'UF_CRM_1658782991',
     'UF_CRM_1667980814193',
@@ -886,7 +887,7 @@ export async function getLinkedDeals() {
 
   const paymenSelect = [
     'ID',
-    'ASSIGNED_BY_NAME',
+    'ASSIGNED_BY_ID',
     'OPPORTUNITY',
     'UF_CRM_1635409690210',
     'UF_CRM_1637135188721',
@@ -924,6 +925,7 @@ export async function getCarSPAItems() {
   const spaItemTypeId = 138;
   const fieldsToSelect = [
     'TITLE',
+    'STAGE_ID',
     'ufCrm4_1654813441319',
     'ufCrm4_1756727906',
     'ufCrm4_1654801798307',
@@ -944,4 +946,12 @@ export async function getCarSPAItems() {
 
   // Uses the corrected 'crm.item.list' method
   return fetchAll('crm.item.list', initialParams);
+}
+export async function getBitrixUserById({ user_id }) {
+  const { result } = await bitrix.call('user.get', {
+    filter: {
+      id: user_id,
+    },
+  });
+  return result;
 }

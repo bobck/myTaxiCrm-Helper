@@ -6,14 +6,17 @@ import {
   cityListWithAssignedBy,
   DTP_BLAME_MAP,
   DTP_REGISTRATION_MAP,
+  DTP_STAGES_MAP,
   FIELD_ALIASES,
   LEASING_STATUS_MAP,
   LICENSE_STATUS_MAP,
   MODEL_MAP,
   PAYMEN_ALIASES,
+  VEHICLE_STATUS_IN_COMPANY_MAP,
   VZYS_ALIASES,
 } from '../../bitrix/bitrix.constants.mjs';
 import {
+  getBitrixUserById,
   getCarSPAItems,
   getDTPDeals,
   getLinkedDeals,
@@ -96,11 +99,12 @@ export async function generateUkrainianReport() {
 
     return assembledRecord;
   });
-  const newAPS = [];
   const processedReport = reportWithoutConatctsAndAssignedBy.map((dl) => {
     const deal = structuredClone(dl);
     const {
       dtp_registration_type,
+      approved_by,
+      responsible_for_ins_payment,
       is_dtp_culprit,
       transfer_to_collector,
       vehicle_model,
@@ -117,20 +121,32 @@ export async function generateUkrainianReport() {
     deal.transfer_to_collector = Boolean(Number(transfer_to_collector));
     deal.vehicle_model = MODEL_MAP[vehicle_model];
     deal.vehicle_owner = CAR_OWNER_MAP[vehicle_owner];
-    deal.vehicle_status_in_company = vehicle_status_in_company;
+    deal.vehicle_status_in_company =
+      VEHICLE_STATUS_IN_COMPANY_MAP[vehicle_status_in_company];
     deal.branding = BRANDING_MAP[branding];
-
     deal.license_status = LICENSE_STATUS_MAP[license_status];
     deal.leasing_status = LEASING_STATUS_MAP[leasing_status];
+    deal.stage = DTP_STAGES_MAP[deal.STAGE_ID];
 
+    delete deal.STAGE_ID;
     delete deal.is_dtp_culprit;
     delete deal.title;
     delete deal['UF_CRM_1654602086875'];
+    delete deal.ID;
 
+    /**
+     * debt_amount_crm
+     * car_seizure_article
+     * vehicle_status_in_company
+     * license_status
+     * assigned_by_name (paymen)
+     */
     const cityData = cityListWithAssignedBy.find((ct) => ct.cityId == city);
-
+    
     if (!cityData) {
-      newAPS.push(deal.city);
+      return deal;
+    }
+    if (cityData.cityName == 'unknown') {
       return deal;
     }
 
@@ -140,7 +156,7 @@ export async function generateUkrainianReport() {
 
     return deal;
   });
-  return { processedReport, newAPS };
+  return processedReport;
 }
 
 // 7. TEST BLOCK (KEPT IN MODULE)
@@ -148,7 +164,7 @@ if (process.env.ENV === 'TEST') {
   generateUkrainianReport()
     .then((report) =>
       console.log(
-        report,
+        report.slice(report.length - 100),
         'Test run complete. Final report length:',
         report.length
       )
