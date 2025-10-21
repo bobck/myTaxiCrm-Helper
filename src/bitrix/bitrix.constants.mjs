@@ -580,6 +580,7 @@ export const jobBoardApplymentParametersToBitrixKeys = {
 export const FIELD_ALIASES = {
   // Стандартні поля
   ID: 'id',
+  CONTACT_ID: 'driver_contact_id',
   CONTACT_NAME: 'driver_contact_name', // Водій
   STAGE_NAME: 'stage_name', // Стаадія (Виправлено до stage_name)
   OPPORTUNITY: 'debt_amount_crm', // Сума виставленого боргу водію по СРМ

@@ -16,6 +16,8 @@ import {
   VZYS_ALIASES,
 } from '../../bitrix/bitrix.constants.mjs';
 import {
+  chunkArray,
+  findContactById,
   getBitrixUserById,
   getCarSPAItems,
   getDTPDeals,
@@ -39,6 +41,17 @@ export async function generateUkrainianReport() {
   console.log(
     'Fetching all necessary datasets from Bitrix24 sequentially (now handling pagination)...'
   );
+  const dtpDeals = await getDTPDeals();
+
+  const contact_ids = new Set(
+    dtpDeals.map((deal) => deal.CONTACT_ID).filter((id) => Boolean(id))
+  );
+  const chunkedContactIds = chunkArray(Array.from(contact_ids), 50);
+  const contacts = [];
+  for (const chunk of chunkedContactIds) {
+    contacts.push(...(await findContactById({ contact_ids: chunk })));
+  }
+
   const linkedDeals = await getLinkedDeals();
   const { vzys: vzysDeals, paymen: paymenDeals } = linkedDeals;
 
@@ -46,8 +59,6 @@ export async function generateUkrainianReport() {
     [...vzysDeals, ...paymenDeals].map((deal) => deal.ASSIGNED_BY_ID)
   );
   const users = await getBitrixUserById({ user_id: Array.from(assignedBySet) });
-
-  const dtpDeals = await getDTPDeals();
 
   const carItems = await getCarSPAItems();
 
@@ -162,7 +173,11 @@ export async function generateUkrainianReport() {
       deal.approved_by_user = `${approved_by_user.NAME} ${approved_by_user.LAST_NAME}`;
     }
     if (responsible_for_ins_payment_user) {
-      deal.responsible_for_ins_payment = `${responsible_for_ins_payment_user.NAME} ${responsible_for_ins_payment_user.LAST_NAME}`;
+      deal.responsible_for_ins_payment_user = `${responsible_for_ins_payment_user.NAME} ${responsible_for_ins_payment_user.LAST_NAME}`;
+    }
+    if (deal.driver_contact_id) {
+      const contact = contacts.find((c) => c.ID == deal.driver_contact_id);
+      deal.driver_contact_name = `${contact.NAME} ${contact.LAST_NAME}`;
     }
 
     if (!cityData) {
@@ -186,7 +201,12 @@ if (process.env.ENV === 'TEST') {
   generateUkrainianReport()
     .then((report) =>
       console.log(
-        report.slice(report.length - 3),
+        report.filter(
+          (deal) =>
+            Boolean(deal.approved_by) &&
+            Boolean(deal.responsible_for_ins_payment) &&
+            Boolean(deal.driver_contact_id)
+        ),
         'Test run complete. Final report length:',
         report.length
       )

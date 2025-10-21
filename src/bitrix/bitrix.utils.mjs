@@ -820,7 +820,6 @@ async function fetchAll(method, initialParams) {
       // Stop pagination on error but return collected results
       next = null;
     }
-
   }
 
   devLog(
@@ -954,5 +953,16 @@ export async function getBitrixUserById({ user_id }) {
       ID: user_id,
     },
   });
+  return result;
+}
+export async function findContactById({ contact_ids }) {
+  const params = {
+    filter: { ID: contact_ids },
+    select: ['ID', 'NAME', 'LAST_NAME'],
+  };
+  const response = await bitrix.call('crm.contact.list', params);
+
+  const { result } = response;
+
   return result;
 }
