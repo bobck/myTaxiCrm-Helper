@@ -21,7 +21,10 @@ import {
   getDTPDeals,
   getLinkedDeals,
 } from '../../bitrix/bitrix.utils.mjs';
-import { parseCyrillicToLatinChars } from '../../shared/shared.utils.mjs';
+import {
+  devLog,
+  parseCyrillicToLatinChars,
+} from '../../shared/shared.utils.mjs';
 
 const renameFields = (data, map) => {
   const newData = {};
@@ -36,14 +39,17 @@ export async function generateUkrainianReport() {
   console.log(
     'Fetching all necessary datasets from Bitrix24 sequentially (now handling pagination)...'
   );
+  const linkedDeals = await getLinkedDeals();
+  const { vzys: vzysDeals, paymen: paymenDeals } = linkedDeals;
+
+  const assignedBySet = new Set(
+    [...vzysDeals, ...paymenDeals].map((deal) => deal.ASSIGNED_BY_ID)
+  );
+  const users = await getBitrixUserById({ user_id: Array.from(assignedBySet) });
 
   const dtpDeals = await getDTPDeals();
 
-  const linkedDeals = await getLinkedDeals();
-
   const carItems = await getCarSPAItems();
-
-  const { vzys: vzysDeals, paymen: paymenDeals } = linkedDeals;
 
   const vzysMap = vzysDeals.reduce((acc, deal) => {
     const translated = renameFields(deal, VZYS_ALIASES);
@@ -82,7 +88,6 @@ export async function generateUkrainianReport() {
       ...paymenRecord,
       ...carRecord,
     };
-    console.log(assembledRecord);
 
     const allAliases = {
       ...FIELD_ALIASES,
@@ -99,7 +104,9 @@ export async function generateUkrainianReport() {
 
     return assembledRecord;
   });
-  const processedReport = reportWithoutConatctsAndAssignedBy.map((dl) => {
+  const processedReport = [];
+
+  for (const dl of reportWithoutConatctsAndAssignedBy) {
     const deal = structuredClone(dl);
     const {
       dtp_registration_type,
@@ -115,7 +122,11 @@ export async function generateUkrainianReport() {
       leasing_status,
       city,
     } = deal;
-
+    devLog({
+      message: `'processing ${deal.id}'`,
+      approved_by,
+      responsible_for_ins_payment,
+    });
     deal.dtp_registration_type = DTP_REGISTRATION_MAP[dtp_registration_type];
     deal.blame = DTP_BLAME_MAP[is_dtp_culprit];
     deal.transfer_to_collector = Boolean(Number(transfer_to_collector));
@@ -142,20 +153,31 @@ export async function generateUkrainianReport() {
      * assigned_by_name (paymen)
      */
     const cityData = cityListWithAssignedBy.find((ct) => ct.cityId == city);
-    
+
+    const approved_by_user = users.find((user) => user.ID == approved_by);
+    const responsible_for_ins_payment_user = users.find(
+      (user) => user.ID == responsible_for_ins_payment
+    );
+    if (approved_by_user) {
+      deal.approved_by_user = `${approved_by_user.NAME} ${approved_by_user.LAST_NAME}`;
+    }
+    if (responsible_for_ins_payment_user) {
+      deal.responsible_for_ins_payment = `${responsible_for_ins_payment_user.NAME} ${responsible_for_ins_payment_user.LAST_NAME}`;
+    }
+
     if (!cityData) {
-      return deal;
+      processedReport.push(deal);
     }
     if (cityData.cityName == 'unknown') {
-      return deal;
+      processedReport.push(deal);
     }
 
     const { auto_park_id, cityName } = cityData;
     deal.city = cityName;
     deal.auto_park_id = auto_park_id;
 
-    return deal;
-  });
+    processedReport.push(deal);
+  }
   return processedReport;
 }
 
@@ -164,7 +186,7 @@ if (process.env.ENV === 'TEST') {
   generateUkrainianReport()
     .then((report) =>
       console.log(
-        report.slice(report.length - 100),
+        report.slice(report.length - 3),
         'Test run complete. Final report length:',
         report.length
       )

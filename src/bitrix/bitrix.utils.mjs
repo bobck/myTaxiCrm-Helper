@@ -820,7 +820,7 @@ async function fetchAll(method, initialParams) {
       // Stop pagination on error but return collected results
       next = null;
     }
-    return allResults;
+
   }
 
   devLog(
@@ -948,9 +948,10 @@ export async function getCarSPAItems() {
   return fetchAll('crm.item.list', initialParams);
 }
 export async function getBitrixUserById({ user_id }) {
+  devLog({ message: 'fetching users...', user_id });
   const { result } = await bitrix.call('user.get', {
     filter: {
-      id: user_id,
+      ID: user_id,
     },
   });
   return result;
