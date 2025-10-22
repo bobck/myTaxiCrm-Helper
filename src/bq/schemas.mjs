@@ -650,12 +650,6 @@ export const bitrixDTPSchema = [
     description: 'The registered owner of the vehicle.',
   },
   {
-    name: 'ufCrm4_1655367397930',
-    type: 'INT64',
-    mode: 'NULLABLE',
-    description: 'A custom CRM field (numeric ID).',
-  },
-  {
     name: 'branding',
     type: 'STRING',
     mode: 'NULLABLE',

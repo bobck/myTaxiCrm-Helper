@@ -27,6 +27,8 @@ import {
   devLog,
   parseCyrillicToLatinChars,
 } from '../../shared/shared.utils.mjs';
+import { createOrResetTableByName, loadRowsViaJSONFile } from '../bq-utils.mjs';
+import { bitrixDTPSchema } from '../schemas.mjs';
 
 const renameFields = (data, map) => {
   const newData = {};
@@ -133,11 +135,7 @@ export async function generateUkrainianReport() {
       leasing_status,
       city,
     } = deal;
-    devLog({
-      message: `'processing ${deal.id}'`,
-      approved_by,
-      responsible_for_ins_payment,
-    });
+
     deal.dtp_registration_type = DTP_REGISTRATION_MAP[dtp_registration_type];
     deal.blame = DTP_BLAME_MAP[is_dtp_culprit];
     deal.transfer_to_collector = Boolean(Number(transfer_to_collector));
@@ -193,23 +191,28 @@ export async function generateUkrainianReport() {
 
     processedReport.push(deal);
   }
-  return processedReport;
+  const resp = await loadRowsViaJSONFile({
+    dataset_id: 'Bitrix',
+    table_id: 'car_accidents',
+    rows: processedReport,
+    schema: bitrixDTPSchema,
+  });
+  console.log({
+    message: 'loadBitrixCarAccidentsToBQ',
+    uploadedDataCount: processedReport.length,
+    date: new Date(),
+  });
 }
-
+export async function resetBitrixCarAccidentTable() {
+  await createOrResetTableByName({
+    bqTableId: 'car_accidents',
+    schema: bitrixDTPSchema,
+    dataSetId: 'Bitrix',
+  });
+}
 // 7. TEST BLOCK (KEPT IN MODULE)
 if (process.env.ENV === 'TEST') {
-  generateUkrainianReport()
-    .then((report) =>
-      console.log(
-        report.filter(
-          (deal) =>
-            Boolean(deal.approved_by) &&
-            Boolean(deal.responsible_for_ins_payment) &&
-            Boolean(deal.driver_contact_id)
-        ),
-        'Test run complete. Final report length:',
-        report.length
-      )
-    )
-    .catch((error) => console.error('Test run failed:', error));
+  await resetBitrixCarAccidentTable();
+
+  await generateUkrainianReport();
 }

@@ -933,7 +933,6 @@ export async function getCarSPAItems() {
     'ufCrm4_1654801619341',
     'ufCrm4_1741607811',
     'ufCrm4_1743597840',
-    'ufCrm4_1655367397930',
     'ufCrm4_1654802341211',
   ];
 
