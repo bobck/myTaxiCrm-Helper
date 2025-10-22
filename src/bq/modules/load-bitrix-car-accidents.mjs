@@ -191,7 +191,7 @@ export async function generateUkrainianReport() {
 
     processedReport.push(deal);
   }
-  const resp = await loadRowsViaJSONFile({
+  await loadRowsViaJSONFile({
     dataset_id: 'Bitrix',
     table_id: 'car_accidents',
     rows: processedReport,
