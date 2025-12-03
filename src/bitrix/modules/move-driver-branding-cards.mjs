@@ -11,7 +11,7 @@ import {
   chunkArray,
   updateBitrixDriverBrandingCards,
 } from '../bitrix.utils.mjs';
-import { openSShTunnel } from '../../../ssh.mjs';
+// import { openSShTunnel } from '../../../ssh.mjs';
 import { computeBrandingCardFinishedStage } from '../bitrix.business-entity.mjs';
 
 export async function moveDriverBrandingCards() {
@@ -106,6 +106,6 @@ if (process.env.ENV === 'TEST') {
   console.log(
     `testing driver branding movement\ncards count :${process.env.BRANDING_CARDS_COUNT}`
   );
-  await openSShTunnel;
+  // await openSShTunnel;
   await moveDriverBrandingCards();
 }

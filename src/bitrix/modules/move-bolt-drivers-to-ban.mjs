@@ -1,7 +1,7 @@
 import { getBoltDriversToBan } from '../../web.api/web.api.utlites.mjs';
 import { cityListWithAssignedBy as cityList } from '../bitrix.constants.mjs';
 import { chunkArray, updateRequestedDrivers } from '../bitrix.utils.mjs';
-import { openSShTunnel } from '../../../ssh.mjs';
+// import { openSShTunnel } from '../../../ssh.mjs';
 import { DateTime } from 'luxon';
 import {
   getALLBoltDriversToBan,
@@ -109,7 +109,7 @@ if (process.env.ENV === 'TEST') {
   console.log(
     `testing bolt drivers ban cards creation\ncards count :${process.env.BOLT_DRIVERS_BAN_CARDS}\nchunk size:${process.env.CHUNK_SIZE}`
   );
-  await openSShTunnel;
+  // await openSShTunnel;
 
   await moveBoltDriversToBan();
 }

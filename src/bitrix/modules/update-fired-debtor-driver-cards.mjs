@@ -2,7 +2,7 @@ import {
   getDriverBalances,
   getHandledCashBlockRulesInfo,
 } from '../../web.api/web.api.utlites.mjs';
-import { openSShTunnel } from '../../../ssh.mjs';
+// import { openSShTunnel } from '../../../ssh.mjs';
 import {
   getAllFiredDebtorDriver,
   getFiredDebtorDriverByDriverId,
@@ -188,6 +188,6 @@ if (process.env.ENV === 'TEST') {
     cards_count: '(all cards from local db)',
     chunk_size: process.env.CHUNK_SIZE,
   });
-  await openSShTunnel;
+  // await openSShTunnel;
   await updateFiredDebtorDriversCards();
 }

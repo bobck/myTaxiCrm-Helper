@@ -10,7 +10,7 @@ import {
   createBitrixDriverBrandingCards,
   findContactsByPhonesObjectReturned,
 } from '../bitrix.utils.mjs';
-import { openSShTunnel } from '../../../ssh.mjs';
+// import { openSShTunnel } from '../../../ssh.mjs';
 import {
   computeBrandingCardInProgressStage,
   computePeriodBounds,
@@ -179,6 +179,6 @@ if (process.env.ENV === 'TEST') {
   console.log(
     `testing driver branding creation\ncards count: ${process.env.BRANDING_CARDS_COUNT}\nchunk size: ${process.env.CHUNK_SIZE}`
   );
-  await openSShTunnel;
+  // await openSShTunnel;
   await createDriverBrandingCards();
 }
