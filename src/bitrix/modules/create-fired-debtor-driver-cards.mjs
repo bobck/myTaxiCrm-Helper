@@ -3,7 +3,6 @@ import {
   getHandledCashBlockRulesInfo,
 } from '../../web.api/web.api.utlites.mjs';
 import { cityListWithAssignedBy as cityList } from '../bitrix.constants.mjs';
-// import { openSShTunnel } from '../../../ssh.mjs';
 import {
   insertFiredDebtorDriver,
   getAllFiredDebtorDriver,
@@ -186,7 +185,7 @@ if (process.env.ENV === 'TEST') {
     cards_count: process.env.DEBTOR_DRIVERS_CARDS_COUNT,
     chunk_size: process.env.CHUNK_SIZE,
   });
-  // await openSShTunnel;
+
 
   await createFiredDebtorDriversCards();
 

@@ -10,7 +10,7 @@ import {
   updateBitrixDriverBrandingCards,
 } from '../bitrix.utils.mjs';
 import { getBrandingCarsInfo } from '../../web.api/web.api.utlites.mjs';
-import { openSShTunnel } from '../../../ssh.mjs';
+
 import { computeBrandingCardInProgressStage } from '../bitrix.business-entity.mjs';
 
 export async function updateDriverBrandingCards() {
@@ -103,6 +103,5 @@ if (process.env.ENV === 'TEST') {
   console.log(
     `testing driver branding updating\ncards count: ${process.env.BRANDING_CARDS_COUNT}\nchunk size: ${process.env.CHUNK_SIZE}`
   );
-  await openSShTunnel;
   await updateDriverBrandingCards();
 }

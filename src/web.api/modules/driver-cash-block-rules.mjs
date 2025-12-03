@@ -1,5 +1,4 @@
 import { DateTime } from 'luxon';
-// import { openSShTunnel } from '../../../ssh.mjs';
 import {
   getDriversIgnoringCashBlockRules,
   getDriversWithActiveCashBlockRules,
@@ -192,7 +191,6 @@ export const updateDriverCashBlockRules = async () => {
 };
 
 if (process.env.ENV == 'TEST') {
-  // await openSShTunnel;
   // await updateDriverCashBlockRules();
   await setDriverCashBlockRules();
 }
