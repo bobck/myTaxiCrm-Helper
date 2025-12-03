@@ -186,7 +186,6 @@ if (process.env.ENV === 'TEST') {
     chunk_size: process.env.CHUNK_SIZE,
   });
 
-
   await createFiredDebtorDriversCards();
 
   // const { debtor_fired_drivers_map: preparedData } =
