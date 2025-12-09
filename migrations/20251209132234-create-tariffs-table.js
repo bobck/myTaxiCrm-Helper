@@ -20,6 +20,7 @@ exports.up = function (db, callback) {
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     driver_id STRING NOT NULL,
     auto_park_id STRING NOT NULL,
+    tariff_rule_id STRING NOT NULL,
     is_deleted BOOLEAN DEFAULT FALSE,
     hired_at DATETIME NOT NULL,
     assigned_at DATETIME DEFAULT CURRENT_TIMESTAMP,

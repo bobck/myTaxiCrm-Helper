@@ -381,27 +381,30 @@ export const getDriversEverPosessedTariffRules = () => {
   return db.all(`select driver_id from assigned_driver_tariff_rules`);
 };
 /**
- * Creates a new assignment record for a driver to an autopark with a tariff rule.
+ * Creates a new assignment record for a driver to an autopark with a specific tariff rule.
  * * @param {string} driverId - The ID of the driver.
  * @param {string} autoParkId - The ID of the autopark.
+ * @param {string} tariffRuleId - The ID of the associated tariff rule.
  * @param {string} hiredAt - The datetime the driver was hired (e.g., 'YYYY-MM-DD HH:MM:SS').
  * @returns {Promise<any>} The result of the database operation.
  */
-export const createAssignedDriverTariffRule = (
+export const createAssignedDriverTariffRule = ({
   driverId,
   autoParkId,
-  hiredAt
-) => {
+  tariffRuleId,
+  hiredAt,
+}) => {
   const sql = `
     INSERT INTO assigned_driver_tariff_rules (
       driver_id, 
       auto_park_id, 
+      tariff_rule_id, 
       hired_at
     ) 
-    VALUES (?, ?, ?)
+    VALUES (?, ?, ?, ?)
   `;
-  // Assuming 'db' is your database connection object (e.g., SQLite/better-sqlite3)
-  return db.run(sql, [driverId, autoParkId, hiredAt]);
+  // Assuming 'db' is your database connection object
+  return db.run(sql, [driverId, autoParkId, tariffRuleId, hiredAt]);
 };
 
 /**

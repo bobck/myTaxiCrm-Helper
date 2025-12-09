@@ -6,7 +6,10 @@ import {
 
 import { DateTime } from 'luxon';
 import { devLog } from '../../shared/shared.utils.mjs';
-import { getDriversEverPosessedTariffRules } from '../web.api.queries.mjs';
+import {
+  createAssignedDriverTariffRule,
+  getDriversEverPosessedTariffRules,
+} from '../web.api.queries.mjs';
 // ##### prod
 // const mapping = [
 //   {
@@ -226,6 +229,15 @@ export async function setDriversCustomTariff() {
     driversWhichEverPosessedTariffRule,
   });
 
+  if (!newDrivers.length) {
+    console.log({
+      module: 'setDriversCustomTariff',
+      message: 'no new drivers this week',
+      date: new Date(),
+    });
+    return;
+  }
+
   for (const driver of newDrivers) {
     const { driver_id, auto_park_id, created_at } = driver;
 
@@ -241,10 +253,8 @@ export async function setDriversCustomTariff() {
       driverIds: [driver_id],
       catalogTariffId: accordingRuleId,
     };
-    devLog(vars);
+    devLog(vars, created_at);
     const { result } = await assignDriversToCatalogTariff(vars);
-    
-
     if (!result.success) {
       console.error({
         message: 'failed to assign catalog taiff rule',
@@ -252,9 +262,19 @@ export async function setDriversCustomTariff() {
         date: new Date(),
       });
     }
-  }
 
-  devLog(newDrivers.length);
+    await createAssignedDriverTariffRule({
+      driverId: driver_id,
+      autoParkId: auto_park_id,
+      hiredAt: hireDate.toISODate(),
+      tariffRuleId: accordingRuleId,
+    });
+  }
+  console.log({
+    module: 'setDriversCustomTariff',
+    newDrivers: newDrivers.length,
+    date: new Date(),
+  });
 }
 
 export async function deleteDriversCustomTariff() {}
