@@ -40,7 +40,7 @@ async function makeCRMRequestWithRetry({ body }) {
         method: 'POST',
         body: JSON.stringify(body),
       });
-
+      // console.error(response);
       if (!response.ok) {
         throw new Error(
           `makeCRMRequestWithRetry HTTP error! status: ${response.status}`
@@ -715,8 +715,9 @@ export async function assignDriversToCatalogTariff({
       },
     },
     query:
-      'mutation AssignDriversToCatalogTariff($assignDriversToCatalogTariffInput: AssignDriversToCatalogTariffInput!) {\\n  assignDriversToCatalogTariff(\\n    assignDriversToCatalogTariffInput: $assignDriversToCatalogTariffInput\\n  ) {\\n    success\\n    __typename\\n  }\\n}\\n',
+      'mutation AssignDriversToCatalogTariff($assignDriversToCatalogTariffInput: AssignDriversToCatalogTariffInput!) {\n  assignDriversToCatalogTariff(\n    assignDriversToCatalogTariffInput: $assignDriversToCatalogTariffInput\n  ) {\n    success\n    __typename\n  }\n}\n',
   };
+  console.log(`requesting...`, body);
   const { data } = await makeCRMRequestlimited({ body });
   const { assignDriversToCatalogTariff: result } = data;
   return { result };
