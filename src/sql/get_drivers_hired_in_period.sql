@@ -1,0 +1,1 @@
+select d.id as driver_id, d.auto_park_id, d.created_at  from drivers d where d.created_at >=$1 and d.created_at <$2 and d.auto_park_id = ANY($3)

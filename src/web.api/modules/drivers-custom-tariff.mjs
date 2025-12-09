@@ -1,9 +1,11 @@
 import {
+  getNewDriversHiredInPeriod,
   makeCRMRequestlimited,
 } from '../web.api.utlites.mjs';
 
-import {
-} from '../web.api.queries.mjs';
+import { DateTime } from 'luxon';
+import { devLog } from '../../shared/shared.utils.mjs';
+
 const mapping = [
   {
     auto_park_id: 'a7bb17b7-fc87-4617-a915-d2f9ec83cfa0',
@@ -176,14 +178,42 @@ const mapping = [
   },
 ];
 
-export async function setDriversCustomTariff() {
-  const autoParksIds = mapping.map((ap) => ap.auto_park_id);
+function computePeriodBounds() {
+  const today = DateTime.local().startOf('day');
 
+  const lowerBound = today.minus({ days: today.weekday - 2 });
 
+  const upperBound = lowerBound.plus({ days: 4 });
+  const { year, weekNumber } = today;
+
+  // Return the dates formatted as ISO strings (YYYY-MM-DD) for PostgreSQL
+  const period_from = lowerBound.toISODate();
+  const period_to = upperBound.toISODate();
+
+  return {
+    period_from,
+    period_to,
+    year,
+    weekNumber,
+  };
 }
 
-export async function deleteDriversCustomTariff() {
-  
+export async function setDriversCustomTariff() {
+  const autoParksIds = mapping.map((ap) => ap.auto_park_id);
+  const { period_from, period_to } = computePeriodBounds();
+
+  const { rows: newDrivers } = await getNewDriversHiredInPeriod({
+    period_from,
+    period_to,
+    auto_park_ids: autoParksIds,
+  });
+  devLog(newDrivers.length);
+}
+
+export async function deleteDriversCustomTariff() {}
+
+if (process.env.ENV == 'TEST') {
+  setDriversCustomTariff();
 }
 
 if (process.env.ENV == 'SET') {

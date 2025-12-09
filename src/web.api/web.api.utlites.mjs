@@ -699,3 +699,37 @@ export async function getTheMostRecentDriverCashBlockRuleIdByDriverId({
   const { rows, rowCount } = result;
   return { rows };
 }
+
+export async function assignDriversToCatalogTariff({
+  autoParkId,
+  driverIds,
+  catalogTariffId,
+}) {
+  const body = {
+    operationName: 'AssignDriversToCatalogTariff',
+    variables: {
+      assignDriversToCatalogTariffInput: {
+        autoParkId,
+        driverIds,
+        catalogTariffId,
+      },
+    },
+    query:
+      'mutation AssignDriversToCatalogTariff($assignDriversToCatalogTariffInput: AssignDriversToCatalogTariffInput!) {\\n  assignDriversToCatalogTariff(\\n    assignDriversToCatalogTariffInput: $assignDriversToCatalogTariffInput\\n  ) {\\n    success\\n    __typename\\n  }\\n}\\n',
+  };
+  const { data } = await makeCRMRequestlimited({ body });
+  const { assignDriversToCatalogTariff: result } = data;
+  return { result };
+}
+export async function getNewDriversHiredInPeriod({
+  period_from,
+  period_to,
+  auto_park_ids,
+}) {
+  const sql = fs
+    .readFileSync('src/sql/get_drivers_hired_in_period.sql')
+    .toString();
+  const result = await pool.query(sql, [period_from, period_to, auto_park_ids]);
+  const { rows, rowCount } = result;
+  return { rows };
+}
