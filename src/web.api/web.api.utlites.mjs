@@ -4,6 +4,7 @@ import { setTimeout } from 'timers/promises';
 import { pool } from './../api/pool.mjs';
 import { globalLimiter } from './bottleneck.mjs';
 import { UkrainianBrandingAutoParkIds } from '../bitrix/bitrix.constants.mjs';
+import { devLog } from '../shared/shared.utils.mjs';
 
 async function makeCRMRequest({ body }) {
   const response = await fetch(process.env.WEB_API_ENDPOINT, {
@@ -717,7 +718,7 @@ export async function assignDriversToCatalogTariff({
     query:
       'mutation AssignDriversToCatalogTariff($assignDriversToCatalogTariffInput: AssignDriversToCatalogTariffInput!) {\n  assignDriversToCatalogTariff(\n    assignDriversToCatalogTariffInput: $assignDriversToCatalogTariffInput\n  ) {\n    success\n    __typename\n  }\n}\n',
   };
-  console.log(`requesting...`, body);
+  devLog(`requesting...`, body);
   const { data } = await makeCRMRequestlimited({ body });
   const { assignDriversToCatalogTariff: result } = data;
   return { result };

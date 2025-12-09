@@ -303,7 +303,7 @@ export async function deleteDriversCustomTariff() {
 
 if (process.env.ENV == 'TEST') {
   setDriversCustomTariff();
-  deleteDriversCustomTariff()
+  deleteDriversCustomTariff();
 }
 
 if (process.env.ENV == 'SET') {
