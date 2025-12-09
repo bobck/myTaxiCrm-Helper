@@ -22,7 +22,8 @@ exports.up = function (db, callback) {
     auto_park_id STRING NOT NULL,
     is_deleted BOOLEAN DEFAULT FALSE,
     hired_at DATETIME NOT NULL,
-    assigned_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    assigned_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`;
   db.runSql(sql, callback);
 };

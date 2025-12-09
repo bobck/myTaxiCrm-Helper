@@ -726,11 +726,17 @@ export async function getNewDriversHiredInPeriod({
   period_from,
   period_to,
   auto_park_ids,
+  driversWhichEverPosessedTariffRule,
 }) {
   const sql = fs
     .readFileSync('src/sql/get_drivers_hired_in_period.sql')
     .toString();
-  const result = await pool.query(sql, [period_from, period_to, auto_park_ids]);
+  const result = await pool.query(sql, [
+    period_from,
+    period_to,
+    auto_park_ids,
+    driversWhichEverPosessedTariffRule,
+  ]);
   const { rows, rowCount } = result;
   return { rows };
 }

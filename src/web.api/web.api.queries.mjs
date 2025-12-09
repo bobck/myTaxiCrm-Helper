@@ -376,3 +376,67 @@ export async function synchronizeAutoParkRulesTransaction({
     throw error;
   }
 }
+
+export const getDriversEverPosessedTariffRules = () => {
+  return db.all(`select driver_id from assigned_driver_tariff_rules`);
+};
+/**
+ * Creates a new assignment record for a driver to an autopark with a tariff rule.
+ * * @param {string} driverId - The ID of the driver.
+ * @param {string} autoParkId - The ID of the autopark.
+ * @param {string} hiredAt - The datetime the driver was hired (e.g., 'YYYY-MM-DD HH:MM:SS').
+ * @returns {Promise<any>} The result of the database operation.
+ */
+export const createAssignedDriverTariffRule = (
+  driverId,
+  autoParkId,
+  hiredAt
+) => {
+  const sql = `
+    INSERT INTO assigned_driver_tariff_rules (
+      driver_id, 
+      auto_park_id, 
+      hired_at
+    ) 
+    VALUES (?, ?, ?)
+  `;
+  // Assuming 'db' is your database connection object (e.g., SQLite/better-sqlite3)
+  return db.run(sql, [driverId, autoParkId, hiredAt]);
+};
+
+/**
+ * Marks a specific assignment record as deleted by setting is_deleted = TRUE
+ * and updating the updated_at timestamp.
+ * * @param {number} id - The primary key ID of the rule assignment to delete.
+ * @returns {Promise<any>} The result of the database operation.
+ */
+export const markDriverTariffRuleAsDeleted = (id) => {
+  const sql = `
+    UPDATE assigned_driver_tariff_rules
+    SET 
+      is_deleted = TRUE,
+      updated_at = CURRENT_TIMESTAMP
+    WHERE id = ?
+  `;
+  // Assuming 'db' is your database connection object
+  return db.run(sql, [id]);
+};
+/**
+ * Retrieves all assigned driver tariff rules that have NOT been marked as deleted.
+ * * @returns {Promise<Array<Object>>} A promise that resolves to an array of rule assignment objects.
+ */
+export const getActiveAssignedDriverTariffRules = () => {
+  const sql = `
+    SELECT 
+      id, 
+      driver_id, 
+      auto_park_id, 
+      hired_at, 
+      assigned_at, 
+      updated_at
+    FROM assigned_driver_tariff_rules
+    WHERE is_deleted = FALSE
+  `;
+  // Assuming 'db' is your database connection object
+  return db.all(sql);
+};

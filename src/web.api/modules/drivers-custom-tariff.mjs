@@ -6,6 +6,7 @@ import {
 
 import { DateTime } from 'luxon';
 import { devLog } from '../../shared/shared.utils.mjs';
+import { getDriversEverPosessedTariffRules } from '../web.api.queries.mjs';
 // ##### prod
 // const mapping = [
 //   {
@@ -213,12 +214,16 @@ function computePeriodBounds() {
 
 export async function setDriversCustomTariff() {
   const autoParksIds = mapping.map((ap) => ap.auto_park_id);
+  const driversWhichEverPosessedTariffRule = (
+    await getDriversEverPosessedTariffRules()
+  ).map((driver) => driver.driver_id);
   const { period_from, period_to } = computePeriodBounds();
 
   const { rows: newDrivers } = await getNewDriversHiredInPeriod({
     period_from,
     period_to,
     auto_park_ids: autoParksIds,
+    driversWhichEverPosessedTariffRule,
   });
 
   for (const driver of newDrivers) {
@@ -236,8 +241,10 @@ export async function setDriversCustomTariff() {
       driverIds: [driver_id],
       catalogTariffId: accordingRuleId,
     };
-    devLog(vars)
+    devLog(vars);
     const { result } = await assignDriversToCatalogTariff(vars);
+    
+
     if (!result.success) {
       console.error({
         message: 'failed to assign catalog taiff rule',
