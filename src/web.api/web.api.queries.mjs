@@ -431,12 +431,9 @@ export const markDriverTariffRuleAsDeleted = (id) => {
 export const getActiveAssignedDriverTariffRules = () => {
   const sql = `
     SELECT 
-      id, 
+      id,
       driver_id, 
-      auto_park_id, 
-      hired_at, 
-      assigned_at, 
-      updated_at
+      auto_park_id
     FROM assigned_driver_tariff_rules
     WHERE is_deleted = FALSE
   `;

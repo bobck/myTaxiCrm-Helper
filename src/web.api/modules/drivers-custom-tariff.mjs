@@ -8,7 +8,9 @@ import { DateTime } from 'luxon';
 import { devLog } from '../../shared/shared.utils.mjs';
 import {
   createAssignedDriverTariffRule,
+  getActiveAssignedDriverTariffRules,
   getDriversEverPosessedTariffRules,
+  markDriverTariffRuleAsDeleted,
 } from '../web.api.queries.mjs';
 // ##### prod
 // const mapping = [
@@ -201,7 +203,6 @@ function computePeriodBounds() {
   const lowerBound = today.minus({ days: today.weekday - 2 });
 
   const upperBound = lowerBound.plus({ days: 4 });
-  const { year, weekNumber } = today;
 
   // Return the dates formatted as ISO strings (YYYY-MM-DD) for PostgreSQL
   const period_from = lowerBound.toISODate();
@@ -210,8 +211,6 @@ function computePeriodBounds() {
   return {
     period_from,
     period_to,
-    year,
-    weekNumber,
   };
 }
 
@@ -277,10 +276,34 @@ export async function setDriversCustomTariff() {
   });
 }
 
-export async function deleteDriversCustomTariff() {}
+export async function deleteDriversCustomTariff() {
+  const activeAssignedDriverTariffRules =
+    await getActiveAssignedDriverTariffRules();
+  for (const tariff of activeAssignedDriverTariffRules) {
+    const { id, driver_id, auto_park_id } = tariff;
+
+    const vars = {
+      autoParkId: auto_park_id,
+      driverIds: [driver_id],
+      catalogTariffId: undefined,
+    };
+    devLog(vars);
+    const { result } = await assignDriversToCatalogTariff(vars);
+    if (!result.success) {
+      console.error({
+        message: 'failed to deassign catalog taiff rule',
+        ...vars,
+        date: new Date(),
+      });
+    }
+    await markDriverTariffRuleAsDeleted(id);
+    devLog(`tariff rule #${id} marked as deleted`);
+  }
+}
 
 if (process.env.ENV == 'TEST') {
   setDriversCustomTariff();
+  deleteDriversCustomTariff()
 }
 
 if (process.env.ENV == 'SET') {
