@@ -6,13 +6,17 @@ const db = await open({
   driver: sqlite3.Database,
 });
 
-export async function saveCreatedDriverCustomTariffId({ tariffId, driverId }) {
-  const sql = `INSERT INTO drivers_custom_tariff_ids(tariff_id, driver_id) VALUES(?,?)`;
-  await db.run(sql, tariffId, driverId);
+export async function saveCreatedDriverCustomTariffId({
+  tariffId,
+  driverId,
+  autoParkId,
+}) {
+  const sql = `INSERT INTO drivers_custom_tariff_ids(tariff_id, driver_id,auto_park_id) VALUES(?,?,?)`;
+  await db.run(sql, tariffId, driverId, autoParkId);
 }
 
 export async function getUndeletedDriversCustomTariffIds() {
-  const sql = `SELECT tariff_id,driver_id FROM drivers_custom_tariff_ids WHERE is_deleted = false`;
+  const sql = `SELECT tariff_id,driver_id,auto_park_id FROM drivers_custom_tariff_ids WHERE is_deleted = false`;
   const undeletedDriversCustomTariffIds = await db.all(sql);
   return { undeletedDriversCustomTariffIds };
 }

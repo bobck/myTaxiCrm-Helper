@@ -709,3 +709,26 @@ export async function getTheMostRecentDriverCashBlockRuleIdByDriverId({
   const { rows, rowCount } = result;
   return { rows };
 }
+
+export async function assignDriversToCatalogTariff({
+  autoParkId,
+  driverIds,
+  catalogTariffId,
+}) {
+  const body = {
+    operationName: 'AssignDriversToCatalogTariff',
+    variables: {
+      assignDriversToCatalogTariffInput: {
+        autoParkId,
+        driverIds,
+        catalogTariffId,
+      },
+    },
+    query:
+      'mutation AssignDriversToCatalogTariff($assignDriversToCatalogTariffInput: AssignDriversToCatalogTariffInput!) {\n  assignDriversToCatalogTariff(\n    assignDriversToCatalogTariffInput: $assignDriversToCatalogTariffInput\n  ) {\n    success\n    __typename\n  }\n}\n',
+  };
+  devLog(`requesting...`, body);
+  const { data } = await makeCRMRequestlimited({ body });
+  const { assignDriversToCatalogTariff: result } = data;
+  return { result };
+}
