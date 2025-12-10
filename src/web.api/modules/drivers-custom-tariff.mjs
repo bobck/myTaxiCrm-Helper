@@ -12,6 +12,7 @@ import {
 } from '../web.api.queries.mjs';
 // import { devLog } from '../../shared/shared.utils.mjs';
 import { DateTime } from 'luxon';
+import { devLog } from '../../shared/shared.utils.mjs';
 // const mapping = [
 //   {
 //     auto_park_id: 'a7bb17b7-fc87-4617-a915-d2f9ec83cfa0',
@@ -219,7 +220,8 @@ export async function setDriversCustomTariff() {
       year,
       allRuleIds,
     });
-
+  devLog(driversCandidatsForCustomTerms);
+  return;
   const driversForCustomTerms = driversCandidatsForCustomTerms.filter(
     (driver) => {
       const { was_fired_days, custom_tariff_enabled, rent_event_id } = driver;
@@ -230,7 +232,6 @@ export async function setDriversCustomTariff() {
       );
     }
   );
-
 
   const attachDriverToTariffInputs = [];
 
@@ -248,16 +249,18 @@ export async function setDriversCustomTariff() {
       driverIds: [driver_id],
       catalogTariffId: accordingRuleId,
     };
+    devLog({ vars });
     attachDriverToTariffInputs.push(vars);
   }
 
   for (let attachTariffToDriverInput of attachDriverToTariffInputs) {
     try {
       await assignDriversToCatalogTariff(attachTariffToDriverInput);
+      devLog({ attachTariffToDriverInput });
       await saveCreatedDriverCustomTariffId({
         tariffId: attachTariffToDriverInput.catalogTariffId,
         driverId: attachTariffToDriverInput.driverIds[0],
-        autoParkId: attachDriverToTariffInputs.autoParkId,
+        autoParkId: attachTariffToDriverInput.autoParkId,
       });
     } catch (e) {
       console.error({
@@ -311,7 +314,7 @@ export async function deleteDriversCustomTariff() {
   }
 }
 
-if (process.env.ENV == 'SET') {
+if (process.env.ENV == 'TEST') {
   setDriversCustomTariff();
 }
 

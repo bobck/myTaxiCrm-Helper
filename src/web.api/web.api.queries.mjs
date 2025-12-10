@@ -1,5 +1,6 @@
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
+import { devLog } from '../shared/shared.utils.mjs';
 
 const db = await open({
   filename: process.env.DEV_DB,
@@ -12,11 +13,13 @@ export async function saveCreatedDriverCustomTariffId({
   autoParkId,
 }) {
   const sql = `INSERT INTO drivers_custom_tariff_ids(tariff_id, driver_id,auto_park_id) VALUES(?,?,?)`;
+  devLog({ sql, arguments });
   await db.run(sql, tariffId, driverId, autoParkId);
 }
 
 export async function getUndeletedDriversCustomTariffIds() {
   const sql = `SELECT tariff_id,driver_id,auto_park_id FROM drivers_custom_tariff_ids WHERE is_deleted = false`;
+
   const undeletedDriversCustomTariffIds = await db.all(sql);
   return { undeletedDriversCustomTariffIds };
 }
