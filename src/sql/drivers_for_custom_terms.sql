@@ -39,7 +39,7 @@ FROM
       t.is_enabled,
       t.created_at
     FROM
-      tariffs t
+      tariffs t --//###
     WHERE
       type = 'DRIVER_CUSTOM'
     ORDER BY

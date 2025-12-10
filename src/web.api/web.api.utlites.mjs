@@ -104,6 +104,8 @@ export async function getDriversCandidatsForCustomTerms({
   isoDate,
   companyId,
   autoParksIds,
+  weekNumber,
+  year,
 }) {
   console.log({ isoDate });
 
@@ -111,7 +113,13 @@ export async function getDriversCandidatsForCustomTerms({
     .readFileSync('./src/sql/drivers_for_custom_terms.sql')
     .toString();
 
-  const result = await pool.query(sql, [isoDate, companyId, autoParksIds]);
+  const result = await pool.query(sql, [
+    isoDate,
+    companyId,
+    autoParksIds,
+    weekNumber,
+    year,
+  ]);
   const { rows, rowCount } = result;
   return { driversCandidatsForCustomTerms: rows };
 }
