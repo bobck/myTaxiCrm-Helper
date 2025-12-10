@@ -1,6 +1,6 @@
 import pg from 'pg';
 let connectionString = `postgres://${process.env.PG_USER}:${process.env.PG_PASSWORD}@${process.env.PG_HOST}:${process.env.PG_PORT}/${process.env.PG_DB}`;
-if (process.env.ENV === 'TEST' || process.env.ENV === 'DEV') {
+if (process.env.ENV === 'TEST' || process.env.ENV === 'DEV'||process.env.ENV === 'SET') {
   const encodedPassword = encodeURIComponent(process.env.PG_PASSWORD);
   connectionString = `postgres://${process.env.PG_USER}:${encodedPassword}@${process.env.PG_HOST}:${process.env.PG_PORT}/${process.env.PG_DB}`;
 }

@@ -10,7 +10,7 @@ import {
   markDriverCustomTariffAsDeleted,
   getUndeletedDriversCustomTariffIds,
 } from '../web.api.queries.mjs';
-import { devLog } from '../../shared/shared.utils.mjs';
+// import { devLog } from '../../shared/shared.utils.mjs';
 import { DateTime } from 'luxon';
 // const mapping = [
 //   {
@@ -204,10 +204,9 @@ export async function setDriversCustomTariff() {
 
   const kievDateTime = DateTime.now().setZone(timeZone);
 
-
   const isoDate = kievDateTime.toISODate();
 
-  const {  weekNumber, year } = kievDateTime;
+  const { weekNumber, year } = kievDateTime;
 
   const companyId = process.env.WEB_API_TARGET_CONPANY_ID;
 
@@ -221,9 +220,6 @@ export async function setDriversCustomTariff() {
       allRuleIds,
     });
 
-  console.log({
-    driversCandidatsForCustomTerms: driversCandidatsForCustomTerms.length,
-  });
   const driversForCustomTerms = driversCandidatsForCustomTerms.filter(
     (driver) => {
       const { was_fired_days, custom_tariff_enabled, rent_event_id } = driver;
@@ -235,7 +231,6 @@ export async function setDriversCustomTariff() {
     }
   );
 
-  console.log({ driversForCustomTermsLength: driversForCustomTerms.length });
 
   const attachDriverToTariffInputs = [];
 
@@ -274,6 +269,11 @@ export async function setDriversCustomTariff() {
       continue;
     }
   }
+  console.log({
+    module: 'setDriversCustomTariff',
+    newDrivers: attachDriverToTariffInputs.length,
+    date: new Date(),
+  });
 }
 
 export async function deleteDriversCustomTariff() {

@@ -727,7 +727,6 @@ export async function assignDriversToCatalogTariff({
     query:
       'mutation AssignDriversToCatalogTariff($assignDriversToCatalogTariffInput: AssignDriversToCatalogTariffInput!) {\n  assignDriversToCatalogTariff(\n    assignDriversToCatalogTariffInput: $assignDriversToCatalogTariffInput\n  ) {\n    success\n    __typename\n  }\n}\n',
   };
-  devLog(`requesting...`, body);
   const { data } = await makeCRMRequestlimited({ body });
   const { assignDriversToCatalogTariff: result } = data;
   return { result };
