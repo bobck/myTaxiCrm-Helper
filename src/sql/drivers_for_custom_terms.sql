@@ -34,17 +34,16 @@ SELECT
 FROM
   drivers d
   LEFT JOIN (
-    SELECT DISTINCT
-      ON (driver_id) t.driver_id,
-      t.is_enabled,
-      t.created_at
-    FROM
-      tariffs t --//###
-    WHERE
-      type = 'DRIVER_CUSTOM'
-    ORDER BY
-      driver_id,
-      created_at DESC
+   (
+select DISTINCT
+      ON (driver_id) cs.driver_id , 
+        CASE
+            WHEN cs.tariff_id = ANY($6::uuid[]) THEN TRUE
+            ELSE FALSE
+        END AS is_enabled  
+      from calculated_statements cs 
+      where cs."year" =$4 and cs.week =$5
+      )
   ) t ON t.driver_id = d.id
   LEFT JOIN (
     SELECT DISTINCT

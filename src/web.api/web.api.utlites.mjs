@@ -106,6 +106,7 @@ export async function getDriversCandidatsForCustomTerms({
   autoParksIds,
   weekNumber,
   year,
+  allRuleIds,
 }) {
   console.log({ isoDate });
 
@@ -119,6 +120,7 @@ export async function getDriversCandidatsForCustomTerms({
     autoParksIds,
     weekNumber,
     year,
+    allRuleIds,
   ]);
   const { rows, rowCount } = result;
   return { driversCandidatsForCustomTerms: rows };

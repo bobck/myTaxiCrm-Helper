@@ -183,6 +183,9 @@ const mapping = [
   },
 ];
 export async function setDriversCustomTariff() {
+  const autoParksIds = mapping.map((ruleset) => ruleset.auto_park_id);
+  const allRuleIds = mapping.map((ruleset) => ruleset.rule_ids).flat();
+
   const timeZone = 'Europe/Kiev';
 
   const kievDateTime = DateTime.now().setZone(timeZone);
@@ -192,8 +195,8 @@ export async function setDriversCustomTariff() {
   const isoDate = kievDateTime.toISODate();
 
   const { day, weekNumber, year } = kievDateTime;
-  console.log({ weekNumber, year, dayOfWeek, isoDate, day });
-
+  // console.log({ weekNumber, year, dayOfWeek, isoDate, day ,allRuleIds});
+  // return;
   const companyId = process.env.WEB_API_TARGET_CONPANY_ID;
 
   // const { discountTariffsForAutoparks } =
@@ -212,12 +215,12 @@ export async function setDriversCustomTariff() {
       autoParksIds,
       weekNumber,
       year,
+      allRuleIds,
     });
 
   console.log({
     driversCandidatsForCustomTerms: driversCandidatsForCustomTerms.length,
   });
-  return;
   const driversForCustomTerms = driversCandidatsForCustomTerms.filter(
     (driver) => {
       const { was_fired_days, custom_tariff_enabled, rent_event_id } = driver;
@@ -231,27 +234,30 @@ export async function setDriversCustomTariff() {
 
   console.log({ driversForCustomTermsLength: driversForCustomTerms.length });
 
-  const discountTariffsForAutoparksWithDriver = [];
+  const attachDriverToTariffInputs = [];
 
   for (let driver of driversForCustomTerms) {
-    const { auto_park_id, id } = driver;
-    const clonedObjectWithExtraProperty = {
-      driverId: id,
-      ...discountTariffsForAutoparks[auto_park_id],
+    const { auto_park_id, id: driver_id, start_working_at } = driver;
+    const { rule_ids } = mapping.find(
+      (ruleset) => ruleset.auto_park_id == auto_park_id
+    );
+
+    const firstWorkingDayDate = new DateTime(start_working_at);
+    const ruleIndex = firstWorkingDayDate.weekday - 2; // because first rule is for tuesday the last one for friday
+    const accordingRuleId = rule_ids[ruleIndex];
+    const vars = {
+      autoParkId: auto_park_id,
+      driverIds: [driver_id],
+      catalogTariffId: accordingRuleId,
     };
-    discountTariffsForAutoparksWithDriver.push(clonedObjectWithExtraProperty);
+    attachDriverToTariffInputs.push(vars);
   }
 
-  console.log({
-    discountTariffsForAutoparksWithDriverLength:
-      discountTariffsForAutoparksWithDriver.length,
-  });
-
-  for (let createDriverCustomTariffInput of discountTariffsForAutoparksWithDriver) {
+  for (let attachTariffToDriverInput of attachDriverToTariffInputs) {
     const body = {
       operationName: 'CreateDriverCustomTariff',
       variables: {
-        createDriverCustomTariffInput,
+        createDriverCustomTariffInput: attachTariffToDriverInput,
       },
       query:
         'mutation CreateDriverCustomTariff($createDriverCustomTariffInput: CreateDriverCustomTariffInput!) {\n  createDriverCustomTariff(\n    createDriverCustomTariffInput: $createDriverCustomTariffInput\n  ) {\n    id\n    name\n    taxPercent\n    taxType\n    targetMarker\n    accounting\n    tariffRules {\n      id\n      rate\n      from\n      to\n      __typename\n    }\n    __typename\n  }\n}\n',
@@ -264,13 +270,13 @@ export async function setDriversCustomTariff() {
       const { createDriverCustomTariff } = data;
 
       const tariffId = createDriverCustomTariff.id;
-      const driverId = createDriverCustomTariffInput.driverId;
+      const driverId = attachTariffToDriverInput.driverId;
       console.log({ tariffId, driverId });
       await saveCreatedDriverCustomTariffId({ tariffId, driverId });
     } catch (e) {
       console.error({
         date: new Date(),
-        createDriverCustomTariffInput,
+        createDriverCustomTariffInput: attachTariffToDriverInput,
         message: e?.message,
       });
       continue;
