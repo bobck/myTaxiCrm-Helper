@@ -183,6 +183,19 @@ import { DateTime } from 'luxon';
 //     ],
 //   },
 // ];
+
+const mapping = [
+  {
+    auto_park_id: 'e2017b70-8418-4a1b-9bf8-aec8a3ad5241',
+    rule_ids: [
+      'ec32afc8-f21c-414c-9d45-4cdb671b656c',
+      'ec32afc8-f21c-414c-9d45-4cdb671b656c',
+      'ec32afc8-f21c-414c-9d45-4cdb671b656c',
+      'ec32afc8-f21c-414c-9d45-4cdb671b656c',
+    ],
+  },
+];
+
 export async function setDriversCustomTariff() {
   const autoParksIds = mapping.map((ruleset) => ruleset.auto_park_id);
   const allRuleIds = mapping.map((ruleset) => ruleset.rule_ids).flat();
@@ -191,23 +204,12 @@ export async function setDriversCustomTariff() {
 
   const kievDateTime = DateTime.now().setZone(timeZone);
 
-  const dayOfWeek = kievDateTime.weekdayLong;
 
   const isoDate = kievDateTime.toISODate();
 
-  const { day, weekNumber, year } = kievDateTime;
-  // console.log({ weekNumber, year, dayOfWeek, isoDate, day ,allRuleIds});
-  // return;
-  const companyId = process.env.WEB_API_TARGET_CONPANY_ID;
+  const {  weekNumber, year } = kievDateTime;
 
-  // const { discountTariffsForAutoparks } =
-  //   await getDiscountTariffsForAutoparksByDay({
-  //     dayOfWeek,
-  //     companyId,
-  //     autoParksIds,
-  //   });
-  // devLog(discountTariffsForAutoparks);
-  // return;
+  const companyId = process.env.WEB_API_TARGET_CONPANY_ID;
 
   const { driversCandidatsForCustomTerms } =
     await getDriversCandidatsForCustomTerms({
