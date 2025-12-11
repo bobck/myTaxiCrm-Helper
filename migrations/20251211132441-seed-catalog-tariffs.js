@@ -16,16 +16,16 @@ exports.setup = function (options, seedLink) {
 
 exports.up = async function (db, cb) {
   const mapping = [
-    //dev
-    {
-      auto_park_id: 'e2017b70-8418-4a1b-9bf8-aec8a3ad5241',
-      rule_ids: [
-        'ec32afc8-f21c-414c-9d45-4cdb671b656c',
-        'ec32afc8-f21c-414c-9d45-4cdb671b656c',
-        'ec32afc8-f21c-414c-9d45-4cdb671b656c',
-        'ec32afc8-f21c-414c-9d45-4cdb671b656c',
-      ],
-    },
+    // //dev
+    // {
+    //   auto_park_id: 'e2017b70-8418-4a1b-9bf8-aec8a3ad5241',
+    //   rule_ids: [
+    //     'ec32afc8-f21c-414c-9d45-4cdb671b656c',
+    //     'ec32afc8-f21c-414c-9d45-4cdb671b656c',
+    //     'ec32afc8-f21c-414c-9d45-4cdb671b656c',
+    //     'ec32afc8-f21c-414c-9d45-4cdb671b656c',
+    //   ],
+    // },
 
     ////pord
     {

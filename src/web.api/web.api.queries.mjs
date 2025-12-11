@@ -383,3 +383,19 @@ export async function synchronizeAutoParkRulesTransaction({
     throw error;
   }
 }
+export function getCatalogTariffByWeekDayAndAutoParkId({
+  auto_park_id,
+  weekDay,
+}) {
+  devLog({auto_park_id,weekDay})
+  return db.get(
+    'select * from catalog_tariffs ct where ct.auto_park_id = ? and ct.weekDay = ?',
+    auto_park_id,
+    weekDay
+  );
+}
+export function getAllCatalogTariffs() {
+  return db.all(
+    'select id,auto_park_id from catalog_tariffs where is_active = true'
+  );
+}
