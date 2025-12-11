@@ -18,15 +18,15 @@ export async function saveCreatedDriverCustomTariffId({
 }
 
 export async function getUndeletedDriversCustomTariffIds() {
-  const sql = `SELECT tariff_id,driver_id,auto_park_id FROM drivers_custom_tariff_ids WHERE is_deleted = false`;
+  const sql = `SELECT driver_id,auto_park_id,tariff_id FROM drivers_custom_tariff_ids WHERE is_deleted = false`;
   devLog({ sql, arguments });
   const undeletedDriversCustomTariffIds = await db.all(sql);
   return { undeletedDriversCustomTariffIds };
 }
 
-export async function markDriverCustomTariffAsDeleted({ tariffId }) {
-  const sql = `UPDATE drivers_custom_tariff_ids SET is_deleted=true WHERE tariff_id = ?`;
-  await db.run(sql, tariffId);
+export async function markDriverCustomTariffAsDeleted({ tariffId, driverId }) {
+  const sql = `UPDATE drivers_custom_tariff_ids SET is_deleted=true WHERE tariff_id = ? and driver_id = ?`;
+  await db.run(sql, tariffId, driverId);
 }
 
 export async function saveCreatedDriverBonusRuleId({

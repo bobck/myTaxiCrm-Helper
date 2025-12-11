@@ -186,17 +186,6 @@ import { devLog } from '../../shared/shared.utils.mjs';
 // ];
 
 
-const mapping = [
-  {
-    auto_park_id: 'e2017b70-8418-4a1b-9bf8-aec8a3ad5241',
-    rule_ids: [
-      'ec32afc8-f21c-414c-9d45-4cdb671b656c',
-      'ec32afc8-f21c-414c-9d45-4cdb671b656c',
-      'ec32afc8-f21c-414c-9d45-4cdb671b656c',
-      'ec32afc8-f21c-414c-9d45-4cdb671b656c',
-    ],
-  },
-];
 
 export async function setDriversCustomTariff() {
   const autoParksIds = mapping.map((ruleset) => ruleset.auto_park_id);
@@ -297,26 +286,23 @@ export async function deleteDriversCustomTariff() {
   const { undeletedDriversCustomTariffIds } =
     await getUndeletedDriversCustomTariffIds();
   devLog(undeletedDriversCustomTariffIds);
-  return;
-  for (let deleteDriverCustomTariffInput of undeletedDriversCustomTariffIds) {
-    // console.log({ deleteDriverCustomTariffInput })
-    const { tariff_id: tariffId, driver_id: driverId } =
-      deleteDriverCustomTariffInput;
-
-    const body = {
-      operationName: 'DeleteDriverCustomTariff',
-      variables: {
-        deleteDriverCustomTariffInput: { tariffId, driverId },
-      },
-      query:
-        'mutation DeleteDriverCustomTariff($deleteDriverCustomTariffInput: DeleteDriverCustomTariffInput!) {\n  deleteDriverCustomTariff(\n    deleteDriverCustomTariffInput: $deleteDriverCustomTariffInput\n  ) {\n    success\n    __typename\n  }\n}\n',
-    };
-
+  const attachTariffToDriverInputs = undeletedDriversCustomTariffIds.map(
+    (val) => {
+      return {
+        catalogTariffId: undefined,
+        driverIds: [val.driver_id],
+        autoParkId: val.auto_park_id,
+        tariffId: val.tariff_id,
+        driverId: val.driver_id,
+      };
+    }
+  );
+  for (let attachTariffToDriverInput of attachTariffToDriverInputs) {
     try {
-      const response = await makeCRMRequestlimited({ body });
-      const { data } = response;
-      // console.log({ data })
-      await markDriverCustomTariffAsDeleted({ tariffId });
+      devLog(attachTariffToDriverInput);
+      const { driverId, tariffId } = attachTariffToDriverInput;
+      await assignDriversToCatalogTariff(attachTariffToDriverInput);
+      await markDriverCustomTariffAsDeleted({ tariffId, driverId });
     } catch (e) {
       console.error({
         date: new Date(),
@@ -331,5 +317,5 @@ export async function deleteDriversCustomTariff() {
 
 if (process.env.ENV == 'TEST') {
   // setDriversCustomTariff();
-  deleteDriversCustomTariff()
+  // deleteDriversCustomTariff();
 }
