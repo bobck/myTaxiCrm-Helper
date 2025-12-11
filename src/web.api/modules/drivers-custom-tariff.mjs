@@ -185,6 +185,7 @@ import { devLog } from '../../shared/shared.utils.mjs';
 //   },
 // ];
 
+
 const mapping = [
   {
     auto_park_id: 'e2017b70-8418-4a1b-9bf8-aec8a3ad5241',
@@ -210,7 +211,20 @@ export async function setDriversCustomTariff() {
   const { weekNumber, year } = kievDateTime;
 
   const companyId = process.env.WEB_API_TARGET_CONPANY_ID;
-
+  // const driversCandidatsForCustomTerms=[{
+  //   id: 'c5894914-3332-4bbd-927a-a1ed1f40197f',
+  //   company_id: '4ea03592-9278-4ede-adf8-f7345a856893',
+  //   auto_park_id: 'e2017b70-8418-4a1b-9bf8-aec8a3ad5241',
+  //   full_name: 'Олександр Старіков',
+  //   inner_status: 'WORKING',
+  //   created_at: '2025-12-11T09:50:55.350Z',
+  //   start_working_at: '2025-12-11T11:33:21.285Z',
+  //   fired_at: null,
+  //   was_fired_days: null,
+  //   custom_tariff_enabled: null,
+  //   custom_bonus_created_at: null,
+  //   rent_event_id: null
+  // }]
   const { driversCandidatsForCustomTerms } =
     await getDriversCandidatsForCustomTerms({
       isoDate,
@@ -221,7 +235,7 @@ export async function setDriversCustomTariff() {
       allRuleIds,
     });
   devLog(driversCandidatsForCustomTerms);
-  return;
+  // return;
   const driversForCustomTerms = driversCandidatsForCustomTerms.filter(
     (driver) => {
       const { was_fired_days, custom_tariff_enabled, rent_event_id } = driver;
@@ -255,8 +269,8 @@ export async function setDriversCustomTariff() {
 
   for (let attachTariffToDriverInput of attachDriverToTariffInputs) {
     try {
-      await assignDriversToCatalogTariff(attachTariffToDriverInput);
       devLog({ attachTariffToDriverInput });
+      await assignDriversToCatalogTariff(attachTariffToDriverInput);
       await saveCreatedDriverCustomTariffId({
         tariffId: attachTariffToDriverInput.catalogTariffId,
         driverId: attachTariffToDriverInput.driverIds[0],
@@ -282,7 +296,8 @@ export async function setDriversCustomTariff() {
 export async function deleteDriversCustomTariff() {
   const { undeletedDriversCustomTariffIds } =
     await getUndeletedDriversCustomTariffIds();
-
+  devLog(undeletedDriversCustomTariffIds);
+  return;
   for (let deleteDriverCustomTariffInput of undeletedDriversCustomTariffIds) {
     // console.log({ deleteDriverCustomTariffInput })
     const { tariff_id: tariffId, driver_id: driverId } =
@@ -315,9 +330,6 @@ export async function deleteDriversCustomTariff() {
 }
 
 if (process.env.ENV == 'TEST') {
-  setDriversCustomTariff();
-}
-
-if (process.env.ENV == 'DEL') {
-  deleteDriversCustomTariff();
+  // setDriversCustomTariff();
+  deleteDriversCustomTariff()
 }

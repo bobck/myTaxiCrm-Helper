@@ -19,7 +19,7 @@ export async function saveCreatedDriverCustomTariffId({
 
 export async function getUndeletedDriversCustomTariffIds() {
   const sql = `SELECT tariff_id,driver_id,auto_park_id FROM drivers_custom_tariff_ids WHERE is_deleted = false`;
-
+  devLog({ sql, arguments });
   const undeletedDriversCustomTariffIds = await db.all(sql);
   return { undeletedDriversCustomTariffIds };
 }
