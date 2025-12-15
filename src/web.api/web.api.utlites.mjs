@@ -136,7 +136,6 @@ async function getOriginalTariffs({ companyId, autoParksIds }) {
   return { rows };
 }
 
-
 async function getOriginalBonuses({ companyId, autoParksIds }) {
   const sql = fs
     .readFileSync('./src/sql/bonuses_to_be_discounted.sql')
