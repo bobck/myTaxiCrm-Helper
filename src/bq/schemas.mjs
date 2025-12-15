@@ -396,3 +396,11 @@ export const closedPolishBitrixDealsTableSchema = [
   { name: 'is_rescheduled', type: 'BOOLEAN', mode: 'REQUIRED' },
   { name: 'date', type: 'DATE', mode: 'REQUIRED' },
 ];
+export const insuranceInvoicesTableSchema = [
+  { name: 'id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'payment_date', type: 'DATE', mode: 'NULLABLE' },
+  { name: 'created_at', type: 'DATE', mode: 'NULLABLE' },
+  { name: 'sum', type: 'FLOAT', mode: 'NULLABLE' },
+  { name: 'auto_park_id', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'auto_park_name', type: 'STRING', mode: 'NULLABLE' },
+];
