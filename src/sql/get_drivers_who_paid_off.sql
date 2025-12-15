@@ -8,5 +8,5 @@ drivers_total_balances as(
 	join calculated_statements cs on wd.driver_id=cs.driver_id
 	and cs.week =$2 and cs.year=$3
 )
-select * from drivers_total_balances dtbc where driver_balance>=0
+select * from drivers_total_balances dtbc 
 order by driver_id
