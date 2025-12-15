@@ -389,7 +389,7 @@ export function getCatalogTariffByWeekDayAndAutoParkId({
 }) {
   devLog({ auto_park_id, weekDay });
   return db.get(
-    'select * from catalog_tariffs ct where ct.auto_park_id = ? and ct.weekDay = ?',
+    'select id from catalog_tariffs ct where ct.auto_park_id = ? and ct.weekDay = ?',
     auto_park_id,
     weekDay
   );

@@ -105,6 +105,11 @@ export async function setDriversCustomTariff() {
 export async function deleteDriversCustomTariff() {
   const { undeletedDriversCustomTariffIds } =
     await getUndeletedDriversCustomTariffIds();
+  console.log({
+    module: 'deleteDriversCustomTariff',
+    deattachedTariffs: undeletedDriversCustomTariffIds.length,
+    date: new Date(),
+  });
   devLog(undeletedDriversCustomTariffIds);
   const attachTariffToDriverInputs = undeletedDriversCustomTariffIds.map(
     (val) => {
@@ -133,11 +138,6 @@ export async function deleteDriversCustomTariff() {
       continue;
     }
   }
-  console.log({
-    module: 'deleteDriversCustomTariff',
-    deattachedTariffs: undeletedDriversCustomTariffIds.length,
-    date: new Date(),
-  });
 }
 
 if (process.env.ENV == 'TEST') {
