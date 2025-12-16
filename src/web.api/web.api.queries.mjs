@@ -1,25 +1,32 @@
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
+import { devLog } from '../shared/shared.utils.mjs';
 
 const db = await open({
   filename: process.env.DEV_DB,
   driver: sqlite3.Database,
 });
 
-export async function saveCreatedDriverCustomTariffId({ tariffId, driverId }) {
-  const sql = `INSERT INTO drivers_custom_tariff_ids(tariff_id, driver_id) VALUES(?,?)`;
-  await db.run(sql, tariffId, driverId);
+export async function saveCreatedDriverCustomTariffId({
+  tariffId,
+  driverId,
+  autoParkId,
+}) {
+  const sql = `INSERT INTO drivers_custom_tariff_ids(tariff_id, driver_id,auto_park_id) VALUES(?,?,?)`;
+  devLog({ sql, arguments });
+  await db.run(sql, tariffId, driverId, autoParkId);
 }
 
 export async function getUndeletedDriversCustomTariffIds() {
-  const sql = `SELECT tariff_id,driver_id FROM drivers_custom_tariff_ids WHERE is_deleted = false`;
+  const sql = `SELECT driver_id,auto_park_id,tariff_id FROM drivers_custom_tariff_ids WHERE is_deleted = false`;
+  devLog({ sql, arguments });
   const undeletedDriversCustomTariffIds = await db.all(sql);
   return { undeletedDriversCustomTariffIds };
 }
 
-export async function markDriverCustomTariffAsDeleted({ tariffId }) {
-  const sql = `UPDATE drivers_custom_tariff_ids SET is_deleted=true WHERE tariff_id = ?`;
-  await db.run(sql, tariffId);
+export async function markDriverCustomTariffAsDeleted({ tariffId, driverId }) {
+  const sql = `UPDATE drivers_custom_tariff_ids SET is_deleted=true WHERE tariff_id = ? and driver_id = ?`;
+  await db.run(sql, tariffId, driverId);
 }
 
 export async function saveCreatedDriverBonusRuleId({
@@ -375,4 +382,20 @@ export async function synchronizeAutoParkRulesTransaction({
     // Re-throw the error so the calling code is aware of the failure
     throw error;
   }
+}
+export function getCatalogTariffByWeekDayAndAutoParkId({
+  auto_park_id,
+  weekDay,
+}) {
+  devLog({ auto_park_id, weekDay });
+  return db.get(
+    'select id from catalog_tariffs ct where ct.auto_park_id = ? and ct.weekDay = ?',
+    auto_park_id,
+    weekDay
+  );
+}
+export function getAllCatalogTariffs() {
+  return db.all(
+    'select id,auto_park_id from catalog_tariffs where is_active = true'
+  );
 }
