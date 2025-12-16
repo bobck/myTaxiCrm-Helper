@@ -74,10 +74,18 @@ export async function getOrders(
     const { message, code } = data;
     const { validation } = message;
 
-    if ((response.status == 403 && code == 101) || response.status == 401) {
+    if (
+      (response.status == 403 && code == 101) ||
+      response.status == 401 ||
+      response.status == 429
+    ) {
       console.info({ function: 'getOrders', message: 'Get new Auth' });
       await remonlineTokenToEnv(true);
-      return await getOrders({ idLabels, ids }, _page, _orders);
+      return await getOrders(
+        { idLabels, ids, sort_dir, modified_at },
+        _page,
+        _orders
+      );
     }
 
     console.error({
