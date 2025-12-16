@@ -75,11 +75,15 @@ export async function setDriversCustomTariff() {
     devLog({ vars });
     attachDriverToTariffInputs.push(vars);
   }
-
+  console.log({
+    module: 'setDriversCustomTariff',
+    newDrivers: attachDriverToTariffInputs.length,
+    date: new Date(),
+  });
   for (let attachTariffToDriverInput of attachDriverToTariffInputs) {
     try {
       devLog({ attachTariffToDriverInput });
-      // await assignDriversToCatalogTariff(attachTariffToDriverInput);
+      await assignDriversToCatalogTariff(attachTariffToDriverInput);
       await saveCreatedDriverCustomTariffId({
         tariffId: attachTariffToDriverInput.catalogTariffId,
         driverId: attachTariffToDriverInput.driverIds[0],
@@ -95,11 +99,6 @@ export async function setDriversCustomTariff() {
       continue;
     }
   }
-  console.log({
-    module: 'setDriversCustomTariff',
-    newDrivers: attachDriverToTariffInputs.length,
-    date: new Date(),
-  });
 }
 
 export async function deleteDriversCustomTariff() {
@@ -141,6 +140,6 @@ export async function deleteDriversCustomTariff() {
 }
 
 if (process.env.ENV == 'TEST') {
-  setDriversCustomTariff();
+  // setDriversCustomTariff();
   deleteDriversCustomTariff();
 }
