@@ -104,7 +104,6 @@ export async function setDriversCustomTariff() {
 export async function deleteDriversCustomTariff() {
   console.log({
     module: 'deleteDriversCustomTariff',
-    deattachedTariffs: undeletedDriversCustomTariffIds.length,
     date: new Date(),
   });
   const { undeletedDriversCustomTariffIds } =
