@@ -110,12 +110,60 @@ export const getRobotaUaPublicationLeftOvers = async ({ page }) => {
 export const getRobotaUaTicketRest = async ({ ticketType }) =>
   await robotaUaAPI.getTicketRest({ ticketType });
 
-export const coldSourceRobotaUaByTerm = async (criteria) => {
-  const searchResult = await robotaUaAPI.searchResumes(criteria);
+export const coldSourceRobotaUaByTerm = async (
+  searchParams,
+  excludeIds = [],
+  maxPages = 50
+) => {
+  let allCandidates = [];
+  let page = 0;
+  let hasMore = true;
+  const pageSize = searchParams.count || 20;
+  devLog(
+    `Starting Cold Source: ${searchParams.keyWords} (Excluding ${excludeIds.length} IDs)`
+  );
 
-  if (!searchResult || !searchResult.documents) {
-    devLog('No documents found or empty response.');
-    return [];
+  while (hasMore && page < maxPages) {
+    const currentParams = { ...searchParams, page, count: pageSize };
+
+    const response = await robotaUaAPI.searchResumes(currentParams);
+    const { documents, total } = response;
+
+    if (!documents || documents.length === 0) {
+      devLog('No more documents found.');
+      hasMore = false;
+      break;
+    }
+
+    // Filter out excluded IDs
+    const newCandidates = documents.filter(
+      (doc) => !excludeIds.includes(doc.resumeId)
+    );
+
+    if (newCandidates.length < documents.length) {
+      devLog(
+        `Page ${page}: Filtered out ${documents.length - newCandidates.length} duplicates.`
+      );
+    }
+
+    // Accumulate results
+    allCandidates = [...allCandidates, ...newCandidates];
+
+    // Check if we reached the end of the results
+    // specific check: if we received fewer docs than the page size, it's the last page
+    if (documents.length < pageSize) {
+      hasMore = false;
+    }
+
+    page++;
+
+    // Optional: Add a small delay here if you encounter Rate Limiting (429)
   }
-  return searchResult;
+
+  devLog(`Finished. Total collected: ${allCandidates.length}`);
+
+  return {
+    documents: allCandidates,
+    totalCount: allCandidates.length,
+  };
 };

@@ -136,10 +136,6 @@ export function processResumeSearchResult(resume) {
     experience,
     skills: skillsString,
     hasPhoto: !!resume.photo,
-    dateOfBirth: null, // Usually not available in search preview
-    phone: null, // Contacts are usually closed in cold search until purchased/opened
-    email: null,
-    sourceOfApplyment: 'Robota.ua Cold Search', // Or specific ID
-    isOpened: resume.areContactsOpenedForCurrentUser, // Flag if you already have access
+    isOpened: resume.areContactsOpenedForCurrentUser,
   };
 }
