@@ -4,10 +4,7 @@ import { devLog } from '../../../shared/shared.utils.mjs';
 import { cityListWithAssignedBy as bitrixCities } from '../../../bitrix/bitrix.constants.mjs';
 import { coldSourceRobotaUaByTerm } from '../robotaua.utils.mjs';
 
-
 export const runDriverColdSourcing = async () => {
-
-
   const searchParams = {
     keyWords: 'Водій',
     cityId: 1,
@@ -18,27 +15,21 @@ export const runDriverColdSourcing = async () => {
   const searchResult = await coldSourceRobotaUaByTerm(searchParams);
 
   const processedCandidates = searchResult.documents.map((resume) => {
-    let bitrixCityId = null;
-
     const robotaCityConfig = robotaUaCities.find((c) => c.id === resume.cityId);
 
     if (robotaCityConfig) {
       const bitrixCityConfig = bitrixCities.find(
         (bc) => bc.auto_park_id === robotaCityConfig.auto_park_id
       );
-      if (bitrixCityConfig) {
-        bitrixCityId = bitrixCityConfig.brandingId;
-      }
     }
 
     return processResumeSearchResult(resume, bitrixCityId);
   });
 
-  processedCandidates.forEach(candidate=>devLog(candidate))
+  processedCandidates.forEach((candidate) => devLog(candidate));
   devLog('Processed Candidates:', processedCandidates.length);
   return processedCandidates;
 };
-
 
 if (process.env.ENV === 'DEV' || process.env.ENV === 'TEST') {
   await runDriverColdSourcing();
