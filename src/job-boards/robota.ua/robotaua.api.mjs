@@ -168,6 +168,32 @@ class RobotaUaApiClient {
       this.handleApiError(error);
     }
   }
+  async searchResumes(params = {}) {
+    try {
+      // Default parameters based on your endpoint analysis
+      const defaultParams = {
+        page: 0,
+        count: 20,
+        searchType: 'default', // or 'everywhere', 'speciality', 'skills'
+        ukrainian: true,
+        inside: false, // Include region
+        showCvWithoutSalary: true,
+        period: 'All', // 'Today', 'Week', 'Month', etc.
+        // ...other defaults if necessary
+      };
+
+      const requestParams = { ...defaultParams, ...params };
+
+      const response = await this.employerApi.get('/cvdb/resumes', {
+        params: requestParams,
+      });
+
+      // console.log('Resume Search Result:', response.data);
+      return response.data;
+    } catch (error) {
+      this.handleApiError(error);
+    }
+  }
   handleApiError(error) {
     console.error('Robota.ua API Error:');
     if (error.response) {
