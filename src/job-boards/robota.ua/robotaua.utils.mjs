@@ -109,3 +109,13 @@ export const getRobotaUaPublicationLeftOvers = async ({ page }) => {
 
 export const getRobotaUaTicketRest = async ({ ticketType }) =>
   await robotaUaAPI.getTicketRest({ ticketType });
+
+export const coldSourceRobotaUaByTerm = async (criteria) => {
+  const searchResult = await robotaUaAPI.searchResumes(criteria);
+
+  if (!searchResult || !searchResult.documents) {
+    devLog('No documents found or empty response.');
+    return [];
+  }
+  return searchResult;
+};

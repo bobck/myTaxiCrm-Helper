@@ -112,3 +112,44 @@ export function processApiResponse(response) {
 
   return processedData;
 }
+export function processResumeSearchResult(resume, bitrixCityId = null) {
+  // Format experience from the CVDB structure
+  const experienceString = resume.experience
+    ?.map((exp) => {
+      const dates = exp.dateDiff ? `(${exp.dateDiff})` : '';
+      const period =
+        exp.startDate && exp.endDate
+          ? `${exp.startDate} - ${exp.endDate}`
+          : '';
+      
+      return `Компанія: ${exp.company || 'Не вказана'}\nПосада: ${
+        exp.position || 'Не вказана'
+      }\nПеріод: ${period} ${dates}`;
+    })
+    .join('\n\n---\n\n');
+
+  // Format Keywords/Skills
+  const skillsString = resume.keywords?.join(', ');
+
+  // Construct URL (standard pattern for Robota.ua candidates)
+  const cvURL = `https://robota.ua/candidates/${resume.resumeId}`;
+
+  // Map to your internal DTO format (adjusting fields to match what your Bitrix/CRM expects)
+  return {
+    id: resume.resumeId, // Unique ID from Robota.ua
+    title: resume.speciality,
+    fullName: resume.fullName || resume.displayName || 'Anonymous',
+    cvURL: cvURL,
+    cityName: resume.cityName,
+    age: resume.age,
+    salaryExpectations: resume.salary,
+    experience: experienceString,
+    skills: skillsString,
+    hasPhoto: !!resume.photo,
+    dateOfBirth: null, // Usually not available in search preview
+    phone: null, // Contacts are usually closed in cold search until purchased/opened
+    email: null,
+    sourceOfApplyment: 'Robota.ua Cold Search', // Or specific ID
+    isOpened: resume.areContactsOpenedForCurrentUser, // Flag if you already have access
+  };
+}
