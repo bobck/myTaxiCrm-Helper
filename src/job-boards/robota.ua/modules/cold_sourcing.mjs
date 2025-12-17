@@ -1,5 +1,3 @@
-// src/job-boards/robota.ua/modules/cold_sourcing.mjs
-import RobotaUaApiClient from '../robotaua.api.mjs';
 import { robotaUaCities } from '../robotaua.constants.mjs';
 import { processResumeSearchResult } from '../robotaua.business-entity.mjs';
 import { devLog } from '../../../shared/shared.utils.mjs';
@@ -36,10 +34,12 @@ export const runDriverColdSourcing = async () => {
     return processResumeSearchResult(resume, bitrixCityId);
   });
 
-  devLog(processedCandidates);
+  processedCandidates.forEach(candidate=>devLog(candidate))
   devLog('Processed Candidates:', processedCandidates.length);
   return processedCandidates;
 };
+
+
 if (process.env.ENV === 'DEV' || process.env.ENV === 'TEST') {
   await runDriverColdSourcing();
 }
