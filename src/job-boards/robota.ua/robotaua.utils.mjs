@@ -109,64 +109,73 @@ export const getRobotaUaPublicationLeftOvers = async ({ page }) => {
 
 export const getRobotaUaTicketRest = async ({ ticketType }) =>
   await robotaUaAPI.getTicketRest({ ticketType });
-
+/**
+ * Cold sources candidates with pagination and ID filtration.
+ * @param {Object} searchParams - The search criteria (keyWords, cityId, etc.)
+ * @param {Array<number|string>} excludeIds - Array of Resume IDs to exclude
+ * @param {number} limit - Target number of unique candidates to find
+ * @param {number} maxPages - Safety limit for pages to fetch
+ */
 export const coldSourceRobotaUaByTerm = async (
   searchParams,
   excludeIds = [],
-  maxCandidates = 50
+  limit = 20,
+  maxPages = 50
 ) => {
-  const allCandidates = [];
+  const auth = {
+    email: process.env.ROBOTA_UA_EMAIL,
+    password: process.env.ROBOTA_UA_PASSWORD,
+  };
+
+  const client = await RobotaUaApiClient.initialize(auth);
+
+  let allCandidates = [];
   let page = 0;
   let hasMore = true;
+  // Default API page size is usually 20
   const pageSize = searchParams.count || 20;
+
   devLog(
-    `Starting Cold Source: ${searchParams.keyWords} (Excluding ${excludeIds.length} IDs)`
+    `Starting Cold Source: "${searchParams.keyWords}" (Need: ${limit}, Excluding: ${excludeIds.length} IDs)`
   );
 
-  while (hasMore) {
+  while (hasMore && page < maxPages && allCandidates.length < limit) {
     const currentParams = { ...searchParams, page, count: pageSize };
 
-    const response = await robotaUaAPI.searchResumes(currentParams);
-    const { documents, total } = response;
+    const response = await client.searchResumes(currentParams);
+    const { documents } = response;
 
     if (!documents || documents.length === 0) {
-      devLog('No more documents found.');
       hasMore = false;
       break;
     }
 
-    // Filter out excluded IDs
+    // Filter out candidates we have already sourced
     const newCandidates = documents.filter(
       (doc) => !excludeIds.includes(doc.resumeId)
     );
 
     if (newCandidates.length < documents.length) {
       devLog(
-        `Page ${page}: Filtered out ${documents.length - newCandidates.length} duplicates.`
+        `Page ${page}: Skipped ${documents.length - newCandidates.length} duplicates.`
       );
     }
 
-    // Accumulate results
-    allCandidates.push(...newCandidates);
+    allCandidates = [...allCandidates, ...newCandidates];
 
+    // Check if we hit the end of the API results
     if (documents.length < pageSize) {
       hasMore = false;
     }
 
     page++;
-    if (allCandidates.length >= maxCandidates) {
-      devLog(
-        `Maximum of candidates count reached. Maximum: ${maxCandidates}, Collected: ${allCandidates.length}`
-      );
-      break;
-    }
   }
 
-  devLog(`Finished. Total collected: ${allCandidates.length}`);
+  // Trim to exact limit if we over-fetched
+  const finalCandidates = allCandidates.slice(0, limit);
 
-  const documents = allCandidates.slice(0, maxCandidates);
   return {
-    documents,
-    totalCount: documents.length,
+    documents: finalCandidates,
+    totalCount: finalCandidates.length,
   };
 };

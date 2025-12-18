@@ -18,8 +18,9 @@ exports.up = function (db) {
   return db
     .createTable('robota_ua_sourced_candidates', {
       id: { type: 'int', primaryKey: true, autoIncrement: true },
-      resume_id: { type: 'int', notNull: true },
+      resume_id: { type: 'int', notNull: true, unique: true }, // Unique constraint for INSERT OR IGNORE
       keyword: { type: 'string' },
+      city_id: { type: 'int' }, // New column
       created_at: {
         type: 'timestamp',
         notNull: true,
@@ -27,7 +28,6 @@ exports.up = function (db) {
       },
     })
     .then(() => {
-      // Add index for performance on resume_id lookups
       return db.addIndex(
         'robota_ua_sourced_candidates',
         'idx_robota_ua_sourced_candidates_resume_id',

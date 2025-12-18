@@ -1,54 +1,79 @@
-// src/job-boards/robota.ua/modules/cold_sourcing.mjs
 import { robotaUaCities } from '../robotaua.constants.mjs';
 import { processResumeSearchResult } from '../robotaua.business-entity.mjs';
 import { devLog } from '../../../shared/shared.utils.mjs';
 import { cityListWithAssignedBy as bitrixCities } from '../../../bitrix/bitrix.constants.mjs';
 import { coldSourceRobotaUaByTerm } from '../robotaua.utils.mjs';
-
-// Example: Retrieve existing IDs from DB (Mock function)
-// In production, you would fetch this from your database
-const getExistingCandidateIds = async () => {
-  // return await db.query('SELECT resume_id FROM ...');
-  return [12345, 67890]; // Mock data
-};
+import {
+  getSourcedCandidateIds,
+  saveSourcedCandidate,
+} from '../robotaua.queries.mjs';
 
 export const runDriverColdSourcing = async () => {
-  // 1. Get IDs to exclude (optional, prevents processing duplicates)
-  const existingIds = await getExistingCandidateIds();
+  try {
+    // 1. Load history to prevent duplicates
+    const existingIds = await getSourcedCandidateIds();
+    devLog(`Loaded ${existingIds.length} existing candidate IDs.`);
 
-  const searchParams = {
-    keyWords: 'Водій',
-    cityId: 1, // Kyiv
-    period: 'ThreeDays', // Fresh candidates
-    searchType: 'speciality',
-    count: 20, // Explicitly set page size
-  };
+    // Configuration
+    const CANDIDATE_LIMIT = 20;
+    const searchParams = {
+      keyWords: 'Водій',
+      cityId: 1, // Kyiv
+      period: 'ThreeDays',
+      searchType: 'speciality',
+      count: 20, 
+    };
 
-  const searchResult = await coldSourceRobotaUaByTerm(
-    searchParams,
-    existingIds
-  );
+    // 2. Fetch new candidates (pagination + filtration handled inside)
+    const searchResult = await coldSourceRobotaUaByTerm(
+      searchParams,
+      existingIds,
+      CANDIDATE_LIMIT
+    );
 
-  const processedCandidates = searchResult.documents.map((resume) => {
-    let bitrixCityId = null; // Defined in correct scope
+    const processedCandidates = [];
 
-    const robotaCityConfig = robotaUaCities.find((c) => c.id === resume.cityId);
+    // 3. Process and Save
+    for (const resume of searchResult.documents) {
+      let bitrixCityId = null;
 
-    if (robotaCityConfig) {
-      const bitrixCityConfig = bitrixCities.find(
-        (bc) => bc.auto_park_id === robotaCityConfig.auto_park_id
+      // Map City IDs for CRM
+      const robotaCityConfig = robotaUaCities.find(
+        (c) => c.id === resume.cityId
       );
+      
+      if (robotaCityConfig) {
+        const bitrixCityConfig = bitrixCities.find(
+          (bc) => bc.auto_park_id === robotaCityConfig.auto_park_id
+        );
+        if (bitrixCityConfig) {
+          bitrixCityId = bitrixCityConfig.brandingId;
+        }
+      }
+
+      // Create Business Entity
+      const candidateDto = processResumeSearchResult(resume, bitrixCityId);
+      processedCandidates.push(candidateDto);
+
+      // Persist to DB immediately with City ID
+      await saveSourcedCandidate({
+        resume_id: resume.resumeId,
+        keyword: searchParams.keyWords,
+        city_id: resume.cityId, // Saving the city ID from the resume
+      });
     }
 
-    return processResumeSearchResult(resume, bitrixCityId);
-  });
+    // Output results
+    processedCandidates.forEach((candidate) => devLog(candidate));
+    devLog('Total New Candidates Processed:', processedCandidates.length);
 
-  processedCandidates.forEach((candidate) => devLog(candidate));
-  devLog('Processed Candidates Count:', processedCandidates.length);
-
-  return processedCandidates;
+    return processedCandidates;
+  } catch (error) {
+    console.error('Error running Driver Cold Sourcing:', error);
+  }
 };
 
+// Execute if running in DEV/TEST mode
 if (process.env.ENV === 'DEV' || process.env.ENV === 'TEST') {
   await runDriverColdSourcing();
 }

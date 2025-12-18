@@ -154,7 +154,11 @@ export async function getSourcedCandidateIds() {
   return rows.map((row) => row.resume_id);
 }
 
-export async function saveSourcedCandidate({ resume_id, keyword }) {
-  const sql = /*sql*/ `INSERT OR IGNORE INTO robota_ua_sourced_candidates (resume_id, keyword) VALUES (?, ?)`;
-  await db.run(sql, resume_id, keyword);
+export async function saveSourcedCandidate({ resume_id, keyword, city_id }) {
+  const sql = /*sql*/ `
+    INSERT OR IGNORE INTO robota_ua_sourced_candidates 
+    (resume_id, keyword, city_id) 
+    VALUES (?, ?, ?)
+  `;
+  await db.run(sql, resume_id, keyword, city_id);
 }
