@@ -113,9 +113,9 @@ export const getRobotaUaTicketRest = async ({ ticketType }) =>
 export const coldSourceRobotaUaByTerm = async (
   searchParams,
   excludeIds = [],
-  maxPages = 50
+  maxCandidates = 50
 ) => {
-  let allCandidates = [];
+  const allCandidates = [];
   let page = 0;
   let hasMore = true;
   const pageSize = searchParams.count || 20;
@@ -123,7 +123,7 @@ export const coldSourceRobotaUaByTerm = async (
     `Starting Cold Source: ${searchParams.keyWords} (Excluding ${excludeIds.length} IDs)`
   );
 
-  while (hasMore && page < maxPages) {
+  while (hasMore) {
     const currentParams = { ...searchParams, page, count: pageSize };
 
     const response = await robotaUaAPI.searchResumes(currentParams);
@@ -147,23 +147,26 @@ export const coldSourceRobotaUaByTerm = async (
     }
 
     // Accumulate results
-    allCandidates = [...allCandidates, ...newCandidates];
+    allCandidates.push(...newCandidates);
 
-    // Check if we reached the end of the results
-    // specific check: if we received fewer docs than the page size, it's the last page
     if (documents.length < pageSize) {
       hasMore = false;
     }
 
     page++;
-
-    // Optional: Add a small delay here if you encounter Rate Limiting (429)
+    if (allCandidates.length >= maxCandidates) {
+      devLog(
+        `Maximum of candidates count reached. Maximum: ${maxCandidates}, Collected: ${allCandidates.length}`
+      );
+      break;
+    }
   }
 
   devLog(`Finished. Total collected: ${allCandidates.length}`);
 
+  const documents = allCandidates.slice(0, maxCandidates);
   return {
-    documents: allCandidates,
-    totalCount: allCandidates.length,
+    documents,
+    totalCount: documents.length,
   };
 };
