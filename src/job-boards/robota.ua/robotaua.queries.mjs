@@ -148,3 +148,13 @@ FROM robota_ua_pagination
 WHERE is_active = 1`;
   return await db.get(sql);
 };
+export async function getSourcedCandidateIds() {
+  const sql = /*sql*/ `SELECT resume_id FROM robota_ua_sourced_candidates`;
+  const rows = await db.all(sql);
+  return rows.map((row) => row.resume_id);
+}
+
+export async function saveSourcedCandidate({ resume_id, keyword }) {
+  const sql = /*sql*/ `INSERT OR IGNORE INTO robota_ua_sourced_candidates (resume_id, keyword) VALUES (?, ?)`;
+  await db.run(sql, resume_id, keyword);
+}
