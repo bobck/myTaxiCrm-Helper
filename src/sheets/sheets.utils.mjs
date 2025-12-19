@@ -3,6 +3,9 @@ import { devLog } from '../shared/shared.utils.mjs';
 
 const KEY_FILE_PATH = './token.json';
 const SPREADSHEET_ID = process.env.DCBR_SHEET_ID;
+const ROBOTA_UA_COLD_SOURCING_SPREADSHEET_ID =
+  process.env.ROBOTA_UA_COLD_SOURCING_SPREADSHEET_ID;
+const ROBOTA_UA_CONFIG_SHEET_NAME = process.env.ROBOTA_UA_CONFIG_SHEET_NAME;
 
 // Reusable authentication and client setup
 const googleAuth = new auth.GoogleAuth({
@@ -105,3 +108,43 @@ export async function getAllCustomRuledAutoParksFromSpreadSheet() {
     return null;
   }
 }
+export const fetchSearchConfiguration = async () => {
+  const googleSheets = client;
+
+  try {
+    const response = await googleSheets.spreadsheets.values.get({
+      spreadsheetId: ROBOTA_UA_COLD_SOURCING_SPREADSHEET_ID,
+      range: `${ROBOTA_UA_CONFIG_SHEET_NAME}!A2:C`,
+    });
+
+    const rows = response.data.values;
+    if (!rows || rows.length === 0) {
+      devLog('No configuration found in Google Sheets.');
+      return [];
+    }
+
+    // Filter and Map
+    return rows
+      .filter((row) => {
+        // Check if columns 0 (Keyword), 1 (Limit), and 2 (City) exist and are not whitespace
+        const hasKeyword = row[0] && row[0].trim().length > 0;
+        const hasLimit = row[1] && row[1].trim().length > 0;
+        const hasCity = row[2] && row[2].trim().length > 0;
+
+        if (!hasKeyword || !hasLimit || !hasCity) {
+          // Optional: Log skipped rows for debugging
+          devLog(`Skipping incomplete row: [${row.join(', ')}]`);
+          return false;
+        }
+        return true;
+      })
+      .map((row) => ({
+        keyword: row[0].trim(),
+        limit: parseInt(row[1].trim(), 10), // We now know row[1] exists
+        cityName: row[2].trim(), // We now know row[2] exists
+      }));
+  } catch (error) {
+    console.error('Error fetching search configuration:', error);
+    throw error;
+  }
+};

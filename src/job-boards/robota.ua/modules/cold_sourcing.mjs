@@ -7,9 +7,14 @@ import {
   getSourcedCandidateIds,
   saveSourcedCandidate,
 } from '../robotaua.queries.mjs';
+import { fetchSearchConfiguration } from '../../../sheets/sheets.utils.mjs';
 
 export const runDriverColdSourcing = async () => {
   try {
+    const resp = await fetchSearchConfiguration();
+    devLog(resp)
+
+    return;
     // 1. Load history to prevent duplicates
     const existingIds = await getSourcedCandidateIds();
     devLog(`Loaded ${existingIds.length} existing candidate IDs.`);
@@ -21,7 +26,7 @@ export const runDriverColdSourcing = async () => {
       cityId: 1, // Kyiv
       period: 'ThreeDays',
       searchType: 'speciality',
-      count: 20, 
+      count: 20,
     };
 
     // 2. Fetch new candidates (pagination + filtration handled inside)
@@ -41,7 +46,7 @@ export const runDriverColdSourcing = async () => {
       const robotaCityConfig = robotaUaCities.find(
         (c) => c.id === resume.cityId
       );
-      
+
       if (robotaCityConfig) {
         const bitrixCityConfig = bitrixCities.find(
           (bc) => bc.auto_park_id === robotaCityConfig.auto_park_id
@@ -76,4 +81,5 @@ export const runDriverColdSourcing = async () => {
 // Execute if running in DEV/TEST mode
 if (process.env.ENV === 'DEV' || process.env.ENV === 'TEST') {
   await runDriverColdSourcing();
+  // devLog(robotaUaCities.map((city) => city.name));
 }
