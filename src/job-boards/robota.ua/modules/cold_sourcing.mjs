@@ -69,18 +69,16 @@ export const runRobotaUaColdSourcing = async () => {
         const candidateDto = processResumeSearchResult(resume);
         candidatesToExport.push(candidateDto);
 
-        // Save to SQLite
+       
         await saveSourcedCandidate({
           resume_id: resume.resumeId,
           keyword: keyword,
           city_id: resume.cityId,
         });
 
-        // Add to local exclusion for subsequent iterations in this run
         existingIds.push(resume.resumeId);
       }
 
-      // 6. Export to Sheets
       if (candidatesToExport.length > 0) {
         const sheetTitle = await ensureColdSourcingSheet(keyword, cityName);
 

@@ -156,7 +156,6 @@ export const ensureColdSourcingSheet = async (keyword, cityName) => {
   if (sheetTitle.length > 100) sheetTitle = sheetTitle.substring(0, 100);
 
   try {
-    // 1. Check metadata
     const metadata = await client.spreadsheets.get({
       spreadsheetId: ROBOTA_UA_COLD_SOURCING_SPREADSHEET_ID,
     });
@@ -168,7 +167,6 @@ export const ensureColdSourcingSheet = async (keyword, cityName) => {
     if (!sheetExists) {
       devLog(`Creating new sheet: "${sheetTitle}"`);
 
-      // Changed 'resource' to 'requestBody'
       await client.spreadsheets.batchUpdate({
         spreadsheetId: ROBOTA_UA_COLD_SOURCING_SPREADSHEET_ID,
         requestBody: {
@@ -188,8 +186,6 @@ export const ensureColdSourcingSheet = async (keyword, cityName) => {
         'Лінк на резюме',
         'Дата додавання',
       ];
-
-      // Changed 'resource' to 'requestBody'
       await client.spreadsheets.values.update({
         spreadsheetId: ROBOTA_UA_COLD_SOURCING_SPREADSHEET_ID,
         range: `${sheetTitle}!A1`,

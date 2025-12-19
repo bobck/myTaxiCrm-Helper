@@ -170,7 +170,6 @@ class RobotaUaApiClient {
   }
   async searchResumes(params = {}) {
     try {
-      // Default parameters based on your endpoint analysis
       const defaultParams = {
         page: 0,
         count: 20,
@@ -178,8 +177,7 @@ class RobotaUaApiClient {
         ukrainian: true,
         inside: false, // Include region
         showCvWithoutSalary: true,
-        period: 'All', // 'Today', 'Week', 'Month', etc.
-        // ...other defaults if necessary
+        period: 'All', 
       };
 
       const requestParams = { ...defaultParams, ...params };
@@ -187,8 +185,6 @@ class RobotaUaApiClient {
       const response = await this.employerApi.get('/cvdb/resumes', {
         params: requestParams,
       });
-
-      // console.log('Resume Search Result:', response.data);
       return response.data;
     } catch (error) {
       this.handleApiError(error);

@@ -18,7 +18,7 @@ exports.up = function (db) {
   return db
     .createTable('robota_ua_sourced_candidates', {
       id: { type: 'int', primaryKey: true, autoIncrement: true },
-      resume_id: { type: 'int', notNull: true, unique: true }, // Unique constraint for INSERT OR IGNORE
+      resume_id: { type: 'int', notNull: true, unique: true },
       keyword: { type: 'string' },
       city_id: { type: 'int' }, // New column
       created_at: {

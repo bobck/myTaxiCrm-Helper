@@ -132,7 +132,6 @@ export const coldSourceRobotaUaByTerm = async (
   let allCandidates = [];
   let page = 0;
   let hasMore = true;
-  // Default API page size is usually 20
   const pageSize = searchParams.count || 20;
 
   devLog(
@@ -156,8 +155,6 @@ export const coldSourceRobotaUaByTerm = async (
       hasMore = false;
       break;
     }
-
-    // Filter out candidates we have already sourced
     const newCandidates = documents.filter(
       (doc) => !excludeIds.includes(doc.resumeId)
     );
@@ -170,7 +167,6 @@ export const coldSourceRobotaUaByTerm = async (
 
     allCandidates = [...allCandidates, ...newCandidates];
 
-    // Check if we hit the end of the API results
     if (documents.length < pageSize) {
       hasMore = false;
     }
@@ -178,7 +174,6 @@ export const coldSourceRobotaUaByTerm = async (
     page++;
   }
 
-  // Trim to exact limit if we over-fetched
   const finalCandidates = allCandidates.slice(0, limit);
 
   return {
