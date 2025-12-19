@@ -7,79 +7,72 @@ import {
   getSourcedCandidateIds,
   saveSourcedCandidate,
 } from '../robotaua.queries.mjs';
-// Importing from your new module location
 import {
-  fetchSearchConfiguration,
-  ensureSheetForKeyword,
+  fetchColdSourcingConfig,
+  ensureColdSourcingSheet,
   exportCandidatesToSheet,
-} from '../../../sheets/modules/cold-soursing-sheets.mjs';
+  debugAuth,
+} from '../../../sheets/sheets.utils.mjs';
 
 export const runDriverColdSourcing = async () => {
   try {
-    devLog('--- Starting Cold Sourcing from Google Sheets Config ---');
+    devLog('--- Starting Cold Sourcing (Google Sheets Config) ---');
 
     // 1. Fetch Configuration
-    // Returns array of objects: { keyword, limit, cityName }
-    const searchConfigs = await fetchSearchConfiguration();
+    const searchConfigs = await fetchColdSourcingConfig();
 
     if (searchConfigs.length === 0) {
-      devLog('No keywords configured in the Google Sheet.');
+      devLog('No valid keywords configured in the Google Sheet.');
       return;
     }
 
-    // 2. Load history to prevent duplicates across ALL keywords/runs
+    // 2. Load History (to prevent duplicates)
     const existingIds = await getSourcedCandidateIds();
-    devLog(`Loaded ${existingIds.length} existing candidate IDs from history.`);
+    devLog(`Loaded ${existingIds.length} existing candidate IDs.`);
 
-    // 3. Iterate through each configuration row
+    // 3. Process each Config Row
     for (const config of searchConfigs) {
       const { keyword, limit, cityName } = config;
 
-      // --- A. Build Search Params ---
-
-      // Resolve City Name to ID
-      // let targetCityId = 1; // Default to Kyiv
       const foundCity = robotaUaCities.find(
         (c) => c.name.toLowerCase() === cityName.toLowerCase()
       );
 
       if (!foundCity) {
-        console.warn(`Warning: City "${cityName}" not found in constants.`);
+        console.error(`Warning: City "${cityName}" not found`);
         continue;
       }
       const targetCityId = foundCity.id;
 
       devLog(
-        `\n>>> Processing: "${keyword}" in "${cityName}" (ID: ${targetCityId}) - Limit: ${limit}`
+        `\n>>> Processing: "${keyword}" in "${cityName}" (ID: ${targetCityId}) | Limit: ${limit}`
       );
 
       const searchParams = {
         keyWords: keyword,
         cityId: targetCityId,
-        period: 'ThreeDays', // Sourcing fresh candidates
-        searchType: 'default', // Allows synonyms
-        count: 20,
+    
       };
 
-      // --- B. Launch Sourcing ---
+      // 4. Fetch Candidates
       const searchResult = await coldSourceRobotaUaByTerm(
         searchParams,
-        existingIds, // Exclude globally sourced IDs
-        limit // Stop after reaching the specific limit for this row
+        existingIds, // Exclude global history
+        limit // Stop after limit
       );
 
       if (searchResult.documents.length === 0) {
-        devLog(`No new candidates found for "${keyword}" in ${cityName}.`);
+        devLog(`No new candidates found.`);
         continue;
       }
 
       const candidatesToExport = [];
 
-      // Process Results & Save History
+      // 5. Process & Save to DB
       for (const resume of searchResult.documents) {
         let bitrixCityId = null;
 
-        // Map internal City IDs
+        // Map Bitrix City Logic
         const robotaCityConfig = robotaUaCities.find(
           (c) => c.id === resume.cityId
         );
@@ -93,25 +86,23 @@ export const runDriverColdSourcing = async () => {
           }
         }
 
-        // Create Business Entity
         const candidateDto = processResumeSearchResult(resume, bitrixCityId);
         candidatesToExport.push(candidateDto);
 
-        // Persist to SQLite immediately
+        // Save to SQLite
         await saveSourcedCandidate({
           resume_id: resume.resumeId,
           keyword: keyword,
           city_id: resume.cityId,
         });
 
-        // Update local exclusion list for the NEXT iteration in this run
+        // Add to local exclusion for subsequent iterations in this run
         existingIds.push(resume.resumeId);
       }
 
-      // --- C. Dynamic Sheet Creation & Data Loadout ---
+      // 6. Export to Sheets
       if (candidatesToExport.length > 0) {
-        // Creates sheet: "Keyword - City" (e.g., "Водій - Київ")
-        const sheetTitle = await ensureSheetForKeyword(keyword, cityName);
+        const sheetTitle = await ensureColdSourcingSheet(keyword, cityName);
 
         if (sheetTitle) {
           await exportCandidatesToSheet(sheetTitle, candidatesToExport);
@@ -125,6 +116,8 @@ export const runDriverColdSourcing = async () => {
   }
 };
 
+// Auto-run in DEV/TEST
 if (process.env.ENV === 'DEV' || process.env.ENV === 'TEST') {
+  // debugAuth()
   await runDriverColdSourcing();
 }

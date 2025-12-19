@@ -140,7 +140,14 @@ export const coldSourceRobotaUaByTerm = async (
   );
 
   while (hasMore && page < maxPages && allCandidates.length < limit) {
-    const currentParams = { ...searchParams, page, count: pageSize };
+    const currentParams = {
+      period: 'ThreeDays',
+      searchType: 'default',
+      count: 20,
+      ...searchParams,
+      page,
+      count: pageSize,
+    };
 
     const response = await client.searchResumes(currentParams);
     const { documents } = response;

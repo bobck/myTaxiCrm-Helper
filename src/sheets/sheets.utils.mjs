@@ -108,11 +108,13 @@ export async function getAllCustomRuledAutoParksFromSpreadSheet() {
     return null;
   }
 }
-export const fetchSearchConfiguration = async () => {
-  const googleSheets = client;
-
+/**
+ * Cold Sourcing: Reads search configuration from the specific config sheet.
+ * Expected Columns: A=Keyword, B=Limit, C=City
+ */
+export const fetchColdSourcingConfig = async () => {
   try {
-    const response = await googleSheets.spreadsheets.values.get({
+    const response = await client.spreadsheets.values.get({
       spreadsheetId: ROBOTA_UA_COLD_SOURCING_SPREADSHEET_ID,
       range: `${ROBOTA_UA_CONFIG_SHEET_NAME}!A2:C`,
     });
@@ -123,28 +125,129 @@ export const fetchSearchConfiguration = async () => {
       return [];
     }
 
-    // Filter and Map
     return rows
       .filter((row) => {
-        // Check if columns 0 (Keyword), 1 (Limit), and 2 (City) exist and are not whitespace
-        const hasKeyword = row[0] && row[0].trim().length > 0;
-        const hasLimit = row[1] && row[1].trim().length > 0;
-        const hasCity = row[2] && row[2].trim().length > 0;
-
-        if (!hasKeyword || !hasLimit || !hasCity) {
-          // Optional: Log skipped rows for debugging
-          devLog(`Skipping incomplete row: [${row.join(', ')}]`);
-          return false;
-        }
-        return true;
+        // Strict check: All 3 columns must be present and not empty
+        return (
+          row[0] &&
+          row[0].trim() &&
+          row[1] &&
+          row[1].trim() &&
+          row[2] &&
+          row[2].trim()
+        );
       })
       .map((row) => ({
         keyword: row[0].trim(),
-        limit: parseInt(row[1].trim(), 10), // We now know row[1] exists
-        cityName: row[2].trim(), // We now know row[2] exists
+        limit: parseInt(row[1].trim(), 10),
+        cityName: row[2].trim(),
       }));
   } catch (error) {
     console.error('Error fetching search configuration:', error);
     throw error;
+  }
+};
+export const debugAuth = async () => {
+  try {
+    const credentialClient = await googleAuth.getCredentials()
+    console.log('---------------------------------------------------');
+    console.log(
+      '🔐 Authenticated as:',
+      // credentialClient.credentials.client_email
+      credentialClient
+    );
+    console.log('---------------------------------------------------');
+  } catch (error) {
+    console.error('❌ Authentication Failed:', error.message);
+  }
+};
+
+
+/**
+ * Cold Sourcing: Ensures a sheet exists for "Keyword - City".
+ */
+export const ensureColdSourcingSheet = async (keyword, cityName) => {
+  let sheetTitle = `${keyword} - ${cityName}`;
+  if (sheetTitle.length > 100) sheetTitle = sheetTitle.substring(0, 100);
+
+  try {
+    // 1. Check metadata
+    const metadata = await client.spreadsheets.get({
+      spreadsheetId: ROBOTA_UA_COLD_SOURCING_SPREADSHEET_ID,
+    });
+
+    const sheetExists = metadata.data.sheets.some(
+      (s) => s.properties.title === sheetTitle
+    );
+
+    // 2. Create if missing
+    if (!sheetExists) {
+      devLog(`Creating new sheet: "${sheetTitle}"`);
+      
+      // Changed 'resource' to 'requestBody'
+      await client.spreadsheets.batchUpdate({
+        spreadsheetId: ROBOTA_UA_COLD_SOURCING_SPREADSHEET_ID,
+        requestBody: { 
+          requests: [
+            {
+              addSheet: {
+                properties: { title: sheetTitle },
+              },
+            },
+          ],
+        },
+      });
+
+      // 3. Add Headers
+      const headers = [
+        'ПІБ',
+        'Короткий опис (Посада/Досвід)',
+        'Джерело',
+        'Лінк на резюме',
+        'Дата додавання',
+      ];
+
+      // Changed 'resource' to 'requestBody'
+      await client.spreadsheets.values.update({
+        spreadsheetId: ROBOTA_UA_COLD_SOURCING_SPREADSHEET_ID,
+        range: `${sheetTitle}!A1`,
+        valueInputOption: 'RAW',
+        requestBody: { values: [headers] },
+      });
+    }
+
+    return sheetTitle;
+  } catch (error) {
+    console.error(`Error ensuring sheet "${sheetTitle}":`, error.response?.data?.error || error.message);
+    return null;
+  }
+};
+
+/**
+ * Cold Sourcing: Appends candidates.
+ */
+export const exportCandidatesToSheet = async (sheetTitle, candidates) => {
+  if (!candidates || candidates.length === 0) return;
+
+  const rows = candidates.map((c) => [
+    c.fullName,
+    `${c.title} | ${c.age || '?'} років | ${c.salaryExpectations || 'ЗП не вказана'}`,
+    'robota.ua',
+    c.cvURL,
+    new Date().toLocaleDateString('uk-UA'),
+  ]);
+
+  try {
+    // Changed 'resource' to 'requestBody'
+    await client.spreadsheets.values.append({
+      spreadsheetId: ROBOTA_UA_COLD_SOURCING_SPREADSHEET_ID,
+      range: `${sheetTitle}!A1`,
+      valueInputOption: 'USER_ENTERED',
+      requestBody: { values: rows },
+    });
+
+    devLog(`Exported ${rows.length} candidates to "${sheetTitle}"`);
+  } catch (error) {
+    console.error(`Error appending to "${sheetTitle}":`, error.response?.data?.error || error.message);
   }
 };
