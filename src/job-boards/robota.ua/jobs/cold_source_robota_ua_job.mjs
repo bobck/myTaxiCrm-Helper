@@ -12,9 +12,7 @@ const job = CronJob.from({
     try {
       await runRobotaUaColdSourcing();
     } catch (error) {
-      console.error(
-        'Error occurred in onTick on runRobotaUaColdSourcingJob'
-      );
+      console.error('Error occurred in onTick on runRobotaUaColdSourcingJob');
       console.error({ time: new Date(), error });
     }
   },

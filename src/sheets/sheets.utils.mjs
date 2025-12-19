@@ -167,11 +167,11 @@ export const ensureColdSourcingSheet = async (keyword, cityName) => {
 
     if (!sheetExists) {
       devLog(`Creating new sheet: "${sheetTitle}"`);
-      
+
       // Changed 'resource' to 'requestBody'
       await client.spreadsheets.batchUpdate({
         spreadsheetId: ROBOTA_UA_COLD_SOURCING_SPREADSHEET_ID,
-        requestBody: { 
+        requestBody: {
           requests: [
             {
               addSheet: {
@@ -200,7 +200,10 @@ export const ensureColdSourcingSheet = async (keyword, cityName) => {
 
     return sheetTitle;
   } catch (error) {
-    console.error(`Error ensuring sheet "${sheetTitle}":`, error.response?.data?.error || error.message);
+    console.error(
+      `Error ensuring sheet "${sheetTitle}":`,
+      error.response?.data?.error || error.message
+    );
     return null;
   }
 };
@@ -229,6 +232,9 @@ export const exportCandidatesToSheet = async (sheetTitle, candidates) => {
 
     devLog(`Exported ${rows.length} candidates to "${sheetTitle}"`);
   } catch (error) {
-    console.error(`Error appending to "${sheetTitle}":`, error.response?.data?.error || error.message);
+    console.error(
+      `Error appending to "${sheetTitle}":`,
+      error.response?.data?.error || error.message
+    );
   }
 };
