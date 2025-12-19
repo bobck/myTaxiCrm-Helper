@@ -18,7 +18,6 @@ export const runDriverColdSourcing = async () => {
   try {
     devLog('--- Starting Cold Sourcing (Google Sheets Config) ---');
 
-    // 1. Fetch Configuration
     const searchConfigs = await fetchColdSourcingConfig();
 
     if (searchConfigs.length === 0) {
@@ -26,11 +25,9 @@ export const runDriverColdSourcing = async () => {
       return;
     }
 
-    // 2. Load History (to prevent duplicates)
     const existingIds = await getSourcedCandidateIds();
     devLog(`Loaded ${existingIds.length} existing candidate IDs.`);
 
-    // 3. Process each Config Row
     for (const config of searchConfigs) {
       const { keyword, limit, cityName } = config;
 
@@ -54,11 +51,10 @@ export const runDriverColdSourcing = async () => {
     
       };
 
-      // 4. Fetch Candidates
       const searchResult = await coldSourceRobotaUaByTerm(
         searchParams,
-        existingIds, // Exclude global history
-        limit // Stop after limit
+        existingIds, 
+        limit 
       );
 
       if (searchResult.documents.length === 0) {
@@ -68,25 +64,10 @@ export const runDriverColdSourcing = async () => {
 
       const candidatesToExport = [];
 
-      // 5. Process & Save to DB
       for (const resume of searchResult.documents) {
-        let bitrixCityId = null;
+       
 
-        // Map Bitrix City Logic
-        const robotaCityConfig = robotaUaCities.find(
-          (c) => c.id === resume.cityId
-        );
-
-        if (robotaCityConfig) {
-          const bitrixCityConfig = bitrixCities.find(
-            (bc) => bc.auto_park_id === robotaCityConfig.auto_park_id
-          );
-          if (bitrixCityConfig) {
-            bitrixCityId = bitrixCityConfig.brandingId;
-          }
-        }
-
-        const candidateDto = processResumeSearchResult(resume, bitrixCityId);
+        const candidateDto = processResumeSearchResult(resume);
         candidatesToExport.push(candidateDto);
 
         // Save to SQLite
@@ -116,8 +97,7 @@ export const runDriverColdSourcing = async () => {
   }
 };
 
-// Auto-run in DEV/TEST
 if (process.env.ENV === 'DEV' || process.env.ENV === 'TEST') {
-  // debugAuth()
+
   await runDriverColdSourcing();
 }

@@ -10,7 +10,7 @@ const ROBOTA_UA_CONFIG_SHEET_NAME = process.env.ROBOTA_UA_CONFIG_SHEET_NAME;
 // Reusable authentication and client setup
 const googleAuth = new auth.GoogleAuth({
   keyFilename: KEY_FILE_PATH,
-  scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
+  scopes: ['https://www.googleapis.com/auth/spreadsheets'],
 });
 
 const client = sheets({
@@ -147,21 +147,6 @@ export const fetchColdSourcingConfig = async () => {
     throw error;
   }
 };
-export const debugAuth = async () => {
-  try {
-    const credentialClient = await googleAuth.getCredentials()
-    console.log('---------------------------------------------------');
-    console.log(
-      '🔐 Authenticated as:',
-      // credentialClient.credentials.client_email
-      credentialClient
-    );
-    console.log('---------------------------------------------------');
-  } catch (error) {
-    console.error('❌ Authentication Failed:', error.message);
-  }
-};
-
 
 /**
  * Cold Sourcing: Ensures a sheet exists for "Keyword - City".
@@ -180,7 +165,6 @@ export const ensureColdSourcingSheet = async (keyword, cityName) => {
       (s) => s.properties.title === sheetTitle
     );
 
-    // 2. Create if missing
     if (!sheetExists) {
       devLog(`Creating new sheet: "${sheetTitle}"`);
       
@@ -197,8 +181,6 @@ export const ensureColdSourcingSheet = async (keyword, cityName) => {
           ],
         },
       });
-
-      // 3. Add Headers
       const headers = [
         'ПІБ',
         'Короткий опис (Посада/Досвід)',
@@ -238,7 +220,6 @@ export const exportCandidatesToSheet = async (sheetTitle, candidates) => {
   ]);
 
   try {
-    // Changed 'resource' to 'requestBody'
     await client.spreadsheets.values.append({
       spreadsheetId: ROBOTA_UA_COLD_SOURCING_SPREADSHEET_ID,
       range: `${sheetTitle}!A1`,
