@@ -1,7 +1,6 @@
 import { robotaUaCities } from '../robotaua.constants.mjs';
 import { processResumeSearchResult } from '../robotaua.business-entity.mjs';
 import { devLog } from '../../../shared/shared.utils.mjs';
-import { cityListWithAssignedBy as bitrixCities } from '../../../bitrix/bitrix.constants.mjs';
 import { coldSourceRobotaUaByTerm } from '../robotaua.utils.mjs';
 import {
   getSourcedCandidateIds,
@@ -11,7 +10,7 @@ import {
   fetchColdSourcingConfig,
   ensureColdSourcingSheet,
   exportCandidatesToSheet,
-  debugAuth,
+
 } from '../../../sheets/sheets.utils.mjs';
 
 export const runDriverColdSourcing = async () => {
