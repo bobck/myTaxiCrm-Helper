@@ -17,7 +17,11 @@ export const runRobotaUaColdSourcing = async () => {
     devLog('--- Starting Cold Sourcing (Google Sheets Config) ---');
 
     const searchConfigs = await fetchColdSourcingConfig();
-
+    console.log({
+      module: 'robotaUaColdSourcing',
+      keywordsCount: searchConfigs.length,
+      date: new Date(),
+    });
     if (searchConfigs.length === 0) {
       devLog('No valid keywords configured in the Google Sheet.');
       return;
