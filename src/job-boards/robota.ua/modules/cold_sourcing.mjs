@@ -10,10 +10,9 @@ import {
   fetchColdSourcingConfig,
   ensureColdSourcingSheet,
   exportCandidatesToSheet,
-
 } from '../../../sheets/sheets.utils.mjs';
 
-export const runDriverColdSourcing = async () => {
+export const runRobotaUaColdSourcing = async () => {
   try {
     devLog('--- Starting Cold Sourcing (Google Sheets Config) ---');
 
@@ -47,13 +46,12 @@ export const runDriverColdSourcing = async () => {
       const searchParams = {
         keyWords: keyword,
         cityId: targetCityId,
-    
       };
 
       const searchResult = await coldSourceRobotaUaByTerm(
         searchParams,
-        existingIds, 
-        limit 
+        existingIds,
+        limit
       );
 
       if (searchResult.documents.length === 0) {
@@ -64,8 +62,6 @@ export const runDriverColdSourcing = async () => {
       const candidatesToExport = [];
 
       for (const resume of searchResult.documents) {
-       
-
         const candidateDto = processResumeSearchResult(resume);
         candidatesToExport.push(candidateDto);
 
@@ -97,6 +93,5 @@ export const runDriverColdSourcing = async () => {
 };
 
 if (process.env.ENV === 'DEV' || process.env.ENV === 'TEST') {
-
-  await runDriverColdSourcing();
+  await runRobotaUaColdSourcing();
 }
