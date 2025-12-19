@@ -69,7 +69,6 @@ export const runRobotaUaColdSourcing = async () => {
         const candidateDto = processResumeSearchResult(resume);
         candidatesToExport.push(candidateDto);
 
-       
         await saveSourcedCandidate({
           resume_id: resume.resumeId,
           keyword: keyword,

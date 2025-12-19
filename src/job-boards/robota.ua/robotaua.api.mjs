@@ -177,7 +177,7 @@ class RobotaUaApiClient {
         ukrainian: true,
         inside: false, // Include region
         showCvWithoutSalary: true,
-        period: 'All', 
+        period: 'All',
       };
 
       const requestParams = { ...defaultParams, ...params };
