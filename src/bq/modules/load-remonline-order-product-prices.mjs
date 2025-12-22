@@ -9,6 +9,8 @@ import {
   sliceArrayIntoEqualParts,
 } from '../../shared/shared.utils.mjs';
 import { getAllRemonlineOrderIds } from '../bq-queries.mjs';
+import { createOrResetTableByName, loadRowsViaJSONFile } from '../bq-utils.mjs';
+import { assetTableSchema, remonlineProductPrices } from '../schemas.mjs';
 
 // const productCustomFieldsMap = {
 //   266913: 'originalPrice',
@@ -29,7 +31,7 @@ import { getAllRemonlineOrderIds } from '../bq-queries.mjs';
 const productCustomFieldsMap = {
   266913: 'originalPrice',
   317530: 'finalPrice',
-  630747: 'Шина',
+  // 630747: 'Шина',
   606851: 'percent_14',
   369837: 'percent_25',
   375921: 'percent_30',
@@ -37,7 +39,7 @@ const productCustomFieldsMap = {
   // 605934: 'Продажі СТО або 35%',
   389671: 'percent_35',
   605934: 'percent_35',
-  328830: 'Філія',
+  // 328830: 'Філія',
   328833: 'STO_partners_park',
   566140: 'percent_40',
 };
@@ -75,7 +77,7 @@ const getOrderProductPrices = async (ids) => {
         product_id: product.id,
         order_id,
         title: product.title,
-        prices,
+        ...prices,
       };
     });
 
@@ -87,18 +89,33 @@ const getOrderProductPrices = async (ids) => {
   devLog(allProducts.length);
   return allProducts;
 };
+export async function resetOrderProductPricesTable() {
+  await createOrResetTableByName({
+    bqTableId: 'product_prices',
+    schema: remonlineProductPrices,
+    dataSetId: 'RemOnline',
+  });
+}
+
 export const loadRemonlineOrderProductPricesToBQ = async (ids) => {
   const order_ids = await getAllRemonlineOrderIds();
   const chunks = sliceArrayIntoEqualParts(order_ids, 10);
   devLog(`chunks:${chunks.length}`);
 
-  const resp = (
+  const prices = (
     await Promise.all(chunks.map((arr) => getOrderProductPrices(arr)))
   ).flat();
-  devLog(resp);
+
+  await loadRowsViaJSONFile({
+    dataset_id: 'RemOnline',
+    table_id: 'product_prices',
+    rows: prices,
+    schema: remonlineProductPrices,
+  });
 };
 
 if (process.env.ENV == 'TEST') {
+  // await resetOrderProductPricesTable();
   await remonlineTokenToEnv();
   loadRemonlineOrderProductPricesToBQ();
 }

@@ -396,3 +396,16 @@ export const closedPolishBitrixDealsTableSchema = [
   { name: 'is_rescheduled', type: 'BOOLEAN', mode: 'REQUIRED' },
   { name: 'date', type: 'DATE', mode: 'REQUIRED' },
 ];
+export const remonlineProductPrices = [
+  { name: 'product_id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'order_id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'title', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'originalPrice', type: 'FLOAT', mode: 'NULLABLE' },
+  { name: 'finalPrice', type: 'FLOAT', mode: 'NULLABLE' },
+  { name: 'STO_partners_park', type: 'FLOAT', mode: 'NULLABLE' },
+  { name: 'percent_25', type: 'FLOAT', mode: 'NULLABLE' },
+  { name: 'percent_30', type: 'FLOAT', mode: 'NULLABLE' },
+  { name: 'percent_35', type: 'FLOAT', mode: 'NULLABLE' },
+  { name: 'percent_40', type: 'FLOAT', mode: 'NULLABLE' },
+  { name: 'percent_14', type: 'FLOAT', mode: 'NULLABLE' },
+];
