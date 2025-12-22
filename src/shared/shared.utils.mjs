@@ -52,3 +52,11 @@ export function chunkArray(array, chunkSize) {
   }
   return result;
 }
+export function sliceArrayIntoEqualParts(arr, count) {
+  const chunkSize = Math.ceil(arr.length / count);
+  const chunks = [];
+  for (let index = 0; index < arr.length; index += chunkSize) {
+    chunks.push(arr.slice(index, index + chunkSize));
+  }
+  return chunks;
+}

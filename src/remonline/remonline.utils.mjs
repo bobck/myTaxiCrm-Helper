@@ -423,7 +423,7 @@ export async function getOrderRelatedItems(order_id) {
 
   return data;
 }
-export async function getOrderProductPrices(product_ids) {
+export async function getRemonlineOrderProductPrices(product_ids) {
   const queryParams = `?${product_ids.map((id) => `ids[]=${id}`).join('&')}`;
   const url = `https://api.roapp.io/products/${queryParams}`;
 
@@ -451,7 +451,7 @@ export async function getOrderProductPrices(product_ids) {
         message: 'Get new Auth',
       });
       await remonlineTokenToEnv(true);
-      return await getOrderProductPrices();
+      return await getRemonlineOrderProductPrices();
     }
   }
 

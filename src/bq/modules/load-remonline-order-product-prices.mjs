@@ -1,9 +1,13 @@
 import { remonlineTokenToEnv } from '../../remonline/remonline.api.mjs';
 import {
-  getOrderProductPrices,
+  getRemonlineOrderProductPrices,
   getOrderRelatedItems,
 } from '../../remonline/remonline.utils.mjs';
-import { chunkArray, devLog } from '../../shared/shared.utils.mjs';
+import {
+  chunkArray,
+  devLog,
+  sliceArrayIntoEqualParts,
+} from '../../shared/shared.utils.mjs';
 import { getAllRemonlineOrderIds } from '../bq-queries.mjs';
 
 // const productCustomFieldsMap = {
@@ -38,19 +42,16 @@ const productCustomFieldsMap = {
   566140: 'percent_40',
 };
 let processed = 0;
-export const loadRemonlineOrderProductPricesToBQ = async (ids) => {
-  // [].le
+const getOrderProductPrices = async (ids) => {
   devLog({
-    module: 'loadRemonlineOrderProductPricesToBQ',
+    module: 'getOrderProductPrices',
     date: new Date(),
     ids: ids && ids.length ? ids.length : null,
     start: ids && ids.length ? ids[0] : null,
     end: ids && ids.length ? ids[ids.length - 1] : null,
   });
   const order_ids = ids || (await getAllRemonlineOrderIds());
-  // const order_ids = [{ order_id: 36271085 }];
-  // const order_ids = [{ order_id: 40341084 }];
-  //   devLog(order_ids);
+
   const allProducts = [];
   for (const [i, { order_id }] of order_ids.entries()) {
     const items = await getOrderRelatedItems(order_id);
@@ -59,7 +60,8 @@ export const loadRemonlineOrderProductPricesToBQ = async (ids) => {
       continue;
     }
     const product_ids = products.map((product) => product.entity.id);
-    const productsWithPrices = await getOrderProductPrices(product_ids);
+    const productsWithPrices =
+      await getRemonlineOrderProductPrices(product_ids);
     devLog(i, order_id, product_ids);
     const parsedProducts = productsWithPrices.map((product) => {
       const prices = {};
@@ -83,14 +85,20 @@ export const loadRemonlineOrderProductPricesToBQ = async (ids) => {
     }
   }
   devLog(allProducts.length);
+  return allProducts;
+};
+export const loadRemonlineOrderProductPricesToBQ = async (ids) => {
+  const order_ids = await getAllRemonlineOrderIds();
+  const chunks = sliceArrayIntoEqualParts(order_ids, 10);
+  devLog(`chunks:${chunks.length}`);
+
+  const resp = (
+    await Promise.all(chunks.map((arr) => getOrderProductPrices(arr)))
+  ).flat();
+  devLog(resp);
 };
 
 if (process.env.ENV == 'TEST') {
   await remonlineTokenToEnv();
   loadRemonlineOrderProductPricesToBQ();
-  // const order_ids = await getAllRemonlineOrderIds();
-  // const chunked = chunkArray(order_ids, 10000);
-  // const resp = await Promise.any(
-  //   chunked.map((arr) => loadRemonlineOrderProductPricesToBQ(arr))
-  // );
 }
