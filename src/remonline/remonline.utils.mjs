@@ -417,7 +417,11 @@ export async function getOrderRelatedItems(order_id) {
         message: 'Get new Auth',
       });
       await remonlineTokenToEnv(true);
-      return await getOrderRelatedItems();
+      return await getOrderRelatedItems(order_id);
+    }
+    if (response.status == 429) {
+      await new Promise((r) => setTimeout(r, 2000));
+      return await getOrderRelatedItems(order_id);
     }
   }
 
@@ -451,7 +455,10 @@ export async function getRemonlineOrderProductPrices(product_ids) {
         message: 'Get new Auth',
       });
       await remonlineTokenToEnv(true);
-      return await getRemonlineOrderProductPrices();
+    }
+    if (response.status == 429) {
+      await new Promise((r) => setTimeout(r, 2000));
+      return await getRemonlineOrderProductPrices(product_ids);
     }
   }
 
