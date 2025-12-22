@@ -106,12 +106,16 @@ export async function resetOrderProductPricesTable() {
 
 export const loadRemonlineOrderProductPricesToBQ = async (ids) => {
   const order_ids = await getAllRemonlineOrderIds();
-  const chunks = sliceArrayIntoEqualParts(order_ids, 5);
-  devLog(`chunks:${chunks.length}`);
+  for (const arr of chunkArray(order_ids, 3000)) {
+    const chunks = sliceArrayIntoEqualParts(arr, 3);
+    devLog(`chunks:${chunks.length}`);
 
-  const prices = (
-    await Promise.all(chunks.map((arr) => getOrderProductPrices(arr)))
-  ).flat();
+    const prices = (
+      await Promise.all(chunks.map((arr) => getOrderProductPrices(arr)))
+    ).flat();
+    devLog('sleeping...');
+    await new Promise((r) => setTimeout(r, 10000));
+  }
 };
 
 if (process.env.ENV == 'TEST') {

@@ -115,5 +115,5 @@ export async function insertOrderResourcesBatch(resources) {
   return rows; // Array of inserted campaign rows
 }
 export function getAllRemonlineOrderIds() {
-  return db.all(`SELECT order_id from remonline_orders`);
+  return db.all(`SELECT order_id from remonline_orders order by order_id asc`);
 }
