@@ -1,5 +1,8 @@
 import { remonlineTokenToEnv } from '../../remonline/remonline.api.mjs';
-import { getOrderRelatedItems } from '../../remonline/remonline.utils.mjs';
+import {
+  getOrderProductPrices,
+  getOrderRelatedItems,
+} from '../../remonline/remonline.utils.mjs';
 import { devLog } from '../../shared/shared.utils.mjs';
 import { getAllRemonlineOrderIds } from '../bq-queries.mjs';
 
@@ -13,7 +16,8 @@ export const loadRemonlineOrderProductPricesToBQ = async () => {
     const products = items.filter((item) => item.entity.type == 'product');
     const product_ids = products.map((product) => product.entity.id);
     devLog(i, order_id, product_ids);
-
+    const productsWithPrices = await getOrderProductPrices(product_ids);
+    devLog(productsWithPrices)
     if (i > 15) break;
   }
 };
