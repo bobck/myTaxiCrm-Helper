@@ -373,3 +373,29 @@ export async function loadRowsViaJSONFile({
     }
   }
 }
+export const getLastHandledId = async () => {
+  {
+    try {
+      const sql = `
+        SELECT Max(order_id)as last_handled_id FROM \`up-statistics.RemOnline.product_prices\`
+      `;
+
+      // Submit as a parameterized query job
+      const [job] = await bigquery.createQueryJob({
+        query: sql,
+        location: 'US',
+        parameterMode: 'NAMED',
+      });
+      // Wait for completion
+      return await job.getQueryResults();
+    } catch (error) {
+      const info = {
+        dataset_id,
+        table_id,
+        parameter,
+        date: new Date(),
+      };
+      throw { info, error };
+    }
+  }
+};

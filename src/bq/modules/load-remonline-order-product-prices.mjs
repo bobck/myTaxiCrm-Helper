@@ -9,7 +9,11 @@ import {
   sliceArrayIntoEqualParts,
 } from '../../shared/shared.utils.mjs';
 import { getAllRemonlineOrderIds } from '../bq-queries.mjs';
-import { createOrResetTableByName, loadRowsViaJSONFile } from '../bq-utils.mjs';
+import {
+  createOrResetTableByName,
+  getLastHandledId,
+  loadRowsViaJSONFile,
+} from '../bq-utils.mjs';
 import { assetTableSchema, remonlineProductPrices } from '../schemas.mjs';
 
 // const productCustomFieldsMap = {
@@ -99,37 +103,53 @@ export async function resetOrderProductPricesTable() {
   });
 }
 
-export const loadRemonlineOrderProductPricesToBQ = async (ids) => {
-  const unfiltered = await getAllRemonlineOrderIds();
-  const indexOf = unfiltered.findIndex(
-    (order_id) => order_id.order_id === 41107772
-  );
-  const order_ids = unfiltered.slice(indexOf, -1);
-  devLog({
-    unfiltered: unfiltered.length,
-    indexOf,
-    order_ids: order_ids.length,
-  });
-  for (const arr of chunkArray(order_ids, 1500)) {
-    const chunks = sliceArrayIntoEqualParts(arr, 3);
-    devLog(`chunks:${chunks.length}`);
+export const loadRemonlineOrderProductPricesToBQ = async () => {
+  let prices;
+  try {
+    const [[{ last_handled_id }]] = await getLastHandledId();
 
-    const prices = (
-      await Promise.all(chunks.map((arr) => getOrderProductPrices(arr)))
-    ).flat();
-    await loadRowsViaJSONFile({
-      dataset_id: 'RemOnline',
-      table_id: 'product_prices',
-      rows: prices,
-      schema: remonlineProductPrices,
+    const unfiltered = await getAllRemonlineOrderIds();
+    const indexOf = unfiltered.findIndex(
+      (order_id) => order_id.order_id === last_handled_id
+    );
+    if (indexOf == unfiltered.length - 1) {
+      return;
+    }
+    const order_ids = unfiltered.slice(indexOf, -1);
+    devLog({
+      unfiltered: unfiltered.length,
+      indexOf,
+      order_ids: order_ids.length,
     });
-    devLog('sleeping...');
-    await new Promise((r) => setTimeout(r, 10000));
+    for (const arr of chunkArray(order_ids, 1500)) {
+      const chunks = sliceArrayIntoEqualParts(arr, 5);
+      devLog(`chunks:${chunks.length}`);
+
+      const prices = (
+        await Promise.all(chunks.map((arr) => getOrderProductPrices(arr)))
+      ).flat();
+      await loadRowsViaJSONFile({
+        dataset_id: 'RemOnline',
+        table_id: 'product_prices',
+        rows: prices,
+        schema: remonlineProductPrices,
+      });
+      devLog('sleeping...');
+      await loadRowsViaJSONFile({
+        dataset_id: 'RemOnline',
+        table_id: 'product_prices',
+        rows: prices,
+        schema: remonlineProductPrices,
+      });
+      await new Promise((r) => setTimeout(r, 10000));
+    }
+  } catch (e) {
+    loadRemonlineOrderProductPricesToBQ();
   }
 };
 
 if (process.env.ENV == 'TEST') {
   // await resetOrderProductPricesTable();
   await remonlineTokenToEnv();
-  loadRemonlineOrderProductPricesToBQ();
+  loadRemonlineOrderProductPricesToBQ()
 }
