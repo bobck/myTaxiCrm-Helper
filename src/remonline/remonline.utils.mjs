@@ -437,7 +437,7 @@ export async function getOrderProductPrices(product_ids) {
   const response = await fetch(url, options);
   let data;
   try {
-    data = await response.json();
+    data = (await response.json()).data;
   } catch (e) {
     console.error({
       function: 'getOrderProductPrices',
