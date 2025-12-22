@@ -7,6 +7,7 @@ import jobBoardRouter from '../modules/job-boards/job-board.route.mjs';
 
 import boltRouter from '../modules/bolt/bolt.route.mjs';
 import { loggerMiddleware } from './middleware/core.middlewares.mjs';
+import bigQueryRouter from '../modules/bigquery/bigquery.route.mjs';
 
 const coreRouter = express.Router();
 
@@ -16,7 +17,7 @@ coreRouter.use('/bolt', boltRouter);
 coreRouter.use('/query', queryRouter);
 coreRouter.use('/', referralRouter);
 coreRouter.use('/job-boards', jobBoardRouter);
-
+coreRouter.use('/bigquery', bigQueryRouter);
 coreRouter.use('/', CoreController.handleCore);
 
 export default coreRouter;
