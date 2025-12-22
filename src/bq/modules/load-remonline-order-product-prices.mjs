@@ -87,12 +87,7 @@ const getOrderProductPrices = async (ids) => {
     // }
     devLog(`processed: ${++processed}`);
   }
-  await loadRowsViaJSONFile({
-    dataset_id: 'RemOnline',
-    table_id: 'product_prices',
-    rows: prices,
-    schema: remonlineProductPrices,
-  });
+
   devLog(allProducts.length);
   return allProducts;
 };
@@ -105,14 +100,29 @@ export async function resetOrderProductPricesTable() {
 }
 
 export const loadRemonlineOrderProductPricesToBQ = async (ids) => {
-  const order_ids = await getAllRemonlineOrderIds();
-  for (const arr of chunkArray(order_ids, 3000)) {
+  const unfiltered = await getAllRemonlineOrderIds();
+  const indexOf = unfiltered.findIndex(
+    (order_id) => order_id.order_id === 41107772
+  );
+  const order_ids = unfiltered.slice(indexOf, -1);
+  devLog({
+    unfiltered: unfiltered.length,
+    indexOf,
+    order_ids: order_ids.length,
+  });
+  for (const arr of chunkArray(order_ids, 1500)) {
     const chunks = sliceArrayIntoEqualParts(arr, 3);
     devLog(`chunks:${chunks.length}`);
 
     const prices = (
       await Promise.all(chunks.map((arr) => getOrderProductPrices(arr)))
     ).flat();
+    await loadRowsViaJSONFile({
+      dataset_id: 'RemOnline',
+      table_id: 'product_prices',
+      rows: prices,
+      schema: remonlineProductPrices,
+    });
     devLog('sleeping...');
     await new Promise((r) => setTimeout(r, 10000));
   }
