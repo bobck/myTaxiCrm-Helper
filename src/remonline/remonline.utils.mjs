@@ -376,7 +376,7 @@ export async function getUOMs() {
     if ((response.status == 403 && code == 101) || response.status == 401) {
       console.info({ function: 'getUOMs', message: 'Get new Auth' });
       await remonlineTokenToEnv(true);
-      return await getEmployees();
+      return await getUOMs();
     }
     console.error({
       function: 'getUOMs',
@@ -390,3 +390,37 @@ export async function getUOMs() {
   const { uoms, uom_types, entity_types } = data;
   return { uoms, uom_types, entity_types };
 }
+export async function getOrderRelatedEntities(order_id) {
+  const url = `https://api.roapp.io/orders/${order_id}/items`;
+
+  const options = {
+    method: 'GET',
+    headers: {
+      accept: 'application/json',
+      authorization: `Bearer ${process.env.REMONLINE_API_TOKEN}`,
+    },
+  };
+  const response = await fetch(url, options);
+  let data;
+  try {
+    data = await response.json();
+  } catch (e) {
+    console.error({
+      function: 'getOrderRelatedEntities',
+      message: 'Error parsing JSON',
+      data,
+      status: response.status,
+    });
+    if ((response.status == 403 && code == 101) || response.status == 401) {
+      console.info({
+        function: 'getOrderRelatedEntities',
+        message: 'Get new Auth',
+      });
+      await remonlineTokenToEnv(true);
+      return await getOrderRelatedEntities();
+    }
+  }
+
+  return data;
+}
+export async function getOrderProductPrices(order_id) {}
