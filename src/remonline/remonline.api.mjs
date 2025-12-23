@@ -28,11 +28,11 @@ export async function remonlineTokenToEnv(forceUpdate) {
 
   if (forceUpdate) {
     const { token } = await _getNewToken();
-    devLog({newRemonlineToken:token})
+    devLog({ newRemonlineToken: token });
     process.env.REMONLINE_API_TOKEN = token;
     return;
   }
-  devLog({newRemonlineToken:token})
+  devLog({ newRemonlineToken: token });
   process.env.REMONLINE_API_TOKEN = token;
   return;
 }
