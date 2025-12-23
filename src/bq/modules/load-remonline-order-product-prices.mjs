@@ -16,21 +16,6 @@ import {
 } from '../bq-utils.mjs';
 import { assetTableSchema, remonlineProductPrices } from '../schemas.mjs';
 
-// const productCustomFieldsMap = {
-//   266913: 'originalPrice',
-//   317530: 'finalPrice',
-//   630747: 'Шина',
-//   606851: '14%',
-//   369837: '25%',
-//   375921: '30%',
-//   // 389671: 'Продажі СТО або 35%',
-//   // 605934: 'Продажі СТО або 35%',
-//   389671: '35%',
-//   605934: '35%',
-//   328830: 'Філія',
-//   328833: 'СТО - Партнерський парк',
-//   566140: '40%',
-// };
 
 const productCustomFieldsMap = {
   266913: 'originalPrice',
@@ -133,7 +118,7 @@ export const loadRemonlineOrderProductPricesToBQ = async () => {
       indexOf,
       order_ids: order_ids.length,
     });
-    for (const arr of chunkArray(order_ids, 13000)) {
+    for (const arr of chunkArray(order_ids, 3000)) {
       const chunks = sliceArrayIntoEqualParts(arr, 3);
       devLog(`chunks:${chunks.length}`);
 
@@ -151,7 +136,8 @@ export const loadRemonlineOrderProductPricesToBQ = async () => {
       await new Promise((r) => setTimeout(r, 10000));
     }
   } catch (e) {
-    loadRemonlineOrderProductPricesToBQ();
+    console.error(e);
+    // loadRemonlineOrderProductPricesToBQ();
   }
 };
 
