@@ -49,14 +49,14 @@ const productCustomFieldsMap = {
 };
 let processed = 0;
 const getOrderProductPrices = async (ids) => {
-  devLog({
+  console.log({
     module: 'getOrderProductPrices',
     date: new Date(),
     ids: ids && ids.length ? ids.length : null,
     start: ids && ids.length ? ids[0] : null,
     end: ids && ids.length ? ids[ids.length - 1] : null,
   });
-  const order_ids = ids || (await getAllRemonlineOrderIds());
+  const order_ids = ids;
 
   const allProducts = [];
   for (const [i, { order_id }] of order_ids.entries()) {
@@ -68,7 +68,7 @@ const getOrderProductPrices = async (ids) => {
     const product_ids = products.map((product) => product.entity.id);
     const productsWithPrices =
       await getRemonlineOrderProductPrices(product_ids);
-    // devLog(i, order_id, product_ids);
+
     const parsedProducts = productsWithPrices.map((product) => {
       const prices = {};
       for (const id in product.prices) {
@@ -86,9 +86,7 @@ const getOrderProductPrices = async (ids) => {
     });
 
     allProducts.push(...parsedProducts);
-    // if (i > 14) {
-    //   break;
-    // }
+
     devLog(`processed: ${++processed}`);
   }
 
@@ -103,6 +101,20 @@ export async function resetOrderProductPricesTable() {
   });
 }
 
+export const loadRemonlineOrderProductPricesToBQ1Thread = async (order_ids) => {
+  try {
+    const prices = await getOrderProductPrices(order_ids);
+    await loadRowsViaJSONFile({
+      dataset_id: 'RemOnline',
+      table_id: 'product_prices',
+      rows: prices,
+      schema: remonlineProductPrices,
+    });
+  } catch (e) {
+    console.error(e);
+    await loadRemonlineOrderProductPricesToBQ1Thread();
+  }
+};
 export const loadRemonlineOrderProductPricesToBQ = async () => {
   let prices;
   try {
@@ -122,7 +134,7 @@ export const loadRemonlineOrderProductPricesToBQ = async () => {
       order_ids: order_ids.length,
     });
     for (const arr of chunkArray(order_ids, 600)) {
-      const chunks = sliceArrayIntoEqualParts(arr, 4);
+      const chunks = sliceArrayIntoEqualParts(arr, 3);
       devLog(`chunks:${chunks.length}`);
 
       const prices = (

@@ -19,6 +19,7 @@ import {
   getAllResourceIds,
   insertOrderResourcesBatch,
 } from '../bq-queries.mjs';
+import { loadRemonlineOrderProductPricesToBQ1Thread } from './load-remonline-order-product-prices.mjs';
 
 async function prepareOrderSequentially() {
   const modified_at = await getMaxOrderModifiedAt();
@@ -323,6 +324,7 @@ async function clearOrdersInBQ({ handledOrders }) {
     'orders_attachments',
     'orders_parts',
     'orders_to_resources',
+    'product_prices',
   ];
 
   const promises = [];
@@ -450,6 +452,10 @@ export async function loadRemonlineOrders() {
       orders2Resources,
       // handledCampaigns,
     });
+    const order_ids = handledOrders.map((order) => {
+      return { order_id: order.id };
+    });
+    loadRemonlineOrderProductPricesToBQ1Thread(order_ids);
   } catch (errors) {
     for (const err of errors) {
       const { reason } = err;
