@@ -419,7 +419,7 @@ export async function getOrderRelatedItems(order_id) {
       await remonlineTokenToEnv(true);
       return await getOrderRelatedItems(order_id);
     }
-    if (response.status == 429) {
+    if (response.status == 429 || response.status >= 500) {
       await new Promise((r) => setTimeout(r, 2000));
       return await getOrderRelatedItems(order_id);
     }
@@ -456,7 +456,7 @@ export async function getRemonlineOrderProductPrices(product_ids) {
       });
       await remonlineTokenToEnv(true);
     }
-    if (response.status == 429) {
+    if (response.status == 429 || response.status >= 500) {
       await new Promise((r) => setTimeout(r, 2000));
       return await getRemonlineOrderProductPrices(product_ids);
     }

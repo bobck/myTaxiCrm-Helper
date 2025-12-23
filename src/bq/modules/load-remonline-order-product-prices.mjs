@@ -121,8 +121,8 @@ export const loadRemonlineOrderProductPricesToBQ = async () => {
       indexOf,
       order_ids: order_ids.length,
     });
-    for (const arr of chunkArray(order_ids, 1500)) {
-      const chunks = sliceArrayIntoEqualParts(arr, 5);
+    for (const arr of chunkArray(order_ids, 600)) {
+      const chunks = sliceArrayIntoEqualParts(arr, 4);
       devLog(`chunks:${chunks.length}`);
 
       const prices = (
@@ -135,12 +135,7 @@ export const loadRemonlineOrderProductPricesToBQ = async () => {
         schema: remonlineProductPrices,
       });
       devLog('sleeping...');
-      await loadRowsViaJSONFile({
-        dataset_id: 'RemOnline',
-        table_id: 'product_prices',
-        rows: prices,
-        schema: remonlineProductPrices,
-      });
+
       await new Promise((r) => setTimeout(r, 10000));
     }
   } catch (e) {
@@ -150,6 +145,6 @@ export const loadRemonlineOrderProductPricesToBQ = async () => {
 
 if (process.env.ENV == 'TEST') {
   // await resetOrderProductPricesTable();
-  await remonlineTokenToEnv();
-  loadRemonlineOrderProductPricesToBQ()
+  await remonlineTokenToEnv(true);
+  loadRemonlineOrderProductPricesToBQ();
 }
