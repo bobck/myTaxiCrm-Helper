@@ -455,7 +455,7 @@ export async function loadRemonlineOrders() {
     const order_ids = handledOrders.map((order) => {
       return { order_id: order.id };
     });
-    loadRemonlineOrderProductPricesToBQ1Thread(order_ids);
+    return { order_ids };
   } catch (errors) {
     for (const err of errors) {
       const { reason } = err;
@@ -463,13 +463,6 @@ export async function loadRemonlineOrders() {
     }
     return;
   }
-
-  await synchronizeRemonlineOrders({
-    orders: handledOrders,
-  });
-
-  await insertOrderResourcesBatch(handledOrderResources);
-  // await insertCampaignsBatch(handledCampaigns);
 }
 async function createOrResetOrdersTables() {
   await createOrResetTableByName({
@@ -507,6 +500,15 @@ async function createOrResetOrdersTables() {
   //   schema: campaignsTableSchema,
   //   dataSetId: 'RemOnline',
   // });
+}
+
+export async function loadRemonlineOrdersAndSynchronizeProductPrices() {
+  const result = await loadRemonlineOrders();
+  if (!result) {
+    return;
+  }
+  const { order_ids } = result;
+  await loadRemonlineOrderProductPricesToBQ1Thread(order_ids);
 }
 if (process.env.ENV === 'TEST') {
   console.log(`running loadRemonlineOrders in Test mode...`);

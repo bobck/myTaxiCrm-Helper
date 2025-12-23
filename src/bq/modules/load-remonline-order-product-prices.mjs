@@ -133,7 +133,7 @@ export const loadRemonlineOrderProductPricesToBQ = async () => {
       indexOf,
       order_ids: order_ids.length,
     });
-    for (const arr of chunkArray(order_ids, 600)) {
+    for (const arr of chunkArray(order_ids, 13000)) {
       const chunks = sliceArrayIntoEqualParts(arr, 3);
       devLog(`chunks:${chunks.length}`);
 
