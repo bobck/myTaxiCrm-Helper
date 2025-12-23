@@ -19,6 +19,7 @@ import {
   getAllResourceIds,
   insertOrderResourcesBatch,
 } from '../bq-queries.mjs';
+import { loadRemonlineOrderProductPricesToBQ1Thread } from './load-remonline-order-product-prices.mjs';
 
 async function prepareOrderSequentially() {
   const modified_at = await getMaxOrderModifiedAt();
@@ -323,6 +324,7 @@ async function clearOrdersInBQ({ handledOrders }) {
     'orders_attachments',
     'orders_parts',
     'orders_to_resources',
+    'product_prices',
   ];
 
   const promises = [];
@@ -450,6 +452,10 @@ export async function loadRemonlineOrders() {
       orders2Resources,
       // handledCampaigns,
     });
+    const order_ids = handledOrders.map((order) => {
+      return { order_id: order.id };
+    });
+    return { order_ids };
   } catch (errors) {
     for (const err of errors) {
       const { reason } = err;
@@ -457,13 +463,6 @@ export async function loadRemonlineOrders() {
     }
     return;
   }
-
-  await synchronizeRemonlineOrders({
-    orders: handledOrders,
-  });
-
-  await insertOrderResourcesBatch(handledOrderResources);
-  // await insertCampaignsBatch(handledCampaigns);
 }
 async function createOrResetOrdersTables() {
   await createOrResetTableByName({
@@ -501,6 +500,15 @@ async function createOrResetOrdersTables() {
   //   schema: campaignsTableSchema,
   //   dataSetId: 'RemOnline',
   // });
+}
+
+export async function loadRemonlineOrdersAndSynchronizeProductPrices() {
+  const result = await loadRemonlineOrders();
+  if (!result) {
+    return;
+  }
+  const { order_ids } = result;
+  await loadRemonlineOrderProductPricesToBQ1Thread(order_ids);
 }
 if (process.env.ENV === 'TEST') {
   console.log(`running loadRemonlineOrders in Test mode...`);
