@@ -452,13 +452,6 @@ export async function loadRemonlineOrders() {
       orders2Resources,
       // handledCampaigns,
     });
-    const order_ids = handledOrders.map((order) => order.id);
-
-    await synchronizeRemonlineOrders({
-      orders: handledOrders,
-    });
-    await insertOrderResourcesBatch(handledOrderResources);
-    return { order_ids };
   } catch (errors) {
     for (const err of errors) {
       const { reason } = err;
@@ -466,6 +459,13 @@ export async function loadRemonlineOrders() {
     }
     return;
   }
+  
+  await synchronizeRemonlineOrders({
+    orders: handledOrders,
+  });
+  await insertOrderResourcesBatch(handledOrderResources);
+  const order_ids = handledOrders.map((order) => order.id);
+  return { order_ids };
 }
 async function createOrResetOrdersTables() {
   await createOrResetTableByName({
