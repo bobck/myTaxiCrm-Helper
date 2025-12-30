@@ -453,6 +453,11 @@ export async function loadRemonlineOrders() {
       // handledCampaigns,
     });
     const order_ids = handledOrders.map((order) => order.id);
+
+    await synchronizeRemonlineOrders({
+      orders: handledOrders,
+    });
+    await insertOrderResourcesBatch(handledOrderResources);
     return { order_ids };
   } catch (errors) {
     for (const err of errors) {
