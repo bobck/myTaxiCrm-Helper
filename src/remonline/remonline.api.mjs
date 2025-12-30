@@ -1,5 +1,6 @@
 import fetch from 'node-fetch';
 import { saveRemonlineToken, getRemonlineToken } from './remonline.queries.mjs';
+import { devLog } from '../shared/shared.utils.mjs';
 
 async function _getNewToken() {
   const tokenLifetime = 86400000;
@@ -27,9 +28,11 @@ export async function remonlineTokenToEnv(forceUpdate) {
 
   if (forceUpdate) {
     const { token } = await _getNewToken();
+    devLog({ token });
     process.env.REMONLINE_API_TOKEN = token;
     return;
   }
+      devLog({ token });
   process.env.REMONLINE_API_TOKEN = token;
   return;
 }
