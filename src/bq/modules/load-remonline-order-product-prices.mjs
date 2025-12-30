@@ -16,7 +16,6 @@ import {
 } from '../bq-utils.mjs';
 import { assetTableSchema, remonlineProductPrices } from '../schemas.mjs';
 
-
 const productCustomFieldsMap = {
   266913: 'originalPrice',
   317530: 'finalPrice',
@@ -45,7 +44,14 @@ const getOrderProductPrices = async (ids) => {
 
   const allProducts = [];
   for (const [i, { order_id }] of order_ids.entries()) {
+    if (!(++processed % 50)) {
+      devLog(`processed: ${processed}, ${new Date()}`);
+    }
     const items = await getOrderRelatedItems(order_id);
+    if (!(items instanceof Array)) {
+      console.error('items error', order_id, items.message);
+      continue;
+    }
     const products = items.filter((item) => item.entity.type == 'product');
     if (!products.length) {
       continue;
@@ -71,8 +77,6 @@ const getOrderProductPrices = async (ids) => {
     });
 
     allProducts.push(...parsedProducts);
-
-    devLog(`processed: ${++processed}`);
   }
 
   devLog(allProducts.length);
@@ -97,7 +101,7 @@ export const loadRemonlineOrderProductPricesToBQ1Thread = async (order_ids) => {
     });
   } catch (e) {
     console.error(e);
-    await loadRemonlineOrderProductPricesToBQ1Thread();
+    await loadRemonlineOrderProductPricesToBQ1Thread(order_ids);
   }
 };
 export const loadRemonlineOrderProductPricesToBQ = async () => {
@@ -145,4 +149,20 @@ if (process.env.ENV == 'TEST') {
   // await resetOrderProductPricesTable();
   await remonlineTokenToEnv(true);
   loadRemonlineOrderProductPricesToBQ();
+  // const [[{ last_handled_id }]] = await getLastHandledId();
+
+  // const unfiltered = await getAllRemonlineOrderIds();
+  // const indexOf = unfiltered.findIndex(
+  //   (order_id) => order_id.order_id === last_handled_id
+  // );
+  // if (indexOf == unfiltered.length - 1) {
+  //   throw new Error();
+  // }
+  // const order_ids = unfiltered.slice(indexOf, -1);
+  // devLog({
+  //   unfiltered: unfiltered.length,
+  //   indexOf,
+  //   order_ids: order_ids.length,
+  // });
+  // await loadRemonlineOrderProductPricesToBQ1Thread(order_ids);
 }
