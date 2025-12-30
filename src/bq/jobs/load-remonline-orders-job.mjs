@@ -1,7 +1,7 @@
 import { CronJob } from 'cron';
 import { loadRemonlineOrdersAndSynchronizeProductPrices } from '../modules/load-remonline-orders.mjs';
 
-const cronTime = '0 */4 * * *'; // Runs every 4 hours
+const cronTime = '0 */2 * * *'; 
 const timeZone = 'Europe/Kiev';
 
 const loadRemonlineOrdersJob = CronJob.from({
