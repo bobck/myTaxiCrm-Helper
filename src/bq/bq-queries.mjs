@@ -114,4 +114,3 @@ export async function insertOrderResourcesBatch(resources) {
   const rows = await db.all(insertSql, JSON.stringify(resources));
   return rows; // Array of inserted campaign rows
 }
-
