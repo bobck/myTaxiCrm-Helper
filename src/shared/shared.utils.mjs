@@ -3,6 +3,11 @@ export function devLog(...args) {
     console.log(...args);
   }
 }
+export function devErrorLog(...args) {
+  if (process.env.ENV === 'DEV' || process.env.ENV === 'TEST') {
+    console.error(...args);
+  }
+}
 
 export function isUuid(str) {
   if (typeof str !== 'string' || str.length === 0) {

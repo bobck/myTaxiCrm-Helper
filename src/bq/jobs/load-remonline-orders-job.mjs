@@ -1,6 +1,5 @@
 import { CronJob } from 'cron';
 import {
-  loadRemonlineOrders,
   loadRemonlineOrdersAndSynchronizeProductPrices,
 } from '../modules/load-remonline-orders.mjs';
 

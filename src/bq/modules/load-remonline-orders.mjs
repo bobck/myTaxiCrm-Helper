@@ -452,9 +452,7 @@ export async function loadRemonlineOrders() {
       orders2Resources,
       // handledCampaigns,
     });
-    const order_ids = handledOrders.map((order) => {
-      return { order_id: order.id };
-    });
+    const order_ids = handledOrders.map((order) => order.id);
     return { order_ids };
   } catch (errors) {
     for (const err of errors) {

@@ -2,7 +2,7 @@ import {
   getRemonlineOrderProductPrices,
   getOrderRelatedItems,
 } from '../../remonline/remonline.utils.mjs';
-import { devLog } from '../../shared/shared.utils.mjs';
+import { devErrorLog, devLog } from '../../shared/shared.utils.mjs';
 import { createOrResetTableByName, insertRowsAsStream } from '../bq-utils.mjs';
 import { remonlineProductPrices } from '../schemas.mjs';
 
@@ -21,21 +21,20 @@ const productCustomFieldsMap = {
   328833: 'STO_partners_park',
   566140: 'percent_40',
 };
-const getOrderProductPrices = async (ids) => {
+const getOrderProductPrices = async (order_ids) => {
   devLog({
     module: 'getOrderProductPrices',
     date: new Date(),
-    ids: ids && ids.length ? ids.length : null,
-    start: ids && ids.length ? ids[0] : null,
-    end: ids && ids.length ? ids[ids.length - 1] : null,
+    ids: order_ids && order_ids.length ? order_ids.length : null,
+    start: order_ids && order_ids.length ? order_ids[0] : null,
+    end: order_ids && order_ids.length ? order_ids[order_ids.length - 1] : null,
   });
-  const order_ids = ids;
 
   const allProducts = [];
-  for (const [i, { order_id }] of order_ids.entries()) {
+  for (const order_id of order_ids) {
     const items = await getOrderRelatedItems(order_id);
     if (!(items instanceof Array)) {
-      console.error('items error', order_id, items.message);
+      devErrorLog('items error', order_id, items.message);
       continue;
     }
     const products = items.filter((item) => item.entity.type == 'product');
