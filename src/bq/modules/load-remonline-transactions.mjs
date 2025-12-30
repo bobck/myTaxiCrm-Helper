@@ -10,6 +10,8 @@ export const loadRemonlineTransactionsToBQ = async () => {
   });
 
   const cashboxes = await getCaboxesWithCrmMapping();
+  devLog(cashboxes);
+  return;
   const uniqueCashFlowItems = [];
   const allCashboxTransactions = [];
   for (const cashbox of cashboxes) {
@@ -27,8 +29,8 @@ export const loadRemonlineTransactionsToBQ = async () => {
       cashboxId: remonlineCashboxId,
       createdAt: 1735686000000,
     });
-    // devLog(transactions)
-    // return
+    devLog(transactions);
+    return;
     const handledTransactions = transactions.map((transaction) => {
       const {
         id,

@@ -396,3 +396,32 @@ export const closedPolishBitrixDealsTableSchema = [
   { name: 'is_rescheduled', type: 'BOOLEAN', mode: 'REQUIRED' },
   { name: 'date', type: 'DATE', mode: 'REQUIRED' },
 ];
+export const cashboxTransactionsTableSchema = [
+  { name: 'id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'remonline_cashbox_id', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'value', type: 'FLOAT', mode: 'REQUIRED' }, // Used FLOAT to accommodate potential decimals in monetary values
+  { name: 'direction', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'employee_id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'created_at', type: 'INTEGER', mode: 'REQUIRED' }, // Unix timestamp in ms
+  { name: 'description', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'client_id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'related_document_id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'related_document_type', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'cashflow_item_id', type: 'INTEGER', mode: 'REQUIRED' },
+];
+
+export const cashFlowItemsTableSchema = [
+  { name: 'id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'name', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'direction', type: 'INTEGER', mode: 'REQUIRED' },
+];
+
+export const remonlineCashboxesTableSchema = [
+  { name: 'id', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'last_transaction_created_at', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'auto_park_id', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'auto_park_cashbox_id', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'default_contator_id', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'usa_contator_id', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'scooter_contator_id', type: 'STRING', mode: 'NULLABLE' },
+];
