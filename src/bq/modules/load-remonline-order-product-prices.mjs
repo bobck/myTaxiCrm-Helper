@@ -1,4 +1,3 @@
-import { remonlineTokenToEnv } from '../../remonline/remonline.api.mjs';
 import {
   getRemonlineOrderProductPrices,
   getOrderRelatedItems,
@@ -93,9 +92,3 @@ export const loadRemonlineOrderProductPricesToBQ = async (order_ids) => {
     console.error(e);
   }
 };
-
-// if (process.env.ENV == 'TEST') {
-//   // await resetOrderProductPricesTable();
-//   await remonlineTokenToEnv(true);
-//   loadRemonlineOrderProductPricesToBQ();
-// }
