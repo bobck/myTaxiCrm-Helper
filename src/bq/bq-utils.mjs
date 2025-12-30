@@ -390,8 +390,8 @@ export const getLastHandledId = async () => {
       return await job.getQueryResults();
     } catch (error) {
       const info = {
-        dataset_id:'RemOnline',
-        table_id:'product_prices',
+        dataset_id: 'RemOnline',
+        table_id: 'product_prices',
 
         date: new Date(),
       };

@@ -3,18 +3,9 @@ import {
   getRemonlineOrderProductPrices,
   getOrderRelatedItems,
 } from '../../remonline/remonline.utils.mjs';
-import {
-  chunkArray,
-  devLog,
-  sliceArrayIntoEqualParts,
-} from '../../shared/shared.utils.mjs';
-import { getAllRemonlineOrderIds } from '../bq-queries.mjs';
-import {
-  createOrResetTableByName,
-  getLastHandledId,
-  insertRowsAsStream
-} from '../bq-utils.mjs';
-import { assetTableSchema, remonlineProductPrices } from '../schemas.mjs';
+import { devLog } from '../../shared/shared.utils.mjs';
+import { createOrResetTableByName, insertRowsAsStream } from '../bq-utils.mjs';
+import { remonlineProductPrices } from '../schemas.mjs';
 
 const productCustomFieldsMap = {
   266913: 'originalPrice',
@@ -31,9 +22,8 @@ const productCustomFieldsMap = {
   328833: 'STO_partners_park',
   566140: 'percent_40',
 };
-let processed = 0;
 const getOrderProductPrices = async (ids) => {
-  console.log({
+  devLog({
     module: 'getOrderProductPrices',
     date: new Date(),
     ids: ids && ids.length ? ids.length : null,
@@ -44,9 +34,6 @@ const getOrderProductPrices = async (ids) => {
 
   const allProducts = [];
   for (const [i, { order_id }] of order_ids.entries()) {
-    if (!(++processed % 50)) {
-      devLog(`processed: ${processed}, ${new Date()}`);
-    }
     const items = await getOrderRelatedItems(order_id);
     if (!(items instanceof Array)) {
       console.error('items error', order_id, items.message);
@@ -90,78 +77,25 @@ export async function resetOrderProductPricesTable() {
   });
 }
 
-export const loadRemonlineOrderProductPricesToBQ1Thread = async (order_ids) => {
+export const loadRemonlineOrderProductPricesToBQ = async (order_ids) => {
+  console.log({
+    module: 'loadRemonlineOrderProductPricesToBQ',
+    date: new Date(),
+  });
   try {
     const prices = await getOrderProductPrices(order_ids);
     await insertRowsAsStream({
       dataset_id: 'RemOnline',
-      table_id: 'product_prices',
+      bqTableId: 'product_prices',
       rows: prices,
     });
   } catch (e) {
     console.error(e);
-    await loadRemonlineOrderProductPricesToBQ1Thread(order_ids);
-  }
-};
-export const loadRemonlineOrderProductPricesToBQ = async () => {
-  let prices;
-  try {
-    const [[{ last_handled_id }]] = await getLastHandledId();
-
-    const unfiltered = await getAllRemonlineOrderIds();
-    const indexOf = unfiltered.findIndex(
-      (order_id) => order_id.order_id === last_handled_id
-    );
-    if (indexOf == unfiltered.length - 1) {
-      return;
-    }
-    const order_ids = unfiltered.slice(indexOf, -1);
-    devLog({
-      unfiltered: unfiltered.length,
-      indexOf,
-      order_ids: order_ids.length,
-    });
-    for (const arr of chunkArray(order_ids, 3000)) {
-      const chunks = sliceArrayIntoEqualParts(arr, 3);
-      devLog(`chunks:${chunks.length}`);
-
-      const prices = (
-        await Promise.all(chunks.map((arr) => getOrderProductPrices(arr)))
-      ).flat();
-      await insertRowsAsStream({
-        dataset_id: 'RemOnline',
-        table_id: 'product_prices',
-        rows: prices,
-      });
-
-      devLog('sleeping...');
-
-      await new Promise((r) => setTimeout(r, 10000));
-    }
-  } catch (e) {
-    console.error(e);
-    // loadRemonlineOrderProductPricesToBQ();
   }
 };
 
-if (process.env.ENV == 'TEST') {
-  // await resetOrderProductPricesTable();
-  await remonlineTokenToEnv(true);
-  loadRemonlineOrderProductPricesToBQ();
-  // const [[{ last_handled_id }]] = await getLastHandledId();
-
-  // const unfiltered = await getAllRemonlineOrderIds();
-  // const indexOf = unfiltered.findIndex(
-  //   (order_id) => order_id.order_id === last_handled_id
-  // );
-  // if (indexOf == unfiltered.length - 1) {
-  //   throw new Error();
-  // }
-  // const order_ids = unfiltered.slice(indexOf, -1);
-  // devLog({
-  //   unfiltered: unfiltered.length,
-  //   indexOf,
-  //   order_ids: order_ids.length,
-  // });
-  // await loadRemonlineOrderProductPricesToBQ1Thread(order_ids);
-}
+// if (process.env.ENV == 'TEST') {
+//   // await resetOrderProductPricesTable();
+//   await remonlineTokenToEnv(true);
+//   loadRemonlineOrderProductPricesToBQ();
+// }

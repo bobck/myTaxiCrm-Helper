@@ -19,7 +19,7 @@ import {
   getAllResourceIds,
   insertOrderResourcesBatch,
 } from '../bq-queries.mjs';
-import { loadRemonlineOrderProductPricesToBQ1Thread } from './load-remonline-order-product-prices.mjs';
+import { loadRemonlineOrderProductPricesToBQ } from './load-remonline-order-product-prices.mjs';
 
 async function prepareOrderSequentially() {
   const modified_at = await getMaxOrderModifiedAt();
@@ -508,12 +508,12 @@ export async function loadRemonlineOrdersAndSynchronizeProductPrices() {
     return;
   }
   const { order_ids } = result;
-  await loadRemonlineOrderProductPricesToBQ1Thread(order_ids);
+  await loadRemonlineOrderProductPricesToBQ(order_ids);
 }
 if (process.env.ENV === 'TEST') {
   console.log(`running loadRemonlineOrders in Test mode...`);
   await remonlineTokenToEnv(true);
-  await loadRemonlineOrders();
+  await loadRemonlineOrdersAndSynchronizeProductPrices();
 
   // await createOrResetOrdersTables();
 }
