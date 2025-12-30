@@ -12,7 +12,7 @@ import { getAllRemonlineOrderIds } from '../bq-queries.mjs';
 import {
   createOrResetTableByName,
   getLastHandledId,
-  loadRowsViaJSONFile,
+  insertRowsAsStream
 } from '../bq-utils.mjs';
 import { assetTableSchema, remonlineProductPrices } from '../schemas.mjs';
 
@@ -93,11 +93,10 @@ export async function resetOrderProductPricesTable() {
 export const loadRemonlineOrderProductPricesToBQ1Thread = async (order_ids) => {
   try {
     const prices = await getOrderProductPrices(order_ids);
-    await loadRowsViaJSONFile({
+    await insertRowsAsStream({
       dataset_id: 'RemOnline',
       table_id: 'product_prices',
       rows: prices,
-      schema: remonlineProductPrices,
     });
   } catch (e) {
     console.error(e);
@@ -129,12 +128,12 @@ export const loadRemonlineOrderProductPricesToBQ = async () => {
       const prices = (
         await Promise.all(chunks.map((arr) => getOrderProductPrices(arr)))
       ).flat();
-      await loadRowsViaJSONFile({
+      await insertRowsAsStream({
         dataset_id: 'RemOnline',
         table_id: 'product_prices',
         rows: prices,
-        schema: remonlineProductPrices,
       });
+
       devLog('sleeping...');
 
       await new Promise((r) => setTimeout(r, 10000));
