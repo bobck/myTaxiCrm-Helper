@@ -1,5 +1,6 @@
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
+import { devLog } from '../shared/shared.utils.mjs';
 
 const db = await open({
   filename: process.env.DEV_DB,
@@ -106,21 +107,14 @@ export async function createCashflowItemsSynchronizedWithBQ({
   await db.run(sql, token, validTo);
 }
 
-export async function createBatchCashflowItems(items) {
-  if (!items.length) return;
+export async function createCashflowItem(item) {
+  if (!item) return;
 
-  const placeholders = items.map(() => '(?, ?, ?, 1)').join(', ');
-
-  const values = items.flatMap((item) => [item.id, item.name, item.direction]);
-
+  // const values = ite
   const sql = `
     INSERT INTO remonline_cashflow_items (id, name, direction, is_present_in_bq)
-    VALUES ${placeholders}
-    ON CONFLICT(id) DO UPDATE SET
-      name=excluded.name,
-      direction=excluded.direction,
-      is_present_in_bq=1;
+    VALUES (?, ?, ?, 1);
   `;
-
-  return await db.run(sql, values);
+  devLog(sql, item);
+  return await db.run(sql, [item.id, item.name, item.direction]);
 }

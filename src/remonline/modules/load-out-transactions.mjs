@@ -93,14 +93,15 @@ export const loadOutRemonlineTransactions = async () => {
     await getCaboxesWithCrmMappingThatDontExistInBQ();
   const existingCashflowItemIdsInBQ = await getCashFlowItemIdsThatExistInBQ();
 
-  const cashflowItems = uniqueCashFlowItems.filter((item) =>
-    existingCashflowItemIdsInBQ.some(({ id }) => item.id && id == item.id)
+  const cashflowItems = uniqueCashFlowItems.filter(
+    (item) =>
+      !existingCashflowItemIdsInBQ.some(({ id }) => item.id && id == item.id)
   );
 
   bigQueryData.cashFlowItems.push(...cashflowItems);
   bigQueryData.cashboxes.push(...cashboxesToSyncWithBQ);
   await loadRemonlineTransactionsToBQ(bigQueryData);
-  await createCRMApplicationsFromRemonlineTransaction(CRMTransactionMap);
+  // await createCRMApplicationsFromRemonlineTransaction(CRMTransactionMap);
 };
 if (process.env.ENV === 'DEV') {
   await remonlineTokenToEnv(true);

@@ -17,7 +17,7 @@ exports.setup = function (options, seedLink) {
 exports.up = function (db, callback) {
   const sql = `
     CREATE TABLE remonline_cashflow_items (
-        id INTEGER PRIMARY KEY NOT NULL,
+        id INTEGER UNIQUE NOT NULL,
         name VARCHAR(255) NOT NULL,
         direction INTEGER NOT NULL,
         is_present_in_bq BOOLEAN DEFAULT FALSE
@@ -29,7 +29,7 @@ exports.up = function (db, callback) {
 
 exports.down = function (db, callback) {
   const sql = `
-    DROP TABLE catalog_tariffs;
+    DROP TABLE remonline_cashflow_items;
   `;
   db.runSql(sql, callback);
 };

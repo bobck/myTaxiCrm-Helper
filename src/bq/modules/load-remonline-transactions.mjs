@@ -1,6 +1,6 @@
 import { remonlineTokenToEnv } from '../../remonline/remonline.api.mjs';
 import {
-  createBatchCashflowItems,
+  createCashflowItem,
   getCaboxesWithCrmMapping,
   markCashboxAsSynchronizedWithBQ,
 } from '../../remonline/remonline.queries.mjs';
@@ -39,16 +39,19 @@ export const loadRemonlineTransactionsToBQ = async ({
     schema: cashboxTransactionsTableSchema,
     rows: cashboxTransactions,
   });
-
+  devLog(`loaded ${cashboxTransactions.length} trasactions [v]`);
   await loadRowsViaJSONFile({
     dataset_id: dataSetId,
     table_id: remonlineCashBoxTableId,
     schema: remonlineCashboxesTableSchema,
     rows: cashboxes,
   });
+
+  devLog(`loaded ${cashboxes.length} cashboxes [v]`);
   await markCashboxAsSynchronizedWithBQ({
     remonlineCashboxIds: cashboxes.map((c) => c.id),
   });
+  devLog(`marked ${cashboxes.length} cashboxes as sync [v]`);
 
   await loadRowsViaJSONFile({
     dataset_id: dataSetId,
@@ -56,7 +59,13 @@ export const loadRemonlineTransactionsToBQ = async ({
     schema: cashFlowItemsTableSchema,
     rows: cashFlowItems,
   });
-  await createBatchCashflowItems(cashFlowItems);
+
+  devLog(`loaded ${cashFlowItems.length} cashFlowItems [v]`);
+  for (const item of cashFlowItems) {
+    await createCashflowItem(item);
+  }
+
+  devLog(`marked ${cashFlowItems.length} cashFlowItems as sync [v]`);
 };
 export async function createOrResetRemonlineTransactionTables() {
   await createOrResetTableByName({
