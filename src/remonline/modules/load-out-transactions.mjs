@@ -1,7 +1,14 @@
+import { createOrResetRemonlineTransactionTables, loadRemonlineTransactionsToBQ } from '../../bq/modules/load-remonline-transactions.mjs';
 import { remonlineTokenToEnv } from '../../remonline/remonline.api.mjs';
-import { getCaboxesWithCrmMapping } from '../../remonline/remonline.queries.mjs';
+import {
+  getCaboxesWithCrmMapping,
+  getCaboxesWithCrmMappingThatDontExistInBQ,
+  getCashFlowItemIdsThatExistInBQ,
+  markCashboxAsSynchronizedWithBQ,
+} from '../../remonline/remonline.queries.mjs';
 import { getCashboxTransactions } from '../../remonline/remonline.utils.mjs';
 import { devLog } from '../../shared/shared.utils.mjs';
+import { createCRMApplicationsFromRemonlineTransaction } from '../../web.api/modules/applications-from-remonline-transactions.mjs';
 export const loadOutRemonlineTransactions = async () => {
   console.log({
     module: 'loadRemonlineTransactionsToBQ',
@@ -11,10 +18,11 @@ export const loadOutRemonlineTransactions = async () => {
   const cashboxes = await getCaboxesWithCrmMapping();
 
   const bigQueryData = {
-    cashboxes,
-    uniqueCashFlowItems: [],
-    allCashboxTransactions: [],
+    cashboxes: [],
+    cashFlowItems: [],
+    cashboxTransactions: [],
   };
+  const uniqueCashFlowItems = [];
   const CRMTransactionMap = new Map();
   for (const cashbox of cashboxes) {
     const {
@@ -22,7 +30,11 @@ export const loadOutRemonlineTransactions = async () => {
       last_transaction_created_at,
       auto_park_cashbox_id: cashboxId,
     } = cashbox;
-
+    devLog({
+      id: remonlineCashboxId,
+      last_transaction_created_at,
+      auto_park_cashbox_id: cashboxId,
+    });
     const { transactions } = await getCashboxTransactions({
       cashboxId: remonlineCashboxId,
       // createdAt: 1735686000000,
@@ -50,11 +62,11 @@ export const loadOutRemonlineTransactions = async () => {
       if (
         cashflow_item &&
         cashflow_item.id &&
-        !bigQueryData.uniqueCashFlowItems.some(
+        !uniqueCashFlowItems.some(
           (cashFlowItem) => cashFlowItem.id == cashflow_item.id
         )
       ) {
-        bigQueryData.uniqueCashFlowItems.push(cashflow_item);
+        uniqueCashFlowItems.push(cashflow_item);
       }
       return {
         id,
@@ -70,15 +82,27 @@ export const loadOutRemonlineTransactions = async () => {
         cashflow_item_id: cashflow_item ? cashflow_item.id : null,
       };
     });
-    bigQueryData.allCashboxTransactions.push(...handledTransactions);
+    bigQueryData.cashboxTransactions.push(...handledTransactions);
     devLog(remonlineCashboxId, 'done');
   }
 
-  await 
+  const cashboxesToSyncWithBQ =
+    await getCaboxesWithCrmMappingThatDontExistInBQ();
+  const existingCashflowItemIdsInBQ = await getCashFlowItemIdsThatExistInBQ();
+
+  const cashflowItems = uniqueCashFlowItems.filter((item) =>
+    existingCashflowItemIdsInBQ.some(({ id }) => item.id && id == item.id)
+  );
+
+  bigQueryData.cashFlowItems.push(...cashflowItems);
+  bigQueryData.cashboxes.push(...cashboxesToSyncWithBQ);
+  await loadRemonlineTransactionsToBQ(bigQueryData);
+  await createCRMApplicationsFromRemonlineTransaction(CRMTransactionMap);
 };
 if (process.env.ENV === 'DEV') {
   await remonlineTokenToEnv(true);
-  // await createOrResetRemonlineTransactionTables();
-  await loadRemonlineTransactionsToBQ();
+  await createOrResetRemonlineTransactionTables();
+  // createOrResetRemonlineTransactionTables()
+  await loadOutRemonlineTransactions();
   // await resetUOMTable();
 }

@@ -15,6 +15,7 @@ import {
   updateSavedCashlessApplicationId,
   getContractorIdByName,
 } from '../web.api.queries.mjs';
+import { devLog } from '../../shared/shared.utils.mjs';
 /**
  * Creates CRM applications based on the provided transaction map.
  * * @param {Map<string, any[]>} CRMTransactionMap - A Map of string keys to any[] values.
@@ -23,7 +24,7 @@ export async function createCRMApplicationsFromRemonlineTransaction(
   CRMTransactionMap
 ) {
   console.log({ message: 'createCRMApplicationsFromRemonlineTransaction' });
-
+  devLog({ transactionExample: Array.from(CRMTransactionMap)[0] });
   const cashboxes = await getCaboxesWithCrmMapping();
   for (let cashbox of cashboxes) {
     const {
@@ -35,7 +36,13 @@ export async function createCRMApplicationsFromRemonlineTransaction(
       scooter_contator_id,
     } = cashbox;
 
-    const transactions = CRMTransactionMap.get(remonlineCashboxId);
+    const transactions = CRMTransactionMap.get(cashboxId);
+    devLog({
+      message:
+        'createCRMApplicationsFromRemonlineTransaction processing ' +
+        String(remonlineCashboxId),
+      length: transactions.length,
+    });
     try {
       for (let transaction of transactions) {
         const {

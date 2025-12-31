@@ -1,5 +1,9 @@
 import { remonlineTokenToEnv } from '../../remonline/remonline.api.mjs';
-import { getCaboxesWithCrmMapping } from '../../remonline/remonline.queries.mjs';
+import {
+  createBatchCashflowItems,
+  getCaboxesWithCrmMapping,
+  markCashboxAsSynchronizedWithBQ,
+} from '../../remonline/remonline.queries.mjs';
 import { getCashboxTransactions } from '../../remonline/remonline.utils.mjs';
 import { devLog } from '../../shared/shared.utils.mjs';
 import { createOrResetTableByName, loadRowsViaJSONFile } from '../bq-utils.mjs';
@@ -14,8 +18,8 @@ const remonlineCashBoxTableId = 'cashboxes';
 const dataSetId = 'RemOnline';
 export const loadRemonlineTransactionsToBQ = async ({
   cashboxes,
-  uniqueCashFlowItems,
-  allCashboxTransactions,
+  cashFlowItems,
+  cashboxTransactions,
 }) => {
   console.log({
     module: 'loadRemonlineTransactionsToBQ',
@@ -23,17 +27,17 @@ export const loadRemonlineTransactionsToBQ = async ({
   });
 
   devLog({
-    allCashboxTransactionExample: allCashboxTransactions[0],
-    uniqueCashFlowItemExample: uniqueCashFlowItems[0],
-    allCashboxTransactions: allCashboxTransactions.length,
-    uniqueCashFlowItems: uniqueCashFlowItems.length,
+    allCashboxTransactionExample: cashboxTransactions[0],
+    uniqueCashFlowItemExample: cashFlowItems[0],
+    allCashboxTransactions: cashboxTransactions.length,
+    uniqueCashFlowItems: cashFlowItems.length,
   });
 
   await loadRowsViaJSONFile({
     dataset_id: dataSetId,
     table_id: cashboxTransactionTableId,
     schema: cashboxTransactionsTableSchema,
-    rows: allCashboxTransactions,
+    rows: cashboxTransactions,
   });
 
   await loadRowsViaJSONFile({
@@ -42,15 +46,19 @@ export const loadRemonlineTransactionsToBQ = async ({
     schema: remonlineCashboxesTableSchema,
     rows: cashboxes,
   });
+  await markCashboxAsSynchronizedWithBQ({
+    remonlineCashboxIds: cashboxes.map((c) => c.id),
+  });
 
   await loadRowsViaJSONFile({
     dataset_id: dataSetId,
     table_id: cashFlowItemTableId,
     schema: cashFlowItemsTableSchema,
-    rows: uniqueCashFlowItems.filter((item) => item.id),
+    rows: cashFlowItems,
   });
+  await createBatchCashflowItems(cashFlowItems);
 };
-async function createOrResetRemonlineTransactionTables() {
+export async function createOrResetRemonlineTransactionTables() {
   await createOrResetTableByName({
     bqTableId: cashboxTransactionTableId,
     schema: cashboxTransactionsTableSchema,
@@ -68,9 +76,9 @@ async function createOrResetRemonlineTransactionTables() {
   });
 }
 
-if (process.env.ENV === 'DEV') {
-  await remonlineTokenToEnv(true);
-  await createOrResetRemonlineTransactionTables();
-  await loadRemonlineTransactionsToBQ();
-  // await resetUOMTable();
-}
+// if (process.env.ENV === 'DEV') {
+//   await remonlineTokenToEnv(true);
+//   await createOrResetRemonlineTransactionTables();
+//   await loadRemonlineTransactionsToBQ();
+//   // await resetUOMTable();
+// }
