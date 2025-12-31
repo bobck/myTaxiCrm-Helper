@@ -32,7 +32,7 @@ export async function remonlineTokenToEnv(forceUpdate) {
     process.env.REMONLINE_API_TOKEN = token;
     return;
   }
-      devLog({ token });
+  devLog({ token });
   process.env.REMONLINE_API_TOKEN = token;
   return;
 }

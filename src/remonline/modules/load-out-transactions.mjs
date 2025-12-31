@@ -2,16 +2,6 @@ import { remonlineTokenToEnv } from '../../remonline/remonline.api.mjs';
 import { getCaboxesWithCrmMapping } from '../../remonline/remonline.queries.mjs';
 import { getCashboxTransactions } from '../../remonline/remonline.utils.mjs';
 import { devLog } from '../../shared/shared.utils.mjs';
-import { createOrResetTableByName, loadRowsViaJSONFile } from '../bq-utils.mjs';
-import {
-  cashboxTransactionsTableSchema,
-  cashFlowItemsTableSchema,
-  remonlineCashboxesTableSchema,
-} from '../schemas.mjs';
-const cashboxTransactionTableId = 'cashbox_trasactions';
-const cashFlowItemTableId = 'cashflow_items';
-const remonlineCashBoxTableId = 'cashboxes';
-const dataSetId = 'RemOnline';
 export const loadOutRemonlineTransactions = async () => {
   console.log({
     module: 'loadRemonlineTransactionsToBQ',
@@ -35,7 +25,7 @@ export const loadOutRemonlineTransactions = async () => {
 
     const { transactions } = await getCashboxTransactions({
       cashboxId: remonlineCashboxId,
-      createdAt: 1735686000000,
+      // createdAt: 1735686000000,
       createdAt:
         last_transaction_created_at == null
           ? null
@@ -83,8 +73,8 @@ export const loadOutRemonlineTransactions = async () => {
     bigQueryData.allCashboxTransactions.push(...handledTransactions);
     devLog(remonlineCashboxId, 'done');
   }
-  return { bigQueryData, CRMData: CRMTransactionMap };
 
+  await 
 };
 if (process.env.ENV === 'DEV') {
   await remonlineTokenToEnv(true);
