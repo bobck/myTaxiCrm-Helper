@@ -46,7 +46,7 @@
     "migrate:up": "db-migrate up",
     "createFiredDebtorDriversCardsManual": "ENV=TEST DEBTOR_DRIVERS_CARDS_COUNT=15 CHUNK_SIZE=8 node -r dotenv/config src/bitrix/modules/create-fired-debtor-driver-cards.mjs",
     "updateFiredDebtorDriversCardsManual": "ENV=TEST CHUNK_SIZE=8 node -r dotenv/config src/bitrix/modules/update-fired-debtor-driver-cards.mjs",
-    "remonlineOrdersToBQManual": "ENV=TEST node -r dotenv/config src/bq/modules/load-remonline-orders.mjs",
+    "test:remonline:orders": "ENV=TEST node -r dotenv/config src/bq/modules/load-remonline-orders.mjs",
     "remonlineAssetsToBQManual": "ENV=TEST node -r dotenv/config src/bq/modules/load-remonline-assets.mjs",
     "remonlineEmployeesToBQManual": "ENV=TEST node -r dotenv/config src/bq/modules/load-remonline-employees.mjs",
     "remonlineUOMsToBQManual": "ENV=TEST node -r dotenv/config src/bq/modules/load-remonline-uoms.mjs",
@@ -64,7 +64,8 @@
     "syncAutoParkCustomCashBlockRulesManually": "ENV=TEST node -r dotenv/config src/sheets/modules/sync-autopark-custom-cash-block-rules.mjs",
     "syncAutoParksExcludedFromDCBRManually": "ENV=TEST node -r dotenv/config src/sheets/modules/sync-autoparks-excluded-from-dcbr-setting.mjs",
     "launchAPI:test": "ENV=TEST API_HOST=0.0.0.0 node -r dotenv/config src/api/api.mjs",
-    "test:tariff": "ENV=TEST node -r dotenv/config src/web.api/modules/drivers-custom-tariff.mjs"
+    "test:tariff": "ENV=TEST node -r dotenv/config src/web.api/modules/drivers-custom-tariff.mjs",
+    "test:remonline:productPrices": "ENV=TEST node -r dotenv/config src/bq/modules/load-remonline-order-product-prices.mjs"
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",
