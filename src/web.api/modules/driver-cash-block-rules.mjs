@@ -133,6 +133,17 @@ export const setDriverCashBlockRules = async () => {
       const { rows } = await getTheMostRecentDriverCashBlockRuleIdByDriverId({
         driver_id,
       });
+      if (!rows || !rows.length) {
+        console.error({
+          module: 'setDriverCashBlockRules',
+          message: 'Cannot find newly set cash block rule for a driver',
+          date: new Date(),
+          driver_id,
+          auto_park_id,
+          expectedRule: variables,
+        });
+        continue;
+      }
       const { id: driver_cash_block_rule_id } = rows[0];
       await insertDriverWithCashBlockRules({
         driver_id,
