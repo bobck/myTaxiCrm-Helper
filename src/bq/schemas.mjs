@@ -425,5 +425,5 @@ export const remonlineCashboxesTableSchema = [
   { name: 'auto_park_cashbox_id', type: 'STRING', mode: 'REQUIRED' },
   { name: 'default_contator_id', type: 'STRING', mode: 'REQUIRED' },
   { name: 'usa_contator_id', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'scooter_contator_id', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'scooter_contator_id', type: 'STRING', mode: 'NULLABLE' },
 ];
