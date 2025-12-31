@@ -1,4 +1,7 @@
-import { createOrResetRemonlineTransactionTables, loadRemonlineTransactionsToBQ } from '../../bq/modules/load-remonline-transactions.mjs';
+import {
+  createOrResetRemonlineTransactionTables,
+  loadRemonlineTransactionsToBQ,
+} from '../../bq/modules/load-remonline-transactions.mjs';
 import { remonlineTokenToEnv } from '../../remonline/remonline.api.mjs';
 import {
   getCaboxesWithCrmMapping,

@@ -90,19 +90,21 @@ export async function getCashFlowItemIdsThatExistInBQ() {
 export async function markCashboxAsSynchronizedWithBQ({ remonlineCashboxIds }) {
   if (!remonlineCashboxIds.length) return;
 
- const placeholders = remonlineCashboxIds.map(() => '?').join(',');
+  const placeholders = remonlineCashboxIds.map(() => '?').join(',');
 
   const sql = `UPDATE remonline_cashboxes SET is_present_in_bq = 1 WHERE id IN (${placeholders})`;
 
   return await db.run(sql, remonlineCashboxIds);
 }
 
-export async function createCashflowItemsSynchronizedWithBQ({ token, validTo }) {
+export async function createCashflowItemsSynchronizedWithBQ({
+  token,
+  validTo,
+}) {
   //
   const sql = `INSERT INTO remonline_cashflow_items(id, valid_to) VALUES(?,?)`;
   await db.run(sql, token, validTo);
 }
-
 
 export async function createBatchCashflowItems(items) {
   if (!items.length) return;
