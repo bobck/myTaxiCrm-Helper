@@ -396,33 +396,34 @@ export const closedPolishBitrixDealsTableSchema = [
   { name: 'is_rescheduled', type: 'BOOLEAN', mode: 'REQUIRED' },
   { name: 'date', type: 'DATE', mode: 'REQUIRED' },
 ];
+
+//client_id
 export const cashboxTransactionsTableSchema = [
   { name: 'id', type: 'INTEGER', mode: 'REQUIRED' },
-  { name: 'remonline_cashbox_id', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'value', type: 'FLOAT', mode: 'NULLABLE' },
-  { name: 'direction', type: 'INTEGER', mode: 'NULLABLE' },
-  { name: 'employee_id', type: 'INTEGER', mode: 'NULLABLE' },
-  { name: 'created_at', type: 'INTEGER', mode: 'NULLABLE' },
-  { name: 'description', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'remonline_cashbox_id', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'value', type: 'FLOAT', mode: 'REQUIRED' },
+  { name: 'direction', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'employee_id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'created_at', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'description', type: 'STRING', mode: 'REQUIRED' },
   { name: 'client_id', type: 'INTEGER', mode: 'NULLABLE' },
   { name: 'related_document_id', type: 'INTEGER', mode: 'NULLABLE' },
   { name: 'related_document_type', type: 'INTEGER', mode: 'NULLABLE' },
   { name: 'cashflow_item_id', type: 'INTEGER', mode: 'NULLABLE' },
 ];
 
-
 export const cashFlowItemsTableSchema = [
   { name: 'id', type: 'INTEGER', mode: 'REQUIRED' },
-  { name: 'name', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'direction', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'name', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'direction', type: 'INTEGER', mode: 'REQUIRED' },
 ];
 
 export const remonlineCashboxesTableSchema = [
   { name: 'id', type: 'STRING', mode: 'REQUIRED' },
   { name: 'last_transaction_created_at', type: 'INTEGER', mode: 'NULLABLE' },
-  { name: 'auto_park_id', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'auto_park_cashbox_id', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'default_contator_id', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'auto_park_id', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'auto_park_cashbox_id', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'default_contator_id', type: 'STRING', mode: 'REQUIRED' },
   { name: 'usa_contator_id', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'scooter_contator_id', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'scooter_contator_id', type: 'STRING', mode: 'REQUIRED' },
 ];
