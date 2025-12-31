@@ -398,22 +398,23 @@ export const closedPolishBitrixDealsTableSchema = [
 ];
 export const cashboxTransactionsTableSchema = [
   { name: 'id', type: 'INTEGER', mode: 'REQUIRED' },
-  { name: 'remonline_cashbox_id', type: 'STRING', mode: 'REQUIRED' },
-  { name: 'value', type: 'FLOAT', mode: 'REQUIRED' }, // Used FLOAT to accommodate potential decimals in monetary values
-  { name: 'direction', type: 'INTEGER', mode: 'REQUIRED' },
-  { name: 'employee_id', type: 'INTEGER', mode: 'REQUIRED' },
-  { name: 'created_at', type: 'INTEGER', mode: 'REQUIRED' }, // Unix timestamp in ms
+  { name: 'remonline_cashbox_id', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'value', type: 'FLOAT', mode: 'NULLABLE' },
+  { name: 'direction', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'employee_id', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'created_at', type: 'INTEGER', mode: 'NULLABLE' },
   { name: 'description', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'client_id', type: 'INTEGER', mode: 'REQUIRED' },
-  { name: 'related_document_id', type: 'INTEGER', mode: 'REQUIRED' },
-  { name: 'related_document_type', type: 'INTEGER', mode: 'REQUIRED' },
-  { name: 'cashflow_item_id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'client_id', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'related_document_id', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'related_document_type', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'cashflow_item_id', type: 'INTEGER', mode: 'NULLABLE' },
 ];
+
 
 export const cashFlowItemsTableSchema = [
   { name: 'id', type: 'INTEGER', mode: 'REQUIRED' },
-  { name: 'name', type: 'STRING', mode: 'REQUIRED' },
-  { name: 'direction', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'name', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'direction', type: 'INTEGER', mode: 'NULLABLE' },
 ];
 
 export const remonlineCashboxesTableSchema = [
