@@ -28,5 +28,3 @@ export const bitrixDb = new BitrixClient({
     },
   },
 });
-
-console.log(remonlineDb.tr);
