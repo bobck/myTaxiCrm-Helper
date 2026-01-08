@@ -76,7 +76,7 @@
     "prisma:migrate:deploy:bitrix": "prisma migrate deploy --schema=./prisma/schema.bitrix.prisma",
     "prisma:migrate:deploy:remonline": "prisma migrate deploy --schema=./prisma/schema.remonline.prisma",
     "prisma:migrate:deploy:all": "npm run prisma:migrate:deploy:remonline && npm run prisma:migrate:deploy:bitrix",
-    "test:web.api:trasactions":"ENV=DEV node -r dotenv/config src/web.api/modules/applications-from-remonline-transactions.mjs"
+    "test:web.api:trasactions": "ENV=DEV node -r dotenv/config src/web.api/modules/applications-from-remonline-transactions.mjs"
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",
