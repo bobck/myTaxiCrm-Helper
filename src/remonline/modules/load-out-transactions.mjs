@@ -107,8 +107,5 @@ export const loadOutRemonlineTransactions = async () => {
 };
 if (process.env.ENV === 'DEV') {
   await remonlineTokenToEnv(true);
-  // await createOrResetRemonlineTransactionTables();
-  // createOrResetRemonlineTransactionTables()
   await loadOutRemonlineTransactions();
-  // await resetUOMTable();
 }

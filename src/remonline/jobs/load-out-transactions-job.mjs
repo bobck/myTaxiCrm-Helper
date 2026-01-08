@@ -1,34 +1,19 @@
 import { CronJob } from 'cron';
-import { createCRMApplicationsFromRemonlineTransaction } from '../modules/applications-from-remonline-transactions.mjs';
+import { loadOutCashboxes } from '../modules/load-out-cashboxes.mjs';
 
-const cronTime = '*/30 * * * *';
+const cronTime = '* 5 * * *';
 
 const timeZone = 'Europe/Kiev';
-let isFunctionRunning = false;
 
-const job = CronJob.from({
+export const loadOutCashboxesJob = CronJob.from({
   cronTime,
   timeZone,
   onTick: async () => {
-    if (isFunctionRunning) {
-      console.log(
-        'In running createCRMApplicationsFromRemonlineTransaction...'
-      );
-      return;
-    }
-
     try {
-      isFunctionRunning = true;
-      await createCRMApplicationsFromRemonlineTransaction();
+      await loadOutCashboxes();
     } catch (error) {
-      console.error(
-        'Error occurred in onTick createCRMApplicationsFromRemonlineTransaction'
-      );
+      console.error('Error occurred in onTick loadOutCashboxesJob');
       console.error({ time: new Date(), error });
-    } finally {
-      isFunctionRunning = false;
     }
   },
 });
-
-export const createCRMApplicationsFromRemonlineTransactionJob = job;
