@@ -1,6 +1,6 @@
 import { getCashboxes } from '../remonline.utils.mjs';
 import { devLog } from '../../shared/shared.utils.mjs';
-
+import * as RemonlinePrisma from '../remonline.prisma.mjs';
 export const loadOutCashboxes = async () => {
   console.log({
     module: 'loadOutCashboxes',
@@ -20,12 +20,7 @@ export const loadOutCashboxes = async () => {
 
     // 2. Iterate and sync with Postgres
     for (const cashboxData of cashboxes) {
-      const { id, type, currency, balance, is_global, title } = cashboxData;
-
-      const idString = String(id);
-
-      // 3. Upsert into Cashbox table
-     
+      await RemonlinePrisma.upsertCashbox(cashboxData);
     }
 
     console.log('Successfully synced cashboxes to Postgres.');

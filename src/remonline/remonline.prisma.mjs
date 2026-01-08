@@ -3,12 +3,36 @@ import { generatePostgresConnectionString } from '../prisma/prisma.mjs';
 export const remonlineDb = new RemOnlineClient({
   datasources: {
     db: {
-      url: process.env.DATABASE_URL_REMONLINE || generatePostgresConnectionString('remonline'),
+      url:
+        process.env.DATABASE_URL_REMONLINE ||
+        generatePostgresConnectionString('remonline'),
     },
   },
 });
-export class RemonlineClinet{
-    constructor() {
-        this.prisma=
-    }
-}
+export const upsertCashbox = async ({
+  id,
+  title,
+  type,
+  balance,
+  is_global,
+  currency,
+}) => {
+  return remonlineDb.cashbox.upsert({
+    where: { id },
+    update: {
+      title,
+      type,
+      balance,
+      isGlobal: is_global,
+      currency: currency?.code || null,
+    },
+    create: {
+      id: idString,
+      title,
+      type,
+      balance,
+      isGlobal: is_global,
+      currency: currency?.code || null,
+    },
+  });
+};
