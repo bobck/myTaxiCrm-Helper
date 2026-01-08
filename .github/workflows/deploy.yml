@@ -50,7 +50,5 @@ jobs:
           git pull
           npm ci
           npm run migrate:up
-          npm run prisma:gen:all
-          npm run prisma:migrate:deploy:all
           pm2 restart 'myTaxiCrm Helper'
           pm2 reset 'myTaxiCrm Helper'
