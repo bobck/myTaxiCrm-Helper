@@ -72,3 +72,22 @@ export const getLastTransactionCreatedAt = async (cashboxId) => {
   });
   return lastTx?.createdAt || null;
 };
+
+export const getCashboxTransActionsByCashboxIdCreatedLaterThan = async ({
+  cashboxId,
+  last_transaction_created_at,
+}) => {
+  return remonlineDb.cashboxTransaction.findMany({
+    where: {
+      cashboxId,
+      createdAt: {
+        gt: last_transaction_created_at
+          ? BigInt(last_transaction_created_at)
+          : 0n,
+      },
+    },
+    orderBy: {
+      createdAt: 'asc',
+    },
+  });
+};
