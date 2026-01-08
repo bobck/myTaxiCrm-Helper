@@ -12,10 +12,10 @@ model CashboxTransaction {
   id                  Int     @id
   
   // 1. Foreign Key for Cashbox
-  remonlineCashboxId  String  @map("remonline_cashbox_id")
+  cashboxId  Int  @map("remonline_cashbox_id")
   
   // 2. Relation Definition for Cashbox
-  remonlineCashbox    RemonlineCashbox @relation(fields: [remonlineCashboxId], references: [id])
+  cashbox    Cashbox @relation(fields: [cashboxId], references: [id])
 
   value               Float
   direction           Int

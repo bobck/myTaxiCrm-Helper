@@ -66,6 +66,7 @@
     "launchAPI:test": "ENV=TEST API_HOST=0.0.0.0 node -r dotenv/config src/api/api.mjs",
     "test:tariff": "ENV=TEST node -r dotenv/config src/web.api/modules/drivers-custom-tariff.mjs",
     "test:remonline:transactions": "ENV=DEV node -r dotenv/config src/remonline/modules/load-out-transactions.mjs",
+    "test:remonline:cashboxes": "ENV=DEV node -r dotenv/config src/remonline/modules/load-out-cashboxes.mjs",
     "prisma:gen:remonline": "prisma generate --schema=./prisma/schema.remonline.prisma",
     "prisma:gen:bitrix": "prisma generate --schema=./prisma/schema.bitrix.prisma",
     "prisma:gen:all": "npm run prisma:gen:remonline && npm run prisma:gen:bitrix",

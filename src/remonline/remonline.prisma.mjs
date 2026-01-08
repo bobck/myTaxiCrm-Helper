@@ -27,7 +27,7 @@ export const upsertCashbox = async ({
       currency: currency?.code || null,
     },
     create: {
-      id: idString,
+      id,
       title,
       type,
       balance,
@@ -35,4 +35,8 @@ export const upsertCashbox = async ({
       currency: currency?.code || null,
     },
   });
+};
+export const upsertCashboxes = async (cashboxes) => {
+  const promises = cashboxes.map((cashbox) => upsertCashbox(cashbox));
+  return await remonlineDb.$transaction(promises);
 };

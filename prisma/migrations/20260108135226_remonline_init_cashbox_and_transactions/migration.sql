@@ -1,7 +1,7 @@
 -- CreateTable
 CREATE TABLE "cashbox_transactions" (
     "id" INTEGER NOT NULL,
-    "remonline_cashbox_id" TEXT NOT NULL,
+    "remonline_cashbox_id" INTEGER NOT NULL,
     "value" DOUBLE PRECISION NOT NULL,
     "direction" INTEGER NOT NULL,
     "employee_id" INTEGER NOT NULL,
@@ -25,20 +25,20 @@ CREATE TABLE "cashflow_items" (
 );
 
 -- CreateTable
-CREATE TABLE "remonline_cashboxes" (
-    "id" TEXT NOT NULL,
+CREATE TABLE "cashboxes" (
+    "id" INTEGER NOT NULL,
+    "title" TEXT,
+    "type" INTEGER,
+    "balance" DOUBLE PRECISION,
+    "is_global" BOOLEAN,
+    "currency" TEXT,
     "last_transaction_created_at" INTEGER,
-    "auto_park_id" TEXT NOT NULL,
-    "auto_park_cashbox_id" TEXT NOT NULL,
-    "default_contator_id" TEXT NOT NULL,
-    "usa_contator_id" TEXT,
-    "scooter_contator_id" TEXT,
 
-    CONSTRAINT "remonline_cashboxes_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "cashboxes_pkey" PRIMARY KEY ("id")
 );
 
 -- AddForeignKey
-ALTER TABLE "cashbox_transactions" ADD CONSTRAINT "cashbox_transactions_remonline_cashbox_id_fkey" FOREIGN KEY ("remonline_cashbox_id") REFERENCES "remonline_cashboxes"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "cashbox_transactions" ADD CONSTRAINT "cashbox_transactions_remonline_cashbox_id_fkey" FOREIGN KEY ("remonline_cashbox_id") REFERENCES "cashboxes"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "cashbox_transactions" ADD CONSTRAINT "cashbox_transactions_cashflow_item_id_fkey" FOREIGN KEY ("cashflow_item_id") REFERENCES "cashflow_items"("id") ON DELETE SET NULL ON UPDATE CASCADE;
