@@ -7,6 +7,7 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL_REMONLINE")
 }
+
 model CashboxTransaction {
   id                  Int     @id
   
@@ -45,17 +46,18 @@ model CashFlowItem {
   @@map("cashflow_items")
 }
 
-model RemonlineCashbox {
-  id                       String  @id
-  lastTransactionCreatedAt Int?    @map("last_transaction_created_at")
-  autoParkId               String  @map("auto_park_id")
-  autoParkCashboxId        String  @map("auto_park_cashbox_id")
-  defaultContatorId        String  @map("default_contator_id")
-  usaContatorId            String? @map("usa_contator_id")
-  scooterContatorId        String? @map("scooter_contator_id")
+model Cashbox {
+  id                       Int  @id
 
-  // Inverse relation (Added this back)
+  // Fields from Remonline API
+  title                    String?
+  type                     Int?
+  balance                  Float?
+  isGlobal                 Boolean? @map("is_global")
+  currency                 String?   
+  lastTransactionCreatedAt Int?    @map("last_transaction_created_at")
+
   transactions             CashboxTransaction[]
 
-  @@map("remonline_cashboxes")
+  @@map("cashboxes")
 }

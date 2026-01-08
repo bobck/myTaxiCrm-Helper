@@ -394,3 +394,56 @@ export async function getUOMs() {
   const { uoms, uom_types, entity_types } = data;
   return { uoms, uom_types, entity_types };
 }
+export async function getCashboxes(_page = 1, _cashboxes = []) {
+  const url = `${process.env.REMONLINE_API}/cashbox/?token=${process.env.REMONLINE_API_TOKEN}&page=${_page}`;
+
+  const options = {
+    method: 'GET',
+    headers: { accept: 'application/json' },
+  };
+
+  const response = await fetch(url, options);
+
+  if (
+    response.status === 414 ||
+    response.status === 503 ||
+    response.status === 502 ||
+    response.status === 504
+  ) {
+    throw await response.text();
+  }
+
+  const data = await response.json();
+  const { success } = data;
+
+  if (!success) {
+    const { message, code } = data;
+    const { validation } = message;
+
+    if ((response.status === 403 && code === 101) || response.status === 401) {
+      console.info({ function: 'getCashboxes', message: 'Get new Auth' });
+      await remonlineTokenToEnv(true);
+      return await getCashboxes(_page, _cashboxes);
+    }
+
+    console.error({
+      function: 'getCashboxes',
+      message,
+      validation,
+      status: response.status,
+    });
+    return;
+  }
+
+  const { data: cashboxes, count, page } = data;
+  const doneOnPrevPage = (page - 1) * 50;
+  const leftToFinish = count - doneOnPrevPage - cashboxes.length;
+
+  _cashboxes.push(...cashboxes);
+
+  if (leftToFinish > 0) {
+    return await getCashboxes(parseInt(page) + 1, _cashboxes);
+  }
+
+  return { cashboxes: _cashboxes };
+}

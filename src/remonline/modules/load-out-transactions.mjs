@@ -46,8 +46,9 @@ export const loadOutRemonlineTransactions = async () => {
           ? null
           : last_transaction_created_at + 1000,
     });
+    devLog(transactions)
+    return
     CRMTransactionMap.set(cashboxId, transactions);
-
     const handledTransactions = transactions.map((transaction) => {
       const {
         id,
@@ -87,6 +88,7 @@ export const loadOutRemonlineTransactions = async () => {
     });
     bigQueryData.cashboxTransactions.push(...handledTransactions);
     devLog(remonlineCashboxId, 'done');
+    break;
   }
 
   const cashboxesToSyncWithBQ =
@@ -101,11 +103,11 @@ export const loadOutRemonlineTransactions = async () => {
   bigQueryData.cashFlowItems.push(...cashflowItems);
   bigQueryData.cashboxes.push(...cashboxesToSyncWithBQ);
   await loadRemonlineTransactionsToBQ(bigQueryData);
-  // await createCRMApplicationsFromRemonlineTransaction(CRMTransactionMap);
+  await createCRMApplicationsFromRemonlineTransaction(CRMTransactionMap);
 };
 if (process.env.ENV === 'DEV') {
   await remonlineTokenToEnv(true);
-  await createOrResetRemonlineTransactionTables();
+  // await createOrResetRemonlineTransactionTables();
   // createOrResetRemonlineTransactionTables()
   await loadOutRemonlineTransactions();
   // await resetUOMTable();
