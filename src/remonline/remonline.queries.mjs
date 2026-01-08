@@ -1,6 +1,5 @@
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
-import { devLog } from '../shared/shared.utils.mjs';
 
 const db = await open({
   filename: process.env.DEV_DB,
