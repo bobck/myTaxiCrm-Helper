@@ -21,7 +21,7 @@ export const loadOutCashboxes = async () => {
 
     // await RemonlinePrisma.upsertCashboxes(cashboxes);
     for (const cashbox of cashboxes) {
-      await RemonlinePrisma.upsertCashbox(cashbox)
+      await RemonlinePrisma.upsertCashbox(cashbox);
     }
     console.log('Successfully synced cashboxes to Postgres.');
   } catch (error) {
