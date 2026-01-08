@@ -10,28 +10,24 @@ datasource db {
 
 model CashboxTransaction {
   id                  Int     @id
+  cashboxId           Int     @map("cashbox_id")
   
-  // 1. Foreign Key for Cashbox
-  cashboxId  Int  @map("remonline_cashbox_id")
-  
-  // 2. Relation Definition for Cashbox
-  cashbox    Cashbox @relation(fields: [cashboxId], references: [id])
+  cashbox             Cashbox @relation(fields: [cashboxId], references: [id])
 
   value               Float
   direction           Int
   employeeId          Int     @map("employee_id")
-  createdAt           Int     @map("created_at")
+  createdAt           BigInt  @map("created_at")
   description         String
   clientId            Int?    @map("client_id")
   relatedDocumentId   Int?    @map("related_document_id")
   relatedDocumentType Int?    @map("related_document_type")
   
-  // 3. Foreign Key for CashFlowItem
   cashflowItemId      Int?    @map("cashflow_item_id")
   
-  // 4. Relation Definition for CashFlowItem
   cashflowItem        CashFlowItem? @relation(fields: [cashflowItemId], references: [id])
 
+  @@index([cashboxId, createdAt])
   @@map("cashbox_transactions")
 }
 
@@ -40,22 +36,19 @@ model CashFlowItem {
   name      String
   direction Int
 
-  // Inverse relation
   transactions CashboxTransaction[]
 
   @@map("cashflow_items")
 }
 
 model Cashbox {
-  id                       Int  @id
+  id                       Int     @id 
 
-  // Fields from Remonline API
   title                    String?
   type                     Int?
   balance                  Float?
   isGlobal                 Boolean? @map("is_global")
   currency                 String?   
-  lastTransactionCreatedAt Int?    @map("last_transaction_created_at")
 
   transactions             CashboxTransaction[]
 

@@ -1,7 +1,7 @@
 import { CronJob } from 'cron';
 import { loadOutCashboxes } from '../modules/load-out-cashboxes.mjs';
 
-const cronTime = '* 5 * * *';
+const cronTime = '0 5 * * *';
 
 const timeZone = 'Europe/Kiev';
 
