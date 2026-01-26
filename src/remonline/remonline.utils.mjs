@@ -2,6 +2,7 @@ import fetch from 'node-fetch';
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
 import { remonlineTokenToEnv } from './remonline.api.mjs';
+import { devLog } from '../shared/shared.utils.mjs';
 
 const db = await open({
   filename: process.env.DEV_DB,
@@ -209,6 +210,9 @@ export async function getCashboxTransactions(
 
     _transactions.push(...transactions);
 
+    devLog(
+      `transactions fetched:${_transactions.length} leftToFinish:${leftTofinish}`
+    );
     if (leftTofinish > 0) {
       return await getCashboxTransactions(
         { createdAt, cashboxId },
