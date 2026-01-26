@@ -24,6 +24,11 @@ const accountNumbers = [
     ownerId: '369a4630-080d-4761-b5cb-10cf56b83035',
     accountNumber: '72 1020 1185 0000 4802 0379 7396',
   },
+  {
+    ownerName: 'STALVERO',
+    ownerId: '8b9125a0-df02-4f74-a21c-145995b29b6f',
+    accountNumber: '83 1020 1185 0000 4502 0425 6640',
+  },
 ];
 
 const modelPrices = [

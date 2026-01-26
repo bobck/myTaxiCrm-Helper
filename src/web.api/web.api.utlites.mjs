@@ -104,6 +104,9 @@ export async function getDriversCandidatsForCustomTerms({
   isoDate,
   companyId,
   autoParksIds,
+  weekNumber,
+  year,
+  allRuleIds,
 }) {
   console.log({ isoDate });
 
@@ -111,7 +114,14 @@ export async function getDriversCandidatsForCustomTerms({
     .readFileSync('./src/sql/drivers_for_custom_terms.sql')
     .toString();
 
-  const result = await pool.query(sql, [isoDate, companyId, autoParksIds]);
+  const result = await pool.query(sql, [
+    isoDate,
+    companyId,
+    autoParksIds,
+    weekNumber,
+    year,
+    allRuleIds,
+  ]);
   const { rows, rowCount } = result;
   return { driversCandidatsForCustomTerms: rows };
 }
@@ -124,82 +134,6 @@ async function getOriginalTariffs({ companyId, autoParksIds }) {
   const result = await pool.query(sql, [companyId, autoParksIds]);
   const { rows, rowCount } = result;
   return { rows };
-}
-
-export async function getDiscountTariffsForAutoparksByDay({
-  dayOfWeek,
-  companyId,
-  autoParksIds,
-}) {
-  const discount = discountByDay[dayOfWeek];
-  console.log({ dayOfWeek, discount });
-
-  let { rows } = await getOriginalTariffs({ companyId, autoParksIds });
-
-  const uniqueAutoParkIds = [];
-
-  rows.forEach((row) => {
-    const autoParkId = row.auto_park_id;
-
-    if (!uniqueAutoParkIds.includes(autoParkId)) {
-      uniqueAutoParkIds.push(autoParkId);
-    }
-  });
-
-  const discountTariffsForAutoparks = {};
-
-  for (let autoParkId of uniqueAutoParkIds) {
-    discountTariffsForAutoparks[autoParkId] = {};
-
-    const autoparkRows = rows
-      .filter((r) => r.auto_park_id == autoParkId)
-      .reverse();
-    const [firstRow] = autoparkRows;
-    const {
-      name,
-      tax_percent,
-      tax_type,
-      target_marker,
-      accounting,
-      divisible_income_type,
-      driver_fleet_bonuses_percent,
-    } = firstRow;
-
-    discountTariffsForAutoparks[autoParkId].name = name;
-    discountTariffsForAutoparks[autoParkId].taxPercent = tax_percent;
-    discountTariffsForAutoparks[autoParkId].taxType = tax_type;
-    discountTariffsForAutoparks[autoParkId].targetMarker = target_marker;
-    discountTariffsForAutoparks[autoParkId].accounting = accounting;
-    discountTariffsForAutoparks[autoParkId].divisibleIncomeType =
-      divisible_income_type;
-    discountTariffsForAutoparks[autoParkId].driverFleetBonusesPercent =
-      driver_fleet_bonuses_percent;
-    discountTariffsForAutoparks[autoParkId].tariffRules = [];
-
-    let prevTo = null;
-    for (let row of autoparkRows) {
-      const rule = {};
-
-      if (row.from != 0) {
-        rule.from = Math.round(row.from * discount);
-      }
-
-      if (prevTo) {
-        rule.to = prevTo;
-        prevTo = null;
-      }
-
-      prevTo = rule.from - 1;
-
-      rule.rate = row.rate;
-      rule.isRateInPercent = true;
-
-      discountTariffsForAutoparks[autoParkId].tariffRules.unshift(rule);
-    }
-    prevTo = null;
-  }
-
-  return { discountTariffsForAutoparks };
 }
 
 async function getOriginalBonuses({ companyId, autoParksIds }) {
@@ -698,4 +632,26 @@ export async function getTheMostRecentDriverCashBlockRuleIdByDriverId({
   const result = await pool.query(sql, [driver_id]);
   const { rows, rowCount } = result;
   return { rows };
+}
+
+export async function assignDriversToCatalogTariff({
+  autoParkId,
+  driverIds,
+  catalogTariffId,
+}) {
+  const body = {
+    operationName: 'AssignDriversToCatalogTariff',
+    variables: {
+      assignDriversToCatalogTariffInput: {
+        autoParkId,
+        driverIds,
+        catalogTariffId,
+      },
+    },
+    query:
+      'mutation AssignDriversToCatalogTariff($assignDriversToCatalogTariffInput: AssignDriversToCatalogTariffInput!) {\n  assignDriversToCatalogTariff(\n    assignDriversToCatalogTariffInput: $assignDriversToCatalogTariffInput\n  ) {\n    success\n    __typename\n  }\n}\n',
+  };
+  const { data } = await makeCRMRequestlimited({ body });
+  const { assignDriversToCatalogTariff: result } = data;
+  return { result };
 }
