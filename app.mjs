@@ -21,4 +21,4 @@ remonlineJobs();
 driversCustomTariffJobs();
 bitrixJobs();
 
-//startJobBoardJobs();
+startJobBoardJobs();
