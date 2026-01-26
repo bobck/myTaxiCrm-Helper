@@ -102,10 +102,7 @@ class RobotaUaApiClient {
     } catch (error) {
       const status = error?.response?.status;
 
-      if (
-        status === 401 &&
-        attempt < (this.maxReauthRetries ?? 1)
-      ) {
+      if (status === 401 && attempt < (this.maxReauthRetries ?? 1)) {
         await this._reauthorize();
         return this._requestWithReauth(requestFn, attempt + 1);
       }

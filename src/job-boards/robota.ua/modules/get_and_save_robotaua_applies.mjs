@@ -32,7 +32,7 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
     last_apply_date,
   });
   devLog({ applies });
-  return
+  return;
   const logInfo = {
     module: 'getAndSaveRobotaUaVacancyApplies',
     date: new Date(),
