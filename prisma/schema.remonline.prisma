@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/@prisma/client-remonline"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL_REMONLINE")
+}
+
+model CashboxTransaction {
+  id                  Int     @id
+  cashboxId           Int     @map("cashbox_id")
+  
+  cashbox             Cashbox @relation(fields: [cashboxId], references: [id])
+
+  value               Float
+  direction           Int
+  employeeId          Int     @map("employee_id")
+  createdAt           BigInt  @map("created_at")
+  description         String
+  clientId            Int?    @map("client_id")
+  relatedDocumentId   Int?    @map("related_document_id")
+  relatedDocumentType Int?    @map("related_document_type")
+  
+  cashflowItemId      Int?    @map("cashflow_item_id")
+  
+  cashflowItem        CashFlowItem? @relation(fields: [cashflowItemId], references: [id])
+
+  @@index([cashboxId, createdAt])
+  @@map("cashbox_transactions")
+}
+
+model CashFlowItem {
+  id        Int    @id
+  name      String
+  direction Int
+
+  transactions CashboxTransaction[]
+
+  @@map("cashflow_items")
+}
+
+model Cashbox {
+  id                       Int     @id 
+
+  title                    String?
+  type                     Int?
+  balance                  Float?
+  isGlobal                 Boolean? @map("is_global")
+  currency                 String?   
+
+  transactions             CashboxTransaction[]
+
+  @@map("cashboxes")
+}

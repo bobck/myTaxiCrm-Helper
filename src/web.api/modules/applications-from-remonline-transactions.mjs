@@ -4,7 +4,6 @@ import {
   editCashlessPaymentApplication,
   payApplication,
 } from '../web.api.utlites.mjs';
-import { getCashboxTransactions } from '../../remonline/remonline.utils.mjs';
 import {
   getCaboxesWithCrmMapping,
   updateLastCreatedTransactionTimeFoxRemonlineCashbox,
@@ -15,6 +14,8 @@ import {
   updateSavedCashlessApplicationId,
   getContractorIdByName,
 } from '../web.api.queries.mjs';
+import { getCashboxTransActionsByCashboxIdCreatedLaterThan } from '../../remonline/remonline.prisma.mjs';
+import { devLog } from '../../shared/shared.utils.mjs';
 
 export async function createCRMApplicationsFromRemonlineTransaction() {
   console.log({ message: 'createCRMApplicationsFromRemonlineTransaction' });
@@ -33,13 +34,19 @@ export async function createCRMApplicationsFromRemonlineTransaction() {
     } = cashbox;
 
     try {
-      const { transactions } = await getCashboxTransactions({
-        cashboxId: remonlineCashboxId,
-        createdAt:
-          last_transaction_created_at == null
-            ? null
-            : last_transaction_created_at + 1000,
-      });
+      const rawTransactions =
+        await getCashboxTransActionsByCashboxIdCreatedLaterThan({
+          cashboxId: Number(remonlineCashboxId),
+          last_transaction_created_at,
+        });
+
+      const transactions = rawTransactions.map((t) => ({
+        id: t.id,
+        value: t.value,
+        direction: t.direction,
+        description: t.description,
+        created_at: Number(t.createdAt),
+      }));
       for (let transaction of transactions) {
         const {
           id: transactionId,
@@ -183,6 +190,6 @@ export async function createCRMApplicationsFromRemonlineTransaction() {
   }
 }
 
-if (process.env.ENV == 'TEST') {
+if (process.env.ENV == 'DEV') {
   createCRMApplicationsFromRemonlineTransaction();
 }
