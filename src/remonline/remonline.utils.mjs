@@ -393,7 +393,7 @@ export async function getUOMs() {
 
 export async function getOrderStatuses() {
   const url = 'https://api.roapp.io/statuses/orders';
-  
+
   const options = {
     method: 'GET',
     headers: {

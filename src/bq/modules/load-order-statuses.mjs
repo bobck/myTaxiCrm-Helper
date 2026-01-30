@@ -44,7 +44,7 @@ export async function loadOrderStatusesToBQ() {
 }
 
 if (process.env.ENV === 'TEST') {
-    await remonlineTokenToEnv();
-    await resetOrderStatusesTable();
-    await loadOrderStatusesToBQ();
+  await remonlineTokenToEnv();
+  await resetOrderStatusesTable();
+  await loadOrderStatusesToBQ();
 }
