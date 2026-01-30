@@ -50,6 +50,7 @@
     "remonlineAssetsToBQManual": "ENV=TEST node -r dotenv/config src/bq/modules/load-remonline-assets.mjs",
     "remonlineEmployeesToBQManual": "ENV=TEST node -r dotenv/config src/bq/modules/load-remonline-employees.mjs",
     "remonlineUOMsToBQManual": "ENV=TEST node -r dotenv/config src/bq/modules/load-remonline-uoms.mjs",
+    "test:remonline:orderStatuses": "ENV=TEST node -r dotenv/config src/bq/modules/load-order-statuses.mjs",
     "launchAPI:dev": "ENV=DEV API_HOST=localhost node -r dotenv/config src/api/api.mjs",
     "launchAPI:prod": "ENV=PROD API_HOST=0.0.0.0 node -r dotenv/config src/api/api.mjs",
     "saveWorkingDriversManual": "ENV=TEST node -r dotenv/config src/web.api/gdc-report/modules/save-working-drivers-with-history-status.mjs",

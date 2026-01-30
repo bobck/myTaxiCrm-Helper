@@ -390,3 +390,45 @@ export async function getUOMs() {
   const { uoms, uom_types, entity_types } = data;
   return { uoms, uom_types, entity_types };
 }
+
+export async function getOrderStatuses() {
+  const url = 'https://api.roapp.io/statuses/orders';
+  
+  const options = {
+    method: 'GET',
+    headers: {
+      accept: 'application/json',
+      authorization: `Bearer ${process.env.REMONLINE_API_TOKEN}`,
+    },
+  };
+
+  const response = await fetch(url, options);
+
+  if (!response.ok) {
+    console.error({
+      function: 'getOrderStatuses',
+      status: response.status,
+      statusText: response.statusText,
+    });
+    throw new Error(`Failed to fetch order statuses: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  const { success, data: statuses, count } = data;
+
+  if (!success) {
+    console.error({
+      function: 'getOrderStatuses',
+      message: 'API returned success: false',
+    });
+    throw new Error('API returned unsuccessful response');
+  }
+
+  console.log({
+    function: 'getOrderStatuses',
+    count,
+    statusesCount: statuses.length,
+  });
+
+  return { statuses, count };
+}
