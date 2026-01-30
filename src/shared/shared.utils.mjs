@@ -3,6 +3,11 @@ export function devLog(...args) {
     console.log(...args);
   }
 }
+export function devErrorLog(...args) {
+  if (process.env.ENV === 'DEV' || process.env.ENV === 'TEST') {
+    console.error(...args);
+  }
+}
 
 export function isUuid(str) {
   if (typeof str !== 'string' || str.length === 0) {
@@ -43,4 +48,20 @@ export function getSetDifferences(setA, setB) {
   }
 
   return [differenceB, differenceA];
+}
+
+export function chunkArray(array, chunkSize) {
+  const result = [];
+  for (let i = 0; i < array.length; i += chunkSize) {
+    result.push(array.slice(i, i + chunkSize));
+  }
+  return result;
+}
+export function sliceArrayIntoEqualParts(arr, count) {
+  const chunkSize = Math.ceil(arr.length / count);
+  const chunks = [];
+  for (let index = 0; index < arr.length; index += chunkSize) {
+    chunks.push(arr.slice(index, index + chunkSize));
+  }
+  return chunks;
 }
