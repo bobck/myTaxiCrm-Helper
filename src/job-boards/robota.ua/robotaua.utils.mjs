@@ -1,10 +1,17 @@
 import { devLog } from '../../shared/shared.utils.mjs';
 import RobotaUaApiClient from './robotaua.api.mjs';
 
-export const robotaUaAPI = await RobotaUaApiClient.initialize({
+let robotaUaAPI = await RobotaUaApiClient.initialize({
   email: process.env.ROBOTA_UA_EMAIL,
   password: process.env.ROBOTA_UA_PASSWORD,
 });
+
+export const reinitializeRobotaUaAPI = async () => {
+  robotaUaAPI = await RobotaUaApiClient.initialize({
+    email: process.env.ROBOTA_UA_EMAIL,
+    password: process.env.ROBOTA_UA_PASSWORD,
+  });
+};
 export const getVacancyList = async ({ last_page }) => {
   const vacancies = [];
   let data;
@@ -30,7 +37,8 @@ export const getRobotaUaVacancyApplies = async ({
   const applies = [];
   let data;
   let current_page = 0;
-  const targetDate = new Date(last_apply_date);
+  const targetDate = new Date(last_apply_date ?? 0);
+  devLog(targetDate);
   let theOldestApplyDate;
   do {
     data = await robotaUaAPI.getApplies({
@@ -45,6 +53,11 @@ export const getRobotaUaVacancyApplies = async ({
     theOldestApplyDate = new Date(theOldestApplyDateStringified);
 
     current_page++;
+    devLog({
+      theOldestApplyDate,
+      current_page,
+      applies: data.applies.length,
+    });
   } while (theOldestApplyDate > targetDate);
 
   const filteredAppliesByDate = applies.filter(

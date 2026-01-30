@@ -1,12 +1,11 @@
 import pg from 'pg';
-let connectionString = `postgres://${process.env.PG_USER}:${process.env.PG_PASSWORD}@${process.env.PROXY_HOST}:${process.env.PROXY_PORT}/${process.env.PG_DB}`;
-if (process.env.ENV === 'TEST' || process.env.ENV === 'DEV') {
-  const encodedPassword = encodeURIComponent(process.env.PG_PASSWORD);
-  connectionString = `postgres://${process.env.PG_USER}:${encodedPassword}@${process.env.PROXY_HOST}:${process.env.PROXY_PORT}/${process.env.PG_DB}`;
-}
 
 export const pool = new pg.Pool({
-  connectionString,
+  user: process.env.PG_USER,
+  password: process.env.PG_PASSWORD,
+  host: process.env.PG_HOST,
+  port: process.env.PG_PORT,
+  database: process.env.PG_DB,
 });
 
 pool.on('connect', () => {

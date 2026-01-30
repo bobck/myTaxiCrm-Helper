@@ -1,25 +1,32 @@
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
+import { devLog } from '../shared/shared.utils.mjs';
 
 const db = await open({
   filename: process.env.DEV_DB,
   driver: sqlite3.Database,
 });
 
-export async function saveCreatedDriverCustomTariffId({ tariffId, driverId }) {
-  const sql = `INSERT INTO drivers_custom_tariff_ids(tariff_id, driver_id) VALUES(?,?)`;
-  await db.run(sql, tariffId, driverId);
+export async function saveCreatedDriverCustomTariffId({
+  tariffId,
+  driverId,
+  autoParkId,
+}) {
+  const sql = `INSERT INTO drivers_custom_tariff_ids(tariff_id, driver_id,auto_park_id) VALUES(?,?,?)`;
+  devLog({ sql, arguments });
+  await db.run(sql, tariffId, driverId, autoParkId);
 }
 
 export async function getUndeletedDriversCustomTariffIds() {
-  const sql = `SELECT tariff_id,driver_id FROM drivers_custom_tariff_ids WHERE is_deleted = false`;
+  const sql = `SELECT driver_id,auto_park_id,tariff_id FROM drivers_custom_tariff_ids WHERE is_deleted = false`;
+  devLog({ sql, arguments });
   const undeletedDriversCustomTariffIds = await db.all(sql);
   return { undeletedDriversCustomTariffIds };
 }
 
-export async function markDriverCustomTariffAsDeleted({ tariffId }) {
-  const sql = `UPDATE drivers_custom_tariff_ids SET is_deleted=true WHERE tariff_id = ?`;
-  await db.run(sql, tariffId);
+export async function markDriverCustomTariffAsDeleted({ tariffId, driverId }) {
+  const sql = `UPDATE drivers_custom_tariff_ids SET is_deleted=true WHERE tariff_id = ? and driver_id = ?`;
+  await db.run(sql, tariffId, driverId);
 }
 
 export async function saveCreatedDriverBonusRuleId({
@@ -312,4 +319,83 @@ export async function createAutoParksExcludedFromDCBR(autoParkIds) {
     await db.exec('ROLLBACK');
     throw err;
   }
+}
+
+export const getAutoParkCustomCashBlockRules = () => {
+  const sql = `SELECT * FROM auto_park_custom_cash_block_rules WHERE is_active=TRUE`;
+  return db.all(sql);
+};
+
+export async function synchronizeAutoParkRulesTransaction({
+  newAutoParkRules,
+  deletedAutoParkRuleIds,
+}) {
+  try {
+    // Start the transaction
+    await db.run('BEGIN TRANSACTION;');
+
+    // Step 1: Deactivate rules based on the deletedAutoParkRules array.
+    // This will set is_active to false for all existing rules matching the auto_park_id.
+    if (deletedAutoParkRuleIds && deletedAutoParkRuleIds.length > 0) {
+      const placeholders = deletedAutoParkRuleIds.map(() => '?').join(',');
+      const updateSql = `
+        UPDATE auto_park_custom_cash_block_rules
+        SET is_active = false, updated_at = CURRENT_TIMESTAMP
+        WHERE rule_id IN (${placeholders});
+      `;
+      await db.run(updateSql, deletedAutoParkRuleIds);
+    }
+
+    // Step 2: Insert all new rules from the newAutoParkRules array.
+    // Since auto_park_id can be repeated, we perform a simple insert for each new rule.
+    if (newAutoParkRules && newAutoParkRules.length > 0) {
+      const insertSql = `
+        INSERT INTO auto_park_custom_cash_block_rules
+        (auto_park_id, mode, target, balanceActivationValue, depositActivationValue, maxDebt)
+        VALUES (?, ?, ?, ?, ?, ?);
+      `;
+
+      // For optimal performance, a database driver's "prepare" statement method
+      // should be used before looping to execute the same query multiple times.
+      for (const rule of newAutoParkRules) {
+        const params = [
+          rule.auto_park_id,
+          rule.mode,
+          rule.target,
+          rule.balanceActivationValue,
+          rule.depositActivationValue,
+          rule.maxDebt,
+        ];
+        await db.run(insertSql, params);
+      }
+    }
+
+    // Commit the transaction if all operations succeed
+    await db.run('COMMIT;');
+  } catch (error) {
+    // If any error occurs, rollback the entire transaction
+    console.error(
+      'Error during synchronization, rolling back transaction.',
+      error
+    );
+    await db.run('ROLLBACK;');
+    // Re-throw the error so the calling code is aware of the failure
+    throw error;
+  }
+}
+export function getCatalogTariffByWeekDayAndAutoParkId({
+  auto_park_id,
+  weekDay,
+}) {
+  devLog({ auto_park_id, weekDay });
+  return db.get(
+    'select id from catalog_tariffs ct where ct.auto_park_id = ? and ct.weekDay = ?',
+    auto_park_id,
+    weekDay
+  );
+}
+export function getAllCatalogTariffs() {
+  return db.all(
+    'select id,auto_park_id from catalog_tariffs where is_active = true'
+  );
 }
