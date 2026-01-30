@@ -396,3 +396,11 @@ export const closedPolishBitrixDealsTableSchema = [
   { name: 'is_rescheduled', type: 'BOOLEAN', mode: 'REQUIRED' },
   { name: 'date', type: 'DATE', mode: 'REQUIRED' },
 ];
+
+export const orderStatusesTableSchema = [
+  { name: 'id', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'name', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'color', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'group', type: 'INTEGER', mode: 'REQUIRED' },
+  { name: 'instance', type: 'INTEGER', mode: 'REQUIRED' },
+];
