@@ -9,7 +9,6 @@ import {
 } from '../bq-utils.mjs';
 import { polandBookkeepingReportTableSchema } from '../schemas.mjs';
 import { DateTime } from 'luxon';
-import { message } from 'telegraf/filters';
 
 const bqTableId = 'poland_bookkeeping';
 
@@ -23,6 +22,11 @@ const accountNumbers = [
     ownerName: 'Auto Świat',
     ownerId: '369a4630-080d-4761-b5cb-10cf56b83035',
     accountNumber: '72 1020 1185 0000 4802 0379 7396',
+  },
+  {
+    ownerName: 'STALVERO',
+    ownerId: '8b9125a0-df02-4f74-a21c-145995b29b6f',
+    accountNumber: '83 1020 1185 0000 4502 0425 6640',
   },
 ];
 
@@ -167,6 +171,34 @@ const modelPrices = [
   },
 ];
 
+const fakeDatesMap = new Map([
+  ['fd6afdb0-a00e-4bbd-9e61-0a1e771dde90', '2026-01-09'],
+  ['357d344b-9943-4787-b28c-b5f9522c3ad8', '2026-01-09'],
+  ['a5cc9a02-d155-4cfc-980d-04104600e4a0', '2026-01-09'],
+  ['82c61900-5c43-4d5f-bd11-eb6052fa2cd0', '2026-01-09'],
+  ['5723d6f2-7d58-4f7a-91b1-24445de88acc', '2026-01-09'],
+  ['47e031a3-ea0a-46a7-9d49-fd9ebbf31c44', '2026-01-09'],
+  ['47e031a3-ea0a-46a7-9d49-fd9ebbf31c44', '2026-01-09'],
+  ['51ae81f6-bae9-4e5b-8b6e-a9788c67e2a4', '2026-01-10'],
+  ['742f5d59-b631-41a6-9368-eef6225a55f3', '2026-01-09'],
+  ['bcd426bc-6f9e-4a5d-9303-ca26d15ca35b', '2026-01-09'],
+  ['50f44b58-b7c3-4553-aaef-023516864922', '2026-01-09'],
+  ['010be42b-372e-4bb1-90b9-e0dc1be2f10d', '2026-01-09'],
+  ['010be42b-372e-4bb1-90b9-e0dc1be2f10d', '2026-01-09'],
+  ['4e42abe1-e862-4616-99d5-bea775b3e172', '2026-01-08'],
+  ['f4b14f69-8581-44d1-ad21-3b44ba715206', '2026-01-08'],
+  ['7d37172a-d6f7-4dde-a2af-4d8db0d04526', '2026-01-08'],
+  ['0f6870d1-3e68-43fe-bdd6-fffc166a60b6', '2026-01-08'],
+  ['f1220ba6-1a19-4995-b6c1-96abe4a21264', '2026-01-09'],
+  ['586791ce-26a6-43a5-b5f5-4942710f0948', '2026-01-08'],
+  ['c2d304f3-bf34-4dc4-8fd7-f8dd5778f520', '2026-01-08'],
+  ['ff069e24-a45f-43a5-a919-ceffd40456b8', '2026-01-10'],
+  ['79cbe538-10d8-468c-b89b-2e15dc6fa487', '2026-01-09'],
+  ['b775bed9-afae-4fe0-a7b5-55183f7234c4', '2026-01-08'],
+  ['bc390195-066a-4275-99da-570fa3383a39', '2026-01-08'],
+  ['35381fce-4ac8-44a9-ae58-e2d9f85b9df1', '2026-01-08'],
+]);
+
 export async function generateAndSavePolandBookkeepingReport({ autoParkId }) {
   const pastWeek = DateTime.now().setZone('Europe/Warsaw').minus({ days: 2 });
   const periodFrom = pastWeek.startOf('week').toFormat('yyyy-MM-dd');
@@ -202,7 +234,22 @@ export async function generateAndSavePolandBookkeepingReport({ autoParkId }) {
 
   try {
     const jsonData = rows.map((row) => {
-      const { owner_id, model_id, bill_days } = row;
+      const {
+        license_plate,
+        car_id,
+        driver_name,
+        bill_period_start,
+        bill_period_end,
+        bill_days,
+        auto_park_name,
+        auto_park_id,
+        model_id,
+        owner_id,
+        car_owner_name,
+        owner_account_number
+      } = row;
+
+      let { car_contract_start_date } = row;
 
       if (!owner_id) {
         throw {
@@ -224,8 +271,30 @@ export async function generateAndSavePolandBookkeepingReport({ autoParkId }) {
         (m) => m.modelId == model_id
       );
       const kwota = Math.round((priceRow.price / 7) * bill_days, 0);
+
+      const fake_car_contract_start_date = fakeDatesMap.get(car_id);
+      
+      if (fake_car_contract_start_date) {
+        const originalDate = new Date(car_contract_start_date);
+        const fakeDate = new Date(fake_car_contract_start_date);
+
+        if (originalDate < fakeDate) {
+          car_contract_start_date = fake_car_contract_start_date;
+        }
+      }
+
       return {
-        ...row,
+        license_plate,
+        driver_name,
+        bill_period_start,
+        bill_period_end,
+        bill_days,
+        car_contract_start_date,
+        auto_park_name,
+        auto_park_id,
+        model_id,
+        car_owner_name,
+        owner_account_number,
         owner_account_number: accountNumber.accountNumber,
         model_price: priceRow.price,
         kwota,
