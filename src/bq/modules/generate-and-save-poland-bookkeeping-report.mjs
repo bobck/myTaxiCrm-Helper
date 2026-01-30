@@ -246,7 +246,7 @@ export async function generateAndSavePolandBookkeepingReport({ autoParkId }) {
         model_id,
         owner_id,
         car_owner_name,
-        owner_account_number
+        owner_account_number,
       } = row;
 
       let { car_contract_start_date } = row;
@@ -273,7 +273,7 @@ export async function generateAndSavePolandBookkeepingReport({ autoParkId }) {
       const kwota = Math.round((priceRow.price / 7) * bill_days, 0);
 
       const fake_car_contract_start_date = fakeDatesMap.get(car_id);
-      
+
       if (fake_car_contract_start_date) {
         const originalDate = new Date(car_contract_start_date);
         const fakeDate = new Date(fake_car_contract_start_date);
