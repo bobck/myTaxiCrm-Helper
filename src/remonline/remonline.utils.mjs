@@ -376,7 +376,7 @@ export async function getUOMs() {
     if ((response.status == 403 && code == 101) || response.status == 401) {
       console.info({ function: 'getUOMs', message: 'Get new Auth' });
       await remonlineTokenToEnv(true);
-      return await getEmployees();
+      return await getUOMs();
     }
     console.error({
       function: 'getUOMs',
@@ -403,32 +403,34 @@ export async function getOrderStatuses() {
   };
 
   const response = await fetch(url, options);
-
-  if (!response.ok) {
+  let data;
+  try {
+    data = await response.json();
+  } catch (e) {
     console.error({
       function: 'getOrderStatuses',
-      status: response.status,
-      statusText: response.statusText,
+      message: 'Error parsing JSON',
+      data,
     });
-    throw new Error(`Failed to fetch order statuses: ${response.statusText}`);
   }
-
-  const data = await response.json();
-  const { success, data: statuses, count } = data;
-
+  const { success } = data;
   if (!success) {
+    const { message, code } = data;
+    const validation = message?.validation;
+    if ((response.status == 403 && code == 101) || response.status == 401) {
+      console.info({ function: 'getOrderStatuses', message: 'Get new Auth' });
+      await remonlineTokenToEnv(true);
+      return await getOrderStatuses();
+    }
     console.error({
       function: 'getOrderStatuses',
-      message: 'API returned success: false',
+      message,
+      validation,
+      status: response.status,
     });
-    throw new Error('API returned unsuccessful response');
+    return;
   }
 
-  console.log({
-    function: 'getOrderStatuses',
-    count,
-    statusesCount: statuses.length,
-  });
-
+  const { data: statuses, count } = data;
   return { statuses, count };
 }
