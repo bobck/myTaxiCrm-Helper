@@ -373,3 +373,49 @@ export async function loadRowsViaJSONFile({
     }
   }
 }
+
+export async function getListedSuppliersFromBQ() {
+  const query = 'SELECT * FROM `up-statistics.RemOnline.suppliers`';
+  const options = {
+    query,
+    location: 'US',
+  };
+
+  const [rows] = await bigquery.query(options);
+  return rows;
+}
+
+export async function updateSuppliersLastPostingAt() {
+  const query = `
+    UPDATE \`up-statistics.RemOnline.suppliers\` s
+    SET s.last_posting_at = updates.last_posting_at
+    FROM (
+      SELECT supplier_id, MAX(created_at) AS last_posting_at
+      FROM \`up-statistics.RemOnline.listed_suppliers_postings\`
+      GROUP BY supplier_id
+    ) AS updates
+    WHERE CAST(s.supplier_id AS INT64) = updates.supplier_id
+  `;
+
+  const options = {
+    query,
+    location: 'US',
+  };
+
+  await bigquery.query(options);
+}
+
+export async function resetSuppliersLastPostingAtToNull() {
+  const query = `
+    UPDATE \`up-statistics.RemOnline.suppliers\`
+    SET last_posting_at = NULL
+    WHERE last_posting_at IS NOT NULL
+  `;
+
+  const options = {
+    query,
+    location: 'US',
+  };
+
+  await bigquery.query(options);
+}

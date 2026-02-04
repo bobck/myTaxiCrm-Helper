@@ -390,3 +390,69 @@ export async function getUOMs() {
   const { uoms, uom_types, entity_types } = data;
   return { uoms, uom_types, entity_types };
 }
+
+export async function getPostingsBySupplier(
+  { supplierId, createdAt },
+  _page = 1,
+  _postings = []
+) {
+  const createdAtUrl = createdAt ? `&created_at[]=${createdAt}` : '';
+  const url = `https://api.roapp.io/warehouse/postings/?page=${_page}&supplier_ids[]=${supplierId}${createdAtUrl}&token=${process.env.REMONLINE_API_TOKEN}`;
+
+  const options = {
+    method: 'GET',
+    headers: {
+      accept: 'application/json',
+    },
+  };
+
+  const response = await fetch(url, options);
+
+  if (
+    response.status === 414 ||
+    response.status === 503 ||
+    response.status === 502 ||
+    response.status === 504
+  ) {
+    throw await response.text();
+  }
+
+  let data;
+  try {
+    data = await response.json();
+  } catch (e) {
+    console.error({
+      function: 'getPostingsBySupplier',
+      message: 'Error parsing JSON',
+      response_status: response.status,
+    });
+    throw e;
+  }
+
+  const { success } = data;
+  if (!success) {
+    const { message } = data;
+    console.error({
+      function: 'getPostingsBySupplier',
+      message,
+      status: response.status,
+    });
+    throw new Error('RemOnline postings API returned unsuccessful response');
+  }
+
+  const { data: postings, count, page } = data;
+  const doneOnPrevPage = (page - 1) * 50;
+  const leftToFinish = count - doneOnPrevPage - postings.length;
+
+  _postings.push(...postings);
+
+  if (leftToFinish > 0) {
+    return await getPostingsBySupplier(
+      { supplierId, createdAt },
+      parseInt(page) + 1,
+      _postings
+    );
+  }
+
+  return { postings: _postings, count };
+}
