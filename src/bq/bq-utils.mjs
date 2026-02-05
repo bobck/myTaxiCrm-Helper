@@ -298,7 +298,7 @@ export async function getBrandedLicencePlateNumbersFromBQ({
 export async function getMaxListedSuppliersPostingCreatedAt() {
   const query = `
     SELECT MAX(created_at) AS maxCreatedAt
-    FROM \`up-statistics.RemOnline.listed_suppliers_postings\`
+    FROM \`up-statistics.RemOnline.remonline_postings\`
   `;
   const options = {
     query,
@@ -388,6 +388,3 @@ export async function loadRowsViaJSONFile({
     }
   }
 }
-
-// Note: suppliers table helpers were intentionally removed because the
-// postings loader no longer depends on `up-statistics.RemOnline.suppliers`.

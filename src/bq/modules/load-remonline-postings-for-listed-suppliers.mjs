@@ -92,7 +92,7 @@ export async function loadRemonlinePostingsForListedSuppliers() {
   devLog({
     maxCreatedAt,
     createdAtForApi,
-    postingsCount: postings.length,
+    postingsCount: postings?.length,
   });
 
   if (!postings || postings.length === 0) {
@@ -108,12 +108,12 @@ export async function loadRemonlinePostingsForListedSuppliers() {
     if (postingsRows.length > 0) {
       await loadRowsViaJSONFile({
         dataset_id,
-        table_id: 'listed_suppliers_postings',
+        table_id: 'remonline_postings',
         rows: postingsRows,
         schema: listedSuppliersPostingsTableSchema,
       });
       devLog(
-        `${postingsRows.length} postings have been uploaded to BQ table listed_suppliers_postings`
+        `${postingsRows.length} postings have been uploaded to BQ table remonline_postings`
       );
     }
 
@@ -140,7 +140,7 @@ export async function loadRemonlinePostingsForListedSuppliers() {
 
 async function resetRemonlinePostingsTables() {
   await createOrResetTableByName({
-    bqTableId: 'listed_suppliers_postings',
+    bqTableId: 'remonline_postings',
     schema: listedSuppliersPostingsTableSchema,
     dataSetId: dataset_id,
   });
@@ -155,6 +155,6 @@ async function resetRemonlinePostingsTables() {
 if (process.env.ENV === 'TEST') {
   devLog('Running loadRemonlinePostingsForListedSuppliers in TEST mode...');
   // await resetRemonlinePostingsTables();
-  await remonlineTokenToEnv();
+  await remonlineTokenToEnv(true);
   await loadRemonlinePostingsForListedSuppliers();
 }
