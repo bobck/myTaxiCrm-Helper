@@ -2,6 +2,7 @@ import fetch from 'node-fetch';
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
 import { remonlineTokenToEnv } from './remonline.api.mjs';
+import { devLog } from '../shared/shared.utils.mjs';
 
 const db = await open({
   filename: process.env.DEV_DB,
@@ -391,13 +392,9 @@ export async function getUOMs() {
   return { uoms, uom_types, entity_types };
 }
 
-export async function getPostingsBySupplier(
-  { supplierId, createdAt },
-  _page = 1,
-  _postings = []
-) {
+export async function getPostings({ createdAt }, _page = 1, _postings = []) {
   const createdAtUrl = createdAt ? `&created_at[]=${createdAt}` : '';
-  const url = `https://api.roapp.io/warehouse/postings/?page=${_page}&supplier_ids[]=${supplierId}${createdAtUrl}&token=${process.env.REMONLINE_API_TOKEN}`;
+  const url = `${process.env.ROAPP_API}/warehouse/postings/?page=${_page}${createdAtUrl}&token=${process.env.REMONLINE_API_TOKEN}`;
 
   const options = {
     method: 'GET',
@@ -414,6 +411,12 @@ export async function getPostingsBySupplier(
     response.status === 502 ||
     response.status === 504
   ) {
+    devLog({
+      function: 'getPostings',
+      message: `API error: HTTP ${response.status}`,
+      status: response.status,
+      url,
+    });
     throw await response.text();
   }
 
@@ -422,37 +425,55 @@ export async function getPostingsBySupplier(
     data = await response.json();
   } catch (e) {
     console.error({
-      function: 'getPostingsBySupplier',
+      function: 'getPostings',
       message: 'Error parsing JSON',
+      error: e,
       response_status: response.status,
+      url,
     });
-    throw e;
+    return;
   }
 
   const { success } = data;
   if (!success) {
     const { message } = data;
     console.error({
-      function: 'getPostingsBySupplier',
-      message,
+      function: 'getPostings',
+      message: `Unsuccessful response: ${message}`,
       status: response.status,
+      url,
     });
-    throw new Error('RemOnline postings API returned unsuccessful response');
+    return;
   }
 
   const { data: postings, count, page } = data;
   const doneOnPrevPage = (page - 1) * 50;
   const leftToFinish = count - doneOnPrevPage - postings.length;
+  const pageSize = postings.length || 50; // default should be total per page
+  const pagesLeft = leftToFinish > 0 ? Math.ceil(leftToFinish / pageSize) : 0;
+
+  devLog({
+    function: 'getPostings',
+    message: 'Fetched postings page',
+    page,
+    count,
+    postingsReceived: postings?.length,
+    leftToFinish,
+    pagesLeftToFetch: pagesLeft,
+  });
 
   _postings.push(...postings);
 
   if (leftToFinish > 0) {
-    return await getPostingsBySupplier(
-      { supplierId, createdAt },
-      parseInt(page) + 1,
-      _postings
-    );
+    return await getPostings({ createdAt }, parseInt(page) + 1, _postings);
   }
+
+  devLog({
+    function: 'getPostings',
+    message: 'Finished fetching all postings',
+    totalPostings: _postings.length,
+    totalCount: count,
+  });
 
   return { postings: _postings, count };
 }

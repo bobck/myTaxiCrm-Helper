@@ -1,10 +1,8 @@
-import { getPostingsBySupplier } from '../../remonline/remonline.utils.mjs';
+import { getPostings } from '../../remonline/remonline.utils.mjs';
 import {
   createOrResetTableByName,
   loadRowsViaJSONFile,
-  getListedSuppliersFromBQ,
-  updateSuppliersLastPostingAt,
-  resetSuppliersLastPostingAtToNull,
+  getMaxListedSuppliersPostingCreatedAt,
 } from '../bq-utils.mjs';
 import {
   listedSuppliersPostingsTableSchema,
@@ -85,57 +83,25 @@ export async function loadRemonlinePostingsForListedSuppliers() {
     message: 'loadRemonlinePostingsForListedSuppliers',
   });
 
-  const suppliers = await getListedSuppliersFromBQ();
+  const maxCreatedAt = await getMaxListedSuppliersPostingCreatedAt();
+  const createdAtForApi = maxCreatedAt ? maxCreatedAt + 1000 : undefined;
+
+  const { postings } =
+    (await getPostings({ createdAt: createdAtForApi })) || {};
+
   devLog({
-    message: 'Fetched listed suppliers from BigQuery',
-    suppliersCount: suppliers.length,
+    maxCreatedAt,
+    createdAtForApi,
+    postingsCount: postings.length,
   });
 
-  if (!suppliers || suppliers.length === 0) {
-    devLog('No listed suppliers found in BigQuery.');
-    return;
-  }
-
-  const allPostings = [];
-
-  for (const supplier of suppliers) {
-    const supplierId = supplier.supplier_id;
-    const lastPostingAt = supplier.last_posting_at || 0;
-
-    if (!supplierId) {
-      continue;
-    }
-
-    try {
-      const { postings } = await getPostingsBySupplier({
-        supplierId,
-        createdAt: lastPostingAt + 1000,
-      });
-
-      devLog({
-        supplierId,
-        lastPostingAt,
-        postingsCount: postings.length,
-      });
-
-      allPostings.push(...postings);
-    } catch (e) {
-      console.error({
-        function: 'loadRemonlinePostingsForListedSuppliers',
-        message: 'Failed to load postings for supplier',
-        supplierId,
-        error: e?.message || e,
-      });
-    }
-  }
-
-  if (allPostings.length === 0) {
-    devLog('No postings to load for listed suppliers.');
+  if (!postings || postings.length === 0) {
+    devLog('No new postings to load.');
     return;
   }
 
   const { postingsRows, postingProductsRows } = splitPostingsAndProducts({
-    postings: allPostings,
+    postings,
   });
 
   try {
@@ -162,8 +128,6 @@ export async function loadRemonlinePostingsForListedSuppliers() {
         `${postingProductsRows.length} posting products have been uploaded to BQ table posting_products`
       );
     }
-
-    await updateSuppliersLastPostingAt();
   } catch (e) {
     if (e.errors) {
       console.error(e.errors[0]);
@@ -174,7 +138,7 @@ export async function loadRemonlinePostingsForListedSuppliers() {
   }
 }
 
-export async function resetRemonlinePostingsTables() {
+async function resetRemonlinePostingsTables() {
   await createOrResetTableByName({
     bqTableId: 'listed_suppliers_postings',
     schema: listedSuppliersPostingsTableSchema,
@@ -185,14 +149,11 @@ export async function resetRemonlinePostingsTables() {
     schema: postingProductsTableSchema,
     dataSetId: dataset_id,
   });
-  await resetSuppliersLastPostingAtToNull();
   devLog('RemOnline postings tables have been reset successfully.');
 }
 
 if (process.env.ENV === 'TEST') {
   devLog('Running loadRemonlinePostingsForListedSuppliers in TEST mode...');
-
-  // await updateSuppliersLastPostingAt();
   // await resetRemonlinePostingsTables();
   await remonlineTokenToEnv();
   await loadRemonlinePostingsForListedSuppliers();
