@@ -20,4 +20,3 @@ const loadRemonlinePostingsForListedSuppliersJob = CronJob.from({
 });
 
 export { loadRemonlinePostingsForListedSuppliersJob };
-

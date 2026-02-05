@@ -29,7 +29,7 @@ export function bqJobs() {
     loadRemonlineOrdersJob.stop();
     resetSecondaryRemonlineTablesJob.stop();
     loadSecondaryRemonlineTablesJob.stop();
-     loadRemonlinePostingsForListedSuppliersJob.stop();
+    loadRemonlinePostingsForListedSuppliersJob.stop();
     bqJobs();
   }
 }
