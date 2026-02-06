@@ -392,7 +392,15 @@ export async function getUOMs() {
   return { uoms, uom_types, entity_types };
 }
 
-export async function getPostings({ createdAt }, _page = 1, _postings = []) {
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+export async function getPostings(
+  { createdAt },
+  _page = 1,
+  _postings = [],
+  _attempt = 1
+) {
+  const MAX_RETRIES = 3;
   const createdAtUrl = createdAt ? `&created_at[]=${createdAt}` : '';
   const url = `${process.env.ROAPP_API}/warehouse/postings/?page=${_page}${createdAtUrl}&token=${process.env.REMONLINE_API_TOKEN}`;
 
@@ -407,17 +415,43 @@ export async function getPostings({ createdAt }, _page = 1, _postings = []) {
 
   if (
     response.status === 414 ||
-    response.status === 503 ||
     response.status === 502 ||
+    response.status === 503 ||
     response.status === 504
   ) {
+    if (_attempt <= MAX_RETRIES) {
+      const delay = 1000 * Math.pow(2, _attempt - 1);
+      devLog({
+        function: 'getPostings',
+        message: `API error: HTTP ${response.status}, retrying...`,
+        status: response.status,
+        url,
+        page: _page,
+        attempt: _attempt,
+        delayMs: delay,
+      });
+      await sleep(delay);
+      return await getPostings({ createdAt }, _page, _postings, _attempt + 1);
+    }
+
     devLog({
       function: 'getPostings',
-      message: `API error: HTTP ${response.status}`,
+      message: `API error after max retries: HTTP ${response.status}`,
       status: response.status,
       url,
+      page: _page,
+      attempt: _attempt,
+      fetchedPostingsSoFar: _postings.length,
     });
-    throw await response.text();
+
+    const error = new Error(
+      `RemOnline postings API failed after ${MAX_RETRIES} retries (status ${response.status})`
+    );
+    error.status = response.status;
+    error.page = _page;
+    error.url = url;
+    error.postings = _postings;
+    throw error;
   }
 
   let data;

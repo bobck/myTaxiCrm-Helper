@@ -295,20 +295,6 @@ export async function getBrandedLicencePlateNumbersFromBQ({
   return { brandedLicencePlateNumbers };
 }
 
-export async function getMaxListedSuppliersPostingCreatedAt() {
-  const query = `
-    SELECT MAX(created_at) AS maxCreatedAt
-    FROM \`up-statistics.RemOnline.remonline_postings\`
-  `;
-  const options = {
-    query,
-    location: 'US',
-  };
-
-  const [rows] = await bigquery.query(options);
-  const maxCreatedAt = rows?.[0]?.maxCreatedAt ?? 0;
-  return maxCreatedAt || 0;
-}
 /**
  * Deletes all rows from `datasetId.tableName` whose order_id matches one
  * of the IDs in `orders`. Runs as a single atomic DML job.

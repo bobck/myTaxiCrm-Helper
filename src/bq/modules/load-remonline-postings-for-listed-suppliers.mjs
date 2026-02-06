@@ -1,9 +1,9 @@
 import { getPostings } from '../../remonline/remonline.utils.mjs';
+import { createOrResetTableByName, loadRowsViaJSONFile } from '../bq-utils.mjs';
 import {
-  createOrResetTableByName,
-  loadRowsViaJSONFile,
-  getMaxListedSuppliersPostingCreatedAt,
-} from '../bq-utils.mjs';
+  getMaxPostingCreatedAt,
+  synchronizeRemonlinePostings,
+} from '../bq-queries.mjs';
 import {
   listedSuppliersPostingsTableSchema,
   postingProductsTableSchema,
@@ -83,11 +83,27 @@ export async function loadRemonlinePostingsForListedSuppliers() {
     message: 'loadRemonlinePostingsForListedSuppliers',
   });
 
-  const maxCreatedAt = await getMaxListedSuppliersPostingCreatedAt();
+  const maxCreatedAt = await getMaxPostingCreatedAt();
   const createdAtForApi = maxCreatedAt ? maxCreatedAt + 1000 : undefined;
 
-  const { postings } =
-    (await getPostings({ createdAt: createdAtForApi })) || {};
+  let postings = [];
+  try {
+    const result = await getPostings({ createdAt: createdAtForApi });
+    postings = result?.postings || [];
+  } catch (e) {
+    postings = e?.postings || [];
+    devLog({
+      function: 'loadRemonlinePostingsForListedSuppliers',
+      message: 'Error while fetching postings from RemOnline API',
+      error: {
+        status: e?.status,
+        page: e?.page,
+        url: e?.url,
+        message: e?.message,
+      },
+      postingsFetched: postings.length,
+    });
+  }
 
   devLog({
     maxCreatedAt,
@@ -128,6 +144,12 @@ export async function loadRemonlinePostingsForListedSuppliers() {
         `${postingProductsRows.length} posting products have been uploaded to BQ table posting_products`
       );
     }
+
+    const postingsForSync = postingsRows.map((p) => ({
+      id: p.id,
+      created_at: p.created_at,
+    }));
+    await synchronizeRemonlinePostings({ postings: postingsForSync });
   } catch (e) {
     if (e.errors) {
       console.error(e.errors[0]);
@@ -154,7 +176,7 @@ async function resetRemonlinePostingsTables() {
 
 if (process.env.ENV === 'TEST') {
   devLog('Running loadRemonlinePostingsForListedSuppliers in TEST mode...');
-  // await resetRemonlinePostingsTables();
+  await resetRemonlinePostingsTables();
   await remonlineTokenToEnv(true);
   await loadRemonlinePostingsForListedSuppliers();
 }
