@@ -131,32 +131,18 @@ export async function synchronizeRemonlinePostings({ postings }) {
     posting_id: p.id,
     created_at: p.created_at,
   }));
+
   const json = JSON.stringify(postingsArray);
 
-  const deleteSql = /*sql*/ `
-   DELETE FROM remonline_postings
-   WHERE posting_id IN (
-     SELECT json_extract(value, '$.posting_id')
-     FROM json_each(?)
-   )
- `;
-
   const insertSql = /*sql*/ `
-   INSERT INTO remonline_postings (posting_id, created_at)
+   INSERT OR IGNORE INTO remonline_postings (posting_id, created_at)
    SELECT
      json_extract(value, '$.posting_id'),
      json_extract(value, '$.created_at')
    FROM json_each(?)
  `;
 
-  await db.exec('BEGIN TRANSACTION');
-  try {
-    await db.run(deleteSql, json);
-    const insertedRows = await db.all(insertSql, json);
-    await db.exec('COMMIT');
-    return insertedRows;
-  } catch (err) {
-    await db.exec('ROLLBACK');
-    throw err;
-  }
+  // Append-only: rely on PRIMARY KEY + INSERT OR IGNORE to prevent duplicates
+  const insertedRows = await db.all(insertSql, json);
+  return insertedRows;
 }
