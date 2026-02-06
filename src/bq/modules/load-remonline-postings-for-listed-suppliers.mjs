@@ -176,7 +176,7 @@ async function resetRemonlinePostingsTables() {
 
 if (process.env.ENV === 'TEST') {
   devLog('Running loadRemonlinePostingsForListedSuppliers in TEST mode...');
-  await resetRemonlinePostingsTables();
+  // await resetRemonlinePostingsTables();
   await remonlineTokenToEnv(true);
   await loadRemonlinePostingsForListedSuppliers();
 }
