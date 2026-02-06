@@ -392,8 +392,6 @@ export async function getUOMs() {
   return { uoms, uom_types, entity_types };
 }
 
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
 export async function getPostings(
   { createdAt },
   _page = 1,
@@ -430,7 +428,6 @@ export async function getPostings(
         attempt: _attempt,
         delayMs: delay,
       });
-      await sleep(delay);
       return await getPostings({ createdAt }, _page, _postings, _attempt + 1);
     }
 
