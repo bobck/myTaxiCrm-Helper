@@ -146,3 +146,28 @@ export async function synchronizeRemonlinePostings({ postings }) {
   const insertedRows = await db.all(insertSql, json);
   return insertedRows;
 }
+
+export async function getPendingRemonlinePostingsForProductCells() {
+  const sql = /*sql*/ `
+      SELECT posting_id
+        FROM remonline_postings
+       WHERE is_product_cells_scrapped = 0
+       ORDER BY created_at ASC
+    `;
+  const rows = await db.all(sql);
+  return rows.map((row) => row.posting_id);
+}
+
+export async function markRemonlinePostingsAsProductCellsScrapped({ postingIds }) {
+  if (!postingIds || postingIds.length === 0) return;
+
+  const placeholders = postingIds.map(() => '?').join(',');
+  const sql = /*sql*/ `
+    UPDATE remonline_postings
+       SET is_product_cells_scrapped = 1
+     WHERE posting_id IN (${placeholders})
+  `;
+
+  await db.run(sql, ...postingIds);
+}
+

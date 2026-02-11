@@ -7,6 +7,7 @@ import { loadRemonlineOrdersJob } from './jobs/load-remonline-orders-job.mjs';
 import { resetSecondaryRemonlineTablesJob } from './jobs/reset-secondary-remonline-tables-job.mjs';
 import { loadSecondaryRemonlineTablesJob } from './jobs/load-secondary-remonline-tables-job.mjs';
 import { loadRemonlinePostingsJob } from './jobs/load-remonline-postings.mjs';
+import { remonlineProductCellsJob } from './jobs/remonline-product-cells-job.mjs';
 export function bqJobs() {
   console.log('bqJobs...');
   try {
@@ -18,6 +19,7 @@ export function bqJobs() {
     resetSecondaryRemonlineTablesJob.start();
     loadSecondaryRemonlineTablesJob.start();
     loadRemonlinePostingsJob.start();
+    remonlineProductCellsJob.start();
   } catch (error) {
     console.error('sync error, app down...');
     console.error({ time: new Date(), error });
@@ -30,6 +32,7 @@ export function bqJobs() {
     resetSecondaryRemonlineTablesJob.stop();
     loadSecondaryRemonlineTablesJob.stop();
     loadRemonlinePostingsJob.stop();
+    remonlineProductCellsJob.stop();
     bqJobs();
   }
 }
