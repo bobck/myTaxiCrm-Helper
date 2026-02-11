@@ -1,7 +1,6 @@
 import { saveAndUpdateSidListJob } from './jobs/save-and-update-sid-list.mjs';
 import { checkIsSidStatusWasUpdatedJob } from './jobs/update-sid-status-job.mjs';
 import { moveOrdersToCloseJob } from './jobs/close-orders-job.mjs';
-import { refreshPrivateApiTokensJob } from './jobs/refresh-private-api-tokens-job.mjs';
 
 export function remonlineJobs() {
   console.log('remonlineJobs...');
@@ -9,7 +8,6 @@ export function remonlineJobs() {
     saveAndUpdateSidListJob.start();
     checkIsSidStatusWasUpdatedJob.start();
     moveOrdersToCloseJob.start();
-    refreshPrivateApiTokensJob.start();
   } catch (error) {
     console.error('sync error, app down...');
     console.error({ time: new Date(), error });
@@ -18,7 +16,6 @@ export function remonlineJobs() {
     saveAndUpdateSidListJob.stop();
     checkIsSidStatusWasUpdatedJob.stop();
     moveOrdersToCloseJob.stop();
-    refreshPrivateApiTokensJob.stop();
 
     remonlineJobs();
   }

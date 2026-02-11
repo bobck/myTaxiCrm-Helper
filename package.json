@@ -65,8 +65,7 @@
     "syncAutoParksExcludedFromDCBRManually": "ENV=TEST node -r dotenv/config src/sheets/modules/sync-autoparks-excluded-from-dcbr-setting.mjs",
     "launchAPI:test": "ENV=TEST API_HOST=0.0.0.0 node -r dotenv/config src/api/api.mjs",
     "test:tariff": "ENV=TEST node -r dotenv/config src/web.api/modules/drivers-custom-tariff.mjs",
-    "test:remonline:listedPostings": "ENV=TEST node -r dotenv/config src/bq/modules/load-remonline-postings-for-listed-suppliers.mjs",
-    "test:remonline:refreshPrivateTokens": "ENV=TEST node -r dotenv/config src/remonline/modules/refresh-private-api-tokens.mjs"
+    "test:remonline:listedPostings": "ENV=TEST node -r dotenv/config src/bq/modules/load-remonline-postings-for-listed-suppliers.mjs"
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",
