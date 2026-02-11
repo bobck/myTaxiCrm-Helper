@@ -1,15 +1,15 @@
 import { CronJob } from 'cron';
-import { loadRemonlinePostingsForListedSuppliers } from '../modules/load-remonline-postings-for-listed-suppliers.mjs';
+import { loadRemonlinePostings } from '../modules/load-remonline-postings.mjs';
 
 const cronTime = '0 3 * * *'; // Runs every day at 3:00 AM
 const timeZone = 'Europe/Kiev';
 
-const loadRemonlinePostingsForListedSuppliersJob = CronJob.from({
+const loadRemonlinePostingsJob = CronJob.from({
   cronTime,
   timeZone,
   onTick: async () => {
     try {
-      await loadRemonlinePostingsForListedSuppliers();
+      await loadRemonlinePostings();
     } catch (e) {
       console.error(
         'An error occurred while loading RemOnline postings for listed suppliers.'
@@ -19,4 +19,4 @@ const loadRemonlinePostingsForListedSuppliersJob = CronJob.from({
   },
 });
 
-export { loadRemonlinePostingsForListedSuppliersJob };
+export { loadRemonlinePostingsJob };

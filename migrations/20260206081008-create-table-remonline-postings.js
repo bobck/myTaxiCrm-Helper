@@ -18,7 +18,8 @@ exports.up = function (db, callback) {
   const sql = `
     CREATE TABLE remonline_postings (
       posting_id INTEGER PRIMARY KEY,
-      created_at INTEGER NOT NULL
+      created_at INTEGER NOT NULL,
+      is_product_cells_scrapped BOOLEAN NOT NULL DEFAULT FALSE
     )
   `;
   db.runSql(sql, function (err) {

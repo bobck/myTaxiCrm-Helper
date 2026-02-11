@@ -76,7 +76,7 @@ function splitPostingsAndProducts({ postings }) {
   );
 }
 
-export async function loadRemonlinePostingsForListedSuppliers() {
+export async function loadRemonlinePostings() {
   const time = new Date();
   devLog({
     time,
@@ -176,7 +176,7 @@ async function resetRemonlinePostingsTables() {
 
 if (process.env.ENV === 'TEST') {
   devLog('Running loadRemonlinePostingsForListedSuppliers in TEST mode...');
-  // await resetRemonlinePostingsTables();
+  await resetRemonlinePostingsTables();
   await remonlineTokenToEnv(true);
-  await loadRemonlinePostingsForListedSuppliers();
+  await loadRemonlinePostings();
 }
