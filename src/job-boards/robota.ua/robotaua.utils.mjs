@@ -1,10 +1,17 @@
 import { devLog } from '../../shared/shared.utils.mjs';
 import RobotaUaApiClient from './robotaua.api.mjs';
 
-export const robotaUaAPI = await RobotaUaApiClient.initialize({
+let robotaUaAPI = await RobotaUaApiClient.initialize({
   email: process.env.ROBOTA_UA_EMAIL,
   password: process.env.ROBOTA_UA_PASSWORD,
 });
+
+export const reinitializeRobotaUaAPI = async () => {
+  robotaUaAPI = await RobotaUaApiClient.initialize({
+    email: process.env.ROBOTA_UA_EMAIL,
+    password: process.env.ROBOTA_UA_PASSWORD,
+  });
+};
 export const getVacancyList = async ({ last_page }) => {
   const vacancies = [];
   let data;
