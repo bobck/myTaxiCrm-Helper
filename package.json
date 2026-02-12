@@ -71,7 +71,7 @@
     "prisma:migrate:dev:all": "npm run prisma:migrate:dev:remonline",
     "prisma:migrate:deploy:remonline": "prisma migrate deploy --schema=./prisma/schema.remonline.prisma",
     "prisma:migrate:deploy:all": "npm run prisma:migrate:deploy:remonline",
-    "test:remonline:postings": "ENV=TEST node -r dotenv/config src/bq/modules/load-remonline-postings.mjs"
+    "test:remonline:postings": "ENV=TEST node -r dotenv/config src/remonline/modules/load-remonline-postings.mjs"
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",

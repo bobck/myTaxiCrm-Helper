@@ -393,14 +393,15 @@ export async function getUOMs() {
 }
 
 export async function getPostings(
-  { createdAt },
+  { createdAt, sort_dir = 'asc' },
   _page = 1,
   _postings = [],
   _attempt = 1
 ) {
   const MAX_RETRIES = 3;
   const createdAtUrl = createdAt ? `&created_at[]=${createdAt}` : '';
-  const url = `${process.env.ROAPP_API}/warehouse/postings/?page=${_page}${createdAtUrl}&token=${process.env.REMONLINE_API_TOKEN}`;
+  const sortDirUrl = sort_dir ? `&sort_dir=${sort_dir}` : '';
+  const url = `${process.env.ROAPP_API}/warehouse/postings/?page=${_page}${createdAtUrl}${sortDirUrl}&token=${process.env.REMONLINE_API_TOKEN}`;
 
   const options = {
     method: 'GET',
@@ -413,6 +414,8 @@ export async function getPostings(
 
   if (
     response.status === 414 ||
+    response.status === 429 ||
+    response.status === 500 ||
     response.status === 502 ||
     response.status === 503 ||
     response.status === 504
@@ -428,7 +431,7 @@ export async function getPostings(
         attempt: _attempt,
         delayMs: delay,
       });
-      return await getPostings({ createdAt }, _page, _postings, _attempt + 1);
+      return await getPostings({ createdAt, sort_dir }, _page, _postings, _attempt + 1);
     }
 
     devLog({
@@ -468,13 +471,37 @@ export async function getPostings(
   const { success } = data;
   if (!success) {
     const { message } = data;
-    console.error({
+    if (_attempt <= MAX_RETRIES) {
+      const delay = 1000 * Math.pow(2, _attempt - 1);
+      devLog({
+        function: 'getPostings',
+        message: `Unsuccessful response: ${message}, retrying in ${delay}ms...`,
+        status: response.status,
+        url,
+        page: _page,
+        attempt: _attempt,
+      });
+      await new Promise((r) => setTimeout(r, delay));
+      return await getPostings({ createdAt, sort_dir }, _page, _postings, _attempt + 1);
+    }
+
+    devLog({
       function: 'getPostings',
-      message: `Unsuccessful response: ${message}`,
+      message: `Unsuccessful response after max retries: ${message}`,
       status: response.status,
       url,
+      page: _page,
+      fetchedPostingsSoFar: _postings.length,
     });
-    return;
+
+    const error = new Error(
+      `RemOnline postings API unsuccessful after ${MAX_RETRIES} retries: ${message}`
+    );
+    error.status = response.status;
+    error.page = _page;
+    error.url = url;
+    error.postings = _postings;
+    throw error;
   }
 
   const { data: postings, count, page } = data;
@@ -491,12 +518,15 @@ export async function getPostings(
     postingsReceived: postings?.length,
     leftToFinish,
     pagesLeftToFetch: pagesLeft,
+    lastCreatedAt: postings?.length ? postings[postings.length - 1]?.created_at : null,
   });
 
   _postings.push(...postings);
-
+  // if ((process.env.ENV === 'DEV' || process.env.ENV === 'TEST')&& page>=10) {
+  //   return { postings: _postings, count };
+  // }
   if (leftToFinish > 0) {
-    return await getPostings({ createdAt }, parseInt(page) + 1, _postings);
+    return await getPostings({ createdAt, sort_dir }, parseInt(page) + 1, _postings);
   }
 
   devLog({
