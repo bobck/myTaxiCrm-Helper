@@ -2,6 +2,7 @@ import fetch from 'node-fetch';
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
 import { remonlineTokenToEnv } from './remonline.api.mjs';
+import { devLog } from '../shared/shared.utils.mjs';
 
 const db = await open({
   filename: process.env.DEV_DB,
@@ -389,4 +390,121 @@ export async function getUOMs() {
 
   const { uoms, uom_types, entity_types } = data;
   return { uoms, uom_types, entity_types };
+}
+
+export async function getPostings(
+  { createdAt },
+  _page = 1,
+  _postings = [],
+  _attempt = 1
+) {
+  const MAX_RETRIES = 3;
+  const createdAtUrl = createdAt ? `&created_at[]=${createdAt}` : '';
+  const url = `${process.env.ROAPP_API}/warehouse/postings/?page=${_page}${createdAtUrl}&token=${process.env.REMONLINE_API_TOKEN}`;
+
+  const options = {
+    method: 'GET',
+    headers: {
+      accept: 'application/json',
+    },
+  };
+
+  const response = await fetch(url, options);
+
+  if (
+    response.status === 414 ||
+    response.status === 502 ||
+    response.status === 503 ||
+    response.status === 504
+  ) {
+    if (_attempt <= MAX_RETRIES) {
+      const delay = 1000 * Math.pow(2, _attempt - 1);
+      devLog({
+        function: 'getPostings',
+        message: `API error: HTTP ${response.status}, retrying...`,
+        status: response.status,
+        url,
+        page: _page,
+        attempt: _attempt,
+        delayMs: delay,
+      });
+      return await getPostings({ createdAt }, _page, _postings, _attempt + 1);
+    }
+
+    devLog({
+      function: 'getPostings',
+      message: `API error after max retries: HTTP ${response.status}`,
+      status: response.status,
+      url,
+      page: _page,
+      attempt: _attempt,
+      fetchedPostingsSoFar: _postings.length,
+    });
+
+    const error = new Error(
+      `RemOnline postings API failed after ${MAX_RETRIES} retries (status ${response.status})`
+    );
+    error.status = response.status;
+    error.page = _page;
+    error.url = url;
+    error.postings = _postings;
+    throw error;
+  }
+
+  let data;
+  try {
+    data = await response.json();
+  } catch (e) {
+    console.error({
+      function: 'getPostings',
+      message: 'Error parsing JSON',
+      error: e,
+      response_status: response.status,
+      url,
+    });
+    return;
+  }
+
+  const { success } = data;
+  if (!success) {
+    const { message } = data;
+    console.error({
+      function: 'getPostings',
+      message: `Unsuccessful response: ${message}`,
+      status: response.status,
+      url,
+    });
+    return;
+  }
+
+  const { data: postings, count, page } = data;
+  const doneOnPrevPage = (page - 1) * 50;
+  const leftToFinish = count - doneOnPrevPage - postings.length;
+  const pageSize = postings.length || 50; // default should be total per page
+  const pagesLeft = leftToFinish > 0 ? Math.ceil(leftToFinish / pageSize) : 0;
+
+  devLog({
+    function: 'getPostings',
+    message: 'Fetched postings page',
+    page,
+    count,
+    postingsReceived: postings?.length,
+    leftToFinish,
+    pagesLeftToFetch: pagesLeft,
+  });
+
+  _postings.push(...postings);
+
+  if (leftToFinish > 0) {
+    return await getPostings({ createdAt }, parseInt(page) + 1, _postings);
+  }
+
+  devLog({
+    function: 'getPostings',
+    message: 'Finished fetching all postings',
+    totalPostings: _postings.length,
+    totalCount: count,
+  });
+
+  return { postings: _postings, count };
 }
