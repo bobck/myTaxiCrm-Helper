@@ -151,11 +151,11 @@ export async function loadRemonlinePostings() {
     }));
     await synchronizeRemonlinePostings({ postings: postingsForSync });
   } catch (e) {
-    if (e.errors) {
-      console.error(e.errors[0]);
-    } else {
-      console.error(e);
-    }
+    console.error({
+      module: 'loadRemonlinePostings',
+      date: new Date(),
+      error: e.errors ? e.errors[0] : e,
+    });
     throw e;
   }
 }
