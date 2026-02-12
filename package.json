@@ -66,14 +66,11 @@
     "launchAPI:test": "ENV=TEST API_HOST=0.0.0.0 node -r dotenv/config src/api/api.mjs",
     "test:tariff": "ENV=TEST node -r dotenv/config src/web.api/modules/drivers-custom-tariff.mjs",
     "prisma:gen:remonline": "prisma generate --schema=./prisma/schema.remonline.prisma",
-    "prisma:gen:bitrix": "prisma generate --schema=./prisma/schema.bitrix.prisma",
-    "prisma:gen:all": "npm run prisma:gen:remonline && npm run prisma:gen:bitrix",
-    "prisma:migrate:dev:bitrix": "prisma migrate dev --schema=./prisma/schema.bitrix.prisma",
+    "prisma:gen:all": "npm run prisma:gen:remonline",
     "prisma:migrate:dev:remonline": "prisma migrate dev --schema=./prisma/schema.remonline.prisma",
-    "prisma:migrate:dev:all": "npm run prisma:migrate:dev:remonline && npm run prisma:migrate:dev:bitrix",
-    "prisma:migrate:deploy:bitrix": "prisma migrate deploy --schema=./prisma/schema.bitrix.prisma",
+    "prisma:migrate:dev:all": "npm run prisma:migrate:dev:remonline",
     "prisma:migrate:deploy:remonline": "prisma migrate deploy --schema=./prisma/schema.remonline.prisma",
-    "prisma:migrate:deploy:all": "npm run prisma:migrate:deploy:remonline && npm run prisma:migrate:deploy:bitrix"
+    "prisma:migrate:deploy:all": "npm run prisma:migrate:deploy:remonline"
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",
