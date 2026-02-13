@@ -294,6 +294,7 @@ export async function getBrandedLicencePlateNumbersFromBQ({
 
   return { brandedLicencePlateNumbers };
 }
+
 /**
  * Deletes all rows from `datasetId.tableName` whose order_id matches one
  * of the IDs in `orders`. Runs as a single atomic DML job.
