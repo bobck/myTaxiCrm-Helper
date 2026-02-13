@@ -197,6 +197,17 @@ const fakeDatesMap = new Map([
   ['b775bed9-afae-4fe0-a7b5-55183f7234c4', '2026-01-08'],
   ['bc390195-066a-4275-99da-570fa3383a39', '2026-01-08'],
   ['35381fce-4ac8-44a9-ae58-e2d9f85b9df1', '2026-01-08'],
+  ['9cf0b28a-de80-4693-aa9e-74caa39c1a39', '2026-01-30'],
+  ['a133b449-ff5d-464d-9dc5-08ddbaa42d50', '2026-01-30'],
+  ['c2c852aa-7af6-446d-92dc-7a2f33fe1e4a', '2026-01-30'],
+  ['d7d64da3-f424-408b-9741-0242bdd0a75e', '2026-01-30'],
+  ['eaca7cdf-24ae-4cdc-9355-5e029ddf3fec', '2026-01-30'],
+  ['7b88f086-3d34-4886-a624-4acac95ff6c4', '2026-01-30'],
+  ['b4f8ab82-3544-49ce-a3f3-05e6ec7da7ac', '2026-01-30'],
+  ['19004300-826c-4049-bf35-480b46347c2e', '2026-01-30'],
+  ['da1ecb8f-d30c-480c-8db0-d7699f869fd9', '2026-01-30'],
+  ['8b482121-1a11-4f63-9197-9cd47460d8e4', '2026-01-30'],
+  ['b0f4d6fb-e264-4fb5-b61f-b170dc478fd3', '2026-01-30'],
 ]);
 
 export async function generateAndSavePolandBookkeepingReport({ autoParkId }) {
