@@ -431,7 +431,12 @@ export async function getPostings(
         attempt: _attempt,
         delayMs: delay,
       });
-      return await getPostings({ createdAt, sort_dir }, _page, _postings, _attempt + 1);
+      return await getPostings(
+        { createdAt, sort_dir },
+        _page,
+        _postings,
+        _attempt + 1
+      );
     }
 
     devLog({
@@ -482,7 +487,12 @@ export async function getPostings(
         attempt: _attempt,
       });
       await new Promise((r) => setTimeout(r, delay));
-      return await getPostings({ createdAt, sort_dir }, _page, _postings, _attempt + 1);
+      return await getPostings(
+        { createdAt, sort_dir },
+        _page,
+        _postings,
+        _attempt + 1
+      );
     }
 
     devLog({
@@ -518,7 +528,9 @@ export async function getPostings(
     postingsReceived: postings?.length,
     leftToFinish,
     pagesLeftToFetch: pagesLeft,
-    lastCreatedAt: postings?.length ? postings[postings.length - 1]?.created_at : null,
+    lastCreatedAt: postings?.length
+      ? postings[postings.length - 1]?.created_at
+      : null,
   });
 
   _postings.push(...postings);
@@ -526,7 +538,11 @@ export async function getPostings(
   //   return { postings: _postings, count };
   // }
   if (leftToFinish > 0) {
-    return await getPostings({ createdAt, sort_dir }, parseInt(page) + 1, _postings);
+    return await getPostings(
+      { createdAt, sort_dir },
+      parseInt(page) + 1,
+      _postings
+    );
   }
 
   devLog({

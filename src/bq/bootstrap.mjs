@@ -17,7 +17,6 @@ export function bqJobs() {
     loadRemonlineOrdersJob.start();
     resetSecondaryRemonlineTablesJob.start();
     loadSecondaryRemonlineTablesJob.start();
-
   } catch (error) {
     console.error('sync error, app down...');
     console.error({ time: new Date(), error });
