@@ -410,81 +410,89 @@ export async function getPostings(
     },
   };
 
-  const response = await fetch(url, options);
+  try {
+    const response = await fetch(url, options);
 
-  if (
-    response.status === 414 ||
-    response.status === 429 ||
-    response.status === 500 ||
-    response.status === 502 ||
-    response.status === 503 ||
-    response.status === 504
-  ) {
-    if (_attempt <= MAX_RETRIES) {
-      const delay = 1000 * Math.pow(2, _attempt - 1);
-      devLog({
-        function: 'getPostings',
-        message: `API error: HTTP ${response.status}, retrying...`,
-        status: response.status,
-        url,
-        page: _page,
-        attempt: _attempt,
-        delayMs: delay,
-      });
+    if (
+      response.status === 414 ||
+      response.status === 429 ||
+      response.status === 500 ||
+      response.status === 502 ||
+      response.status === 503 ||
+      response.status === 504
+    ) {
+      const error = new Error(`API error: HTTP ${response.status}`);
+      error.status = response.status;
+      throw error;
+    }
+
+    let data;
+    try {
+      data = await response.json();
+    } catch (e) {
+      const error = new Error('Error parsing JSON');
+      error.originalError = e;
+      error.status = response.status;
+      throw error;
+    }
+
+    const { success } = data;
+    if (!success) {
+      const { message } = data;
+      const error = new Error(`Unsuccessful response: ${message}`);
+      error.status = response.status;
+      error.data = data;
+      throw error;
+    }
+
+    const { data: postings, count, page } = data;
+    const doneOnPrevPage = (page - 1) * 50;
+    const leftToFinish = count - doneOnPrevPage - postings.length;
+    const pageSize = postings.length || 50;
+    const pagesLeft = leftToFinish > 0 ? Math.ceil(leftToFinish / pageSize) : 0;
+
+    devLog({
+      function: 'getPostings',
+      message: 'Fetched postings page',
+      page,
+      count,
+      postingsReceived: postings?.length,
+      leftToFinish,
+      pagesLeftToFetch: pagesLeft,
+      lastCreatedAt: postings?.length
+        ? postings[postings.length - 1]?.created_at
+        : null,
+    });
+
+    _postings.push(...postings);
+
+    if (leftToFinish > 0) {
       return await getPostings(
         { createdAt, sort_dir },
-        _page,
-        _postings,
-        _attempt + 1
+        parseInt(page) + 1,
+        _postings
       );
     }
 
     devLog({
       function: 'getPostings',
-      message: `API error after max retries: HTTP ${response.status}`,
-      status: response.status,
-      url,
-      page: _page,
-      attempt: _attempt,
-      fetchedPostingsSoFar: _postings.length,
+      message: 'Finished fetching all postings',
+      totalPostings: _postings.length,
+      totalCount: count,
     });
 
-    const error = new Error(
-      `RemOnline postings API failed after ${MAX_RETRIES} retries (status ${response.status})`
-    );
-    error.status = response.status;
-    error.page = _page;
-    error.url = url;
-    error.postings = _postings;
-    throw error;
-  }
-
-  let data;
-  try {
-    data = await response.json();
-  } catch (e) {
-    console.error({
-      function: 'getPostings',
-      message: 'Error parsing JSON',
-      error: e,
-      response_status: response.status,
-      url,
-    });
-    return;
-  }
-
-  const { success } = data;
-  if (!success) {
-    const { message } = data;
+    return { postings: _postings, count };
+  } catch (error) {
     if (_attempt <= MAX_RETRIES) {
       const delay = 1000 * Math.pow(2, _attempt - 1);
       devLog({
         function: 'getPostings',
-        message: `Unsuccessful response: ${message}, retrying in ${delay}ms...`,
-        status: response.status,
+        message: `Retryable error: ${error.message}, retrying...`,
+        status: error.status,
         url,
         page: _page,
         attempt: _attempt,
+        delayMs: delay,
       });
       await new Promise((r) => setTimeout(r, delay));
       return await getPostings(
@@ -497,60 +505,17 @@ export async function getPostings(
 
     devLog({
       function: 'getPostings',
-      message: `Unsuccessful response after max retries: ${message}`,
-      status: response.status,
+      message: `Error after max retries: ${error.message}`,
+      status: error.status,
       url,
       page: _page,
+      attempt: _attempt,
       fetchedPostingsSoFar: _postings.length,
     });
 
-    const error = new Error(
-      `RemOnline postings API unsuccessful after ${MAX_RETRIES} retries: ${message}`
-    );
-    error.status = response.status;
     error.page = _page;
     error.url = url;
     error.postings = _postings;
     throw error;
   }
-
-  const { data: postings, count, page } = data;
-  const doneOnPrevPage = (page - 1) * 50;
-  const leftToFinish = count - doneOnPrevPage - postings.length;
-  const pageSize = postings.length || 50; // default should be total per page
-  const pagesLeft = leftToFinish > 0 ? Math.ceil(leftToFinish / pageSize) : 0;
-
-  devLog({
-    function: 'getPostings',
-    message: 'Fetched postings page',
-    page,
-    count,
-    postingsReceived: postings?.length,
-    leftToFinish,
-    pagesLeftToFetch: pagesLeft,
-    lastCreatedAt: postings?.length
-      ? postings[postings.length - 1]?.created_at
-      : null,
-  });
-
-  _postings.push(...postings);
-  // if ((process.env.ENV === 'DEV' || process.env.ENV === 'TEST')&& page>=10) {
-  //   return { postings: _postings, count };
-  // }
-  if (leftToFinish > 0) {
-    return await getPostings(
-      { createdAt, sort_dir },
-      parseInt(page) + 1,
-      _postings
-    );
-  }
-
-  devLog({
-    function: 'getPostings',
-    message: 'Finished fetching all postings',
-    totalPostings: _postings.length,
-    totalCount: count,
-  });
-
-  return { postings: _postings, count };
 }
