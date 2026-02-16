@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { telegramJobs } from './src/telegram/bootstrap.mjs';
 import { sheetJobs } from './src/sheets/bootstrap.mjs';
 import { remonlineJobs } from './src/remonline/bootstrap.mjs';
