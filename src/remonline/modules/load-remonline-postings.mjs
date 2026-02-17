@@ -80,11 +80,13 @@ export async function loadRemonlinePostings() {
   const maxCreatedAt = latestPosting?.createdAt
     ? Number(latestPosting.createdAt)
     : 0;
-  const createdAtForApi = maxCreatedAt ? maxCreatedAt + 1000 : undefined;
+  const createdAtFrom = maxCreatedAt ? maxCreatedAt + 1000 : 1000;
+  const createdAtTo = Date.now();
+  devLog({ createdAtFrom, createdAtTo });
 
   let postings = [];
   try {
-    const result = await getPostings({ createdAt: createdAtForApi });
+    const result = await getPostings({ createdAtFrom, createdAtTo });
     postings = result?.postings || [];
   } catch (e) {
     postings = e?.postings || [];
@@ -103,7 +105,8 @@ export async function loadRemonlinePostings() {
 
   devLog({
     maxCreatedAt,
-    createdAtForApi,
+    createdAtFrom,
+    createdAtTo,
     postingsCount: postings?.length,
   });
 
@@ -118,20 +121,6 @@ export async function loadRemonlinePostings() {
 
   try {
     if (postingsRows.length > 0) {
-      const seenPostingIds = new Set();
-      const duplicatePostings = postingsRows.filter((p) => {
-        if (seenPostingIds.has(p.id)) return true;
-        seenPostingIds.add(p.id);
-        return false;
-      });
-      if (duplicatePostings.length > 0) {
-        console.error({
-          message: 'Duplicate posting IDs in batch',
-          count: duplicatePostings.length,
-          ids: duplicatePostings.map((p) => p.id),
-        });
-      }
-
       await prisma.posting.createMany({
         data: postingsRows,
         skipDuplicates: true,
@@ -142,21 +131,6 @@ export async function loadRemonlinePostings() {
     }
 
     if (postingProductsRows.length > 0) {
-      const seenProductKeys = new Set();
-      const duplicateProducts = postingProductsRows.filter((p) => {
-        const key = `${p.id}_${p.postingId}`;
-        if (seenProductKeys.has(key)) return true;
-        seenProductKeys.add(key);
-        return false;
-      });
-      if (duplicateProducts.length > 0) {
-        console.error({
-          message: 'Duplicate product keys (id + postingId) in batch',
-          count: duplicateProducts.length,
-          keys: duplicateProducts.map((p) => `${p.id}_${p.postingId}`),
-        });
-      }
-
       await prisma.postingProduct.createMany({
         data: postingProductsRows,
         skipDuplicates: true,

@@ -393,15 +393,16 @@ export async function getUOMs() {
 }
 
 export async function getPostings(
-  { createdAt, sort_dir = 'asc' },
+  { createdAtFrom, createdAtTo },
   _page = 1,
   _postings = [],
   _attempt = 1
 ) {
   const MAX_RETRIES = 3;
-  const createdAtUrl = createdAt ? `&created_at[]=${createdAt}` : '';
-  const sortDirUrl = sort_dir ? `&sort_dir=${sort_dir}` : '';
-  const url = `${process.env.ROAPP_API}/warehouse/postings/?page=${_page}${createdAtUrl}${sortDirUrl}&token=${process.env.REMONLINE_API_TOKEN}`;
+  let createdAtUrl = '';
+  if (createdAtFrom) createdAtUrl += `&created_at[]=${createdAtFrom}`;
+  if (createdAtTo) createdAtUrl += `&created_at[]=${createdAtTo}`;
+  const url = `${process.env.ROAPP_API}/warehouse/postings/?page=${_page}${createdAtUrl}&token=${process.env.REMONLINE_API_TOKEN}`;
 
   const options = {
     method: 'GET',
@@ -468,7 +469,7 @@ export async function getPostings(
 
     if (leftToFinish > 0) {
       return await getPostings(
-        { createdAt, sort_dir },
+        { createdAtFrom, createdAtTo },
         parseInt(page) + 1,
         _postings
       );
@@ -496,7 +497,7 @@ export async function getPostings(
       });
       await new Promise((r) => setTimeout(r, delay));
       return await getPostings(
-        { createdAt, sort_dir },
+        { createdAtFrom, createdAtTo },
         _page,
         _postings,
         _attempt + 1
