@@ -24,8 +24,9 @@ CREATE TABLE "posting_products" (
     "price" DOUBLE PRECISION NOT NULL,
     "is_serial" BOOLEAN NOT NULL,
     "sernums" JSONB,
+    "serial_number" TEXT NOT NULL DEFAULT '',
 
-    CONSTRAINT "posting_products_pkey" PRIMARY KEY ("id","posting_id")
+    CONSTRAINT "posting_products_pkey" PRIMARY KEY ("id","posting_id","serial_number")
 );
 
 -- AddForeignKey
