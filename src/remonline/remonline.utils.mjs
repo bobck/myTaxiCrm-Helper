@@ -2,6 +2,7 @@ import fetch from 'node-fetch';
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
 import { remonlineTokenToEnv } from './remonline.api.mjs';
+import { devLog } from '../shared/shared.utils.mjs';
 
 const db = await open({
   filename: process.env.DEV_DB,
@@ -389,4 +390,134 @@ export async function getUOMs() {
 
   const { uoms, uom_types, entity_types } = data;
   return { uoms, uom_types, entity_types };
+}
+
+export async function getPostings(
+  { createdAtFrom, createdAtTo },
+  _page = 1,
+  _postings = [],
+  _attempt = 1
+) {
+  const MAX_RETRIES = 3;
+  if (!createdAtFrom && !createdAtTo) {
+    return { postings: _postings };
+  }
+  const createdAtUrl = `&created_at[]=${createdAtFrom}&created_at[]=${createdAtTo}`;
+  const url = `${process.env.ROAPP_API}/warehouse/postings/?page=${_page}${createdAtUrl}&token=${process.env.REMONLINE_API_TOKEN}`;
+
+  const options = {
+    method: 'GET',
+    headers: {
+      accept: 'application/json',
+    },
+  };
+
+  try {
+    const response = await fetch(url, options);
+
+    if (
+      response.status === 414 ||
+      response.status === 429 ||
+      response.status === 500 ||
+      response.status === 502 ||
+      response.status === 503 ||
+      response.status === 504
+    ) {
+      const error = new Error(`API error: HTTP ${response.status}`);
+      error.status = response.status;
+      throw error;
+    }
+
+    let data;
+    try {
+      data = await response.json();
+    } catch (e) {
+      const error = new Error('Error parsing JSON');
+      error.originalError = e;
+      error.status = response.status;
+      throw error;
+    }
+
+    const { success } = data;
+    if (!success) {
+      const { message } = data;
+      const error = new Error(`Unsuccessful response: ${message}`);
+      error.status = response.status;
+      error.data = data;
+      throw error;
+    }
+
+    const { data: postings, count, page } = data;
+    const doneOnPrevPage = (page - 1) * 50;
+    const leftToFinish = count - doneOnPrevPage - postings.length;
+    const pageSize = postings.length || 50;
+    const pagesLeft = leftToFinish > 0 ? Math.ceil(leftToFinish / pageSize) : 0;
+
+    devLog({
+      function: 'getPostings',
+      message: 'Fetched postings page',
+      page,
+      count,
+      postingsReceived: postings?.length,
+      leftToFinish,
+      pagesLeftToFetch: pagesLeft,
+      lastCreatedAt: postings?.length
+        ? postings[postings.length - 1]?.created_at
+        : null,
+    });
+
+    _postings.push(...postings);
+
+    if (leftToFinish > 0) {
+      return await getPostings(
+        { createdAtFrom, createdAtTo },
+        parseInt(page) + 1,
+        _postings
+      );
+    }
+
+    devLog({
+      function: 'getPostings',
+      message: 'Finished fetching all postings',
+      totalPostings: _postings.length,
+      totalCount: count,
+    });
+
+    return { postings: _postings, count };
+  } catch (error) {
+    if (_attempt <= MAX_RETRIES) {
+      const delay = 1000 * Math.pow(2, _attempt - 1);
+      devLog({
+        function: 'getPostings',
+        message: `Retryable error: ${error.message}, retrying...`,
+        status: error.status,
+        url,
+        page: _page,
+        attempt: _attempt,
+        delayMs: delay,
+      });
+      await new Promise((r) => setTimeout(r, delay));
+      return await getPostings(
+        { createdAtFrom, createdAtTo },
+        _page,
+        _postings,
+        _attempt + 1
+      );
+    }
+
+    devLog({
+      function: 'getPostings',
+      message: `Error after max retries: ${error.message}`,
+      status: error.status,
+      url,
+      page: _page,
+      attempt: _attempt,
+      fetchedPostingsSoFar: _postings.length,
+    });
+
+    error.page = _page;
+    error.url = url;
+    error.postings = _postings;
+    throw error;
+  }
 }
