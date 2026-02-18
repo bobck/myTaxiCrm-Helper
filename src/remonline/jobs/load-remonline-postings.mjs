@@ -1,7 +1,7 @@
 import { CronJob } from 'cron';
 import { loadRemonlinePostings } from '../modules/load-remonline-postings.mjs';
 
-const cronTime = '0 * * * *'; 
+const cronTime = '0 * * * *';
 const timeZone = 'Europe/Kiev';
 
 const loadRemonlinePostingsJob = CronJob.from({
