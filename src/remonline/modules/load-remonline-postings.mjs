@@ -1,17 +1,7 @@
-import { getPostings } from '../../remonline/remonline.utils.mjs';
-import { createOrResetTableByName, loadRowsViaJSONFile } from '../bq-utils.mjs';
-import {
-  getMaxPostingCreatedAt,
-  synchronizeRemonlinePostings,
-} from '../bq-queries.mjs';
-import {
-  listedSuppliersPostingsTableSchema,
-  postingProductsTableSchema,
-} from '../schemas.mjs';
+import { getPostings } from '../remonline.utils.mjs';
+import prisma from '../remonline.prisma.mjs';
 import { devLog } from '../../shared/shared.utils.mjs';
-import { remonlineTokenToEnv } from '../../remonline/remonline.api.mjs';
-
-const dataset_id = 'RemOnline';
+import { remonlineTokenToEnv } from '../remonline.api.mjs';
 
 function splitPostingsAndProducts({ postings }) {
   return postings.reduce(
@@ -30,13 +20,13 @@ function splitPostingsAndProducts({ postings }) {
 
       const postingRow = {
         id,
-        id_label,
-        created_at,
-        created_by_id,
-        supplier_id,
-        warehouse_id,
+        idLabel: id_label,
+        createdAt: created_at,
+        createdById: created_by_id,
+        supplierId: supplier_id,
+        warehouseId: warehouse_id,
         description,
-        document_number,
+        documentNumber: document_number,
       };
 
       acc.postingsRows.push(postingRow);
@@ -54,17 +44,20 @@ function splitPostingsAndProducts({ postings }) {
           sernums,
         } = product;
 
+        const serialNumber = sernums?.[0]?.code || '';
+
         const productRow = {
           id: productId,
-          posting_id: id,
+          postingId: id,
           title,
-          uom_id: uom?.id,
+          uomId: uom?.id,
           code,
           article,
           amount,
           price,
-          is_serial,
+          isSerial: is_serial,
           sernums,
+          serialNumber,
         };
 
         acc.postingProductsRows.push(productRow);
@@ -83,12 +76,20 @@ export async function loadRemonlinePostings() {
     message: 'loadRemonlinePostingsForListedSuppliers',
   });
 
-  const maxCreatedAt = await getMaxPostingCreatedAt();
-  const createdAtForApi = maxCreatedAt ? maxCreatedAt + 1000 : undefined;
+  const latestPosting = await prisma.posting.findFirst({
+    orderBy: { createdAt: 'desc' },
+    select: { createdAt: true },
+  });
+  const maxCreatedAt = latestPosting?.createdAt
+    ? Number(latestPosting.createdAt)
+    : 0;
+  const createdAtFrom = maxCreatedAt ? maxCreatedAt + 1000 : 1000;
+  const createdAtTo = Date.now();
+  devLog({ createdAtFrom, createdAtTo });
 
   let postings = [];
   try {
-    const result = await getPostings({ createdAt: createdAtForApi });
+    const result = await getPostings({ createdAtFrom, createdAtTo });
     postings = result?.postings || [];
   } catch (e) {
     postings = e?.postings || [];
@@ -104,10 +105,15 @@ export async function loadRemonlinePostings() {
       postingsFetched: postings.length,
     });
   }
+  if (postings.length === 0) {
+    devLog('No new postings to load.');
+    return;
+  }
 
   devLog({
     maxCreatedAt,
-    createdAtForApi,
+    createdAtFrom,
+    createdAtTo,
     postingsCount: postings?.length,
   });
 
@@ -122,34 +128,30 @@ export async function loadRemonlinePostings() {
 
   try {
     if (postingsRows.length > 0) {
-      await loadRowsViaJSONFile({
-        dataset_id,
-        table_id: 'remonline_postings',
-        rows: postingsRows,
-        schema: listedSuppliersPostingsTableSchema,
-      });
+      await prisma.$transaction(
+        async (tx) => {
+          await tx.posting.createMany({
+            data: postingsRows,
+          });
+
+          await tx.postingProduct.createMany({
+            data: postingProductsRows,
+          });
+        },
+        {
+          maxWait: 5000, // default: 2000
+          timeout: 20000, // default: 5000
+        }
+      );
+
       devLog(
-        `${postingsRows.length} postings have been uploaded to BQ table remonline_postings`
+        `${postingsRows.length} postings have been uploaded to remonline_postings`
+      );
+
+      devLog(
+        `${postingProductsRows.length} posting products have been uploaded to posting_products`
       );
     }
-
-    if (postingProductsRows.length > 0) {
-      await loadRowsViaJSONFile({
-        dataset_id,
-        table_id: 'posting_products',
-        rows: postingProductsRows,
-        schema: postingProductsTableSchema,
-      });
-      devLog(
-        `${postingProductsRows.length} posting products have been uploaded to BQ table posting_products`
-      );
-    }
-
-    const postingsForSync = postingsRows.map((p) => ({
-      id: p.id,
-      created_at: p.created_at,
-    }));
-    await synchronizeRemonlinePostings({ postings: postingsForSync });
   } catch (e) {
     console.error({
       module: 'loadRemonlinePostings',
@@ -160,23 +162,8 @@ export async function loadRemonlinePostings() {
   }
 }
 
-async function resetRemonlinePostingsTables() {
-  await createOrResetTableByName({
-    bqTableId: 'remonline_postings',
-    schema: listedSuppliersPostingsTableSchema,
-    dataSetId: dataset_id,
-  });
-  await createOrResetTableByName({
-    bqTableId: 'posting_products',
-    schema: postingProductsTableSchema,
-    dataSetId: dataset_id,
-  });
-  devLog('RemOnline postings tables have been reset successfully.');
-}
-
 if (process.env.ENV === 'TEST') {
   devLog('Running loadRemonlinePostingsForListedSuppliers in TEST mode...');
-  await resetRemonlinePostingsTables();
   await remonlineTokenToEnv(true);
   await loadRemonlinePostings();
 }

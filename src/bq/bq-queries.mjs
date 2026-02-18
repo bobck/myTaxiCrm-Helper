@@ -123,26 +123,3 @@ export async function getMaxPostingCreatedAt() {
   const row = await db.get(sql);
   return row?.maxCreatedAt ?? 0;
 }
-
-export async function synchronizeRemonlinePostings({ postings }) {
-  if (!postings || postings.length === 0) return [];
-
-  const postingsArray = postings.map((p) => ({
-    posting_id: p.id,
-    created_at: p.created_at,
-  }));
-
-  const json = JSON.stringify(postingsArray);
-
-  const insertSql = /*sql*/ `
-   INSERT OR IGNORE INTO remonline_postings (posting_id, created_at)
-   SELECT
-     json_extract(value, '$.posting_id'),
-     json_extract(value, '$.created_at')
-   FROM json_each(?)
- `;
-
-  // Append-only: rely on PRIMARY KEY + INSERT OR IGNORE to prevent duplicates
-  const insertedRows = await db.all(insertSql, json);
-  return insertedRows;
-}

@@ -396,26 +396,3 @@ export const closedPolishBitrixDealsTableSchema = [
   { name: 'is_rescheduled', type: 'BOOLEAN', mode: 'REQUIRED' },
   { name: 'date', type: 'DATE', mode: 'REQUIRED' },
 ];
-export const listedSuppliersPostingsTableSchema = [
-  { name: 'id', type: 'INTEGER', mode: 'REQUIRED' },
-  { name: 'id_label', type: 'STRING', mode: 'REQUIRED' },
-  { name: 'created_at', type: 'INT64', mode: 'REQUIRED' },
-  { name: 'created_by_id', type: 'INTEGER', mode: 'REQUIRED' },
-  { name: 'supplier_id', type: 'INTEGER', mode: 'REQUIRED' },
-  { name: 'warehouse_id', type: 'INTEGER', mode: 'REQUIRED' },
-  { name: 'description', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'document_number', type: 'STRING', mode: 'NULLABLE' },
-];
-
-export const postingProductsTableSchema = [
-  { name: 'id', type: 'INTEGER', mode: 'REQUIRED' },
-  { name: 'posting_id', type: 'INTEGER', mode: 'REQUIRED' },
-  { name: 'title', type: 'STRING', mode: 'REQUIRED' },
-  { name: 'uom_id', type: 'INTEGER', mode: 'REQUIRED' },
-  { name: 'code', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'article', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'amount', type: 'FLOAT', mode: 'REQUIRED' },
-  { name: 'price', type: 'FLOAT', mode: 'REQUIRED' },
-  { name: 'is_serial', type: 'BOOLEAN', mode: 'REQUIRED' },
-  { name: 'sernums', type: 'JSON', mode: 'NULLABLE' },
-];
