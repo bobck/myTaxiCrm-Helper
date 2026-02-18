@@ -44,6 +44,8 @@ function splitPostingsAndProducts({ postings }) {
           sernums,
         } = product;
 
+        const serialNumber = sernums?.[0]?.code || '';
+
         const productRow = {
           id: productId,
           postingId: id,
@@ -55,6 +57,7 @@ function splitPostingsAndProducts({ postings }) {
           price,
           isSerial: is_serial,
           sernums,
+          serialNumber,
         };
 
         acc.postingProductsRows.push(productRow);
@@ -129,12 +132,10 @@ export async function loadRemonlinePostings() {
         async (tx) => {
           await tx.posting.createMany({
             data: postingsRows,
-            skipDuplicates: true,
           });
 
           await tx.postingProduct.createMany({
             data: postingProductsRows,
-            skipDuplicates: true,
           });
         },
         {

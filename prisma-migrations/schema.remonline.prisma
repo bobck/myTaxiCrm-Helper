@@ -23,18 +23,19 @@ model Posting {
 }
 
 model PostingProduct {
-  id        Int
-  postingId Int              @map("posting_id")
-  title     String
-  uomId     Int              @map("uom_id")
-  code      String?
-  article   String?
-  amount    Float
-  price     Float
-  isSerial  Boolean          @map("is_serial")
-  sernums   Json?
-  posting   Posting          @relation(fields: [postingId], references: [id])
+  id           Int
+  postingId    Int     @map("posting_id")
+  title        String
+  uomId        Int     @map("uom_id")
+  code         String?
+  article      String?
+  amount       Float
+  price        Float
+  isSerial     Boolean @map("is_serial")
+  sernums      Json?
+  serialNumber String  @default("") @map("serial_number")
+  posting      Posting @relation(fields: [postingId], references: [id])
 
-  @@id([id, postingId])
+  @@id([id, postingId, serialNumber])
   @@map("posting_products")
 }
