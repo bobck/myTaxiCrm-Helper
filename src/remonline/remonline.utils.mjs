@@ -399,9 +399,10 @@ export async function getPostings(
   _attempt = 1
 ) {
   const MAX_RETRIES = 3;
-  let createdAtUrl = '';
-  if (createdAtFrom) createdAtUrl += `&created_at[]=${createdAtFrom}`;
-  if (createdAtTo) createdAtUrl += `&created_at[]=${createdAtTo}`;
+  if (!createdAtFrom && !createdAtTo) {
+    return { postings: _postings };
+  }
+  const createdAtUrl = `&created_at[]=${createdAtFrom}&created_at[]=${createdAtTo}`;
   const url = `${process.env.ROAPP_API}/warehouse/postings/?page=${_page}${createdAtUrl}&token=${process.env.REMONLINE_API_TOKEN}`;
 
   const options = {

@@ -102,6 +102,10 @@ export async function loadRemonlinePostings() {
       postingsFetched: postings.length,
     });
   }
+  if (postings.length === 0) {
+    devLog('No new postings to load.');
+    return;
+  }
 
   devLog({
     maxCreatedAt,
@@ -121,20 +125,28 @@ export async function loadRemonlinePostings() {
 
   try {
     if (postingsRows.length > 0) {
-      await prisma.posting.createMany({
-        data: postingsRows,
-        skipDuplicates: true,
-      });
+      await prisma.$transaction(
+        async (tx) => {
+          await tx.posting.createMany({
+            data: postingsRows,
+            skipDuplicates: true,
+          });
+
+          await tx.postingProduct.createMany({
+            data: postingProductsRows,
+            skipDuplicates: true,
+          });
+        },
+        {
+          maxWait: 5000, // default: 2000
+          timeout: 20000, // default: 5000
+        }
+      );
+
       devLog(
         `${postingsRows.length} postings have been uploaded to remonline_postings`
       );
-    }
 
-    if (postingProductsRows.length > 0) {
-      await prisma.postingProduct.createMany({
-        data: postingProductsRows,
-        skipDuplicates: true,
-      });
       devLog(
         `${postingProductsRows.length} posting products have been uploaded to posting_products`
       );
