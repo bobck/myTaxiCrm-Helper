@@ -1,11 +1,13 @@
 generator client {
-  provider = "prisma-client-js"
-  output   = "../node_modules/@prisma/client-remonline"
+  provider        = "prisma-client-js"
+  output          = "../node_modules/@prisma/client-remonline"
+  previewFeatures = ["multiSchema"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL_REMONLINE")
+  schemas  = ["public", "private_api"]
 }
 
 model Posting {
@@ -20,6 +22,7 @@ model Posting {
   products       PostingProduct[]
 
   @@map("postings")
+  @@schema("public")
 }
 
 model PostingProduct {
@@ -38,35 +41,40 @@ model PostingProduct {
 
   @@id([id, postingId, serialNumber])
   @@map("posting_products")
+  @@schema("public")
 }
-model PrivateApiWarehouseCellsToPostingProducts {
-  postingId                    Int      @map("posting_id")
-  postingItemId                Int      @map("posting_item_id")
-  productId                    Int      @map("product_id")
-  cellId                       Int      @map("cell_id")
-  cellTitle                    String?  @map("cell_title")
-  warehouseId                  Int?     @map("warehouse_id")
-  code                         String?
-  article                      String?
-  title                        String?
-  uomId                        Int?     @map("uom_id")
-  quantity                     Float?
-  cost                         Float?
-  totalCost                    Float?   @map("total_cost")
-  snAccounting                 Boolean? @map("sn_accounting")
-  sernumsJson                  String?  @map("sernums_json")
-  warranty                     Int?
-  warrantyPeriod               Int?     @map("warranty_period")
-  isCustomTaxes                Boolean? @map("is_custom_taxes")
-  taxesJson                    String?  @map("taxes_json")
-  isEnableExpirationTracking   Boolean? @map("is_enable_expiration_tracking")
-  isExpiringSoonAlertEnabled   Boolean? @map("is_expiring_soon_alert_enabled")
-  isCriticalAlertEnabled       Boolean? @map("is_critical_alert_enabled")
-  expiringSoonAlertValue       Int?     @map("expiring_soon_alert_value")
-  criticalAlertValue           Int?     @map("critical_alert_value")
-  expiringSoonAlertUnit        Int?     @map("expiring_soon_alert_unit")
-  criticalAlertUnit            Int?     @map("critical_alert_unit")
 
-  @@id([postingId, postingItemId])
-  @@map("private_api_warehouse_cells_to_posting_products")
+model PrivateApiPostingProducts {
+  postingId                  Int      @map("posting_id")
+  postingItemId              Int      @map("posting_item_id")
+  productId                  Int      @map("product_id")
+  cellId                     Int      @map("cell_id")
+  cellTitle                  String?  @map("cell_title")
+  warehouseId                Int?     @map("warehouse_id")
+  code                       String?
+  article                    String?
+  title                      String?
+  uomId                      Int?     @map("uom_id")
+  quantity                   Float?
+  cost                       Float?
+  totalCost                  Float?   @map("total_cost")
+  snAccounting               Boolean? @map("sn_accounting")
+  sernumsJson                String?  @map("sernums_json")
+  warranty                   Int?
+  warrantyPeriod             Int?     @map("warranty_period")
+  isCustomTaxes              Boolean? @map("is_custom_taxes")
+  taxesJson                  String?  @map("taxes_json")
+  isEnableExpirationTracking Boolean? @map("is_enable_expiration_tracking")
+  isExpiringSoonAlertEnabled Boolean? @map("is_expiring_soon_alert_enabled")
+  isCriticalAlertEnabled     Boolean? @map("is_critical_alert_enabled")
+  expiringSoonAlertValue     Int?     @map("expiring_soon_alert_value")
+  criticalAlertValue         Int?     @map("critical_alert_value")
+  expiringSoonAlertUnit      Int?     @map("expiring_soon_alert_unit")
+  criticalAlertUnit          Int?     @map("critical_alert_unit")
+
+  serialNumber String @default("") @map("serial_number")
+
+  @@id([postingId, postingItemId, serialNumber])
+  @@map("posting_products")
+  @@schema("private_api")
 }

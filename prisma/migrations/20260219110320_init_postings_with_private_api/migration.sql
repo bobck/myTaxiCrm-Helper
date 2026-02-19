@@ -1,5 +1,8 @@
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "private_api";
+
 -- CreateTable
-CREATE TABLE "private_api_warehouse_cells_to_posting_products" (
+CREATE TABLE "private_api"."posting_products" (
     "posting_id" INTEGER NOT NULL,
     "posting_item_id" INTEGER NOT NULL,
     "product_id" INTEGER NOT NULL,
@@ -26,6 +29,7 @@ CREATE TABLE "private_api_warehouse_cells_to_posting_products" (
     "critical_alert_value" INTEGER,
     "expiring_soon_alert_unit" INTEGER,
     "critical_alert_unit" INTEGER,
+    "serial_number" TEXT NOT NULL DEFAULT '',
 
-    CONSTRAINT "private_api_warehouse_cells_to_posting_products_pkey" PRIMARY KEY ("posting_id","posting_item_id")
+    CONSTRAINT "posting_products_pkey" PRIMARY KEY ("posting_id","posting_item_id","serial_number")
 );
