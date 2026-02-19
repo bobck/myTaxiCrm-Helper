@@ -20,7 +20,7 @@ model Posting {
   description    String?
   documentNumber String?          @map("document_number")
   products       PostingProduct[]
-
+  privateDetails PrivateApiPostingProducts[]
   @@map("postings")
   @@schema("public")
 }
@@ -73,7 +73,7 @@ model PrivateApiPostingProducts {
   criticalAlertUnit          Int?     @map("critical_alert_unit")
 
   serialNumber String @default("") @map("serial_number")
-
+  posting      Posting  @relation(fields: [postingId], references: [id])
   @@id([postingId, postingItemId, serialNumber])
   @@map("posting_products")
   @@schema("private_api")

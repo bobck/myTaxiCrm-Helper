@@ -33,3 +33,6 @@ CREATE TABLE "private_api"."posting_products" (
 
     CONSTRAINT "posting_products_pkey" PRIMARY KEY ("posting_id","posting_item_id","serial_number")
 );
+
+-- AddForeignKey
+ALTER TABLE "private_api"."posting_products" ADD CONSTRAINT "posting_products_posting_id_fkey" FOREIGN KEY ("posting_id") REFERENCES "public"."postings"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
