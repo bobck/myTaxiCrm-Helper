@@ -1,6 +1,9 @@
 -- CreateSchema
 CREATE SCHEMA IF NOT EXISTS "private_api";
 
+-- AlterTable
+ALTER TABLE "public"."postings" ADD COLUMN     "is_failed_to_scrape" BOOLEAN NOT NULL DEFAULT false;
+
 -- CreateTable
 CREATE TABLE "private_api"."posting_products" (
     "posting_id" INTEGER NOT NULL,

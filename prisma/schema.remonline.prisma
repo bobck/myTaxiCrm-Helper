@@ -20,7 +20,8 @@ model Posting {
   description    String?
   documentNumber String?          @map("document_number")
   products       PostingProduct[]
-  privateDetails PrivateApiPostingProducts[]
+  privateDetails PrivateApiPostingProducts[] 
+  isFailedToScrape Boolean @default(false) @map("is_failed_to_scrape")
   @@map("postings")
   @@schema("public")
 }
