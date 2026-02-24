@@ -112,3 +112,30 @@ export function processApiResponse(response) {
 
   return processedData;
 }
+export function processResumeSearchResult(resume) {
+  // Format experience from the CVDB structure
+  const experience = resume.experience?.map((exp) => {
+    const period =
+      exp.startDate && exp.endDate ? `${exp.startDate} - ${exp.endDate}` : '';
+    return { company: exp.company, position: exp.position, period };
+  });
+
+  // Format Keywords/Skills
+  const skillsString = resume.keywords?.join(', ');
+
+  const cvURL = `https://robota.ua/candidates/${resume.resumeId}`;
+  const [age] = String(resume.age).split(' ');
+  return {
+    id: resume.resumeId, // Unique ID from Robota.ua
+    title: resume.speciality,
+    fullName: resume.fullName || resume.displayName || 'Anonymous',
+    cvURL: cvURL,
+    cityName: resume.cityName,
+    age: Number(age),
+    salaryExpectations: resume.salary,
+    experience,
+    skills: skillsString,
+    hasPhoto: !!resume.photo,
+    isOpened: resume.areContactsOpenedForCurrentUser,
+  };
+}

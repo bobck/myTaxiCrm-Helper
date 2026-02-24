@@ -71,7 +71,8 @@
     "prisma:gen:all": "npm run prisma:gen:remonline",
     "prisma:migrate:dev:all": "npm run prisma:migrate:dev:remonline",
     "prisma:migrate:deploy:all": "npm run prisma:migrate:deploy:remonline",
-    "test:remonline:postings": "ENV=TEST node -r dotenv/config src/remonline/modules/load-remonline-postings.mjs"
+    "test:remonline:postings": "ENV=TEST node -r dotenv/config src/remonline/modules/load-remonline-postings.mjs",
+    "test:robotaua:coldSourcing": "ENV=DEV node -r dotenv/config src/job-boards/robota.ua/modules/cold_sourcing.mjs"
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",
