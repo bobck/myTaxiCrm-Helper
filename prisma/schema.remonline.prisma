@@ -8,6 +8,7 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL_REMONLINE")
   schemas  = ["public", "private_api"]
+  relationMode = "prisma"
 }
 
 model Posting {
@@ -39,6 +40,7 @@ model PostingProduct {
   sernums      Json?
   serialNumber String  @default("") @map("serial_number")
   posting      Posting @relation(fields: [postingId], references: [id])
+  product      Product? @relation(fields: [id], references: [id], onUpdate: Restrict, onDelete: Restrict)
 
   @@id([id, postingId, serialNumber])
   @@map("posting_products")
@@ -78,4 +80,32 @@ model PrivateApiPostingProducts {
   @@id([postingId, postingItemId, serialNumber])
   @@map("posting_products")
   @@schema("private_api")
+}
+
+model Product {
+  id                             Int      @id
+  code                           String?
+  title                          String
+  isSerial                       Boolean  @default(false) @map("is_serial")
+  article                        String?
+  description                    String?
+  isEnableExpirationTracking     Boolean? @map("is_enable_expiration_tracking")
+  isExpirationTrackingEnabled    Boolean? @map("is_expiration_tracking_enabled")
+  isExpiringSoonAlertEnabled     Boolean? @map("is_expiring_soon_alert_enabled")
+  isCriticalAlertEnabled         Boolean? @map("is_critical_alert_enabled")
+  defaultSupplierId              Int?     @map("default_supplier_id")
+  categoryId                     Int?     @map("category_id")
+  categoryTitle                  String?  @map("category_title")
+  uomId                          Int?     @map("uom_id")
+  warranty                       Int?
+  warrantyPeriod                 Int?     @map("warranty_period")
+  prices                         Json?
+  images                         Json?
+  customFields                   Json?    @map("custom_fields")
+  isDimensionsWeightEnabled      Boolean? @map("is_dimensions_weight_enabled")
+
+  postingProducts                PostingProduct[]
+
+  @@map("products")
+  @@schema("public")
 }

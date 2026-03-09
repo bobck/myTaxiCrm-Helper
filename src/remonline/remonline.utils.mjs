@@ -521,3 +521,120 @@ export async function getPostings(
     throw error;
   }
 }
+
+export async function* getProducts(_page = 1, _attempt = 1) {
+  const MAX_RETRIES = 3;
+  
+  while (true) {
+    const url = `${process.env.ROAPP_API}/products/?page=${_page}&token=${process.env.REMONLINE_API_TOKEN}`;
+
+    const options = {
+      method: 'GET',
+      headers: {
+        accept: 'application/json',
+      },
+    };
+
+    try {
+      const response = await fetch(url, options);
+
+      if (
+        response.status === 414 ||
+        response.status === 429 ||
+        response.status === 500 ||
+        response.status === 502 ||
+        response.status === 503 ||
+        response.status === 504
+      ) {
+        const error = new Error(`API error: HTTP ${response.status}`);
+        error.status = response.status;
+        throw error;
+      }
+
+      let data;
+      try {
+        data = await response.json();
+      } catch (e) {
+        const error = new Error('Error parsing JSON');
+        error.originalError = e;
+        error.status = response.status;
+        throw error;
+      }
+
+      const { success } = data;
+      if (!success) {
+        const { message, code } = data;
+        
+        if ((response.status == 403 && code == 101) || response.status == 401) {
+          devLog({ function: 'getProducts', message: 'Get new Auth' });
+          await remonlineTokenToEnv(true);
+          // Retry the same page with new token
+          _attempt = 1;
+          continue;
+        }
+        
+        const error = new Error(`Unsuccessful response: ${message}`);
+        error.status = response.status;
+        error.data = data;
+        throw error;
+      }
+
+      const { data: products, count, page } = data;
+      const pageSize = 50;
+
+      devLog({
+        function: 'getProducts',
+        message: 'Fetched products page',
+        page,
+        count,
+        productsReceived: products?.length,
+      });
+
+      if (products && products.length > 0) {
+        yield { products, page, count };
+      }
+
+      if (!products || products.length < pageSize) {
+        devLog({
+          function: 'getProducts',
+          message: 'Finished fetching all products'
+        });
+        break;
+      }
+
+      // Prepare for next page
+      _page = parseInt(page) + 1;
+      _attempt = 1;
+
+    } catch (error) {
+      if (_attempt <= MAX_RETRIES) {
+        const delay = 1000 * Math.pow(2, _attempt - 1);
+        devLog({
+          function: 'getProducts',
+          message: `Retryable error: ${error.message}, retrying...`,
+          status: error.status,
+          url,
+          page: _page,
+          attempt: _attempt,
+          delayMs: delay,
+        });
+        await new Promise((r) => setTimeout(r, delay));
+        _attempt++;
+        continue;
+      }
+
+      devLog({
+        function: 'getProducts',
+        message: `Error after max retries: ${error.message}`,
+        status: error.status,
+        url,
+        page: _page,
+        attempt: _attempt,
+      });
+
+      error.page = _page;
+      error.url = url;
+      throw error;
+    }
+  }
+}
