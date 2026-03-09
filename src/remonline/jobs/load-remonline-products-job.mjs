@@ -11,9 +11,7 @@ const loadRemonlineProductsJob = CronJob.from({
     try {
       await loadRemonlineProducts();
     } catch (e) {
-      console.error(
-        'An error occurred while loading RemOnline products.'
-      );
+      console.error('An error occurred while loading RemOnline products.');
       console.error(e);
     }
   },

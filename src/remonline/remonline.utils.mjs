@@ -524,7 +524,7 @@ export async function getPostings(
 
 export async function* getProducts(_page = 1, _attempt = 1) {
   const MAX_RETRIES = 3;
-  
+
   while (true) {
     const url = `${process.env.ROAPP_API}/products/?page=${_page}&token=${process.env.REMONLINE_API_TOKEN}`;
 
@@ -564,7 +564,7 @@ export async function* getProducts(_page = 1, _attempt = 1) {
       const { success } = data;
       if (!success) {
         const { message, code } = data;
-        
+
         if ((response.status == 403 && code == 101) || response.status == 401) {
           devLog({ function: 'getProducts', message: 'Get new Auth' });
           await remonlineTokenToEnv(true);
@@ -572,7 +572,7 @@ export async function* getProducts(_page = 1, _attempt = 1) {
           _attempt = 1;
           continue;
         }
-        
+
         const error = new Error(`Unsuccessful response: ${message}`);
         error.status = response.status;
         error.data = data;
@@ -597,7 +597,7 @@ export async function* getProducts(_page = 1, _attempt = 1) {
       if (!products || products.length < pageSize) {
         devLog({
           function: 'getProducts',
-          message: 'Finished fetching all products'
+          message: 'Finished fetching all products',
         });
         break;
       }
@@ -605,7 +605,6 @@ export async function* getProducts(_page = 1, _attempt = 1) {
       // Prepare for next page
       _page = parseInt(page) + 1;
       _attempt = 1;
-
     } catch (error) {
       if (_attempt <= MAX_RETRIES) {
         const delay = 1000 * Math.pow(2, _attempt - 1);
