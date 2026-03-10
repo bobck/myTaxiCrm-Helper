@@ -159,7 +159,11 @@ export async function loadRemonlineProducts() {
 
     // Save any remaining products in the last partial batch
     if (currentBatch.length > 0) {
-      const savedCount = await saveBatch(currentBatch, lastFetchedPage, totalSaved);
+      const savedCount = await saveBatch(
+        currentBatch,
+        lastFetchedPage,
+        totalSaved
+      );
       totalSaved += savedCount;
     }
 
