@@ -50,6 +50,73 @@ function formatProduct(product) {
   };
 }
 
+async function saveBatch(productsToSave, pageMarker, totalSavedSoFar = 0) {
+  if (!productsToSave || productsToSave.length === 0) return 0;
+
+  devLog({
+    productsCount: productsToSave.length,
+    message: `Formatting products for database upsert. Batch marker: ${pageMarker}`,
+  });
+
+  const formattedProducts = productsToSave.map(formatProduct);
+
+  try {
+    devLog('Starting product upsert for batch...');
+
+    const productIds = formattedProducts.map((p) => p.id);
+
+    // Separate existing vs new to manually upsert without Prisma trying to mess with relations
+    const existingProducts = await prisma.product.findMany({
+      where: { id: { in: productIds } },
+      select: { id: true },
+    });
+    const existingIds = new Set(existingProducts.map((p) => p.id));
+
+    const toCreate = formattedProducts.filter((p) => !existingIds.has(p.id));
+    const toUpdate = formattedProducts.filter((p) => existingIds.has(p.id));
+
+    await prisma.$transaction(
+      async (tx) => {
+        if (toCreate.length > 0) {
+          // Chunk createMany just in case it's huge (100 pages = 5000 items)
+          const chunkSize = 1000;
+          for (let i = 0; i < toCreate.length; i += chunkSize) {
+            await tx.product.createMany({
+              data: toCreate.slice(i, i + chunkSize),
+            });
+          }
+        }
+
+        for (const product of toUpdate) {
+          const { id, ...updateData } = product;
+          await tx.product.update({
+            where: { id: product.id },
+            data: updateData,
+          });
+        }
+      },
+      {
+        maxWait: 10000,
+        timeout: 120000,
+      }
+    );
+
+    const savedCount = formattedProducts.length;
+    devLog(
+      `[PROGRESS SAVED] 100-page batch successfully processed (Created: ${toCreate.length}, Updated: ${toUpdate.length}) up to page ${pageMarker}. Total saved so far: ${totalSavedSoFar + savedCount}`
+    );
+    return savedCount;
+  } catch (e) {
+    console.error({
+      module: 'loadRemonlineProducts - saveBatch',
+      date: new Date(),
+      error: e.errors ? e.errors[0] : e,
+      message: e.message,
+    });
+    throw e;
+  }
+}
+
 export async function loadRemonlineProducts() {
   const time = new Date();
   devLog({
@@ -73,72 +140,6 @@ export async function loadRemonlineProducts() {
   const BATCH_PAGES_LIMIT = 100;
   let totalSaved = 0;
 
-  const saveBatch = async (productsToSave, pageMarker) => {
-    if (!productsToSave || productsToSave.length === 0) return;
-
-    devLog({
-      productsCount: productsToSave.length,
-      message: `Formatting products for database upsert. Batch marker: ${pageMarker}`,
-    });
-
-    const formattedProducts = productsToSave.map(formatProduct);
-
-    try {
-      devLog('Starting product upsert for batch...');
-
-      const productIds = formattedProducts.map((p) => p.id);
-
-      // Separate existing vs new to manually upsert without Prisma trying to mess with relations
-      const existingProducts = await prisma.product.findMany({
-        where: { id: { in: productIds } },
-        select: { id: true },
-      });
-      const existingIds = new Set(existingProducts.map((p) => p.id));
-
-      const toCreate = formattedProducts.filter((p) => !existingIds.has(p.id));
-      const toUpdate = formattedProducts.filter((p) => existingIds.has(p.id));
-
-      await prisma.$transaction(
-        async (tx) => {
-          if (toCreate.length > 0) {
-            // Chunk createMany just in case it's huge (100 pages = 5000 items)
-            const chunkSize = 1000;
-            for (let i = 0; i < toCreate.length; i += chunkSize) {
-              await tx.product.createMany({
-                data: toCreate.slice(i, i + chunkSize),
-              });
-            }
-          }
-
-          for (const product of toUpdate) {
-            const { id, ...updateData } = product;
-            await tx.product.update({
-              where: { id: product.id },
-              data: updateData,
-            });
-          }
-        },
-        {
-          maxWait: 10000,
-          timeout: 120000,
-        }
-      );
-
-      totalSaved += formattedProducts.length;
-      devLog(
-        `[PROGRESS SAVED] 100-page batch successfully processed (Created: ${toCreate.length}, Updated: ${toUpdate.length}) up to page ${pageMarker}. Total saved so far: ${totalSaved}`
-      );
-    } catch (e) {
-      console.error({
-        module: 'loadRemonlineProducts - saveBatch',
-        date: new Date(),
-        error: e.errors ? e.errors[0] : e,
-        message: e.message,
-      });
-      throw e;
-    }
-  };
-
   try {
     let lastFetchedPage = startPage;
     for await (const { products, page } of getProducts(startPage)) {
@@ -149,7 +150,8 @@ export async function loadRemonlineProducts() {
       lastFetchedPage = page;
 
       if (currentBatchPages >= BATCH_PAGES_LIMIT) {
-        await saveBatch(currentBatch, page);
+        const savedCount = await saveBatch(currentBatch, page, totalSaved);
+        totalSaved += savedCount;
         currentBatch = [];
         currentBatchPages = 0;
       }
@@ -157,7 +159,8 @@ export async function loadRemonlineProducts() {
 
     // Save any remaining products in the last partial batch
     if (currentBatch.length > 0) {
-      await saveBatch(currentBatch, lastFetchedPage);
+      const savedCount = await saveBatch(currentBatch, lastFetchedPage, totalSaved);
+      totalSaved += savedCount;
     }
 
     devLog({
