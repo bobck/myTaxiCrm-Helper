@@ -309,7 +309,7 @@ export const positionTextReferralsToPayments = {
 export const cityTextRecruitToPayments = {
   Київ: {
     id: '2880',
-    assigned_by_id: '259',
+    assigned_by_id: '197876',
   },
   Харків: {
     id: '2882',
@@ -333,11 +333,11 @@ export const cityTextRecruitToPayments = {
   },
   Вінниця: {
     id: '2892',
-    assigned_by_id: '49842',
+    assigned_by_id: '178592',
   },
   Чернігів: {
     id: '2894',
-    assigned_by_id: '197876',
+    assigned_by_id: '234860',
   },
   Полтава: {
     id: '2896',
@@ -369,7 +369,7 @@ export const cityTextRecruitToPayments = {
   },
   Чернівці: {
     id: '2910',
-    assigned_by_id: '118318',
+    assigned_by_id: '89922',
   },
   Тернопіль: {
     id: '2912',
@@ -381,7 +381,7 @@ export const cityTextRecruitToPayments = {
   },
   Ужгород: {
     id: '2920',
-    assigned_by_id: '75012',
+    assigned_by_id: '219414',
   },
   Черкаси: {
     id: '2928',
