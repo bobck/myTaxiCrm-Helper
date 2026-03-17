@@ -54,6 +54,7 @@ export const updateBitrixVacancy = async ({
   vacancy_name,
   work_ua_vacancy_id,
   robota_ua_vacancy_id,
+  is_active,
   assigned_by_id,
 }) => {
   let toSet = `vacancy_name = '${vacancy_name}'`;
@@ -62,6 +63,9 @@ export const updateBitrixVacancy = async ({
   }
   if (work_ua_vacancy_id) {
     toSet += `,work_ua_vacancy_id = ${work_ua_vacancy_id}`;
+  }
+  if (is_active !== undefined && is_active !== null) {
+    toSet += `,is_active = ${is_active}`;
   }
   if (assigned_by_id) {
     toSet += `,assigned_by_id = ${assigned_by_id}`;

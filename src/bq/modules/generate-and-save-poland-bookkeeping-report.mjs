@@ -238,6 +238,14 @@ const fakeDatesMap = new Map([
   ['19ba77bc-73e8-40cc-94cc-b98e0ffcab8a', '2026-03-03'],
   ['10e49a57-a84b-4583-a243-c92596fad5d9', '2026-03-04'],
   ['f9906a81-0bcc-47ef-ad0c-e8af1abb8843', '2026-03-04'],
+  ['f332998b-7afd-49c7-a902-6c8668b82f6c', '2026-02-06'],
+  ['7875e42b-740a-4c2a-aa40-6b3a50e1a951', '2026-02-06'],
+  ['94a65636-7277-46cb-bcac-1699dced3a7c', '2026-02-05'],
+  ['9e221d5a-8ae3-42df-beba-751e43bd5383', '2026-03-15'],
+  ['68a9f8c8-f17c-4705-9b43-4993b4d942c1', '2026-03-15'],
+  ['c1cd1b15-672b-4fa6-ace6-3f5c16b78fd8', '2026-03-15'],
+  ['342e39e8-1837-44be-a21b-1ffb5df9bfe6', '2026-03-15'],
+  ['51860e01-e667-475a-aca4-e0919b85c3e6', '2026-03-15'],
 ]);
 
 export async function generateAndSavePolandBookkeepingReport({ autoParkId }) {
