@@ -15,7 +15,7 @@ export async function getMaxOrderModifiedAt() {
         FROM remonline_orders
     `;
   const row = await db.get(sql);
-  return row?.maxModifiedAt;
+  return row.maxModifiedAt;
 }
 
 /**
