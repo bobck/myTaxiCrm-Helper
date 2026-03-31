@@ -1,13 +1,7 @@
 import fetch from 'node-fetch';
-import sqlite3 from 'sqlite3';
-import { open } from 'sqlite';
 import { remonlineTokenToEnv } from './remonline.api.mjs';
 import { devLog } from '../shared/shared.utils.mjs';
-
-const db = await open({
-  filename: process.env.DEV_DB,
-  driver: sqlite3.Database,
-});
+import { db } from '../shared/sqlite.mjs';
 
 export async function saveSidRow({
   id,
@@ -348,7 +342,7 @@ export async function getAssets(_page = 1, _assets = []) {
 
   const leftToFinish = count - doneOnPrevPage - assets.length;
 
-  _assets.push(...structuredClone(assets));
+  _assets.push(...assets);
   console.log({ count, page, doneOnPrevPage, leftToFinish });
   if (leftToFinish > 0) {
     return await getAssets(parseInt(page) + 1, _assets);
