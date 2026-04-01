@@ -16,7 +16,9 @@ export function remonlineJobs() {
     loadRemonlineProductsJob.start();
     syncRemonlineCashboxesJob.start();
     loadRemonlineCashboxTransactionsJob.start();
-    console.log('syncRemonlineCashboxes and loadRemonlineCashboxTransactions Jobs runs...');
+    console.log(
+      'syncRemonlineCashboxes and loadRemonlineCashboxTransactions Jobs runs...'
+    );
   } catch (error) {
     console.error('sync error, app down...');
     console.error({ time: new Date(), error });
