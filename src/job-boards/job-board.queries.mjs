@@ -1,10 +1,4 @@
-import sqlite3 from 'sqlite3';
-import { open } from 'sqlite';
-
-const db = await open({
-  filename: process.env.DEV_DB,
-  driver: sqlite3.Database,
-});
+import { db } from '../shared/sqlite.mjs';
 
 export const getBitrixVacancyById = async ({ bitrix_vacancy_id }) => {
   const sql = `SELECT * FROM bitrix_vacancies_to_job_board_vacancies WHERE bitrix_vacancy_id = ${bitrix_vacancy_id}`;

@@ -1,12 +1,4 @@
-import sqlite3 from 'sqlite3';
-import { open } from 'sqlite';
-
-const db = await open({
-  filename: process.env.DEV_DB,
-  driver: sqlite3.Database,
-});
-
-await db.exec('PRAGMA foreign_keys = ON;');
+import { db } from '../shared/sqlite.mjs';
 
 export async function getLastSidCreatedAt() {
   const sql = `SELECT max(created_at) as created_at from sids`;
