@@ -42,6 +42,8 @@
     "newworkingdrivers": "ENV=TEST node -r dotenv/config src/bitrix/modules/new-working-drivers.mjs",
     "format": "prettier --write .",
     "remonlineCashboxTransactionsManual": "ENV=TEST node -r dotenv/config src/web.api/modules/applications-from-remonline-transactions.mjs",
+    "remonline:cashbox:sync": "ENV=TEST node -r dotenv/config src/remonline/modules/sync-remonline-cashboxes.mjs",
+    "remonline:cashbox:transactions:sync": "ENV=TEST node -r dotenv/config src/remonline/modules/load-remonline-cashbox-transactions.mjs",
     "remonlineTransfersToBQManual": "ENV=TEST node -r dotenv/config src/bq/modules/generate-and-save-remonline-transfers.mjs",
     "format:check": "prettier --check .",
     "migrate:up": "db-migrate up",
