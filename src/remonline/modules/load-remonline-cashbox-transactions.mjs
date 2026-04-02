@@ -66,11 +66,20 @@ export async function loadRemonlineCashboxTransactions() {
 
       const rows = transactions.map((tx) => mapTransaction(tx, cashboxId));
 
+      const maxCreatedAt = transactions.reduce(
+        (max, tx) => (tx.created_at > max ? tx.created_at : max),
+        0
+      );
+
       await prisma.$transaction(
         async (tx) => {
           await tx.cashboxTransaction.createMany({
             data: rows,
-            skipDuplicates: true,
+          });
+
+          await tx.cashbox.update({
+            where: { id: cashboxId },
+            data: { lastTransactionCreatedAt: maxCreatedAt },
           });
         },
         {
@@ -78,16 +87,6 @@ export async function loadRemonlineCashboxTransactions() {
           timeout: 20000,
         }
       );
-
-      const maxCreatedAt = transactions.reduce(
-        (max, tx) => (tx.created_at > max ? tx.created_at : max),
-        0
-      );
-
-      await prisma.cashbox.update({
-        where: { id: cashboxId },
-        data: { lastTransactionCreatedAt: maxCreatedAt },
-      });
 
       devLog({
         message: `Loaded ${transactions.length} transactions for cashbox ${cashboxId} (${title})`,
