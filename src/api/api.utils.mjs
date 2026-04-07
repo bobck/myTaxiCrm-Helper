@@ -15,7 +15,11 @@ export const controllerWrapper = ({
     try {
       await handlerCB(req, res);
     } catch (error) {
-      console.error(`error occured in ${handlingServiceName}`, error);
+      console.error({
+        message: `error occured in ${handlingServiceName}`,
+        date: new Date(),
+        error,
+      });
       const { code, message } = error;
       if (error instanceof Error) {
         res
@@ -31,11 +35,6 @@ export const controllerWrapper = ({
           .json({ message: 'Internal Server Error', status: 'error' });
         return;
       }
-      console.error({
-        message: `error occured in ${handlingServiceName}`,
-        date: new Date(),
-        error,
-      });
 
       res.status(code).json({ message, status: 'error' });
     }

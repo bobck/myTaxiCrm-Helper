@@ -22,7 +22,7 @@ import { updateAndSaveDriverCashBlockRulesJob } from './jobs/update-and-save-dri
 export function driversCustomTariffJobs() {
   try {
     deleteDriversCustomTariffJob.start();
-    // setDriversCustomTariffJob.start();
+    setDriversCustomTariffJob.start();
 
     setDriversCustomBonusJob.start();
     deleteDriversCustomBonusJob.start();
@@ -52,7 +52,7 @@ export function driversCustomTariffJobs() {
     console.error({ time: new Date(), error });
     console.error('Trying to restart...');
     deleteDriversCustomTariffJob.stop();
-    // setDriversCustomTariffJob.stop();
+    setDriversCustomTariffJob.stop();
 
     setDriversCustomBonusJob.stop();
     deleteDriversCustomBonusJob.stop();

@@ -1,10 +1,4 @@
-import sqlite3 from 'sqlite3';
-import { open } from 'sqlite';
-
-const db = await open({
-  filename: process.env.DEV_DB,
-  driver: sqlite3.Database,
-});
+import { db } from '../shared/sqlite.mjs';
 
 /**
  * Get the most recent modified_at timestamp across all orders.
@@ -15,7 +9,7 @@ export async function getMaxOrderModifiedAt() {
         FROM remonline_orders
     `;
   const row = await db.get(sql);
-  return row?.maxModifiedAt ?? 1;
+  return row.maxModifiedAt;
 }
 
 /**
@@ -113,4 +107,13 @@ export async function insertOrderResourcesBatch(resources) {
   `;
   const rows = await db.all(insertSql, JSON.stringify(resources));
   return rows; // Array of inserted campaign rows
+}
+
+export async function getMaxPostingCreatedAt() {
+  const sql = /*sql*/ `
+      SELECT MAX(created_at) AS maxCreatedAt
+        FROM remonline_postings
+    `;
+  const row = await db.get(sql);
+  return row?.maxCreatedAt ?? 0;
 }

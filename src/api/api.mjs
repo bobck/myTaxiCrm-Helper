@@ -1,7 +1,5 @@
 import express from 'express';
 
-import { openSShTunnel } from '../../ssh.mjs';
-
 import coreRouter from './core/core.route.mjs';
 
 export async function initApi() {
@@ -23,6 +21,5 @@ export async function initApi() {
   }
 }
 if (process.env.ENV === 'DEV' || process.env.ENV === 'PROD') {
-  await openSShTunnel;
   initApi();
 }

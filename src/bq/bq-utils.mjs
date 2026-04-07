@@ -249,13 +249,6 @@ export async function createOrResetTableByName({
   // console.log({ response })
 }
 
-export async function generateCarsRoutsReport({ date }) {
-  const sqlp = fs.readFileSync('./src/sql/cars_routs_report.sql').toString();
-  const result = await pool.query(sqlp, [date]);
-  const { rows } = result;
-  return { rows };
-}
-
 export async function generatePolandBookkeepingReport({
   periodFrom,
   periodTo,
@@ -301,6 +294,7 @@ export async function getBrandedLicencePlateNumbersFromBQ({
 
   return { brandedLicencePlateNumbers };
 }
+
 /**
  * Deletes all rows from `datasetId.tableName` whose order_id matches one
  * of the IDs in `orders`. Runs as a single atomic DML job.

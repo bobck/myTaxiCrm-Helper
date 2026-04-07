@@ -1,12 +1,7 @@
 import fetch from 'node-fetch';
-import sqlite3 from 'sqlite3';
-import { open } from 'sqlite';
 import { remonlineTokenToEnv } from './remonline.api.mjs';
-
-const db = await open({
-  filename: process.env.DEV_DB,
-  driver: sqlite3.Database,
-});
+import { devLog } from '../shared/shared.utils.mjs';
+import { db } from '../shared/sqlite.mjs';
 
 export async function saveSidRow({
   id,
@@ -30,11 +25,7 @@ export async function saveSidRow({
   return { result };
 }
 
-export async function getOrders(
-  { idLabels, ids, modified_at, sort_dir },
-  _page = 1,
-  _orders = []
-) {
+export async function getOrders({ idLabels, ids, modified_at, sort_dir }) {
   let idLabelsUrl = '';
   if (idLabels) {
     for (let idLabel of idLabels) {
@@ -42,7 +33,6 @@ export async function getOrders(
     }
   }
   let idUrl = '';
-
   if (ids) {
     for (let id of ids) {
       idUrl += `&ids[]=${id}`;
@@ -51,63 +41,71 @@ export async function getOrders(
   const sort_dir_url = sort_dir ? `&sort_dir=${sort_dir}` : '';
   const modified_at_url = modified_at ? `&modified_at[]=${modified_at}` : '';
 
-  const url = `${process.env.REMONLINE_API}/order/?token=${process.env.REMONLINE_API_TOKEN}&page=${_page}${idLabelsUrl}${idUrl}${sort_dir_url}${modified_at_url}`;
+  const allOrders = [];
+  let _page = 1;
+  let count;
 
-  const response = await fetch(url);
+  while (true) {
+    const url = `${process.env.REMONLINE_API}/order/?token=${process.env.REMONLINE_API_TOKEN}&page=${_page}${idLabelsUrl}${idUrl}${sort_dir_url}${modified_at_url}`;
 
-  if (
-    response.status == 414 ||
-    response.status == 503 ||
-    response.status == 502 ||
-    response.status == 504
-  ) {
-    throw await response.text();
-  }
+    const response = await fetch(url);
 
-  if (process.env.LOG == 'LOG') {
-    console.log(await response.text());
-  }
-
-  const data = await response.json();
-  const { success } = data;
-  if (!success) {
-    const { message, code } = data;
-    const { validation } = message;
-
-    if ((response.status == 403 && code == 101) || response.status == 401) {
-      console.info({ function: 'getOrders', message: 'Get new Auth' });
-      await remonlineTokenToEnv(true);
-      return await getOrders({ idLabels, ids }, _page, _orders);
+    if (
+      response.status == 414 ||
+      response.status == 503 ||
+      response.status == 502 ||
+      response.status == 504
+    ) {
+      throw await response.text();
     }
 
-    console.error({
+    if (process.env.LOG == 'LOG') {
+      console.log(await response.text());
+    }
+
+    const data = await response.json();
+    const { success } = data;
+    if (!success) {
+      const { message, code } = data;
+      const { validation } = message;
+
+      if ((response.status == 403 && code == 101) || response.status == 401) {
+        console.info({ function: 'getOrders', message: 'Get new Auth' });
+        await remonlineTokenToEnv(true);
+        continue;
+      }
+
+      console.error({
+        function: 'getOrders',
+        message,
+        validation,
+        status: response.status,
+      });
+      return;
+    }
+
+    const { data: orders, count: totalCount, page } = data;
+    count = totalCount;
+
+    const doneOnPrevPage = (page - 1) * 50;
+    const leftToFinish = count - doneOnPrevPage - orders.length;
+
+    allOrders.push(...orders);
+
+    devLog({
       function: 'getOrders',
-      message,
-      validation,
-      status: response.status,
+      page,
+      count,
+      fetched: orders.length,
+      totalFetched: allOrders.length,
+      leftToFinish,
     });
-    return;
+
+    if (leftToFinish <= 0) break;
+    _page = parseInt(page) + 1;
   }
 
-  const { data: orders, count, page } = data;
-
-  const doneOnPrevPage = (page - 1) * 50;
-
-  const leftToFinish = count - doneOnPrevPage - orders.length;
-
-  _orders.push(...orders);
-
-  // console.log({ count, page, doneOnPrevPage, leftToFinish });
-
-  if (leftToFinish > 0) {
-    return await getOrders(
-      { idLabels, ids, modified_at, sort_dir },
-      parseInt(page) + 1,
-      _orders
-    );
-  }
-
-  return { orders: _orders, count };
+  return { orders: allOrders, count };
 }
 
 export async function changeOrderStatus({ id, statusId }) {
@@ -148,84 +146,84 @@ export async function changeOrderStatus({ id, statusId }) {
   return { changeOrderStatusData };
 }
 
-export async function getCashboxTransactions(
-  { createdAt, cashboxId },
-  _page = 1,
-  _transactions = []
-) {
+export async function getCashboxTransactions({ createdAt, cashboxId }) {
   let createdAtUrl = '';
   if (createdAt) {
     createdAtUrl += `&created_at[]=${createdAt}`;
   }
 
-  const response = await fetch(
-    `${process.env.REMONLINE_API}/cashbox/report/${cashboxId}?token=${process.env.REMONLINE_API_TOKEN}&page=${_page}${createdAtUrl}&sort_dir=asc`
-  );
+  const allTransactions = [];
+  let _page = 1;
 
-  if (
-    response.status == 414 ||
-    response.status == 503 ||
-    response.status == 502 ||
-    response.status == 504
-  ) {
-    throw await response.text();
-  }
-
-  if (response.status == 403 || response.status == 401) {
-    console.info({
-      function: 'getCashboxTransactions',
-      message: 'Get new Auth',
-    });
-    await remonlineTokenToEnv(true);
-    return await getCashboxTransactions(
-      { createdAt, cashboxId },
-      _page,
-      _transactions
+  while (true) {
+    const response = await fetch(
+      `${process.env.REMONLINE_API}/cashbox/report/${cashboxId}?token=${process.env.REMONLINE_API_TOKEN}&page=${_page}${createdAtUrl}&sort_dir=asc`
     );
-  }
 
-  try {
-    const data = await response.json();
-    const { success } = data;
+    if (
+      response.status == 414 ||
+      response.status == 503 ||
+      response.status == 502 ||
+      response.status == 504
+    ) {
+      throw await response.text();
+    }
 
-    if (!success) {
-      const { message, code } = data;
-      const { validation } = message;
+    if (response.status == 403 || response.status == 401) {
+      console.info({
+        function: 'getCashboxTransactions',
+        message: 'Get new Auth',
+      });
+      await remonlineTokenToEnv(true);
+      continue;
+    }
 
+    try {
+      const data = await response.json();
+      const { success } = data;
+
+      if (!success) {
+        const { message, code } = data;
+        const { validation } = message;
+
+        console.error({
+          function: 'getCashboxTransactions',
+          message,
+          validation,
+          response_status: response.status,
+        });
+        throw validation;
+      }
+
+      const { data: transactions, count, page } = data;
+
+      const doneOnPrevPage = (page - 1) * 50;
+      const leftToFinish = count - doneOnPrevPage - transactions.length;
+
+      allTransactions.push(...transactions);
+
+      devLog({
+        function: 'getCashboxTransactions',
+        page,
+        count,
+        fetched: transactions.length,
+        totalFetched: allTransactions.length,
+        leftToFinish,
+      });
+
+      if (leftToFinish <= 0) break;
+      _page = parseInt(page) + 1;
+    } catch (e) {
       console.error({
         function: 'getCashboxTransactions',
-        message,
-        validation,
+        e: e?.message,
         response_status: response.status,
       });
-      throw validation;
+      throw response.status;
     }
-
-    const { data: transactions, count, page } = data;
-
-    const doneOnPrevPage = (page - 1) * 50;
-
-    const leftTofinish = count - doneOnPrevPage - transactions.length;
-
-    _transactions.push(...transactions);
-
-    if (leftTofinish > 0) {
-      return await getCashboxTransactions(
-        { createdAt, cashboxId },
-        parseInt(page) + 1,
-        _transactions
-      );
-    }
-
-    return { transactions: _transactions };
-  } catch (e) {
-    console.error({
-      function: 'getCashboxTransactions',
-      e: e?.message,
-      response_status: response.status,
-    });
-    throw response.status;
   }
+
+  return { transactions: allTransactions };
 }
 export async function getLocations() {
   // return await fetch(`${process.env.REMONLINE_API}/branches/?token=${process.env.REMONLINE_API_TOKEN}`);
@@ -237,48 +235,59 @@ export async function getLocations() {
   return data;
 }
 
-export async function getTransfers({ branch_id }, _page = 1, _transfers = []) {
-  const url = `${process.env.REMONLINE_API}/warehouse/moves/?page=${_page}&branch_id=${branch_id}&token=${process.env.REMONLINE_API_TOKEN}`;
-
+export async function getTransfers({ branch_id }) {
   const options = { method: 'GET', headers: { accept: 'application/json' } };
+  const allTransfers = [];
+  let _page = 1;
 
-  const response = await fetch(url, options);
+  while (true) {
+    const url = `${process.env.REMONLINE_API}/warehouse/moves/?page=${_page}&branch_id=${branch_id}&token=${process.env.REMONLINE_API_TOKEN}`;
 
-  const data = await response.json();
-  const { success } = data;
-  if (!success) {
-    const { message, code } = data;
-    const { validation } = message;
-    if ((response.status == 403 && code == 101) || response.status == 401) {
-      console.info({ function: 'getTransfers', message: 'Get new Auth' });
-      await remonlineTokenToEnv(true);
-      return await getTransfers({ branch_id }, _page, _transfers);
+    const response = await fetch(url, options);
+
+    const data = await response.json();
+    const { success } = data;
+    if (!success) {
+      const { message, code } = data;
+      const { validation } = message;
+      if ((response.status == 403 && code == 101) || response.status == 401) {
+        console.info({ function: 'getTransfers', message: 'Get new Auth' });
+        await remonlineTokenToEnv(true);
+        continue;
+      }
+      console.error({
+        function: 'getTransfers',
+        message,
+        validation,
+        status: response.status,
+      });
+      return;
     }
-    console.error({
+    const { data: transfers, page, count } = data;
+    const doneOnPrevPage = (page - 1) * 50;
+    const leftToFinish = count - doneOnPrevPage - transfers.length;
+
+    allTransfers.push(
+      ...transfers.map((transfer) => {
+        return { branch_id, ...transfer };
+      })
+    );
+
+    devLog({
       function: 'getTransfers',
-      message,
-      validation,
-      status: response.status,
+      branch_id,
+      page,
+      count,
+      fetched: transfers.length,
+      totalFetched: allTransfers.length,
+      leftToFinish,
     });
-    return;
+
+    if (leftToFinish <= 0) break;
+    _page = parseInt(page) + 1;
   }
-  const { data: transfers, page, count } = data;
-  const doneOnPrevPage = (page - 1) * 50;
 
-  const leftToFinish = count - doneOnPrevPage - transfers.length;
-
-  _transfers.push(
-    ...transfers.map((transfer) => {
-      return { branch_id, ...transfer };
-    })
-  );
-
-  // console.log({ count, page, doneOnPrevPage, leftToFinish })
-
-  if (leftToFinish > 0) {
-    return await getTransfers({ branch_id }, parseInt(page) + 1, _transfers);
-  }
-  return { transfers: _transfers };
+  return { transfers: allTransfers };
 }
 export async function getEmployees() {
   const url = `${process.env.REMONLINE_API}/employees/?token=${process.env.REMONLINE_API_TOKEN}`;
@@ -315,44 +324,55 @@ export async function getEmployees() {
   // console.log(data);
   return { employees };
 }
-export async function getAssets(_page = 1, _assets = []) {
-  const url = `${process.env.REMONLINE_API}/warehouse/assets?page=${_page}&token=${process.env.REMONLINE_API_TOKEN}`;
-  // const url = `${process.env.REMONLINE_API}/warehouse/assets?token=${process.env.REMONLINE_API_TOKEN}`;
-
+export async function getAssets() {
   const options = { method: 'GET', headers: { accept: 'application/json' } };
+  const allAssets = [];
+  let _page = 1;
 
-  const response = await fetch(url, options);
+  while (true) {
+    const url = `${process.env.REMONLINE_API}/warehouse/assets?page=${_page}&token=${process.env.REMONLINE_API_TOKEN}`;
 
-  const data = await response.json();
-  const { success } = data;
-  if (!success) {
-    const { message, code } = data;
-    const { validation } = message;
-    if ((response.status == 403 && code == 101) || response.status == 401) {
-      console.info({ function: 'getAssets', message: 'Get new Auth' });
-      await remonlineTokenToEnv(true);
-      return await getAssets(_page, _assets);
+    const response = await fetch(url, options);
+
+    const data = await response.json();
+    const { success } = data;
+    if (!success) {
+      const { message, code } = data;
+      const { validation } = message;
+      if ((response.status == 403 && code == 101) || response.status == 401) {
+        console.info({ function: 'getAssets', message: 'Get new Auth' });
+        await remonlineTokenToEnv(true);
+        continue;
+      }
+      console.error({
+        function: 'getAssets',
+        url,
+        message,
+        validation,
+        status: response.status,
+      });
+      return;
     }
-    console.error({
+    const { data: assets, page, count } = data;
+    const doneOnPrevPage = (page - 1) * 50;
+    const leftToFinish = count - doneOnPrevPage - assets.length;
+
+    allAssets.push(...assets);
+
+    devLog({
       function: 'getAssets',
-      url,
-      message,
-      validation,
-      status: response.status,
+      page,
+      count,
+      fetched: assets.length,
+      totalFetched: allAssets.length,
+      leftToFinish,
     });
-    return;
-  }
-  const { data: assets, page, count } = data;
-  const doneOnPrevPage = (page - 1) * 50;
 
-  const leftToFinish = count - doneOnPrevPage - assets.length;
-
-  _assets.push(...structuredClone(assets));
-  console.log({ count, page, doneOnPrevPage, leftToFinish });
-  if (leftToFinish > 0) {
-    return await getAssets(parseInt(page) + 1, _assets);
+    if (leftToFinish <= 0) break;
+    _page = parseInt(page) + 1;
   }
-  return { assets: _assets };
+
+  return { assets: allAssets };
 }
 export async function getUOMs() {
   const url = `${process.env.REMONLINE_API}/catalogs/uoms?token=${process.env.REMONLINE_API_TOKEN}`;
@@ -389,4 +409,250 @@ export async function getUOMs() {
 
   const { uoms, uom_types, entity_types } = data;
   return { uoms, uom_types, entity_types };
+}
+
+export async function getPostings(
+  { createdAtFrom, createdAtTo },
+  _page = 1,
+  _postings = [],
+  _attempt = 1
+) {
+  const MAX_RETRIES = 3;
+  if (!createdAtFrom && !createdAtTo) {
+    return { postings: _postings };
+  }
+  const createdAtUrl = `&created_at[]=${createdAtFrom}&created_at[]=${createdAtTo}`;
+  const url = `${process.env.ROAPP_API}/warehouse/postings/?page=${_page}${createdAtUrl}&token=${process.env.REMONLINE_API_TOKEN}`;
+
+  const options = {
+    method: 'GET',
+    headers: {
+      accept: 'application/json',
+    },
+  };
+
+  try {
+    const response = await fetch(url, options);
+
+    if (
+      response.status === 414 ||
+      response.status === 429 ||
+      response.status === 500 ||
+      response.status === 502 ||
+      response.status === 503 ||
+      response.status === 504
+    ) {
+      const error = new Error(`API error: HTTP ${response.status}`);
+      error.status = response.status;
+      throw error;
+    }
+
+    let data;
+    try {
+      data = await response.json();
+    } catch (e) {
+      const error = new Error('Error parsing JSON');
+      error.originalError = e;
+      error.status = response.status;
+      throw error;
+    }
+
+    const { success } = data;
+    if (!success) {
+      const { message } = data;
+      const error = new Error(`Unsuccessful response: ${message}`);
+      error.status = response.status;
+      error.data = data;
+      throw error;
+    }
+
+    const { data: postings, count, page } = data;
+    const doneOnPrevPage = (page - 1) * 50;
+    const leftToFinish = count - doneOnPrevPage - postings.length;
+    const pageSize = postings.length || 50;
+    const pagesLeft = leftToFinish > 0 ? Math.ceil(leftToFinish / pageSize) : 0;
+
+    devLog({
+      function: 'getPostings',
+      message: 'Fetched postings page',
+      page,
+      count,
+      postingsReceived: postings?.length,
+      leftToFinish,
+      pagesLeftToFetch: pagesLeft,
+      lastCreatedAt: postings?.length
+        ? postings[postings.length - 1]?.created_at
+        : null,
+    });
+
+    _postings.push(...postings);
+
+    if (leftToFinish > 0) {
+      return await getPostings(
+        { createdAtFrom, createdAtTo },
+        parseInt(page) + 1,
+        _postings
+      );
+    }
+
+    devLog({
+      function: 'getPostings',
+      message: 'Finished fetching all postings',
+      totalPostings: _postings.length,
+      totalCount: count,
+    });
+
+    return { postings: _postings, count };
+  } catch (error) {
+    if (_attempt <= MAX_RETRIES) {
+      const delay = 1000 * Math.pow(2, _attempt - 1);
+      devLog({
+        function: 'getPostings',
+        message: `Retryable error: ${error.message}, retrying...`,
+        status: error.status,
+        url,
+        page: _page,
+        attempt: _attempt,
+        delayMs: delay,
+      });
+      await new Promise((r) => setTimeout(r, delay));
+      return await getPostings(
+        { createdAtFrom, createdAtTo },
+        _page,
+        _postings,
+        _attempt + 1
+      );
+    }
+
+    devLog({
+      function: 'getPostings',
+      message: `Error after max retries: ${error.message}`,
+      status: error.status,
+      url,
+      page: _page,
+      attempt: _attempt,
+      fetchedPostingsSoFar: _postings.length,
+    });
+
+    error.page = _page;
+    error.url = url;
+    error.postings = _postings;
+    throw error;
+  }
+}
+
+export async function* getProducts(_page = 1, _attempt = 1) {
+  const MAX_RETRIES = 3;
+
+  while (true) {
+    const url = `${process.env.ROAPP_API}/products/?page=${_page}&token=${process.env.REMONLINE_API_TOKEN}`;
+
+    const options = {
+      method: 'GET',
+      headers: {
+        accept: 'application/json',
+      },
+    };
+
+    try {
+      const response = await fetch(url, options);
+
+      if (
+        response.status === 414 ||
+        response.status === 429 ||
+        response.status === 500 ||
+        response.status === 502 ||
+        response.status === 503 ||
+        response.status === 504
+      ) {
+        const error = new Error(`API error: HTTP ${response.status}`);
+        error.status = response.status;
+        throw error;
+      }
+
+      let data;
+      try {
+        data = await response.json();
+      } catch (e) {
+        const error = new Error('Error parsing JSON');
+        error.originalError = e;
+        error.status = response.status;
+        throw error;
+      }
+
+      const { success } = data;
+      if (!success) {
+        const { message, code } = data;
+
+        if ((response.status == 403 && code == 101) || response.status == 401) {
+          devLog({ function: 'getProducts', message: 'Get new Auth' });
+          await remonlineTokenToEnv(true);
+          // Retry the same page with new token
+          _attempt = 1;
+          continue;
+        }
+
+        const error = new Error(`Unsuccessful response: ${message}`);
+        error.status = response.status;
+        error.data = data;
+        throw error;
+      }
+
+      const { data: products, count, page } = data;
+      const pageSize = 50;
+
+      devLog({
+        function: 'getProducts',
+        message: 'Fetched products page',
+        page,
+        count,
+        productsReceived: products?.length,
+      });
+
+      if (products && products.length > 0) {
+        yield { products, page, count };
+      }
+
+      if (!products || products.length < pageSize) {
+        devLog({
+          function: 'getProducts',
+          message: 'Finished fetching all products',
+        });
+        break;
+      }
+
+      // Prepare for next page
+      _page = parseInt(page) + 1;
+      _attempt = 1;
+    } catch (error) {
+      if (_attempt <= MAX_RETRIES) {
+        const delay = 1000 * Math.pow(2, _attempt - 1);
+        devLog({
+          function: 'getProducts',
+          message: `Retryable error: ${error.message}, retrying...`,
+          status: error.status,
+          url,
+          page: _page,
+          attempt: _attempt,
+          delayMs: delay,
+        });
+        await new Promise((r) => setTimeout(r, delay));
+        _attempt++;
+        continue;
+      }
+
+      devLog({
+        function: 'getProducts',
+        message: `Error after max retries: ${error.message}`,
+        status: error.status,
+        url,
+        page: _page,
+        attempt: _attempt,
+      });
+
+      error.page = _page;
+      error.url = url;
+      throw error;
+    }
+  }
 }

@@ -9,7 +9,6 @@ import {
 } from '../bq-utils.mjs';
 import { polandBookkeepingReportTableSchema } from '../schemas.mjs';
 import { DateTime } from 'luxon';
-import { message } from 'telegraf/filters';
 
 const bqTableId = 'poland_bookkeeping';
 
@@ -23,6 +22,11 @@ const accountNumbers = [
     ownerName: 'Auto Świat',
     ownerId: '369a4630-080d-4761-b5cb-10cf56b83035',
     accountNumber: '72 1020 1185 0000 4802 0379 7396',
+  },
+  {
+    ownerName: 'STALVERO',
+    ownerId: '8b9125a0-df02-4f74-a21c-145995b29b6f',
+    accountNumber: '83 1020 1185 0000 4502 0425 6640',
   },
 ];
 
@@ -167,6 +171,83 @@ const modelPrices = [
   },
 ];
 
+const fakeDatesMap = new Map([
+  ['fd6afdb0-a00e-4bbd-9e61-0a1e771dde90', '2026-01-09'],
+  ['357d344b-9943-4787-b28c-b5f9522c3ad8', '2026-01-09'],
+  ['a5cc9a02-d155-4cfc-980d-04104600e4a0', '2026-01-09'],
+  ['82c61900-5c43-4d5f-bd11-eb6052fa2cd0', '2026-01-09'],
+  ['5723d6f2-7d58-4f7a-91b1-24445de88acc', '2026-01-09'],
+  ['47e031a3-ea0a-46a7-9d49-fd9ebbf31c44', '2026-01-09'],
+  ['47e031a3-ea0a-46a7-9d49-fd9ebbf31c44', '2026-01-09'],
+  ['51ae81f6-bae9-4e5b-8b6e-a9788c67e2a4', '2026-01-10'],
+  ['742f5d59-b631-41a6-9368-eef6225a55f3', '2026-01-09'],
+  ['bcd426bc-6f9e-4a5d-9303-ca26d15ca35b', '2026-01-09'],
+  ['50f44b58-b7c3-4553-aaef-023516864922', '2026-01-09'],
+  ['010be42b-372e-4bb1-90b9-e0dc1be2f10d', '2026-01-09'],
+  ['010be42b-372e-4bb1-90b9-e0dc1be2f10d', '2026-01-09'],
+  ['4e42abe1-e862-4616-99d5-bea775b3e172', '2026-01-08'],
+  ['f4b14f69-8581-44d1-ad21-3b44ba715206', '2026-01-08'],
+  ['7d37172a-d6f7-4dde-a2af-4d8db0d04526', '2026-01-08'],
+  ['0f6870d1-3e68-43fe-bdd6-fffc166a60b6', '2026-01-08'],
+  ['f1220ba6-1a19-4995-b6c1-96abe4a21264', '2026-01-09'],
+  ['586791ce-26a6-43a5-b5f5-4942710f0948', '2026-01-08'],
+  ['c2d304f3-bf34-4dc4-8fd7-f8dd5778f520', '2026-01-08'],
+  ['ff069e24-a45f-43a5-a919-ceffd40456b8', '2026-01-10'],
+  ['79cbe538-10d8-468c-b89b-2e15dc6fa487', '2026-01-09'],
+  ['b775bed9-afae-4fe0-a7b5-55183f7234c4', '2026-01-08'],
+  ['bc390195-066a-4275-99da-570fa3383a39', '2026-01-08'],
+  ['35381fce-4ac8-44a9-ae58-e2d9f85b9df1', '2026-01-08'],
+  ['9cf0b28a-de80-4693-aa9e-74caa39c1a39', '2026-01-30'],
+  ['a133b449-ff5d-464d-9dc5-08ddbaa42d50', '2026-01-30'],
+  ['c2c852aa-7af6-446d-92dc-7a2f33fe1e4a', '2026-01-30'],
+  ['d7d64da3-f424-408b-9741-0242bdd0a75e', '2026-01-30'],
+  ['eaca7cdf-24ae-4cdc-9355-5e029ddf3fec', '2026-01-30'],
+  ['7b88f086-3d34-4886-a624-4acac95ff6c4', '2026-01-30'],
+  ['b4f8ab82-3544-49ce-a3f3-05e6ec7da7ac', '2026-01-30'],
+  ['19004300-826c-4049-bf35-480b46347c2e', '2026-01-30'],
+  ['da1ecb8f-d30c-480c-8db0-d7699f869fd9', '2026-01-30'],
+  ['8b482121-1a11-4f63-9197-9cd47460d8e4', '2026-01-30'],
+  ['b0f4d6fb-e264-4fb5-b61f-b170dc478fd3', '2026-01-30'],
+  ['7d221787-f63a-4709-ae31-da20198daea7', '2026-02-13'],
+  ['6a7476d9-fa11-4769-b184-787d24d237b2', '2026-02-18'],
+  ['6e15986e-5cdb-43e0-a13a-ed5ea067e745', '2026-02-18'],
+  ['280d832c-9d19-4a14-a5f2-277ecbafade3', '2026-02-19'],
+  ['9052c4d8-7051-4acd-83d2-1d43eb3219c8', '2026-02-19'],
+  ['8ae93aad-161c-4954-ac34-8d6acb7a7510', '2026-02-20'],
+  ['4842f739-2d9e-4199-8abf-0d2b18abfae1', '2026-02-20'],
+  ['56e682ae-b603-4ad3-a2f3-084459723724', '2026-02-23'],
+  ['e2d9fcd1-c510-4db6-a36d-b618f32fc5e0', '2026-02-23'],
+  ['51d7b0b5-05ff-4cc7-b8be-7f21ed325e7c', '2026-02-22'],
+  ['de0c4e9c-f0bb-474b-a9eb-5e1579acdf73', '2026-02-22'],
+  ['3b94bfaa-6903-4934-bef8-28dc71c0eb45', '2026-02-25'],
+  ['6d1ebe54-eaf8-458c-a054-aab6f97fc469', '2026-02-24'],
+  ['cb28ae4b-16c2-46d9-bced-6cc15d7c8333', '2026-02-25'],
+  ['a3852d68-d65d-43d4-a6d5-e3475f7cc502', '2026-02-26'],
+  ['5b1a3850-4cf0-479d-8d79-437e88dd5b70', '2026-02-26'],
+  ['9e221d5a-8ae3-42df-beba-751e43bd5383', '2026-02-25'],
+  ['68a9f8c8-f17c-4705-9b43-4993b4d942c1', '2026-02-25'],
+  ['c1cd1b15-672b-4fa6-ace6-3f5c16b78fd8', '2026-02-25'],
+  ['342e39e8-1837-44be-a21b-1ffb5df9bfe6', '2026-02-26'],
+  ['51860e01-e667-475a-aca4-e0919b85c3e6', '2026-02-26'],
+  ['7224c194-6a91-4f83-8711-2bc31f9964fc', '2026-02-27'],
+  ['1cbb3b88-b388-4afe-ab2a-b6dc13562b06', '2026-02-27'],
+  ['dc6b91f9-cdac-4a22-96b2-8347d37c04cf', '2026-03-02'],
+  ['7df5342e-b551-4b22-8a1c-495256e8d614', '2026-03-02'],
+  ['e8fcea43-17ae-4523-97f2-3d42d50eee2b', '2026-03-03'],
+  ['2847a1da-940c-4b27-a04c-fc437a578d4d', '2026-03-03'],
+  ['19ba77bc-73e8-40cc-94cc-b98e0ffcab8a', '2026-03-03'],
+  ['10e49a57-a84b-4583-a243-c92596fad5d9', '2026-03-04'],
+  ['f9906a81-0bcc-47ef-ad0c-e8af1abb8843', '2026-03-04'],
+  ['f332998b-7afd-49c7-a902-6c8668b82f6c', '2026-02-06'],
+  ['7875e42b-740a-4c2a-aa40-6b3a50e1a951', '2026-02-06'],
+  ['94a65636-7277-46cb-bcac-1699dced3a7c', '2026-02-05'],
+  ['9e221d5a-8ae3-42df-beba-751e43bd5383', '2026-03-15'],
+  ['68a9f8c8-f17c-4705-9b43-4993b4d942c1', '2026-03-15'],
+  ['c1cd1b15-672b-4fa6-ace6-3f5c16b78fd8', '2026-03-15'],
+  ['342e39e8-1837-44be-a21b-1ffb5df9bfe6', '2026-03-15'],
+  ['51860e01-e667-475a-aca4-e0919b85c3e6', '2026-03-15'],
+]);
+
 export async function generateAndSavePolandBookkeepingReport({ autoParkId }) {
   const pastWeek = DateTime.now().setZone('Europe/Warsaw').minus({ days: 2 });
   const periodFrom = pastWeek.startOf('week').toFormat('yyyy-MM-dd');
@@ -202,7 +283,22 @@ export async function generateAndSavePolandBookkeepingReport({ autoParkId }) {
 
   try {
     const jsonData = rows.map((row) => {
-      const { owner_id, model_id, bill_days } = row;
+      const {
+        license_plate,
+        car_id,
+        driver_name,
+        bill_period_start,
+        bill_period_end,
+        bill_days,
+        auto_park_name,
+        auto_park_id,
+        model_id,
+        owner_id,
+        car_owner_name,
+        owner_account_number,
+      } = row;
+
+      let { car_contract_start_date } = row;
 
       if (!owner_id) {
         throw {
@@ -224,8 +320,30 @@ export async function generateAndSavePolandBookkeepingReport({ autoParkId }) {
         (m) => m.modelId == model_id
       );
       const kwota = Math.round((priceRow.price / 7) * bill_days, 0);
+
+      const fake_car_contract_start_date = fakeDatesMap.get(car_id);
+
+      if (fake_car_contract_start_date) {
+        const originalDate = new Date(car_contract_start_date);
+        const fakeDate = new Date(fake_car_contract_start_date);
+
+        if (originalDate < fakeDate) {
+          car_contract_start_date = fake_car_contract_start_date;
+        }
+      }
+
       return {
-        ...row,
+        license_plate,
+        driver_name,
+        bill_period_start,
+        bill_period_end,
+        bill_days,
+        car_contract_start_date,
+        auto_park_name,
+        auto_park_id,
+        model_id,
+        car_owner_name,
+        owner_account_number,
         owner_account_number: accountNumber.accountNumber,
         model_price: priceRow.price,
         kwota,

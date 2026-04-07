@@ -287,14 +287,14 @@ export const deactivateVacancy = async ({ query }) => {
       robota_ua_vacancy_id,
       bitrix_vacancy_id,
     });
-  if (robota_ua_vacancy_id) {
+  if (robotaUaVacancy) {
     const { state } = robotaUaVacancy;
     const is_robota_ua_vacancy_active = state == 'Publicated';
     if (is_robota_ua_vacancy_active) {
       await deactivateRobotaUaVacancy({ vacancyId: robota_ua_vacancy_id });
     }
   }
-  if (work_ua_vacancy_id) {
+  if (workUaVacancy) {
     const { active } = workUaVacancy;
     const is_work_ua_vacancy_active = Boolean(active);
     if (is_work_ua_vacancy_active) {

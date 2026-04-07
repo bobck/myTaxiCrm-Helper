@@ -16,3 +16,9 @@ src/remonline/.DS_Store
 main.db-journal
 _main.db
 app.log
+/src/generated/prisma
+
+/src/generated/prisma
+
+main.db-shm
+main.db-wal

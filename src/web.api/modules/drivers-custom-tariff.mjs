@@ -1,73 +1,49 @@
 import {
-  getDiscountTariffsForAutoparksByDay,
+  assignDriversToCatalogTariff,
   getDriversCandidatsForCustomTerms,
-  makeCRMRequestlimited,
 } from '../web.api.utlites.mjs';
 
 import {
   saveCreatedDriverCustomTariffId,
   markDriverCustomTariffAsDeleted,
   getUndeletedDriversCustomTariffIds,
+  getCatalogTariffByWeekDayAndAutoParkId,
+  getAllCatalogTariffs,
 } from '../web.api.queries.mjs';
+import { DateTime } from 'luxon';
+import { devLog } from '../../shared/shared.utils.mjs';
 
 export async function setDriversCustomTariff() {
-  const autoParksIds = [
-    'd34e7c17-ccf3-49d1-875c-67e4378c4562', //
-    '4dd93df2-c172-488c-846f-d81452ddba70', //
-    '03328f6b-1336-4ee3-8407-bf5520411136', //
-    '2d3e566e-01a2-486f-ac7f-446d13f96f27', //
-    '2bfb0c23-33d8-4bc3-ab03-442d6ba13712',
-    '2964e082-0e86-4695-b5f5-98915d190518',
-    'c6dc6608-1cb3-488d-97f6-3f1132732bb9',
-    '472c4d3e-3fe7-45ea-9c94-a77f364bbd86',
-    '65844e7d-5e8a-4582-9ac3-c8cdaa988726',
-    '5571b3ea-1ccf-4f41-bbe0-0f12ee8dfb17',
-    'e4df553f-4ec2-43a8-b012-4795259e983a',
-    'a7bb17b7-fc87-4617-a915-d2f9ec83cfa0',
-    '34a2020d-d412-461c-ba0a-86e45f9afc78',
-    'b0328dc5-71be-485d-b6ec-786d9ce52112',
-    '9c8bae55-2aa2-4b25-a1e0-c93ab4bbb3ad',
-    'd78cf363-5b82-41b2-8a53-79bb74969ba7',
-    '052da49c-2175-4033-8010-c8e1f9a755ab',
-  ];
+  const catalogTariffs = await getAllCatalogTariffs();
 
-  const currentDate = new Date();
+  const autoParksIds = Array.from(
+    new Set(catalogTariffs.map((catalogTariff) => catalogTariff.auto_park_id))
+  );
+  const allRuleIds = Array.from(
+    new Set(catalogTariffs.map((catalogTariff) => catalogTariff.id))
+  );
+
   const timeZone = 'Europe/Kiev';
 
-  const options = {
-    timeZone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  };
+  const kievDateTime = DateTime.now().setZone(timeZone);
 
-  const currentDateTimeInKiev = currentDate.toLocaleString('en-US', options);
-  const dayOfWeek =
-    process.env.DAYNAME ||
-    currentDate.toLocaleDateString('en-US', { timeZone, weekday: 'long' });
+  const isoDate = kievDateTime.toISODate();
 
-  const [m, d, y] = currentDateTimeInKiev.split('/');
-  const isoDate = process.env.ISODATE || `${y}-${m}-${d}`;
+  const { weekNumber, year } = kievDateTime;
 
   const companyId = process.env.WEB_API_TARGET_CONPANY_ID;
-
-  const { discountTariffsForAutoparks } =
-    await getDiscountTariffsForAutoparksByDay({
-      dayOfWeek,
-      companyId,
-      autoParksIds,
-    });
 
   const { driversCandidatsForCustomTerms } =
     await getDriversCandidatsForCustomTerms({
       isoDate,
       companyId,
       autoParksIds,
+      weekNumber,
+      year,
+      allRuleIds,
     });
-
-  console.log({
-    driversCandidatsForCustomTerms: driversCandidatsForCustomTerms.length,
-  });
+  devLog(driversCandidatsForCustomTerms);
+  // return;
   const driversForCustomTerms = driversCandidatsForCustomTerms.filter(
     (driver) => {
       const { was_fired_days, custom_tariff_enabled, rent_event_id } = driver;
@@ -78,48 +54,46 @@ export async function setDriversCustomTariff() {
       );
     }
   );
-  console.log({ driversForCustomTermsLength: driversForCustomTerms.length });
 
-  const discountTariffsForAutoparksWithDriver = [];
+  const attachDriverToTariffInputs = [];
 
   for (let driver of driversForCustomTerms) {
-    const { auto_park_id, id } = driver;
-    const clonedObjectWithExtraProperty = {
-      driverId: id,
-      ...discountTariffsForAutoparks[auto_park_id],
+    const { auto_park_id, id: driver_id, start_working_at } = driver;
+
+    const firstWorkingDayDate = new DateTime(start_working_at);
+
+    const { id: catalogTariffId } =
+      await getCatalogTariffByWeekDayAndAutoParkId({
+        auto_park_id,
+        weekDay: firstWorkingDayDate.weekday,
+      });
+    const vars = {
+      autoParkId: auto_park_id,
+      driverIds: [driver_id],
+      catalogTariffId,
     };
-    discountTariffsForAutoparksWithDriver.push(clonedObjectWithExtraProperty);
+    devLog({ vars });
+    attachDriverToTariffInputs.push(vars);
   }
-
   console.log({
-    discountTariffsForAutoparksWithDriverLength:
-      discountTariffsForAutoparksWithDriver.length,
+    module: 'setDriversCustomTariff',
+    newDrivers: attachDriverToTariffInputs.length,
+    date: new Date(),
   });
-
-  for (let createDriverCustomTariffInput of discountTariffsForAutoparksWithDriver) {
-    const body = {
-      operationName: 'CreateDriverCustomTariff',
-      variables: {
-        createDriverCustomTariffInput,
-      },
-      query:
-        'mutation CreateDriverCustomTariff($createDriverCustomTariffInput: CreateDriverCustomTariffInput!) {\n  createDriverCustomTariff(\n    createDriverCustomTariffInput: $createDriverCustomTariffInput\n  ) {\n    id\n    name\n    taxPercent\n    taxType\n    targetMarker\n    accounting\n    tariffRules {\n      id\n      rate\n      from\n      to\n      __typename\n    }\n    __typename\n  }\n}\n',
-    };
-
+  for (let attachTariffToDriverInput of attachDriverToTariffInputs) {
     try {
-      const response = await makeCRMRequestlimited({ body });
-      const { data } = response;
-
-      const { createDriverCustomTariff } = data;
-
-      const tariffId = createDriverCustomTariff.id;
-      const driverId = createDriverCustomTariffInput.driverId;
-      console.log({ tariffId, driverId });
-      await saveCreatedDriverCustomTariffId({ tariffId, driverId });
+      devLog({ attachTariffToDriverInput });
+      await assignDriversToCatalogTariff(attachTariffToDriverInput);
+      await saveCreatedDriverCustomTariffId({
+        tariffId: attachTariffToDriverInput.catalogTariffId,
+        driverId: attachTariffToDriverInput.driverIds[0],
+        autoParkId: attachTariffToDriverInput.autoParkId,
+      });
     } catch (e) {
       console.error({
+        module: 'setDriversCustomTariff',
         date: new Date(),
-        createDriverCustomTariffInput,
+        attachTariffToDriverInput,
         message: e?.message,
       });
       continue;
@@ -128,28 +102,30 @@ export async function setDriversCustomTariff() {
 }
 
 export async function deleteDriversCustomTariff() {
+  console.log({
+    module: 'deleteDriversCustomTariff',
+    date: new Date(),
+  });
   const { undeletedDriversCustomTariffIds } =
     await getUndeletedDriversCustomTariffIds();
-
-  for (let deleteDriverCustomTariffInput of undeletedDriversCustomTariffIds) {
-    // console.log({ deleteDriverCustomTariffInput })
-    const { tariff_id: tariffId, driver_id: driverId } =
-      deleteDriverCustomTariffInput;
-
-    const body = {
-      operationName: 'DeleteDriverCustomTariff',
-      variables: {
-        deleteDriverCustomTariffInput: { tariffId, driverId },
-      },
-      query:
-        'mutation DeleteDriverCustomTariff($deleteDriverCustomTariffInput: DeleteDriverCustomTariffInput!) {\n  deleteDriverCustomTariff(\n    deleteDriverCustomTariffInput: $deleteDriverCustomTariffInput\n  ) {\n    success\n    __typename\n  }\n}\n',
-    };
-
+  devLog(undeletedDriversCustomTariffIds);
+  const attachTariffToDriverInputs = undeletedDriversCustomTariffIds.map(
+    (val) => {
+      return {
+        catalogTariffId: undefined,
+        driverIds: [val.driver_id],
+        autoParkId: val.auto_park_id,
+        tariffId: val.tariff_id,
+        driverId: val.driver_id,
+      };
+    }
+  );
+  for (let attachTariffToDriverInput of attachTariffToDriverInputs) {
     try {
-      const response = await makeCRMRequestlimited({ body });
-      const { data } = response;
-      // console.log({ data })
-      await markDriverCustomTariffAsDeleted({ tariffId });
+      devLog(attachTariffToDriverInput);
+      const { driverId, tariffId } = attachTariffToDriverInput;
+      await assignDriversToCatalogTariff(attachTariffToDriverInput);
+      await markDriverCustomTariffAsDeleted({ tariffId, driverId });
     } catch (e) {
       console.error({
         date: new Date(),
@@ -162,10 +138,7 @@ export async function deleteDriversCustomTariff() {
   }
 }
 
-if (process.env.ENV == 'SET') {
-  setDriversCustomTariff();
-}
-
-if (process.env.ENV == 'DEL') {
+if (process.env.ENV == 'TEST') {
+  // setDriversCustomTariff();
   deleteDriversCustomTariff();
 }

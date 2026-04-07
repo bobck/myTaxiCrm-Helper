@@ -309,7 +309,7 @@ export const positionTextReferralsToPayments = {
 export const cityTextRecruitToPayments = {
   Київ: {
     id: '2880',
-    assigned_by_id: '259',
+    assigned_by_id: '197876',
   },
   Харків: {
     id: '2882',
@@ -333,11 +333,11 @@ export const cityTextRecruitToPayments = {
   },
   Вінниця: {
     id: '2892',
-    assigned_by_id: '49842',
+    assigned_by_id: '178592',
   },
   Чернігів: {
     id: '2894',
-    assigned_by_id: '197876',
+    assigned_by_id: '234860',
   },
   Полтава: {
     id: '2896',
@@ -369,7 +369,7 @@ export const cityTextRecruitToPayments = {
   },
   Чернівці: {
     id: '2910',
-    assigned_by_id: '118318',
+    assigned_by_id: '89922',
   },
   Тернопіль: {
     id: '2912',
@@ -381,7 +381,7 @@ export const cityTextRecruitToPayments = {
   },
   Ужгород: {
     id: '2920',
-    assigned_by_id: '75012',
+    assigned_by_id: '219414',
   },
   Черкаси: {
     id: '2928',
@@ -398,6 +398,10 @@ export const cityTextRecruitToPayments = {
   "Кам'янське": {
     id: '2924',
     assigned_by_id: '197858',
+  },
+  Кропивницький: {
+    id: '2918',
+    assigned_by_id: '226660',
   },
 };
 export const procentageRewardAutoParkIds = [
@@ -424,6 +428,8 @@ export const procentageRewardAutoParkIds = [
   'e4df553f-4ec2-43a8-b012-4795259e983a',
   'a7bb17b7-fc87-4617-a915-d2f9ec83cfa0',
   '1e8a6a0d-aa34-4d77-a87c-d0c86fab5577',
+  'b9db6e4a-5b65-4ac2-ba34-976e0f72ff5c',
+  '760a2eb6-3b03-44bf-a1ea-d9f955cb290a',
 ];
 
 const positionCodes = {
