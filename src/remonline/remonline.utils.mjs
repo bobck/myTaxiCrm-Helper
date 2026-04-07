@@ -707,3 +707,68 @@ export async function* getProducts(_page = 1, _attempt = 1) {
     }
   }
 }
+
+export async function getRefunds({ lastCreatedAt } = {}) {
+  const allRefunds = [];
+  let _page = 1;
+  let reachedKnown = false;
+
+  while (true) {
+    const response = await fetch(
+      `${process.env.ROAPP_API}/v2/finance/refunds?token=${process.env.REMONLINE_API_TOKEN}&page=${_page}`
+    );
+
+    if (
+      response.status == 414 ||
+      response.status == 503 ||
+      response.status == 502 ||
+      response.status == 504
+    ) {
+      throw await response.text();
+    }
+
+    if (response.status == 403 || response.status == 401) {
+      console.info({
+        function: 'getRefunds',
+        message: 'Get new Auth',
+      });
+      await remonlineTokenToEnv(true);
+      continue;
+    }
+
+    try {
+      const data = await response.json();
+      const { paging, data: refunds } = data;
+
+      for (const refund of refunds) {
+        if (lastCreatedAt && new Date(refund.created_at) <= lastCreatedAt) {
+          reachedKnown = true;
+          break;
+        }
+        allRefunds.push(refund);
+      }
+
+      devLog({
+        function: 'getRefunds',
+        page: paging.page,
+        totalPages: paging.total_pages,
+        count: paging.count,
+        fetched: refunds.length,
+        totalFetched: allRefunds.length,
+        reachedKnown,
+      });
+
+      if (reachedKnown || _page >= paging.total_pages) break;
+      _page++;
+    } catch (e) {
+      console.error({
+        function: 'getRefunds',
+        e: e?.message,
+        response_status: response.status,
+      });
+      throw response.status;
+    }
+  }
+
+  return { refunds: allRefunds };
+}

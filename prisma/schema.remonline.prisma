@@ -121,6 +121,23 @@ model CashboxTransaction {
   @@schema("public")
 }
 
+model Refund {
+  id                  Int      @id
+  number              String
+  branchId            Int      @map("branch_id")
+  createdAt           DateTime @map("created_at")
+  createdById         Int      @map("created_by_id")
+  clientId            Int?     @map("client_id")
+  clientName          String?  @map("client_name")
+  comment             String?
+  relatedDocumentId   Int?     @map("related_document_id")
+  relatedDocumentType String?  @map("related_document_type")
+  total               Float
+
+  @@map("refunds")
+  @@schema("public")
+}
+
 model Product {
   id                             Int      @id
   code                           String?
