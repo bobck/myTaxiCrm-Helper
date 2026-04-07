@@ -82,6 +82,45 @@ model PrivateApiPostingProducts {
   @@schema("private_api")
 }
 
+model Cashbox {
+  id                       Int      @id
+  title                    String?
+  type                     Int?
+  currencyName             String?  @map("currency_name")
+  currencyCode             String?  @map("currency_code")
+  balance                  Float?
+  isGlobal                 Boolean? @map("is_global")
+  isEnabled                Boolean  @default(true) @map("is_enabled")
+  lastTransactionCreatedAt BigInt?  @map("last_transaction_created_at")
+  createdAt                DateTime @default(now()) @map("created_at")
+  updatedAt                DateTime @updatedAt @map("updated_at")
+  transactions             CashboxTransaction[]
+
+  @@map("cashboxes")
+  @@schema("public")
+}
+
+model CashboxTransaction {
+  id                    Int      @id
+  cashboxId             Int      @map("cashbox_id")
+  value                 Float
+  direction             Int
+  employeeId            Int?     @map("employee_id")
+  createdAt             BigInt   @map("created_at")
+  description           String?
+  clientId              Int?     @map("client_id")
+  relatedDocumentId     Int?     @map("related_document_id")
+  relatedDocumentType   Int?     @map("related_document_type")
+  cashflowItemId        Int?     @map("cashflow_item_id")
+  cashflowItemName      String?  @map("cashflow_item_name")
+  cashflowItemDirection Int?     @map("cashflow_item_direction")
+  cashbox               Cashbox  @relation(fields: [cashboxId], references: [id])
+
+  @@index([cashboxId, createdAt])
+  @@map("cashbox_transactions")
+  @@schema("public")
+}
+
 model Product {
   id                             Int      @id
   code                           String?
