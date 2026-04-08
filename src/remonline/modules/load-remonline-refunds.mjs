@@ -40,11 +40,15 @@ export async function loadRemonlineRefunds() {
     select: { createdAt: true },
   });
 
-  const lastCreatedAt = lastRefund?.createdAt ?? null;
+  const createdAt = lastRefund
+    ? new Date(lastRefund.createdAt.getTime() + 1000)
+        .toISOString()
+        .replace(/\.\d{3}Z$/, 'Z')// API fails with 400 if miliseconds are passed to the filter
+    : null;
 
-  devLog({ message: `Last known refund createdAt: ${lastCreatedAt}` });
+  devLog({ message: `Last known refund createdAt: ${lastRefund?.createdAt}, fetching from: ${createdAt}` });
 
-  const { refunds } = await getRefunds({ lastCreatedAt });
+  const { refunds } = await getRefunds({ createdAt });
 
   if (refunds.length === 0) {
     devLog({ message: 'No new refunds found' });
