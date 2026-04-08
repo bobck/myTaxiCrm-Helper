@@ -225,6 +225,57 @@ export async function getCashboxTransactions({ createdAt, cashboxId }) {
 
   return { transactions: allTransactions };
 }
+export async function getCashboxes() {
+  while (true) {
+    const url = `${process.env.REMONLINE_API}/cashbox/?token=${process.env.REMONLINE_API_TOKEN}`;
+
+    const response = await fetch(url);
+
+    if (
+      response.status == 414 ||
+      response.status == 503 ||
+      response.status == 502 ||
+      response.status == 504
+    ) {
+      throw await response.text();
+    }
+
+    if (response.status == 403 || response.status == 401) {
+      console.info({ function: 'getCashboxes', message: 'Get new Auth' });
+      await remonlineTokenToEnv(true);
+      continue;
+    }
+
+    const data = await response.json();
+    const { success } = data;
+
+    if (!success) {
+      const { message, code } = data;
+      if ((response.status == 403 && code == 101) || response.status == 401) {
+        console.info({ function: 'getCashboxes', message: 'Get new Auth' });
+        await remonlineTokenToEnv(true);
+        continue;
+      }
+      console.error({
+        function: 'getCashboxes',
+        message,
+        status: response.status,
+      });
+      throw message;
+    }
+
+    const { data: cashboxes, count } = data;
+
+    devLog({
+      function: 'getCashboxes',
+      count,
+      fetched: cashboxes.length,
+    });
+
+    return { cashboxes };
+  }
+}
+
 export async function getLocations() {
   // return await fetch(`${process.env.REMONLINE_API}/branches/?token=${process.env.REMONLINE_API_TOKEN}`);
   const url = `${process.env.REMONLINE_API}/branches/?token=${process.env.REMONLINE_API_TOKEN}`;

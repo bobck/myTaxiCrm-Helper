@@ -74,7 +74,9 @@
     "prisma:migrate:deploy:all": "npm run prisma:migrate:deploy:remonline",
     "test:remonline:postings": "ENV=TEST node -r dotenv/config src/remonline/modules/load-remonline-postings.mjs",
     "test:remonline:products": "ENV=TEST node -r dotenv/config src/remonline/modules/load-remonline-products.mjs",
-    "test:insurance:invoice": "ENV=TEST node -r dotenv/config src/bq/modules/load-insurance-invoices.mjs"
+    "test:remonline:cashbox:sync": "ENV=TEST node -r dotenv/config src/remonline/modules/sync-remonline-cashboxes.mjs",
+    "test:remonline:cashbox:transactions:sync": "ENV=TEST node -r dotenv/config src/remonline/modules/load-remonline-cashbox-transactions.mjs",
+    "test:bitrix:insurance:invoice": "ENV=TEST node -r dotenv/config src/bq/modules/load-insurance-invoices.mjs"
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",
