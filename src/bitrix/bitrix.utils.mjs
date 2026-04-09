@@ -805,7 +805,7 @@ export async function getInsuranceInvoices({ date, modifiedSince }) {
     ],
   };
   const response = await bitrix.deals.list(dealParams);
-  
+
   const { result } = response;
   devLog({ dealParams, fetchedDeals: result.length });
   return result;
