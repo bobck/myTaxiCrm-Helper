@@ -43,10 +43,12 @@ export async function loadRemonlineRefunds() {
   const createdAt = lastRefund
     ? new Date(lastRefund.createdAt.getTime() + 1000)
         .toISOString()
-        .replace(/\.\d{3}Z$/, 'Z')// API fails with 400 if miliseconds are passed to the filter
+        .replace(/\.\d{3}Z$/, 'Z') // API fails with 400 if miliseconds are passed to the filter
     : null;
 
-  devLog({ message: `Last known refund createdAt: ${lastRefund?.createdAt}, fetching from: ${createdAt}` });
+  devLog({
+    message: `Last known refund createdAt: ${lastRefund?.createdAt}, fetching from: ${createdAt}`,
+  });
 
   const { refunds } = await getRefunds({ createdAt });
 
