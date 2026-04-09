@@ -709,9 +709,11 @@ export async function* getProducts(_page = 1, _attempt = 1) {
 }
 
 export async function getRefunds({ createdAt } = {}) {
+  const MAX_AUTH_RETRIES = 3;
   const createdAtUrl = createdAt ? `&created_at=${createdAt}` : '';
   const allRefunds = [];
   let _page = 1;
+  let _authRetries = 0;
 
   while (true) {
     const response = await fetch(
@@ -728,9 +730,15 @@ export async function getRefunds({ createdAt } = {}) {
     }
 
     if (response.status == 403 || response.status == 401) {
+      _authRetries++;
+      if (_authRetries > MAX_AUTH_RETRIES) {
+        throw new Error(
+          `getRefunds: auth failed after ${MAX_AUTH_RETRIES} retries`
+        );
+      }
       console.info({
         function: 'getRefunds',
-        message: 'Get new Auth',
+        message: `Get new Auth (attempt ${_authRetries}/${MAX_AUTH_RETRIES})`,
       });
       await remonlineTokenToEnv(true);
       continue;
