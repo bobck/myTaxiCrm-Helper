@@ -707,3 +707,69 @@ export async function* getProducts(_page = 1, _attempt = 1) {
     }
   }
 }
+
+export async function getRefunds({ createdAt } = {}) {
+  const MAX_AUTH_RETRIES = 3;
+  const createdAtUrl = createdAt ? `&created_at=${createdAt}` : '';
+  const allRefunds = [];
+  let _page = 1;
+  let _authRetries = 0;
+
+  while (true) {
+    const response = await fetch(
+      `${process.env.ROAPP_API}/v2/finance/refunds?token=${process.env.REMONLINE_API_TOKEN}&page=${_page}${createdAtUrl}`
+    );
+
+    if (
+      response.status == 414 ||
+      response.status == 503 ||
+      response.status == 502 ||
+      response.status == 504
+    ) {
+      throw await response.text();
+    }
+
+    if (response.status == 403 || response.status == 401) {
+      _authRetries++;
+      if (_authRetries > MAX_AUTH_RETRIES) {
+        throw new Error(
+          `getRefunds: auth failed after ${MAX_AUTH_RETRIES} retries`
+        );
+      }
+      console.info({
+        function: 'getRefunds',
+        message: `Get new Auth (attempt ${_authRetries}/${MAX_AUTH_RETRIES})`,
+      });
+      await remonlineTokenToEnv(true);
+      continue;
+    }
+
+    try {
+      const data = await response.json();
+      const { paging, data: refunds } = data;
+
+      allRefunds.push(...refunds);
+
+      devLog({
+        function: 'getRefunds',
+        page: paging.page,
+        totalPages: paging.total_pages,
+        count: paging.count,
+        fetched: refunds.length,
+        totalFetched: allRefunds.length,
+      });
+
+      if (_page >= paging.total_pages) break;
+      _page++;
+    } catch (e) {
+      console.error({
+        function: 'getRefunds',
+        e: e?.message,
+        response_status: response.status,
+      });
+      throw response.status;
+    }
+  }
+
+  return { refunds: allRefunds };
+}

@@ -79,7 +79,8 @@
     "test:remonline:products": "ENV=TEST node -r dotenv/config src/remonline/modules/load-remonline-products.mjs",
     "test:remonline:cashbox:sync": "ENV=TEST node -r dotenv/config src/remonline/modules/sync-remonline-cashboxes.mjs",
     "test:remonline:cashbox:transactions:sync": "ENV=TEST node -r dotenv/config src/remonline/modules/load-remonline-cashbox-transactions.mjs",
-    "test:bitrix:insurance:invoice": "ENV=TEST node -r dotenv/config src/bitrix/modules/sync-insurance-invoices.mjs"
+    "test:bitrix:insurance:invoice": "ENV=TEST node -r dotenv/config src/bitrix/modules/sync-insurance-invoices.mjs",
+    "test:remonline:refunds": "ENV=TEST node -r dotenv/config src/remonline/modules/load-remonline-refunds.mjs"
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",
