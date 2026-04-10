@@ -3,6 +3,7 @@ import fs from 'fs';
 import { pool } from './../api/pool.mjs';
 import { jobBoardApplymentParametersToBitrixKeys } from './bitrix.constants.mjs';
 import { BitrixAPIClient } from './bitrix.api.mjs';
+import { devLog } from '../shared/shared.utils.mjs';
 const bitrix = Bitrix(
   `https://${process.env.BITRIX_PORTAL_HOST}/rest/${process.env.BITRIX_USER_ID}/${process.env.BITRIX_API_KEY}/`
 );
@@ -778,4 +779,34 @@ export async function moveRequestedDriversToCheckStage({ cards }) {
   const { result: resp, time } = await bitrix.batch(batchObj);
   const { result: itemObj } = resp;
   return itemObj;
+}
+export async function getInsuranceInvoices({ date, modifiedSince }) {
+  const filter = {
+    '>=UF_CRM_1642522045721': `${date}T00:00:00`,
+    '>UF_CRM_1654075469': 0,
+    CATEGORY_ID: '46',
+  };
+
+  if (modifiedSince) {
+    filter['>=DATE_MODIFY'] = modifiedSince;
+  }
+
+  const dealParams = {
+    filter,
+    order: {
+      DATE_CREATE: 'ASC',
+    },
+    select: [
+      'ID',
+      'DATE_CREATE',
+      'UF_CRM_1654075469',
+      'UF_CRM_1642522045721',
+      'UF_CRM_1527615815',
+    ],
+  };
+  const response = await bitrix.deals.list(dealParams);
+
+  const { result } = response;
+  devLog({ dealParams, fetchedDeals: result.length });
+  return result;
 }
