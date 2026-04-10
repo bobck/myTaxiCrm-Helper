@@ -41,9 +41,11 @@ export async function getOrders({ idLabels, ids, modified_at, sort_dir }) {
   const sort_dir_url = sort_dir ? `&sort_dir=${sort_dir}` : '';
   const modified_at_url = modified_at ? `&modified_at[]=${modified_at}` : '';
 
+  const MAX_AUTH_RETRIES = 3;
   const allOrders = [];
   let _page = 1;
   let count;
+  let _authRetries = 0;
 
   while (true) {
     const url = `${process.env.REMONLINE_API}/order/?token=${process.env.REMONLINE_API_TOKEN}&page=${_page}${idLabelsUrl}${idUrl}${sort_dir_url}${modified_at_url}`;
@@ -70,7 +72,16 @@ export async function getOrders({ idLabels, ids, modified_at, sort_dir }) {
       const { validation } = message;
 
       if ((response.status == 403 && code == 101) || response.status == 401) {
-        console.info({ function: 'getOrders', message: 'Get new Auth' });
+        _authRetries++;
+        if (_authRetries > MAX_AUTH_RETRIES) {
+          throw new Error(
+            `getOrders: auth failed after ${MAX_AUTH_RETRIES} retries`
+          );
+        }
+        console.info({
+          function: 'getOrders',
+          message: `Get new Auth (attempt ${_authRetries}/${MAX_AUTH_RETRIES})`,
+        });
         await remonlineTokenToEnv(true);
         continue;
       }
@@ -108,7 +119,8 @@ export async function getOrders({ idLabels, ids, modified_at, sort_dir }) {
   return { orders: allOrders, count };
 }
 
-export async function changeOrderStatus({ id, statusId }) {
+export async function changeOrderStatus({ id, statusId }, _authRetries = 0) {
+  const MAX_AUTH_RETRIES = 3;
   const params = new URLSearchParams();
 
   params.append('token', process.env.REMONLINE_API_TOKEN);
@@ -128,9 +140,17 @@ export async function changeOrderStatus({ id, statusId }) {
     const { validation } = message;
 
     if ((response.status == 403 && code == 101) || response.status == 401) {
-      console.info({ function: 'createOrder', message: 'Get new Auth' });
+      if (_authRetries >= MAX_AUTH_RETRIES) {
+        throw new Error(
+          `changeOrderStatus: auth failed after ${MAX_AUTH_RETRIES} retries`
+        );
+      }
+      console.info({
+        function: 'changeOrderStatus',
+        message: `Get new Auth (attempt ${_authRetries + 1}/${MAX_AUTH_RETRIES})`,
+      });
       await remonlineTokenToEnv(true);
-      return await changeOrderStatus({ id, statusId });
+      return await changeOrderStatus({ id, statusId }, _authRetries + 1);
     }
 
     console.error({
@@ -147,6 +167,7 @@ export async function changeOrderStatus({ id, statusId }) {
 }
 
 export async function getCashboxTransactions({ createdAt, cashboxId }) {
+  const MAX_AUTH_RETRIES = 3;
   let createdAtUrl = '';
   if (createdAt) {
     createdAtUrl += `&created_at[]=${createdAt}`;
@@ -154,6 +175,7 @@ export async function getCashboxTransactions({ createdAt, cashboxId }) {
 
   const allTransactions = [];
   let _page = 1;
+  let _authRetries = 0;
 
   while (true) {
     const response = await fetch(
@@ -170,9 +192,15 @@ export async function getCashboxTransactions({ createdAt, cashboxId }) {
     }
 
     if (response.status == 403 || response.status == 401) {
+      _authRetries++;
+      if (_authRetries > MAX_AUTH_RETRIES) {
+        throw new Error(
+          `getCashboxTransactions: auth failed after ${MAX_AUTH_RETRIES} retries`
+        );
+      }
       console.info({
         function: 'getCashboxTransactions',
-        message: 'Get new Auth',
+        message: `Get new Auth (attempt ${_authRetries}/${MAX_AUTH_RETRIES})`,
       });
       await remonlineTokenToEnv(true);
       continue;
@@ -226,6 +254,9 @@ export async function getCashboxTransactions({ createdAt, cashboxId }) {
   return { transactions: allTransactions };
 }
 export async function getCashboxes() {
+  const MAX_AUTH_RETRIES = 3;
+  let _authRetries = 0;
+
   while (true) {
     const url = `${process.env.REMONLINE_API}/cashbox/?token=${process.env.REMONLINE_API_TOKEN}`;
 
@@ -241,7 +272,16 @@ export async function getCashboxes() {
     }
 
     if (response.status == 403 || response.status == 401) {
-      console.info({ function: 'getCashboxes', message: 'Get new Auth' });
+      _authRetries++;
+      if (_authRetries > MAX_AUTH_RETRIES) {
+        throw new Error(
+          `getCashboxes: auth failed after ${MAX_AUTH_RETRIES} retries`
+        );
+      }
+      console.info({
+        function: 'getCashboxes',
+        message: `Get new Auth (attempt ${_authRetries}/${MAX_AUTH_RETRIES})`,
+      });
       await remonlineTokenToEnv(true);
       continue;
     }
@@ -252,7 +292,16 @@ export async function getCashboxes() {
     if (!success) {
       const { message, code } = data;
       if ((response.status == 403 && code == 101) || response.status == 401) {
-        console.info({ function: 'getCashboxes', message: 'Get new Auth' });
+        _authRetries++;
+        if (_authRetries > MAX_AUTH_RETRIES) {
+          throw new Error(
+            `getCashboxes: auth failed after ${MAX_AUTH_RETRIES} retries`
+          );
+        }
+        console.info({
+          function: 'getCashboxes',
+          message: `Get new Auth (attempt ${_authRetries}/${MAX_AUTH_RETRIES})`,
+        });
         await remonlineTokenToEnv(true);
         continue;
       }
@@ -287,9 +336,11 @@ export async function getLocations() {
 }
 
 export async function getTransfers({ branch_id }) {
+  const MAX_AUTH_RETRIES = 3;
   const options = { method: 'GET', headers: { accept: 'application/json' } };
   const allTransfers = [];
   let _page = 1;
+  let _authRetries = 0;
 
   while (true) {
     const url = `${process.env.REMONLINE_API}/warehouse/moves/?page=${_page}&branch_id=${branch_id}&token=${process.env.REMONLINE_API_TOKEN}`;
@@ -302,7 +353,16 @@ export async function getTransfers({ branch_id }) {
       const { message, code } = data;
       const { validation } = message;
       if ((response.status == 403 && code == 101) || response.status == 401) {
-        console.info({ function: 'getTransfers', message: 'Get new Auth' });
+        _authRetries++;
+        if (_authRetries > MAX_AUTH_RETRIES) {
+          throw new Error(
+            `getTransfers: auth failed after ${MAX_AUTH_RETRIES} retries`
+          );
+        }
+        console.info({
+          function: 'getTransfers',
+          message: `Get new Auth (attempt ${_authRetries}/${MAX_AUTH_RETRIES})`,
+        });
         await remonlineTokenToEnv(true);
         continue;
       }
@@ -340,7 +400,8 @@ export async function getTransfers({ branch_id }) {
 
   return { transfers: allTransfers };
 }
-export async function getEmployees() {
+export async function getEmployees(_authRetries = 0) {
+  const MAX_AUTH_RETRIES = 3;
   const url = `${process.env.REMONLINE_API}/employees/?token=${process.env.REMONLINE_API_TOKEN}`;
   const options = { method: 'GET', headers: { accept: 'application/json' } };
   const response = await fetch(url, options);
@@ -359,9 +420,17 @@ export async function getEmployees() {
     const { message, code } = data;
     const { validation } = message;
     if ((response.status == 403 && code == 101) || response.status == 401) {
-      console.info({ function: 'getEmployees', message: 'Get new Auth' });
+      if (_authRetries >= MAX_AUTH_RETRIES) {
+        throw new Error(
+          `getEmployees: auth failed after ${MAX_AUTH_RETRIES} retries`
+        );
+      }
+      console.info({
+        function: 'getEmployees',
+        message: `Get new Auth (attempt ${_authRetries + 1}/${MAX_AUTH_RETRIES})`,
+      });
       await remonlineTokenToEnv(true);
-      return await getEmployees();
+      return await getEmployees(_authRetries + 1);
     }
     console.error({
       function: 'getEmployees',
@@ -376,9 +445,11 @@ export async function getEmployees() {
   return { employees };
 }
 export async function getAssets() {
+  const MAX_AUTH_RETRIES = 3;
   const options = { method: 'GET', headers: { accept: 'application/json' } };
   const allAssets = [];
   let _page = 1;
+  let _authRetries = 0;
 
   while (true) {
     const url = `${process.env.REMONLINE_API}/warehouse/assets?page=${_page}&token=${process.env.REMONLINE_API_TOKEN}`;
@@ -391,7 +462,16 @@ export async function getAssets() {
       const { message, code } = data;
       const { validation } = message;
       if ((response.status == 403 && code == 101) || response.status == 401) {
-        console.info({ function: 'getAssets', message: 'Get new Auth' });
+        _authRetries++;
+        if (_authRetries > MAX_AUTH_RETRIES) {
+          throw new Error(
+            `getAssets: auth failed after ${MAX_AUTH_RETRIES} retries`
+          );
+        }
+        console.info({
+          function: 'getAssets',
+          message: `Get new Auth (attempt ${_authRetries}/${MAX_AUTH_RETRIES})`,
+        });
         await remonlineTokenToEnv(true);
         continue;
       }
@@ -425,7 +505,8 @@ export async function getAssets() {
 
   return { assets: allAssets };
 }
-export async function getUOMs() {
+export async function getUOMs(_authRetries = 0) {
+  const MAX_AUTH_RETRIES = 3;
   const url = `${process.env.REMONLINE_API}/catalogs/uoms?token=${process.env.REMONLINE_API_TOKEN}`;
 
   const options = { method: 'GET', headers: { accept: 'application/json' } };
@@ -445,9 +526,17 @@ export async function getUOMs() {
     const { message, code } = data;
     const { validation } = message;
     if ((response.status == 403 && code == 101) || response.status == 401) {
-      console.info({ function: 'getUOMs', message: 'Get new Auth' });
+      if (_authRetries >= MAX_AUTH_RETRIES) {
+        throw new Error(
+          `getUOMs: auth failed after ${MAX_AUTH_RETRIES} retries`
+        );
+      }
+      console.info({
+        function: 'getUOMs',
+        message: `Get new Auth (attempt ${_authRetries + 1}/${MAX_AUTH_RETRIES})`,
+      });
       await remonlineTokenToEnv(true);
-      return await getEmployees();
+      return await getUOMs(_authRetries + 1);
     }
     console.error({
       function: 'getUOMs',
@@ -594,6 +683,8 @@ export async function getPostings(
 
 export async function* getProducts(_page = 1, _attempt = 1) {
   const MAX_RETRIES = 3;
+  const MAX_AUTH_RETRIES = 3;
+  let _authRetries = 0;
 
   while (true) {
     const url = `${process.env.ROAPP_API}/products/?page=${_page}&token=${process.env.REMONLINE_API_TOKEN}`;
@@ -636,9 +727,17 @@ export async function* getProducts(_page = 1, _attempt = 1) {
         const { message, code } = data;
 
         if ((response.status == 403 && code == 101) || response.status == 401) {
-          devLog({ function: 'getProducts', message: 'Get new Auth' });
+          _authRetries++;
+          if (_authRetries > MAX_AUTH_RETRIES) {
+            throw new Error(
+              `getProducts: auth failed after ${MAX_AUTH_RETRIES} retries`
+            );
+          }
+          devLog({
+            function: 'getProducts',
+            message: `Get new Auth (attempt ${_authRetries}/${MAX_AUTH_RETRIES})`,
+          });
           await remonlineTokenToEnv(true);
-          // Retry the same page with new token
           _attempt = 1;
           continue;
         }
