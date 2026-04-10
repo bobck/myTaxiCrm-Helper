@@ -75,7 +75,8 @@
     "test:remonline:postings": "ENV=TEST node -r dotenv/config src/remonline/modules/load-remonline-postings.mjs",
     "test:remonline:products": "ENV=TEST node -r dotenv/config src/remonline/modules/load-remonline-products.mjs",
     "test:remonline:cashbox:sync": "ENV=TEST node -r dotenv/config src/remonline/modules/sync-remonline-cashboxes.mjs",
-    "test:remonline:cashbox:transactions:sync": "ENV=TEST node -r dotenv/config src/remonline/modules/load-remonline-cashbox-transactions.mjs"
+    "test:remonline:cashbox:transactions:sync": "ENV=TEST node -r dotenv/config src/remonline/modules/load-remonline-cashbox-transactions.mjs",
+    "test:remonline:refunds": "ENV=TEST node -r dotenv/config src/remonline/modules/load-remonline-refunds.mjs"
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",
