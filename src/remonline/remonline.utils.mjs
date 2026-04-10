@@ -74,9 +74,14 @@ export async function getOrders({ idLabels, ids, modified_at, sort_dir }) {
       if ((response.status == 403 && code == 101) || response.status == 401) {
         _authRetries++;
         if (_authRetries > MAX_AUTH_RETRIES) {
-          throw new Error(`getOrders: auth failed after ${MAX_AUTH_RETRIES} retries`);
+          throw new Error(
+            `getOrders: auth failed after ${MAX_AUTH_RETRIES} retries`
+          );
         }
-        console.info({ function: 'getOrders', message: `Get new Auth (attempt ${_authRetries}/${MAX_AUTH_RETRIES})` });
+        console.info({
+          function: 'getOrders',
+          message: `Get new Auth (attempt ${_authRetries}/${MAX_AUTH_RETRIES})`,
+        });
         await remonlineTokenToEnv(true);
         continue;
       }
@@ -136,9 +141,14 @@ export async function changeOrderStatus({ id, statusId }, _authRetries = 0) {
 
     if ((response.status == 403 && code == 101) || response.status == 401) {
       if (_authRetries >= MAX_AUTH_RETRIES) {
-        throw new Error(`changeOrderStatus: auth failed after ${MAX_AUTH_RETRIES} retries`);
+        throw new Error(
+          `changeOrderStatus: auth failed after ${MAX_AUTH_RETRIES} retries`
+        );
       }
-      console.info({ function: 'changeOrderStatus', message: `Get new Auth (attempt ${_authRetries + 1}/${MAX_AUTH_RETRIES})` });
+      console.info({
+        function: 'changeOrderStatus',
+        message: `Get new Auth (attempt ${_authRetries + 1}/${MAX_AUTH_RETRIES})`,
+      });
       await remonlineTokenToEnv(true);
       return await changeOrderStatus({ id, statusId }, _authRetries + 1);
     }
@@ -184,7 +194,9 @@ export async function getCashboxTransactions({ createdAt, cashboxId }) {
     if (response.status == 403 || response.status == 401) {
       _authRetries++;
       if (_authRetries > MAX_AUTH_RETRIES) {
-        throw new Error(`getCashboxTransactions: auth failed after ${MAX_AUTH_RETRIES} retries`);
+        throw new Error(
+          `getCashboxTransactions: auth failed after ${MAX_AUTH_RETRIES} retries`
+        );
       }
       console.info({
         function: 'getCashboxTransactions',
@@ -262,9 +274,14 @@ export async function getCashboxes() {
     if (response.status == 403 || response.status == 401) {
       _authRetries++;
       if (_authRetries > MAX_AUTH_RETRIES) {
-        throw new Error(`getCashboxes: auth failed after ${MAX_AUTH_RETRIES} retries`);
+        throw new Error(
+          `getCashboxes: auth failed after ${MAX_AUTH_RETRIES} retries`
+        );
       }
-      console.info({ function: 'getCashboxes', message: `Get new Auth (attempt ${_authRetries}/${MAX_AUTH_RETRIES})` });
+      console.info({
+        function: 'getCashboxes',
+        message: `Get new Auth (attempt ${_authRetries}/${MAX_AUTH_RETRIES})`,
+      });
       await remonlineTokenToEnv(true);
       continue;
     }
@@ -277,9 +294,14 @@ export async function getCashboxes() {
       if ((response.status == 403 && code == 101) || response.status == 401) {
         _authRetries++;
         if (_authRetries > MAX_AUTH_RETRIES) {
-          throw new Error(`getCashboxes: auth failed after ${MAX_AUTH_RETRIES} retries`);
+          throw new Error(
+            `getCashboxes: auth failed after ${MAX_AUTH_RETRIES} retries`
+          );
         }
-        console.info({ function: 'getCashboxes', message: `Get new Auth (attempt ${_authRetries}/${MAX_AUTH_RETRIES})` });
+        console.info({
+          function: 'getCashboxes',
+          message: `Get new Auth (attempt ${_authRetries}/${MAX_AUTH_RETRIES})`,
+        });
         await remonlineTokenToEnv(true);
         continue;
       }
@@ -333,9 +355,14 @@ export async function getTransfers({ branch_id }) {
       if ((response.status == 403 && code == 101) || response.status == 401) {
         _authRetries++;
         if (_authRetries > MAX_AUTH_RETRIES) {
-          throw new Error(`getTransfers: auth failed after ${MAX_AUTH_RETRIES} retries`);
+          throw new Error(
+            `getTransfers: auth failed after ${MAX_AUTH_RETRIES} retries`
+          );
         }
-        console.info({ function: 'getTransfers', message: `Get new Auth (attempt ${_authRetries}/${MAX_AUTH_RETRIES})` });
+        console.info({
+          function: 'getTransfers',
+          message: `Get new Auth (attempt ${_authRetries}/${MAX_AUTH_RETRIES})`,
+        });
         await remonlineTokenToEnv(true);
         continue;
       }
@@ -394,9 +421,14 @@ export async function getEmployees(_authRetries = 0) {
     const { validation } = message;
     if ((response.status == 403 && code == 101) || response.status == 401) {
       if (_authRetries >= MAX_AUTH_RETRIES) {
-        throw new Error(`getEmployees: auth failed after ${MAX_AUTH_RETRIES} retries`);
+        throw new Error(
+          `getEmployees: auth failed after ${MAX_AUTH_RETRIES} retries`
+        );
       }
-      console.info({ function: 'getEmployees', message: `Get new Auth (attempt ${_authRetries + 1}/${MAX_AUTH_RETRIES})` });
+      console.info({
+        function: 'getEmployees',
+        message: `Get new Auth (attempt ${_authRetries + 1}/${MAX_AUTH_RETRIES})`,
+      });
       await remonlineTokenToEnv(true);
       return await getEmployees(_authRetries + 1);
     }
@@ -432,9 +464,14 @@ export async function getAssets() {
       if ((response.status == 403 && code == 101) || response.status == 401) {
         _authRetries++;
         if (_authRetries > MAX_AUTH_RETRIES) {
-          throw new Error(`getAssets: auth failed after ${MAX_AUTH_RETRIES} retries`);
+          throw new Error(
+            `getAssets: auth failed after ${MAX_AUTH_RETRIES} retries`
+          );
         }
-        console.info({ function: 'getAssets', message: `Get new Auth (attempt ${_authRetries}/${MAX_AUTH_RETRIES})` });
+        console.info({
+          function: 'getAssets',
+          message: `Get new Auth (attempt ${_authRetries}/${MAX_AUTH_RETRIES})`,
+        });
         await remonlineTokenToEnv(true);
         continue;
       }
@@ -490,9 +527,14 @@ export async function getUOMs(_authRetries = 0) {
     const { validation } = message;
     if ((response.status == 403 && code == 101) || response.status == 401) {
       if (_authRetries >= MAX_AUTH_RETRIES) {
-        throw new Error(`getUOMs: auth failed after ${MAX_AUTH_RETRIES} retries`);
+        throw new Error(
+          `getUOMs: auth failed after ${MAX_AUTH_RETRIES} retries`
+        );
       }
-      console.info({ function: 'getUOMs', message: `Get new Auth (attempt ${_authRetries + 1}/${MAX_AUTH_RETRIES})` });
+      console.info({
+        function: 'getUOMs',
+        message: `Get new Auth (attempt ${_authRetries + 1}/${MAX_AUTH_RETRIES})`,
+      });
       await remonlineTokenToEnv(true);
       return await getUOMs(_authRetries + 1);
     }
@@ -687,9 +729,14 @@ export async function* getProducts(_page = 1, _attempt = 1) {
         if ((response.status == 403 && code == 101) || response.status == 401) {
           _authRetries++;
           if (_authRetries > MAX_AUTH_RETRIES) {
-            throw new Error(`getProducts: auth failed after ${MAX_AUTH_RETRIES} retries`);
+            throw new Error(
+              `getProducts: auth failed after ${MAX_AUTH_RETRIES} retries`
+            );
           }
-          devLog({ function: 'getProducts', message: `Get new Auth (attempt ${_authRetries}/${MAX_AUTH_RETRIES})` });
+          devLog({
+            function: 'getProducts',
+            message: `Get new Auth (attempt ${_authRetries}/${MAX_AUTH_RETRIES})`,
+          });
           await remonlineTokenToEnv(true);
           _attempt = 1;
           continue;
