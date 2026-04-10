@@ -18,7 +18,7 @@ function transformInvoice(invoice) {
     createdAt: invoice['DATE_CREATE']
       ? new Date(invoice['DATE_CREATE'].slice(0, 10))
       : null,
-    sum: Number(invoice['UF_CRM_1654075469']),
+    sum: Number(invoice['UF_CRM_1654075469']) || null,
     autoParkId: bitrixCity ? bitrixCity.auto_park_id : null,
     autoParkName: bitrixCity ? bitrixCity.cityName : null,
   };
@@ -80,14 +80,15 @@ export async function syncInsuranceInvoices() {
   devLog({ processedInvoices });
 
   try {
-    for (const invoice of processedInvoices) {
-      const { id, ...data } = invoice;
-      await prisma.insuranceInvoice.upsert({
-        where: { id },
-        create: { id, ...data },
-        update: data,
-      });
-    }
+    await prisma.$transaction(
+      processedInvoices.map(({ id, ...data }) =>
+        prisma.insuranceInvoice.upsert({
+          where: { id },
+          create: { id, ...data },
+          update: data,
+        })
+      )
+    );
 
     await updateLastSyncTimestamp(syncStartedAt);
     logData.syncedInvoices = processedInvoices.length;
