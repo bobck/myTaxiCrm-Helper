@@ -83,7 +83,7 @@ export async function syncInsuranceInvoices() {
 
   const processedInvoices = invoices.map(transformInvoice);
   devLog({ processedInvoices });
-  return;
+
   try {
     await prisma.$transaction(
       processedInvoices.map(({ id, ...data }) =>
