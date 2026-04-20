@@ -9,6 +9,7 @@ CREATE TABLE "public"."insurance_invoices" (
     "sum" DOUBLE PRECISION,
     "auto_park_id" TEXT,
     "auto_park_name" TEXT,
+    "license_plate" TEXT,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "insurance_invoices_pkey" PRIMARY KEY ("id")

@@ -1,7 +1,7 @@
 import { cityListWithAssignedBy } from '../bitrix.constants.mjs';
 import { getInsuranceInvoices } from '../bitrix.utils.mjs';
 import prisma from '../bitrix.prisma.mjs';
-import { devLog } from '../../shared/shared.utils.mjs';
+import { devLog, transliterateLicensePlate } from '../../shared/shared.utils.mjs';
 
 const INSURANCE_INVOICE_BEGINNING_DATE = '2025-08-01';
 const SYNC_ENTITY_NAME = 'insurance_invoices';
@@ -21,6 +21,7 @@ function transformInvoice(invoice) {
     sum: Number(invoice['UF_CRM_1654075469']) || null,
     autoParkId: bitrixCity ? bitrixCity.auto_park_id : null,
     autoParkName: bitrixCity ? bitrixCity.cityName : null,
+    licensePlate: transliterateLicensePlate(invoice['UF_CRM_1635249720750']) || null,
   };
 }
 
@@ -78,7 +79,7 @@ export async function syncInsuranceInvoices() {
 
   const processedInvoices = invoices.map(transformInvoice);
   devLog({ processedInvoices });
-
+  return
   try {
     await prisma.$transaction(
       processedInvoices.map(({ id, ...data }) =>

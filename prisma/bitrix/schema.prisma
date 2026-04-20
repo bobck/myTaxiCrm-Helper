@@ -18,6 +18,7 @@ model InsuranceInvoice {
   sum          Float?
   autoParkId   String?   @map("auto_park_id")
   autoParkName String?   @map("auto_park_name")
+  licensePlate String?   @map("license_plate")
   updatedAt    DateTime  @updatedAt @map("updated_at")
 
   @@map("insurance_invoices")

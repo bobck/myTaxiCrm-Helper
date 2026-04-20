@@ -802,6 +802,7 @@ export async function getInsuranceInvoices({ date, modifiedSince }) {
       'UF_CRM_1654075469',
       'UF_CRM_1642522045721',
       'UF_CRM_1527615815',
+      'UF_CRM_1635249720750',
     ],
   };
   const response = await bitrix.deals.list(dealParams);
