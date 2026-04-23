@@ -27,7 +27,6 @@ export function bqJobs() {
     loadRemonlineOrdersJob.stop();
     resetSecondaryRemonlineTablesJob.stop();
     loadSecondaryRemonlineTablesJob.stop();
-
     bqJobs();
   }
 }

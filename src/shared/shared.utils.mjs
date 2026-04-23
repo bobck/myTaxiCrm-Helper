@@ -44,3 +44,40 @@ export function getSetDifferences(setA, setB) {
 
   return [differenceB, differenceA];
 }
+
+const cyrillicToLatinMap = {
+  А: 'A',
+  а: 'a',
+  В: 'B',
+  в: 'b',
+  Е: 'E',
+  е: 'e',
+  К: 'K',
+  к: 'k',
+  М: 'M',
+  м: 'm',
+  Н: 'H',
+  н: 'h',
+  О: 'O',
+  о: 'o',
+  Р: 'P',
+  р: 'p',
+  С: 'C',
+  с: 'c',
+  Т: 'T',
+  т: 't',
+  Х: 'X',
+  х: 'x',
+  І: 'I',
+  і: 'i',
+  И: 'I',
+  и: 'i',
+};
+
+export function transliterateLicensePlate(text) {
+  if (!text) return text;
+  return text
+    .split('')
+    .map((char) => cyrillicToLatinMap[char] ?? char)
+    .join('');
+}
