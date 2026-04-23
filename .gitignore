@@ -22,3 +22,4 @@ app.log
 
 main.db-shm
 main.db-wal
+.claude/

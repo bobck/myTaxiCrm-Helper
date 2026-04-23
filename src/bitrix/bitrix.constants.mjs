@@ -317,7 +317,7 @@ export const cityTextRecruitToPayments = {
   },
   Одеса: {
     id: '2884',
-    assigned_by_id: '27704',
+    assigned_by_id: '86392',
   },
   Дніпро: {
     id: '2886',
