@@ -456,7 +456,7 @@ export async function getUOMs() {
     if ((response.status == 403 && code == 101) || response.status == 401) {
       console.info({ function: 'getUOMs', message: 'Get new Auth' });
       await remonlineTokenToEnv(true);
-      return await getEmployees();
+      return await getUOMs();
     }
     console.error({
       function: 'getUOMs',
