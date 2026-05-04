@@ -379,6 +379,8 @@ export async function getAssets() {
   const options = { method: 'GET', headers: { accept: 'application/json' } };
   const allAssets = [];
   let _page = 1;
+  const isTest = process.env.ENV === 'TEST';
+  const TEST_PAGE_LIMIT = 10;
 
   while (true) {
     const url = `${process.env.REMONLINE_API}/warehouse/assets?page=${_page}&token=${process.env.REMONLINE_API_TOKEN}`;
@@ -420,6 +422,13 @@ export async function getAssets() {
     });
 
     if (leftToFinish <= 0) break;
+    if (isTest && _page >= TEST_PAGE_LIMIT) {
+      devLog({
+        function: 'getAssets',
+        message: `TEST mode: stop after ${TEST_PAGE_LIMIT} pages`,
+      });
+      break;
+    }
     _page = parseInt(page) + 1;
   }
 
