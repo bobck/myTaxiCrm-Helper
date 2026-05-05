@@ -44,12 +44,12 @@ export async function getOrders({ idLabels, ids, modified_at, sort_dir }) {
   const allOrders = [];
   let _page = 1;
   let count;
-  const isTest = process.env.ENV === 'TEST';
-  const TEST_PAGE_LIMIT = 100;
+  const isTest = process.env.ENV !== 'TEST';
+  const TEST_PAGE_LIMIT = 1;
 
   while (true) {
     const url = `${process.env.REMONLINE_API}/order/?token=${process.env.REMONLINE_API_TOKEN}&page=${_page}${idLabelsUrl}${idUrl}${sort_dir_url}${modified_at_url}`;
-
+    devLog({url})
     const response = await fetch(url);
 
     if (

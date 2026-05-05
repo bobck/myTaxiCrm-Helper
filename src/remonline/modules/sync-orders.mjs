@@ -21,8 +21,10 @@ function buildPayload({ orders }) {
   const attachmentsRows = [];
   const resourceMap = new Map();
   const linksRows = [];
+  const skippedOrderIds = [];
 
   for (const order of orders) {
+    try {
     const {
       id,
       uuid,
@@ -182,24 +184,80 @@ function buildPayload({ orders }) {
       }
       linksRows.push({ resourceId: r.id, orderId: id });
     }
+    } catch (e) {
+      console.error({
+        function: 'buildPayload',
+        message: 'Failed to map order — skipping',
+        orderId: order?.id,
+        idLabel: order?.id_label,
+        error: e?.message,
+      });
+      skippedOrderIds.push(order?.id);
+    }
   }
 
+  if (skippedOrderIds.length > 0) {
+    console.warn({
+      function: 'buildPayload',
+      message: 'Some orders were skipped due to mapping errors',
+      count: skippedOrderIds.length,
+      ids: skippedOrderIds,
+    });
+  }
+
+  // The Remonline API can return the same order across multiple pages if its
+  // modified_at changes mid-fetch. Dedup by primary key for every table to
+  // avoid PK collisions on createMany. Attachments use a synthetic id and
+  // resources are already deduped via resourceMap.
+  const dedupBy = (rows, keyFn, label) => {
+    const seen = new Map();
+    const out = [];
+    const collisions = [];
+    for (const r of rows) {
+      const k = keyFn(r);
+      if (seen.has(k)) {
+        collisions.push({ key: k, first: seen.get(k), dup: r });
+        continue;
+      }
+      seen.set(k, r);
+      out.push(r);
+    }
+    if (collisions.length > 0) {
+      console.warn({
+        function: 'dedupBy',
+        label,
+        droppedCount: collisions.length,
+        sample: collisions.slice(0, 5),
+      });
+    }
+    return out;
+  };
+
   return {
-    ordersRows,
-    partsRows,
-    operationsRows,
+    ordersRows: dedupBy(ordersRows, (o) => o.id, 'orders'),
+    partsRows: dedupBy(partsRows, (p) => `${p.orderId}:${p.id}`, 'parts'),
+    operationsRows: dedupBy(
+      operationsRows,
+      (op) => `${op.orderId}:${op.id}`,
+      'operations'
+    ),
     attachmentsRows,
     resourcesRows: [...resourceMap.values()],
-    linksRows,
+    linksRows: dedupBy(
+      linksRows,
+      (l) => `${l.resourceId}:${l.orderId}`,
+      'links'
+    ),
+    skippedOrderIds,
   };
 }
 
 async function chunkedCreateMany(tx, model, rows, opts = {}) {
   for (let i = 0; i < rows.length; i += CHUNK_SIZE) {
-    await tx[model].createMany({
-      data: rows.slice(i, i + CHUNK_SIZE),
-      ...opts,
-    });
+    const chunk = rows.slice(i, i + CHUNK_SIZE);
+
+      await tx[model].createMany({ data: chunk, ...opts });
+    
   }
 }
 
@@ -236,7 +294,21 @@ export async function syncRemonlineOrders() {
 
   await prisma.$transaction(
     async (tx) => {
-      // cascade сметёт parts/operations/attachments/orders_to_resources
+      // Prisma's relationMode = "prisma" does NOT cascade through deleteMany
+      // (it only emulates cascade for single delete/update). Clean dependents
+      // explicitly before removing the parent rows.
+      await tx.orderPart.deleteMany({
+        where: { orderId: { in: orderIds } },
+      });
+      await tx.orderOperation.deleteMany({
+        where: { orderId: { in: orderIds } },
+      });
+      await tx.orderAttachment.deleteMany({
+        where: { orderId: { in: orderIds } },
+      });
+      await tx.orderToResource.deleteMany({
+        where: { orderId: { in: orderIds } },
+      });
       await tx.order.deleteMany({ where: { id: { in: orderIds } } });
 
       await chunkedCreateMany(tx, 'order', ordersRows);
