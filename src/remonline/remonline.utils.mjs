@@ -44,6 +44,8 @@ export async function getOrders({ idLabels, ids, modified_at, sort_dir }) {
   const allOrders = [];
   let _page = 1;
   let count;
+  const isTest = process.env.ENV === 'TEST';
+  const TEST_PAGE_LIMIT = 100;
 
   while (true) {
     const url = `${process.env.REMONLINE_API}/order/?token=${process.env.REMONLINE_API_TOKEN}&page=${_page}${idLabelsUrl}${idUrl}${sort_dir_url}${modified_at_url}`;
@@ -102,6 +104,13 @@ export async function getOrders({ idLabels, ids, modified_at, sort_dir }) {
     });
 
     if (leftToFinish <= 0) break;
+    if (isTest && _page >= TEST_PAGE_LIMIT) {
+      devLog({
+        function: 'getOrders',
+        message: `TEST mode: stop after ${TEST_PAGE_LIMIT} pages`,
+      });
+      break;
+    }
     _page = parseInt(page) + 1;
   }
 

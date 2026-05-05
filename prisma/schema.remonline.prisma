@@ -219,3 +219,139 @@ model Asset {
   @@map("assets")
   @@schema("public")
 }
+
+model Order {
+  id               Int      @id
+  modifiedAt       BigInt   @map("modified_at")
+  uuid             String?
+  createdAt        BigInt   @map("created_at")
+  doneAt           BigInt?  @map("done_at")
+  scheduledFor     BigInt?  @map("scheduled_for")
+  duration         Int?
+  kindofGood       String?  @map("kindof_good")
+  serial           String?
+  packagelist      String?
+  appearance       String?
+  malfunction      String?
+  managerNotes     String?  @map("manager_notes")
+  engineerNotes   String?  @map("engineer_notes")
+  resume           String?
+  payed            Float?
+  missedPayments   Int?     @map("missed_payments")
+  warrantyMeasures Int?     @map("warranty_measures")
+  warrantyDate     BigInt?  @map("warranty_date")
+  urgent           Boolean?
+  discountSum      Float?   @map("discount_sum")
+  customFields     String?  @map("custom_fields")
+  estimatedCost    String?  @map("estimated_cost")
+  closedAt         BigInt?  @map("closed_at")
+  estimatedDoneAt  BigInt?  @map("estimated_done_at")
+  idLabel          String?  @map("id_label")
+  price            Float?
+  branchId         Int?     @map("branch_id")
+  overdue          Boolean?
+  statusOverdue    Boolean? @map("status_overdue")
+  managerId        Int?     @map("manager_id")
+  engineerId       Int?     @map("engineer_id")
+  createdById      Int?     @map("created_by_id")
+  closedById       Int?     @map("closed_by_id")
+  brand            String?
+  model            String?
+  clientId         Int?     @map("client_id")
+  clientName       String?  @map("client_name")
+  assetId          Int?     @map("asset_id")
+  assetUid         String?  @map("asset_uid")
+  orderTypeId      Int?     @map("order_type_id")
+  statusId         Int?     @map("status_id")
+  adCampaignId     Int?     @map("ad_campaign_id")
+
+  parts         OrderPart[]
+  operations    OrderOperation[]
+  attachments   OrderAttachment[]
+  resourceLinks OrderToResource[]
+
+  @@index([modifiedAt])
+  @@map("orders")
+  @@schema("public")
+}
+
+model OrderPart {
+  orderId        Int     @map("order_id")
+  id             Int
+  entityId       Int?    @map("entity_id")
+  engineerId     Int?    @map("engineer_id")
+  title          String?
+  amount         Float
+  price          Float?
+  cost           Float?
+  discountValue  Float?  @map("discount_value")
+  code           String?
+  article        String?
+  warranty       Int?
+  warrantyPeriod Int?    @map("warranty_period")
+  uomId          Int?    @map("uom_id")
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@id([orderId, id])
+  @@map("orders_parts")
+  @@schema("public")
+}
+
+model OrderOperation {
+  orderId        Int    @map("order_id")
+  id             Int
+  entityId       Int    @map("entity_id")
+  engineerId     Int    @map("engineer_id")
+  title          String
+  amount         Float
+  price          Float
+  cost           Float
+  discountValue  Float  @map("discount_value")
+  warranty       Int
+  warrantyPeriod Int    @map("warranty_period")
+  uomId          Int    @map("uom_id")
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@id([orderId, id])
+  @@map("orders_operations")
+  @@schema("public")
+}
+
+model OrderAttachment {
+  id          Int    @id @default(autoincrement())
+  orderId     Int    @map("order_id")
+  createdAt   BigInt @map("created_at")
+  createdById Int    @map("created_by_id")
+  filename    String
+  url         String
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@map("orders_attachments")
+  @@schema("public")
+}
+
+model OrderResource {
+  id   Int    @id
+  name String
+
+  links OrderToResource[]
+
+  @@map("orders_resources")
+  @@schema("public")
+}
+
+model OrderToResource {
+  resourceId Int @map("resource_id")
+  orderId    Int @map("order_id")
+
+  resource OrderResource @relation(fields: [resourceId], references: [id])
+  order    Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@id([resourceId, orderId])
+  @@map("orders_to_resources")
+  @@schema("public")
+}
