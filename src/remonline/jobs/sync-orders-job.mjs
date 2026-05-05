@@ -1,7 +1,7 @@
 import { CronJob } from 'cron';
 import { syncRemonlineOrders } from '../modules/sync-orders.mjs';
 
-const cronTime = '0 2 * * 0';
+const cronTime = '0 */4 * * *';
 const timeZone = 'Europe/Kiev';
 
 const syncRemonlineOrdersJob = CronJob.from({
