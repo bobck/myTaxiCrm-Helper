@@ -25,7 +25,14 @@ export async function saveSidRow({
   return { result };
 }
 
-export async function getOrders({ idLabels, ids, modified_at, sort_dir }) {
+export async function getOrders({
+  idLabels,
+  ids,
+  modified_at,
+  sort_dir,
+  startPage = 1,
+  targetPage,
+}) {
   let idLabelsUrl = '';
   if (idLabels) {
     for (let idLabel of idLabels) {
@@ -42,8 +49,9 @@ export async function getOrders({ idLabels, ids, modified_at, sort_dir }) {
   const modified_at_url = modified_at ? `&modified_at[]=${modified_at}` : '';
 
   const allOrders = [];
-  let _page = 1;
+  let _page = startPage;
   let count;
+  let lastPage = startPage - 1;
 
   while (true) {
     const url = `${process.env.REMONLINE_API}/order/?token=${process.env.REMONLINE_API_TOKEN}&page=${_page}${idLabelsUrl}${idUrl}${sort_dir_url}${modified_at_url}`;
@@ -86,6 +94,7 @@ export async function getOrders({ idLabels, ids, modified_at, sort_dir }) {
 
     const { data: orders, count: totalCount, page } = data;
     count = totalCount;
+    lastPage = parseInt(page);
 
     const doneOnPrevPage = (page - 1) * 50;
     const leftToFinish = count - doneOnPrevPage - orders.length;
@@ -102,10 +111,11 @@ export async function getOrders({ idLabels, ids, modified_at, sort_dir }) {
     });
 
     if (leftToFinish <= 0) break;
-    _page = parseInt(page) + 1;
+    if (targetPage != null && _page >= targetPage) break;
+    _page = lastPage + 1;
   }
 
-  return { orders: allOrders, count };
+  return { orders: allOrders, count, lastPage };
 }
 
 export async function changeOrderStatus({ id, statusId }) {
