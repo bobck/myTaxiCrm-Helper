@@ -4,7 +4,9 @@ import { devLog } from '../../shared/shared.utils.mjs';
 import { remonlineTokenToEnv } from '../remonline.api.mjs';
 
 const PAGE_SIZE = 50;
-const PAGES_PER_BATCH = 5;
+const PAGES_PER_BATCH = 50;
+const TX_TIMEOUT_MS = 10 * 60 * 1000;
+const TX_MAX_WAIT_MS = 15_000;
 
 async function getMaxOrderModifiedAt() {
   const r = await prisma.order.aggregate({ _max: { modifiedAt: true } });
@@ -15,6 +17,7 @@ export async function syncRemonlineOrders() {
   devLog({ time: new Date(), message: 'syncRemonlineOrders — start' });
 
   const maxModifiedAt = await getMaxOrderModifiedAt();
+  const nowMs = Date.now();
   const sort_dir = 'asc';
 
   let totalPages;
@@ -25,6 +28,7 @@ export async function syncRemonlineOrders() {
 
     const { orders, count, lastPage } = await getOrders({
       modified_at: maxModifiedAt != null ? Number(maxModifiedAt) : undefined,
+      modified_at_to: nowMs,
       sort_dir,
       startPage,
       targetPage,
@@ -63,6 +67,48 @@ export async function syncRemonlineOrders() {
       orderIds,
     });
 
+    await prisma.$transaction(
+      async (tx) => {
+        // Prisma's relationMode = "prisma" does NOT cascade through deleteMany
+        // (it only emulates cascade for single delete/update). Clean dependents
+        // explicitly before removing the parent rows.
+        await tx.orderPart.deleteMany({
+          where: { orderId: { in: orderIds } },
+        });
+        await tx.orderOperation.deleteMany({
+          where: { orderId: { in: orderIds } },
+        });
+        await tx.orderAttachment.deleteMany({
+          where: { orderId: { in: orderIds } },
+        });
+        await tx.orderToResource.deleteMany({
+          where: { orderId: { in: orderIds } },
+        });
+        await tx.order.deleteMany({ where: { id: { in: orderIds } } });
+
+        await tx.order.createMany({ data: parsed.ordersRows });
+        await tx.orderPart.createMany({ data: parsed.partsRows });
+        await tx.orderOperation.createMany({ data: parsed.operationsRows });
+        await tx.orderAttachment.createMany({ data: parsed.attachmentsRows });
+        await tx.orderResource.createMany({
+          data: parsed.resourcesRows,
+          skipDuplicates: true,
+        });
+        await tx.orderToResource.createMany({
+          data: parsed.linksRows,
+          skipDuplicates: true,
+        });
+      },
+      { maxWait: TX_MAX_WAIT_MS, timeout: TX_TIMEOUT_MS }
+    );
+
+    devLog({
+      message: 'syncRemonlineOrders — batch persisted',
+      startPage,
+      lastPage,
+      orders: parsed.ordersRows.length,
+    });
+
     if (totalPages != null && lastPage >= totalPages) break;
 
     startPage = lastPage + 1;
@@ -97,7 +143,7 @@ const dedupBy = (rows, keyFn, label) => {
   return out;
 };
 
-export function parseOrders(orders) {
+function parseOrders(orders) {
   const ordersRows = [];
   const partsRows = [];
   const operationsRows = [];

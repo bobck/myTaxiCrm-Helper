@@ -29,6 +29,7 @@ export async function getOrders({
   idLabels,
   ids,
   modified_at,
+  modified_at_to,
   sort_dir,
   startPage = 1,
   targetPage,
@@ -47,6 +48,9 @@ export async function getOrders({
   }
   const sort_dir_url = sort_dir ? `&sort_dir=${sort_dir}` : '';
   const modified_at_url = modified_at ? `&modified_at[]=${modified_at}` : '';
+  const modified_at_to_url = modified_at_to
+    ? `&modified_at[]=${modified_at_to}`
+    : '';
 
   const allOrders = [];
   let _page = startPage;
@@ -54,7 +58,7 @@ export async function getOrders({
   let lastPage = startPage - 1;
 
   while (true) {
-    const url = `${process.env.REMONLINE_API}/order/?token=${process.env.REMONLINE_API_TOKEN}&page=${_page}${idLabelsUrl}${idUrl}${sort_dir_url}${modified_at_url}`;
+    const url = `${process.env.REMONLINE_API}/order/?token=${process.env.REMONLINE_API_TOKEN}&page=${_page}${idLabelsUrl}${idUrl}${sort_dir_url}${modified_at_url}${modified_at_to_url}`;
 
     const response = await fetch(url);
 
