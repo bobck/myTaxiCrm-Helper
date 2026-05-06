@@ -11,16 +11,12 @@ import { getAllRemonlineOrderIds } from '../bq-queries.mjs';
 const DATASET_ID = 'RemOnline';
 const TABLE_ID = 'order_items';
 
-function isoOrNull(iso) {
-  if (!iso) return null;
-  return Number.isFinite(Date.parse(iso)) ? iso : null;
-}
-
-function dateOrNull(value) {
+function isoOrNull(value) {
   if (!value) return null;
-  const t = Date.parse(value);
-  if (!Number.isFinite(t)) return null;
-  return new Date(t).toISOString().slice(0, 10);
+  if (!Number.isFinite(Date.parse(value))) return null;
+  // Date-only ('YYYY-MM-DD') → pad to UTC midnight so BQ TIMESTAMP accepts it.
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return `${value}T00:00:00Z`;
+  return value;
 }
 
 function toFloat(value) {
@@ -78,7 +74,7 @@ export function mapItemToBQRow({ orderId, item }) {
     discount_sponsor: discount.sponsor ?? null,
     warranty_period: warranty.period ?? null,
     warranty_period_units: warranty.period_units ?? warranty.unit ?? null,
-    expiration_date: dateOrNull(item.expiration_date),
+    expiration_date: isoOrNull(item.expiration_date),
     taxes: jsonOrNull(item.taxes),
     write_offs: jsonOrNull(item.write_offs),
   };
@@ -158,7 +154,7 @@ export async function createOrResetOrderItemsTable() {
 if (process.env.ENV === 'TEST') {
   console.log('running loadRemonlineOrderItems in TEST mode...');
   await remonlineTokenToEnv(true);
-  // await createOrResetOrderItemsTable()
+  await createOrResetOrderItemsTable()
   await loadRemonlineOrderItems();
 
 }

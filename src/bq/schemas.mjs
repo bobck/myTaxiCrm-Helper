@@ -390,7 +390,7 @@ export const ordersV2TableSchema = [
   { name: 'discount_sum', type: 'FLOAT', mode: 'NULLABLE' },
   { name: 'payed', type: 'FLOAT', mode: 'NULLABLE' },
   { name: 'total', type: 'FLOAT', mode: 'NULLABLE' },
-  { name: 'warranty_date', type: 'DATE', mode: 'NULLABLE' },
+  { name: 'warranty_date', type: 'TIMESTAMP', mode: 'NULLABLE' },
   { name: 'urgent', type: 'BOOLEAN', mode: 'NULLABLE' },
   { name: 'is_deduction_required', type: 'BOOLEAN', mode: 'NULLABLE' },
   { name: 'ad_campaign_id', type: 'INTEGER', mode: 'NULLABLE' },
@@ -429,7 +429,7 @@ export const orderItemsTableSchema = [
   { name: 'discount_sponsor', type: 'STRING', mode: 'NULLABLE' },
   { name: 'warranty_period', type: 'INTEGER', mode: 'NULLABLE' },
   { name: 'warranty_period_units', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'expiration_date', type: 'DATE', mode: 'NULLABLE' },
+  { name: 'expiration_date', type: 'TIMESTAMP', mode: 'NULLABLE' },
   { name: 'taxes', type: 'STRING', mode: 'NULLABLE' },
   { name: 'write_offs', type: 'STRING', mode: 'NULLABLE' },
 ];
