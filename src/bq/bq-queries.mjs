@@ -117,3 +117,15 @@ export async function getMaxPostingCreatedAt() {
   const row = await db.get(sql);
   return row?.maxCreatedAt ?? 0;
 }
+
+/**
+ * Returns every order_id we know about locally. Used by the items loader to
+ * decide which orders still need their items pulled into BQ.
+ */
+export async function getAllRemonlineOrderIds() {
+  const sql = /*sql*/ `
+      SELECT order_id FROM remonline_orders
+  `;
+  const rows = await db.all(sql);
+  return rows.map((r) => r.order_id);
+}

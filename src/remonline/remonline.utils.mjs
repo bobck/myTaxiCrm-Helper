@@ -717,6 +717,222 @@ export async function* getProducts(_page = 1, _attempt = 1) {
   }
 }
 
+const V2_RETRYABLE_STATUSES = new Set([414, 429, 500, 502, 503, 504]);
+const V2_MAX_RETRIES = 3;
+
+/**
+ * The roapp.io API rejects ISO timestamps with millisecond precision
+ * (`Invalid ISO8601 format. Expected: %Y-%m-%dT%H:%M:%SZ`). Trim them.
+ */
+function toApiIso(value) {
+  if (!value) return value;
+  // Date.toISOString() always returns YYYY-MM-DDTHH:mm:ss.sssZ — drop the .sss.
+  return String(value).replace(/\.\d+Z$/, 'Z');
+}
+
+function buildV2Query(params) {
+  const qs = new URLSearchParams();
+  qs.append('token', process.env.REMONLINE_API_TOKEN);
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined || value === null) continue;
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        if (item === undefined || item === null) continue;
+        qs.append(`${key}[]`, String(item));
+      }
+    } else {
+      qs.append(key, String(value));
+    }
+  }
+  return qs.toString();
+}
+
+async function fetchV2WithRetry({ url, fnName, attempt = 1 }) {
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: { accept: 'application/json' },
+  });
+
+  if (V2_RETRYABLE_STATUSES.has(response.status)) {
+    if (attempt > V2_MAX_RETRIES) {
+      const error = new Error(
+        `${fnName}: HTTP ${response.status} after ${V2_MAX_RETRIES} retries`
+      );
+      error.status = response.status;
+      throw error;
+    }
+    const delay = 1000 * Math.pow(2, attempt - 1);
+    devLog({
+      function: fnName,
+      message: `Retryable HTTP ${response.status}, retrying`,
+      url,
+      attempt,
+      delayMs: delay,
+    });
+    await new Promise((r) => setTimeout(r, delay));
+    return fetchV2WithRetry({ url, fnName, attempt: attempt + 1 });
+  }
+
+  if (
+    (response.status === 403 || response.status === 401) &&
+    attempt <= V2_MAX_RETRIES
+  ) {
+    devLog({ function: fnName, message: 'Auth refresh, retrying' });
+    await remonlineTokenToEnv(true);
+    // Rebuild url with the refreshed token.
+    const refreshed = url.replace(/token=[^&]*/, `token=${process.env.REMONLINE_API_TOKEN}`);
+    return fetchV2WithRetry({ url: refreshed, fnName, attempt: attempt + 1 });
+  }
+
+  return response;
+}
+
+async function readV2Json({ response, fnName }) {
+  if (!response.ok) {
+    const text = await response.text();
+    const error = new Error(`${fnName}: HTTP ${response.status}: ${text}`);
+    error.status = response.status;
+    error.body = text;
+    throw error;
+  }
+  try {
+    return await response.json();
+  } catch (e) {
+    const error = new Error(`${fnName}: failed to parse JSON`);
+    error.status = response.status;
+    error.cause = e;
+    throw error;
+  }
+}
+
+/**
+ * Fetch all orders from the v2 API (`{ROAPP_API}/v2/orders`).
+ *
+ * Sorting follows the documented enum prefix convention:
+ *   sort=modified_at        — ascending
+ *   sort=-modified_at       — descending (minus prefix)
+ *
+ * Auth is the same `?token=` mechanism as v1 — only the host differs.
+ *
+ * @param {object} [opts]
+ * @param {string} [opts.modifiedAtFrom] ISO-8601 lower bound for modified_at
+ * @param {string} [opts.modifiedAtTo]   ISO-8601 upper bound for modified_at
+ * @param {number[]} [opts.ids]          filter by explicit ids
+ * @param {string} [opts.sort='modified_at']  enum: 'modified_at' | '-modified_at'
+ * @returns {Promise<{ orders: object[], count: number }>}
+ */
+export async function getOrdersV2({
+  modifiedAtFrom,
+  modifiedAtTo,
+  ids,
+  sort = 'modified_at',
+} = {}) {
+  const allOrders = [];
+  let page = 1;
+  const isTest = process.env.ENV === 'TEST';
+  const TEST_PAGE_LIMIT = 20;
+
+  const modifiedAtRange = [];
+  if (modifiedAtFrom) modifiedAtRange.push(toApiIso(modifiedAtFrom));
+  if (modifiedAtTo) modifiedAtRange.push(toApiIso(modifiedAtTo));
+
+  while (true) {
+    const qs = buildV2Query({
+      page,
+      sort,
+      modified_at: modifiedAtRange.length ? modifiedAtRange : undefined,
+      ids: ids && ids.length ? ids : undefined,
+    });
+    const url = `${process.env.ROAPP_API}/v2/orders?${qs}`;
+
+    const response = await fetchV2WithRetry({ url, fnName: 'getOrdersV2' });
+    const data = await readV2Json({ response, fnName: 'getOrdersV2' });
+
+    const orders = data.data || [];
+    const paging = data.paging || {};
+    allOrders.push(...orders);
+
+    devLog({
+      function: 'getOrdersV2',
+      page: paging.page,
+      total_pages: paging.total_pages,
+      count: paging.count,
+      fetched: orders.length,
+      totalFetched: allOrders.length,
+    });
+
+    if (!paging.total_pages || page >= paging.total_pages) break;
+    if (isTest && page >= TEST_PAGE_LIMIT) {
+      devLog({
+        function: 'getOrdersV2',
+        message: `TEST mode: stop after ${TEST_PAGE_LIMIT} pages`,
+      });
+      break;
+    }
+    page += 1;
+  }
+
+  return { orders: allOrders, count: allOrders.length };
+}
+
+/**
+ * Line items (parts/works/services/products) for one order. Endpoint returns
+ * a bare array — no paging wrapper.
+ */
+export async function getOrderItems(orderId) {
+  const qs = buildV2Query({});
+  const url = `${process.env.ROAPP_API}/v2/orders/${orderId}/items?${qs}`;
+  const response = await fetchV2WithRetry({ url, fnName: 'getOrderItems' });
+
+  if (response.status === 404) return [];
+
+  const data = await readV2Json({ response, fnName: 'getOrderItems' });
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.data)) return data.data;
+  return [];
+}
+
+/**
+ * Fetch items for many orders with bounded concurrency, attaching `order_id`
+ * to each returned item. Failures for individual orders are logged and skipped.
+ */
+export async function getOrderItemsBatch(orderIds, { concurrency = 10 } = {}) {
+  const items = [];
+  const failedOrderIds = [];
+
+  for (let i = 0; i < orderIds.length; i += concurrency) {
+    const slice = orderIds.slice(i, i + concurrency);
+    const results = await Promise.all(
+      slice.map(async (orderId) => {
+        try {
+          const orderItems = await getOrderItems(orderId);
+          return orderItems.map((item) => ({ order_id: orderId, ...item }));
+        } catch (e) {
+          console.error({
+            function: 'getOrderItemsBatch',
+            orderId,
+            status: e.status,
+            message: e.message,
+          });
+          failedOrderIds.push(orderId);
+          return [];
+        }
+      })
+    );
+    for (const slab of results) items.push(...slab);
+
+    devLog({
+      function: 'getOrderItemsBatch',
+      processed: Math.min(i + concurrency, orderIds.length),
+      total: orderIds.length,
+      itemsSoFar: items.length,
+      failedSoFar: failedOrderIds.length,
+    });
+  }
+
+  return { items, failedOrderIds };
+}
+
 export async function getRefunds({ createdAt } = {}) {
   const MAX_AUTH_RETRIES = 3;
   const createdAtUrl = createdAt ? `&created_at=${createdAt}` : '';
