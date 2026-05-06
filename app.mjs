@@ -1,5 +1,4 @@
 import { telegramJobs } from './src/telegram/bootstrap.mjs';
-import { openSShTunnel } from './ssh.mjs';
 import { sheetJobs } from './src/sheets/bootstrap.mjs';
 import { remonlineJobs } from './src/remonline/bootstrap.mjs';
 import { remonlineTokenToEnv } from './src/remonline/remonline.api.mjs';
@@ -8,13 +7,12 @@ import { driversCustomTariffJobs } from './src/web.api/bootstrap.mjs';
 
 import { bitrixJobs } from './src/bitrix/bootstrap.mjs';
 import { initApi } from './src/api/api.mjs';
-
-await openSShTunnel;
+import { startJobBoardJobs } from './src/job-boards/bootstrap.mjs';
 
 await initApi();
 
 // telegramJobs();
-// sheetJobs();
+sheetJobs();
 bqJobs();
 
 await remonlineTokenToEnv();
@@ -22,3 +20,5 @@ remonlineJobs();
 
 driversCustomTariffJobs();
 bitrixJobs();
+
+startJobBoardJobs();

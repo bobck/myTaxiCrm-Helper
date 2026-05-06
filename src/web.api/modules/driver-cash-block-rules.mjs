@@ -1,5 +1,4 @@
 import { DateTime } from 'luxon';
-import { openSShTunnel } from '../../../ssh.mjs';
 import {
   getDriversIgnoringCashBlockRules,
   getDriversWithActiveCashBlockRules,
@@ -147,10 +146,6 @@ export const setDriverCashBlockRules = async () => {
     weekNumber,
     maxDebt,
     driversToIgnore,
-    autoParksToIgnore: [
-      ...autoParksToIgnore,
-      ...customRuledAutoParks.map(({ auto_park_id }) => auto_park_id),
-    ],
   });
   drivers.push(...rows);
 
@@ -165,6 +160,7 @@ export const setDriverCashBlockRules = async () => {
     customRuledAutoParks: customRuledAutoParks.length,
     defaultRule,
   });
+
   for (const driver of drivers) {
     try {
       const { driver_id, auto_park_id } = driver;
@@ -186,6 +182,17 @@ export const setDriverCashBlockRules = async () => {
       const { rows } = await getTheMostRecentDriverCashBlockRuleIdByDriverId({
         driver_id,
       });
+      if (!rows || !rows.length) {
+        console.error({
+          module: 'setDriverCashBlockRules',
+          message: 'Cannot find newly set cash block rule for a driver',
+          date: new Date(),
+          driver_id,
+          auto_park_id,
+          expectedRule: variables,
+        });
+        continue;
+      }
       const { id: driver_cash_block_rule_id } = rows[0];
       await insertDriverWithCashBlockRules({
         driver_id,
@@ -248,14 +255,6 @@ export const updateDriverCashBlockRules = async () => {
 };
 
 if (process.env.ENV == 'TEST') {
-  // console.log({ driversToOmit, driverToOmit });
-  // await openSShTunnel;
-  // const drivers = [
-  //   {
-  //     driver_id: '38c9a2f7-c95d-4a1e-b481-661de8486539',
-  //     auto_park_id: 'e2017b70-8418-4a1b-9bf8-aec8a3ad5241',
-  //   },
-  // ];
+  // await updateDriverCashBlockRules();
   await setDriverCashBlockRules();
-  // await updateDriverCashBlockRules(drivers);
 }

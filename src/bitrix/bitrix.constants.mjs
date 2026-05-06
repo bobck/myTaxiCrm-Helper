@@ -309,7 +309,7 @@ export const positionTextReferralsToPayments = {
 export const cityTextRecruitToPayments = {
   Київ: {
     id: '2880',
-    assigned_by_id: '259',
+    assigned_by_id: '197876',
   },
   Харків: {
     id: '2882',
@@ -317,7 +317,7 @@ export const cityTextRecruitToPayments = {
   },
   Одеса: {
     id: '2884',
-    assigned_by_id: '27704',
+    assigned_by_id: '86392',
   },
   Дніпро: {
     id: '2886',
@@ -333,11 +333,11 @@ export const cityTextRecruitToPayments = {
   },
   Вінниця: {
     id: '2892',
-    assigned_by_id: '49842',
+    assigned_by_id: '178592',
   },
   Чернігів: {
     id: '2894',
-    assigned_by_id: '197876',
+    assigned_by_id: '234860',
   },
   Полтава: {
     id: '2896',
@@ -357,7 +357,7 @@ export const cityTextRecruitToPayments = {
   },
   Житомир: {
     id: '2906',
-    assigned_by_id: '6587',
+    assigned_by_id: '144246',
   },
   Суми: {
     id: '3148',
@@ -369,7 +369,7 @@ export const cityTextRecruitToPayments = {
   },
   Чернівці: {
     id: '2910',
-    assigned_by_id: '118318',
+    assigned_by_id: '89922',
   },
   Тернопіль: {
     id: '2912',
@@ -381,7 +381,7 @@ export const cityTextRecruitToPayments = {
   },
   Ужгород: {
     id: '2920',
-    assigned_by_id: '75012',
+    assigned_by_id: '219414',
   },
   Черкаси: {
     id: '2928',
@@ -398,6 +398,10 @@ export const cityTextRecruitToPayments = {
   "Кам'янське": {
     id: '2924',
     assigned_by_id: '197858',
+  },
+  Кропивницький: {
+    id: '2918',
+    assigned_by_id: '226660',
   },
 };
 export const procentageRewardAutoParkIds = [
@@ -424,6 +428,8 @@ export const procentageRewardAutoParkIds = [
   'e4df553f-4ec2-43a8-b012-4795259e983a',
   'a7bb17b7-fc87-4617-a915-d2f9ec83cfa0',
   '1e8a6a0d-aa34-4d77-a87c-d0c86fab5577',
+  'b9db6e4a-5b65-4ac2-ba34-976e0f72ff5c',
+  '760a2eb6-3b03-44bf-a1ea-d9f955cb290a',
 ];
 
 const positionCodes = {
@@ -476,3 +482,47 @@ export const UkrainianBrandingAutoParkIds = [
   '65844e7d-5e8a-4582-9ac3-c8cdaa988726',
   '45dcaa21-bceb-45f2-bba9-5c72bbac441f',
 ];
+export const jobBoardApplymentParametersToBitrixKeys = {
+  title: 'fields[TITLE]',
+  comment: 'fields[COMMENTS]',
+  fullName: 'fields[ufCrm56_1739363161]',
+  avatar: 'fields[ufCrm56_1739365267]',
+  cvURL: 'fields[ufCrm56_1748600822]',
+  cvFile: 'fields[ufCrm56_1740146734]',
+  cvText: 'fields[ufCrm56_1752567875]',
+  status: 'fields[ufCrm56_1740147016]',
+  email: 'fields[ufCrm56_1740146479]',
+  phone: 'fields[ufCrm56_1740146425]',
+  socialNetwork: 'fields[ufCrm56_1739364752]',
+  dateOfBirth: 'fields[ufCrm56_1739364365]',
+  applyingForPosition: 'fields[ufCrm56_1744977632]',
+  responsibleRecruiter: 'fields[ufCrm56_1740150074]',
+  hrCity: 'fields[ufCrm56_1740756395]',
+  city: 'fields[ufCrm56_1740150019]',
+  isVolunteerToMove: 'fields[ufCrm56_1739364300]',
+  country: 'fields[ufCrm56_1739364205]',
+  uni: 'fields[ufCrm56_1740149024]',
+  education: 'fields[ufCrm56_1739365108]',
+  faculty: 'fields[ufCrm56_1740148949]',
+  degreeLevel: 'fields[ufCrm56_1740148616]',
+  educationDetails: 'fields[ufCrm56_1740149258]',
+  educationYears: 'fields[ufCrm56_1740149175]',
+  skills: 'fields[ufCrm56_1740149099]',
+  languageLevel: 'fields[ufCrm56_1740148427]',
+  languageName: 'fields[ufCrm56_1740147974]',
+  categoryOfWork: 'fields[ufCrm56_1740147510]',
+  kindOfJob: 'fields[ufCrm56_1740146155]',
+  isFullTime: 'fields[ufCrm56_1740145996]',
+  sex: 'fields[ufCrm56_1739370696]',
+  workExperience: 'fields[ufCrm56_1740158299]',
+  experience: 'fields[ufCrm56_1739365038]',
+  'level????': 'fields[ufCrm56_1739364031]',
+  currentPosition: 'fields[ufCrm56_1739363968]',
+  currentJob: 'fields[ufCrm56_1739363891]',
+  kindOfCurrentJob: 'fields[ufCrm56_1739363699]',
+  salaryExpectaions: 'fields[ufCrm56_1739363608]',
+  positionExpectaions: 'fields[ufCrm56_1739363418]',
+  sourceOfApplyment: 'fields[ufCrm56_1739198502]',
+  assigned_by_id: 'fields[ufCrm56_1740150074]',
+  bitrix_vacancy_id: 'fields[ufCrm56_1748608748]',
+};

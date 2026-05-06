@@ -347,47 +347,6 @@ export const campaignsTableSchema = [
   { name: 'id', type: 'INTEGER', mode: 'REQUIRED' },
   { name: 'name', type: 'STRING', mode: 'REQUIRED' },
 ];
-export const assetTableSchema = [
-  { name: 'id', type: 'INTEGER', mode: 'REQUIRED' },
-  { name: 'uid', type: 'STRING', mode: 'REQUIRED' },
-  { name: 'title', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'color', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'state', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'cost', type: 'INTEGER', mode: 'NULLABLE' },
-  { name: 'group', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'brand', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'model', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'modification', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'description', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'year', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'reg_number', type: 'STRING', mode: 'REQUIRED' },
-  { name: 'owner_name', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'warehouse', type: 'JSON', mode: 'REQUIRED' },
-  { name: 'image', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'custom_fields', type: 'JSON', mode: 'REQUIRED' },
-];
-export const employeeTableSchema = [
-  { name: 'id', type: 'INTEGER', mode: 'REQUIRED' },
-  { name: 'email', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'first_name', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'last_name', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'notes', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'phone', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'deleted', type: 'BOOLEAN', mode: 'REQUIRED' },
-  { name: 'position', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'created_at', type: 'INTEGER', mode: 'REQUIRED' },
-  { name: 'started_work', type: 'INTEGER', mode: 'REQUIRED' },
-  { name: 'avatar', type: 'STRING', mode: 'NULLABLE' },
-];
-export const uomTableSchema = [
-  { name: 'id', type: 'INTEGER' },
-  { name: 'description', type: 'STRING' },
-  { name: 'title', type: 'STRING' },
-  { name: 'uom_type', type: 'STRING' },
-  { name: 'is_imperial', type: 'BOOLEAN' },
-  { name: 'is_system', type: 'BOOLEAN' },
-  { name: 'entity_types', type: 'STRING', mode: 'REPEATED' },
-];
 export const closedPolishBitrixDealsTableSchema = [
   { name: 'id', type: 'STRING', mode: 'REQUIRED' },
   { name: 'source_id', type: 'STRING', mode: 'NULLABLE' },
