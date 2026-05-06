@@ -18,11 +18,7 @@ import {
 } from '../../sheets/sheets-utils.mjs';
 
 const calculateDriverCashBlockRules = ({ rule }) => {
-  const {
-    target,
-    balanceActivationValue,
-    depositActivationValue,
-  } = rule;
+  const { target, balanceActivationValue, depositActivationValue } = rule;
 
   const cashBlockRules = [];
   if ((target == 'BOTH' || target == 'BALANCE') && balanceActivationValue) {
@@ -32,19 +28,16 @@ const calculateDriverCashBlockRules = ({ rule }) => {
       target: 'BALANCE',
     };
 
-    cashBlockRules.push(balanceCashBlockRule,);
-
+    cashBlockRules.push(balanceCashBlockRule);
   }
   if ((target == 'BOTH' || target == 'DEPOSIT') && depositActivationValue) {
-
     const depositCashBlockRule = {
       activationValue: depositActivationValue,
       isEnabled: true,
       target: 'DEPOSIT',
     };
 
-
-    cashBlockRules.push(depositCashBlockRule,);
+    cashBlockRules.push(depositCashBlockRule);
   }
   return { cashBlockRules };
 };
@@ -91,7 +84,7 @@ const calculateMutationVariables = ({
   auto_park_id,
   driver_id,
   cashBlockRules,
-  mode
+  mode,
 }) => {
   const variables = {
     editDriverCashBlockRulesInput: {
@@ -124,10 +117,7 @@ export const setDriverCashBlockRules = async () => {
 
   if (customRuledAutoParks.length > 0) {
     for (const autoPark of customRuledAutoParks) {
-      const {
-        auto_park_id,
-        maxDebt,
-      } = autoPark;
+      const { auto_park_id, maxDebt } = autoPark;
       const { rows } = await getAllWorkingDriverIdsByAutoPark({
         ids: IdsOfDriversWithCashBlockRules,
         year,
@@ -164,7 +154,10 @@ export const setDriverCashBlockRules = async () => {
   for (const driver of drivers) {
     try {
       const { driver_id, auto_park_id } = driver;
-      const rule = customRuledAutoParks.find(autopark => autopark.auto_park_id === auto_park_id) || defaultRule;
+      const rule =
+        customRuledAutoParks.find(
+          (autopark) => autopark.auto_park_id === auto_park_id
+        ) || defaultRule;
       const { cashBlockRules } = calculateDriverCashBlockRules({ rule });
       const { variables } = calculateMutationVariables({
         auto_park_id,
