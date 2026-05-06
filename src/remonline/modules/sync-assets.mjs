@@ -64,7 +64,7 @@ export async function syncRemonlineAssets() {
   });
 }
 
-if (process.env.ENV === 'TEST') {
+if (process.env.ENV === 'TEST' || process.env.ENV === 'DEV') {
   devLog('Running syncRemonlineAssets in TEST mode...');
   await remonlineTokenToEnv(true);
   await syncRemonlineAssets();
