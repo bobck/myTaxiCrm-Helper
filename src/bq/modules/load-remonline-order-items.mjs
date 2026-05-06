@@ -10,12 +10,17 @@ import { getAllRemonlineOrderIds } from '../bq-queries.mjs';
 
 const DATASET_ID = 'RemOnline';
 const TABLE_ID = 'order_items';
-const ITEMS_FETCH_CONCURRENCY = 10;
 
-function isoToMs(iso) {
+function isoOrNull(iso) {
   if (!iso) return null;
-  const t = Date.parse(iso);
-  return Number.isFinite(t) ? t : null;
+  return Number.isFinite(Date.parse(iso)) ? iso : null;
+}
+
+function dateOrNull(value) {
+  if (!value) return null;
+  const t = Date.parse(value);
+  if (!Number.isFinite(t)) return null;
+  return new Date(t).toISOString().slice(0, 10);
 }
 
 function toFloat(value) {
@@ -46,7 +51,7 @@ export function mapItemToBQRow({ orderId, item }) {
   return {
     order_id: orderId,
     id: item.id,
-    created_at: isoToMs(item.created_at),
+    created_at: isoOrNull(item.created_at),
     assignee_id: item.assignee_id ?? null,
     entity_id: entity.id ?? null,
     entity_type: entity.type ?? null,
@@ -73,7 +78,7 @@ export function mapItemToBQRow({ orderId, item }) {
     discount_sponsor: discount.sponsor ?? null,
     warranty_period: warranty.period ?? null,
     warranty_period_units: warranty.period_units ?? warranty.unit ?? null,
-    expiration_date: isoToMs(item.expiration_date),
+    expiration_date: dateOrNull(item.expiration_date),
     taxes: jsonOrNull(item.taxes),
     write_offs: jsonOrNull(item.write_offs),
   };
@@ -82,7 +87,7 @@ export function mapItemToBQRow({ orderId, item }) {
 export async function loadRemonlineOrderItems() {
   const time = new Date();
 
-  const allOrderIds = await getAllRemonlineOrderIds();
+  const allOrderIds = (await getAllRemonlineOrderIds()).slice(0,50);
   if (allOrderIds.length === 0) {
     console.log({
       time,
@@ -107,9 +112,7 @@ export async function loadRemonlineOrderItems() {
 
   if (missingOrderIds.length === 0) return;
 
-  const { items, failedOrderIds } = await getOrderItemsBatch(missingOrderIds, {
-    concurrency: ITEMS_FETCH_CONCURRENCY,
-  });
+  const { items, failedOrderIds } = await getOrderItemsBatch(missingOrderIds);
 
   console.log({
     time: new Date(),
@@ -155,7 +158,7 @@ export async function createOrResetOrderItemsTable() {
 if (process.env.ENV === 'TEST') {
   console.log('running loadRemonlineOrderItems in TEST mode...');
   await remonlineTokenToEnv(true);
-  await createOrResetOrderItemsTable()
+  // await createOrResetOrderItemsTable()
   await loadRemonlineOrderItems();
 
 }

@@ -893,37 +893,33 @@ export async function getOrderItems(orderId) {
 }
 
 /**
- * Fetch items for many orders with bounded concurrency, attaching `order_id`
- * to each returned item. Failures for individual orders are logged and skipped.
+ * Fetch items for many orders one-by-one, attaching `order_id` to each
+ * returned item. Failures for individual orders are logged and skipped.
  */
-export async function getOrderItemsBatch(orderIds, { concurrency = 10 } = {}) {
+export async function getOrderItemsBatch(orderIds) {
   const items = [];
   const failedOrderIds = [];
 
-  for (let i = 0; i < orderIds.length; i += concurrency) {
-    const slice = orderIds.slice(i, i + concurrency);
-    const results = await Promise.all(
-      slice.map(async (orderId) => {
-        try {
-          const orderItems = await getOrderItems(orderId);
-          return orderItems.map((item) => ({ order_id: orderId, ...item }));
-        } catch (e) {
-          console.error({
-            function: 'getOrderItemsBatch',
-            orderId,
-            status: e.status,
-            message: e.message,
-          });
-          failedOrderIds.push(orderId);
-          return [];
-        }
-      })
-    );
-    for (const slab of results) items.push(...slab);
+  for (let i = 0; i < orderIds.length; i += 1) {
+    const orderId = orderIds[i];
+    try {
+      const orderItems = await getOrderItems(orderId);
+      for (const item of orderItems) {
+        items.push({ order_id: orderId, ...item });
+      }
+    } catch (e) {
+      console.error({
+        function: 'getOrderItemsBatch',
+        orderId,
+        status: e.status,
+        message: e.message,
+      });
+      failedOrderIds.push(orderId);
+    }
 
     devLog({
       function: 'getOrderItemsBatch',
-      processed: Math.min(i + concurrency, orderIds.length),
+      processed: i + 1,
       total: orderIds.length,
       itemsSoFar: items.length,
       failedSoFar: failedOrderIds.length,

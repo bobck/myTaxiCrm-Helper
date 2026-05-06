@@ -15,10 +15,16 @@ const DATASET_ID = 'RemOnline';
 const ORDERS_TABLE_ID = 'orders_v2';
 const ITEMS_TABLE_ID = 'order_items';
 
-function isoToMs(iso) {
+function isoOrNull(iso) {
   if (!iso) return null;
-  const t = Date.parse(iso);
-  return Number.isFinite(t) ? t : null;
+  return Number.isFinite(Date.parse(iso)) ? iso : null;
+}
+
+function dateOrNull(value) {
+  if (!value) return null;
+  const t = Date.parse(value);
+  if (!Number.isFinite(t)) return null;
+  return new Date(t).toISOString().slice(0, 10);
 }
 
 function toFloat(value) {
@@ -54,11 +60,11 @@ export function mapOrderToBQRow(order) {
     status_id: status.id ?? null,
     status_name: status.name ?? null,
     status_overdue: order.status_overdue ?? null,
-    created_at: isoToMs(order.created_at),
+    created_at: isoOrNull(order.created_at),
     created_by_id: order.created_by_id ?? null,
-    modified_at: isoToMs(order.modified_at),
-    done_at: isoToMs(order.done_at),
-    closed_at: isoToMs(order.closed_at),
+    modified_at: isoOrNull(order.modified_at),
+    done_at: isoOrNull(order.done_at),
+    closed_at: isoOrNull(order.closed_at),
     closed_by_id: order.closed_by_id ?? null,
     branch_id: order.branch_id ?? null,
     order_type_id: orderType.id ?? null,
@@ -75,8 +81,8 @@ export function mapOrderToBQRow(order) {
     client_is_organization: client.is_organization ?? null,
     payer_id: payer?.id ?? null,
     payer_name: payer ? pickClientName(payer) : null,
-    scheduled_for: isoToMs(order.scheduled_for),
-    scheduled_to: isoToMs(order.scheduled_to),
+    scheduled_for: isoOrNull(order.scheduled_for),
+    scheduled_to: isoOrNull(order.scheduled_to),
     resource_id: resource?.id ?? null,
     resource_name: resource?.name ?? null,
     malfunction: order.malfunction ?? null,
@@ -85,12 +91,12 @@ export function mapOrderToBQRow(order) {
     address: order.address ?? null,
     resume: order.resume ?? null,
     estimated_price: toFloat(order.estimated_price),
-    due_date: isoToMs(order.due_date),
+    due_date: isoOrNull(order.due_date),
     overdue: order.overdue ?? null,
     discount_sum: toFloat(order.discount_sum),
     payed: toFloat(order.payed),
     total: toFloat(order.total),
-    warranty_date: isoToMs(order.warranty_date),
+    warranty_date: dateOrNull(order.warranty_date),
     urgent: order.urgent ?? null,
     is_deduction_required: order.is_deduction_required ?? null,
     ad_campaign_id: order.ad_campaign_id ?? null,
@@ -102,10 +108,7 @@ export function mapOrderToBQRow(order) {
 
 export async function loadRemonlineOrdersV2() {
   const time = new Date();
-  const watermarkMs = await getMaxOrderModifiedAt();
-  const modifiedAtFrom = watermarkMs
-    ? new Date(Number(watermarkMs)).toISOString()
-    : undefined;
+  const modifiedAtFrom = (await getMaxOrderModifiedAt()) || undefined;
 
   const { orders, count } = await getOrdersV2({
     modifiedAtFrom,
@@ -115,7 +118,6 @@ export async function loadRemonlineOrdersV2() {
   console.log({
     time,
     message: 'loadRemonlineOrdersV2',
-    watermarkMs,
     modifiedAtFrom,
     fetchedCount: count,
     ordersLength: orders.length,
@@ -176,6 +178,6 @@ export async function createOrResetOrdersV2Table() {
 if (process.env.ENV === 'TEST') {
   console.log('running loadRemonlineOrdersV2 in TEST mode...');
   await remonlineTokenToEnv(true);
-  createOrResetOrdersV2Table()
+  // createOrResetOrdersV2Table()
   await loadRemonlineOrdersV2();
 }
