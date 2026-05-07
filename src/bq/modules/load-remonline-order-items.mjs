@@ -83,7 +83,7 @@ export function mapItemToBQRow({ orderId, item }) {
 export async function loadRemonlineOrderItems() {
   const time = new Date();
 
-  const allOrderIds = (await getAllRemonlineOrderIds()).slice(0, 50);
+  const allOrderIds = (await getAllRemonlineOrderIds());
   if (allOrderIds.length === 0) {
     console.log({
       time,
