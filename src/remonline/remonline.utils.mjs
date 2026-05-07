@@ -276,58 +276,60 @@ export async function getCashboxes() {
   }
 }
 
-export async function getLocations() {
-  // return await fetch(`${process.env.REMONLINE_API}/branches/?token=${process.env.REMONLINE_API_TOKEN}`);
-  const url = `${process.env.REMONLINE_API}/branches/?token=${process.env.REMONLINE_API_TOKEN}`;
-  const options = { method: 'GET', headers: { accept: 'application/json' } };
-
-  const response = await fetch(url, options);
-  const { data } = await response.json();
-  return data;
+export async function getLocationsV2() {
+  const qs = buildV2Query({});
+  const url = `${process.env.ROAPP_API}/v2/company/locations?${qs}`;
+  const response = await fetchV2WithRetry({ url, fnName: 'getLocationsV2' });
+  const data = await readV2Json({ response, fnName: 'getLocationsV2' });
+  // Endpoint returns a bare array (object with numeric string keys when JSON-serialized).
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.data)) return data.data;
+  return Object.values(data || {});
 }
 
-export async function getTransfers({ branch_id }) {
-  const options = { method: 'GET', headers: { accept: 'application/json' } };
+/**
+ * Fetch all warehouse moves for a single branch from the v1-shaped endpoint
+ * hosted on ROAPP_API. Filter by `created_at[]=<unix-ms>` (lower bound).
+ *
+ * @param {object} opts
+ * @param {number} opts.branchId
+ * @param {number} [opts.createdAtFromMs] unix ms; results returned where created_at >= this
+ * @returns {Promise<{ transfers: object[] }>}
+ */
+export async function getTransfersV2({ branchId, createdAtFromMs } = {}) {
+  if (branchId == null) throw new Error('getTransfersV2: branchId is required');
+
   const allTransfers = [];
-  let _page = 1;
+  let page = 1;
 
   while (true) {
-    const url = `${process.env.REMONLINE_API}/warehouse/moves/?page=${_page}&branch_id=${branch_id}&token=${process.env.REMONLINE_API_TOKEN}`;
+    const qs = buildV2Query({
+      page,
+      branch_id: branchId,
+      created_at: createdAtFromMs != null ? [createdAtFromMs] : undefined,
+    });
+    const url = `${process.env.ROAPP_API}/warehouse/moves/?${qs}`;
 
-    const response = await fetch(url, options);
+    const response = await fetchV2WithRetry({ url, fnName: 'getTransfersV2' });
+    const data = await readV2Json({ response, fnName: 'getTransfersV2' });
 
-    const data = await response.json();
     const { success } = data;
     if (!success) {
-      const { message, code } = data;
-      const { validation } = message;
-      if ((response.status == 403 && code == 101) || response.status == 401) {
-        console.info({ function: 'getTransfers', message: 'Get new Auth' });
-        await remonlineTokenToEnv(true);
-        continue;
-      }
-      console.error({
-        function: 'getTransfers',
-        message,
-        validation,
-        status: response.status,
-      });
-      return;
+      const error = new Error(`getTransfersV2: unsuccessful response`);
+      error.data = data;
+      throw error;
     }
-    const { data: transfers, page, count } = data;
-    const doneOnPrevPage = (page - 1) * 50;
+
+    const { data: transfers, page: gotPage, count } = data;
+    allTransfers.push(...transfers.map((t) => ({ branch_id: branchId, ...t })));
+
+    const doneOnPrevPage = (gotPage - 1) * 50;
     const leftToFinish = count - doneOnPrevPage - transfers.length;
 
-    allTransfers.push(
-      ...transfers.map((transfer) => {
-        return { branch_id, ...transfer };
-      })
-    );
-
     devLog({
-      function: 'getTransfers',
-      branch_id,
-      page,
+      function: 'getTransfersV2',
+      branchId,
+      page: gotPage,
       count,
       fetched: transfers.length,
       totalFetched: allTransfers.length,
@@ -335,7 +337,7 @@ export async function getTransfers({ branch_id }) {
     });
 
     if (leftToFinish <= 0) break;
-    _page = parseInt(page) + 1;
+    page = parseInt(gotPage) + 1;
   }
 
   return { transfers: allTransfers };
