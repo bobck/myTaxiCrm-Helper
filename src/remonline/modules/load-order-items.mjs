@@ -1,33 +1,12 @@
 import { getOrderItemsBatch } from '../remonline.utils.mjs';
 import prisma from '../remonline.prisma.mjs';
-import { devLog } from '../../shared/shared.utils.mjs';
+import {
+  devLog,
+  isoOrNull,
+  jsonOrNull,
+  toFloat,
+} from '../../shared/shared.utils.mjs';
 import { remonlineTokenToEnv } from '../remonline.api.mjs';
-
-function isoOrNull(value) {
-  if (!value) return null;
-  if (!Number.isFinite(Date.parse(value))) return null;
-  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return new Date(`${value}T00:00:00Z`);
-  return new Date(value);
-}
-
-function toFloat(value) {
-  if (value === null || value === undefined || value === '') return null;
-  const n = Number(value);
-  return Number.isFinite(n) ? n : null;
-}
-
-function jsonOrNull(value) {
-  if (value === null || value === undefined) return null;
-  if (Array.isArray(value) && value.length === 0) return null;
-  if (
-    typeof value === 'object' &&
-    !Array.isArray(value) &&
-    Object.keys(value).length === 0
-  ) {
-    return null;
-  }
-  return JSON.stringify(value);
-}
 
 function mapItemToPgRow({ orderId, item }) {
   const entity = item.entity || {};

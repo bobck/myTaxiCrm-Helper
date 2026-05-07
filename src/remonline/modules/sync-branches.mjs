@@ -1,14 +1,7 @@
 import { getLocationsV2 } from '../remonline.utils.mjs';
 import prisma from '../remonline.prisma.mjs';
-import { devLog } from '../../shared/shared.utils.mjs';
+import { devLog, isoOrNull } from '../../shared/shared.utils.mjs';
 import { remonlineTokenToEnv } from '../remonline.api.mjs';
-
-function isoOrNull(value) {
-  if (!value) return null;
-  if (!Number.isFinite(Date.parse(value))) return null;
-  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return new Date(`${value}T00:00:00Z`);
-  return new Date(value);
-}
 
 export async function syncBranches() {
   const time = new Date();

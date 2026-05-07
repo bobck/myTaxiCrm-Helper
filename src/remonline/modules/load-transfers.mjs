@@ -1,13 +1,7 @@
 import { getLocationsV2, getTransfersV2 } from '../remonline.utils.mjs';
 import prisma from '../remonline.prisma.mjs';
-import { devLog } from '../../shared/shared.utils.mjs';
+import { devLog, toFloat } from '../../shared/shared.utils.mjs';
 import { remonlineTokenToEnv } from '../remonline.api.mjs';
-
-function toFloat(value) {
-  if (value === null || value === undefined || value === '') return null;
-  const n = Number(value);
-  return Number.isFinite(n) ? n : null;
-}
 
 function mapTransferToPgRow(transfer) {
   return {

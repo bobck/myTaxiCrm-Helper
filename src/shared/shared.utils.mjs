@@ -81,3 +81,39 @@ export function transliterateLicensePlate(text) {
     .map((char) => cyrillicToLatinMap[char] ?? char)
     .join('');
 }
+
+/**
+ * Parse an ISO-8601 string (or unix-ms timestamp) into a `Date`. Returns null
+ * for empty/invalid input. Date-only `"YYYY-MM-DD"` is padded to UTC midnight
+ * so it round-trips through both BQ `TIMESTAMP` and Postgres `TIMESTAMP` types.
+ */
+export function isoOrNull(value) {
+  if (!value) return null;
+  if (!Number.isFinite(Date.parse(value))) return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return new Date(`${value}T00:00:00Z`);
+  return new Date(value);
+}
+
+/**
+ * Coerce to finite Number or null. Accepts numeric strings (eg. `"217.80"`).
+ */
+export function toFloat(value) {
+  if (value === null || value === undefined || value === '') return null;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+/**
+ * Stringify an object/array as JSON, or return null for empty/missing values.
+ * Empty objects (`{}`) and empty arrays (`[]`) collapse to null so downstream
+ * consumers can rely on `IS NULL` instead of parsing empty containers.
+ */
+export function jsonOrNull(value) {
+  if (value === null || value === undefined) return null;
+  if (Array.isArray(value)) {
+    if (value.length === 0) return null;
+    return JSON.stringify(value);
+  }
+  if (typeof value === 'object' && Object.keys(value).length === 0) return null;
+  return JSON.stringify(value);
+}
