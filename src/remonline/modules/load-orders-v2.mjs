@@ -98,7 +98,7 @@ export async function loadOrdersV2() {
     select: { modifiedAt: true },
   });
   const modifiedAtFrom = lastOrder?.modifiedAt
-    ? new Date(lastOrder.modifiedAt.getTime() + 1000)
+    ? lastOrder.modifiedAt
         .toISOString()
         .replace(/\.\d{3}Z$/, 'Z')
     : undefined;
