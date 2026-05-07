@@ -83,7 +83,7 @@ export function mapItemToBQRow({ orderId, item }) {
 export async function loadRemonlineOrderItems() {
   const time = new Date();
 
-  const allOrderIds = (await getAllRemonlineOrderIds()).slice(0,50);
+  const allOrderIds = (await getAllRemonlineOrderIds()).slice(0, 50);
   if (allOrderIds.length === 0) {
     console.log({
       time,
@@ -154,7 +154,6 @@ export async function createOrResetOrderItemsTable() {
 if (process.env.ENV === 'TEST') {
   console.log('running loadRemonlineOrderItems in TEST mode...');
   await remonlineTokenToEnv(true);
-  await createOrResetOrderItemsTable()
+  await createOrResetOrderItemsTable();
   await loadRemonlineOrderItems();
-
 }

@@ -780,7 +780,10 @@ async function fetchV2WithRetry({ url, fnName, attempt = 1 }) {
     devLog({ function: fnName, message: 'Auth refresh, retrying' });
     await remonlineTokenToEnv(true);
     // Rebuild url with the refreshed token.
-    const refreshed = url.replace(/token=[^&]*/, `token=${process.env.REMONLINE_API_TOKEN}`);
+    const refreshed = url.replace(
+      /token=[^&]*/,
+      `token=${process.env.REMONLINE_API_TOKEN}`
+    );
     return fetchV2WithRetry({ url: refreshed, fnName, attempt: attempt + 1 });
   }
 
