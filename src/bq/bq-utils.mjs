@@ -336,44 +336,6 @@ export async function deleteRowsByParameter({
   }
 }
 
-/**
- * Returns the subset of `allIds` that are NOT present (as values of `parameter`)
- * in the given BQ table. Uses a LEFT JOIN against an UNNEST'd array so it
- * scales to large id lists.
- *
- * @param {string} dataset_id
- * @param {string} table_id
- * @param {string} parameter Column name in the table (e.g. `order_id`)
- * @param {(number|string)[]} allIds
- * @returns {Promise<(number|string)[]>}
- */
-export async function getMissingIdsInTable({
-  dataset_id,
-  table_id,
-  parameter,
-  allIds,
-}) {
-  if (!allIds || allIds.length === 0) return [];
-
-  const sql = `
-      WITH input AS (SELECT id FROM UNNEST(@allIds) AS id)
-      SELECT input.id AS id
-      FROM input
-      LEFT JOIN \`${process.env.BQ_PROJECT_NAME}.${dataset_id}.${table_id}\` t
-        ON t.${parameter} = input.id
-      WHERE t.${parameter} IS NULL
-      GROUP BY input.id
-  `;
-
-  const [rows] = await bigquery.query({
-    query: sql,
-    location: 'US',
-    params: { allIds },
-    parameterMode: 'NAMED',
-  });
-  return rows.map((r) => r.id);
-}
-
 export async function loadRowsViaJSONFile({
   dataset_id,
   table_id,
