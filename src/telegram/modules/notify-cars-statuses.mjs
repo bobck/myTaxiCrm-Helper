@@ -66,7 +66,11 @@ export async function notifyCarsStatusChanges() {
     }
   }
 
-  console.log({ time: new Date(), message: 'notifyCarsStatusChanges done', sent });
+  console.log({
+    time: new Date(),
+    message: 'notifyCarsStatusChanges done',
+    sent,
+  });
 }
 
 if (process.env.ENV == 'TEST') {
