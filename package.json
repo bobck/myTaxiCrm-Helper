@@ -85,8 +85,8 @@
     "test:remonline:employees": "ENV=TEST node -r dotenv/config src/remonline/modules/sync-employees.mjs",
     "test:remonline:assets": "ENV=DEV node -r dotenv/config src/remonline/modules/sync-assets.mjs",
     "tunnel:pg": "node -r dotenv/config scripts/tunnel-pg.mjs",
-    "test:mytaxi:car:statuses": "ENV=TEST node -r dotenv/config src/web.api/modules/sync-cars-statuses.mjs"
-   
+    "test:mytaxi:car:statuses": "ENV=TEST node -r dotenv/config src/web.api/modules/sync-cars-statuses.mjs",
+    "test:mytaxi:car:statuses:notifications": "ENV=TEST node -r dotenv/config src/telegram/modules/notify-cars-statuses.mjs"
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",

@@ -11,7 +11,7 @@ import { startJobBoardJobs } from './src/job-boards/bootstrap.mjs';
 
 await initApi();
 
-// telegramJobs();
+telegramJobs();
 sheetJobs();
 bqJobs();
 

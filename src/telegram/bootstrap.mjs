@@ -1,19 +1,21 @@
-import {
-  startRoomNotificationJob,
-  roomNotificationJob,
-} from './jobs/rooms-notification-job.mjs';
+// import {
+//   startRoomNotificationJob,
+//   roomNotificationJob,
+// } from './jobs/rooms-notification-job.mjs';
+import { notifyCarsStatusesJob } from './jobs/notify-cars-statuses-job.mjs';
 
 export function telegramJobs() {
-  console.log('roomNotificationJob...');
   try {
-    roomNotificationJob.start();
+    // roomNotificationJob.start();
+    // console.log('roomNotificationJob...');
+    notifyCarsStatusesJob.start();
+    console.log('notifyCarsStatusesJob runs...');
   } catch (error) {
-    console.error('sync error, app down...');
+    console.error('telegram jobs error, app down...');
     console.error({ time: new Date(), error });
     console.error('Trying to restart...');
-    roomNotificationJob.stop();
+    // roomNotificationJob.stop();
+    notifyCarsStatusesJob.stop();
     telegramJobs();
   }
 }
-
-// telegranJobs();
