@@ -1,0 +1,37 @@
+generator client {
+  provider        = "prisma-client-js"
+  output          = "../../node_modules/@prisma/client-mytaxi"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider     = "postgresql"
+  url          = env("DATABASE_URL_MYTAXI")
+  schemas      = ["public"]
+  relationMode = "prisma"
+}
+
+model Car {
+  id           String   @id
+  status       String
+  licensePlate String   @map("license_plate")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@index([licensePlate])
+  @@map("cars")
+  @@schema("public")
+}
+
+model CarStatusLog {
+  id         BigInt   @id @default(autoincrement())
+  carId      String   @map("car_id")
+  prevStatus String?  @map("prev_status")
+  nextStatus String   @map("next_status")
+  changedAt  DateTime @default(now()) @map("changed_at")
+
+  @@index([carId, changedAt])
+  @@index([changedAt])
+  @@map("car_status_log")
+  @@schema("public")
+}
