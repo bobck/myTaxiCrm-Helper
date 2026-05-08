@@ -75,7 +75,6 @@
     "prisma:gen:all": "npm run prisma:gen:remonline && npm run prisma:gen:bitrix && npm run prisma:gen:mytaxi",
     "prisma:migrate:dev:all": "npm run prisma:migrate:dev:remonline && npm run prisma:migrate:dev:bitrix && npm run prisma:migrate:dev:mytaxi",
     "prisma:migrate:deploy:all": "npm run prisma:migrate:deploy:remonline && npm run prisma:migrate:deploy:bitrix && npm run prisma:migrate:deploy:mytaxi",
-    "syncCarsStatusesManual": "ENV=TEST node -r dotenv/config src/web.api/modules/sync-cars-statuses.mjs",
     "test:remonline:postings": "ENV=TEST node -r dotenv/config src/remonline/modules/load-remonline-postings.mjs",
     "test:remonline:products": "ENV=TEST node -r dotenv/config src/remonline/modules/load-remonline-products.mjs",
     "test:remonline:cashbox:sync": "ENV=TEST node -r dotenv/config src/remonline/modules/sync-remonline-cashboxes.mjs",
@@ -85,7 +84,9 @@
     "test:remonline:uoms": "ENV=TEST node -r dotenv/config src/remonline/modules/sync-uoms.mjs",
     "test:remonline:employees": "ENV=TEST node -r dotenv/config src/remonline/modules/sync-employees.mjs",
     "test:remonline:assets": "ENV=DEV node -r dotenv/config src/remonline/modules/sync-assets.mjs",
-    "tunnel:pg": "node -r dotenv/config scripts/tunnel-pg.mjs"
+    "tunnel:pg": "node -r dotenv/config scripts/tunnel-pg.mjs",
+    "test:mytaxi:car:statuses": "ENV=TEST node -r dotenv/config src/web.api/modules/sync-cars-statuses.mjs"
+   
   },
   "author": "bobockx10@gmail.com <bobozlo>",
   "license": "ISC",

@@ -11,11 +11,24 @@ datasource db {
   relationMode = "prisma"
 }
 
+enum CarEventType {
+  BUSY_WITH_PRIVATE_TRADER
+  RENTAL
+  ON_SERVICE_STATION
+  BUSY_WITH_CREW
+  ROAD_ACCIDENT
+  OTHER
+  AUTO_POUND
+
+  @@map("car_event_type")
+  @@schema("public")
+}
+
 model Car {
-  id           String   @id
-  status       String
-  licensePlate String   @map("license_plate")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  id           String       @id
+  status       CarEventType
+  licensePlate String       @map("license_plate")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
 
   @@index([status])
   @@index([licensePlate])
@@ -24,11 +37,12 @@ model Car {
 }
 
 model CarStatusLog {
-  id         BigInt   @id @default(autoincrement())
-  carId      String   @map("car_id")
-  prevStatus String?  @map("prev_status")
-  nextStatus String   @map("next_status")
-  changedAt  DateTime @default(now()) @map("changed_at")
+  id                BigInt        @id @default(autoincrement())
+  carId             String        @map("car_id")
+  prevStatus        CarEventType? @map("prev_status")
+  nextStatus        CarEventType  @map("next_status")
+  isManagerNotified Boolean       @default(false) @map("is_manager_notified")
+  changedAt         DateTime      @default(now()) @map("changed_at")
 
   @@index([carId, changedAt])
   @@index([changedAt])

@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { pool } from '../../api/pool.mjs';
-import mytaxiPrisma from '../../mytaxi/mytaxi.prisma.mjs';
+import mytaxiPrisma from '../mytaxi.prisma.mjs';
 
 async function getCarsCurrentStatuses() {
   const sql = fs.readFileSync('./src/sql/cars-current-statuses.sql').toString();
@@ -24,18 +24,25 @@ export async function syncCarsStatuses() {
   });
   const existingById = new Map(existing.map((car) => [car.id, car.status]));
 
-  const toUpsert = [];
+  const newCars = [];
+  const changedCars = [];
   const logEntries = [];
 
   for (const row of rows) {
     const { id, status, license_plate: licensePlate } = row;
+    const isExisting = existingById.has(id);
     const prevStatus = existingById.get(id);
 
-    if (prevStatus === status) {
+    if (isExisting && prevStatus === status) {
       continue;
     }
 
-    toUpsert.push({ id, status, licensePlate });
+    if (isExisting) {
+      changedCars.push({ id, status, licensePlate });
+    } else {
+      newCars.push({ id, status, licensePlate });
+    }
+
     logEntries.push({
       carId: id,
       prevStatus: prevStatus ?? null,
@@ -43,22 +50,27 @@ export async function syncCarsStatuses() {
     });
   }
 
-  console.log({ changedOrNew: toUpsert.length });
+  console.log({ new: newCars.length, changed: changedCars.length });
 
-  if (toUpsert.length === 0) {
+  if (newCars.length === 0 && changedCars.length === 0) {
     return;
   }
 
-  await mytaxiPrisma.$transaction([
-    ...toUpsert.map((car) =>
-      mytaxiPrisma.car.upsert({
+  const ops = [];
+  if (newCars.length > 0) {
+    ops.push(mytaxiPrisma.car.createMany({ data: newCars }));
+  }
+  for (const car of changedCars) {
+    ops.push(
+      mytaxiPrisma.car.update({
         where: { id: car.id },
-        create: car,
-        update: { status: car.status, licensePlate: car.licensePlate },
+        data: { status: car.status, licensePlate: car.licensePlate },
       })
-    ),
-    mytaxiPrisma.carStatusLog.createMany({ data: logEntries }),
-  ]);
+    );
+  }
+  ops.push(mytaxiPrisma.carStatusLog.createMany({ data: logEntries }));
+
+  await mytaxiPrisma.$transaction(ops);
 
   console.log({ time: new Date(), message: 'syncCarsStatuses done' });
 }
