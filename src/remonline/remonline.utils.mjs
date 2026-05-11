@@ -719,6 +719,7 @@ export async function* getProducts(_page = 1, _attempt = 1) {
 
 const V2_RETRYABLE_STATUSES = new Set([414, 429, 500, 502, 503, 504]);
 const V2_MAX_RETRIES = 3;
+const V2_MAX_AUTH_RETRIES = 3;
 
 /**
  * The roapp.io API rejects ISO timestamps with millisecond precision
@@ -732,7 +733,6 @@ function toApiIso(value) {
 
 function buildV2Query(params) {
   const qs = new URLSearchParams();
-  qs.append('token', process.env.REMONLINE_API_TOKEN);
   for (const [key, value] of Object.entries(params)) {
     if (value === undefined || value === null) continue;
     if (Array.isArray(value)) {
@@ -747,44 +747,69 @@ function buildV2Query(params) {
   return qs.toString();
 }
 
-async function fetchV2WithRetry({ url, fnName, attempt = 1 }) {
+function v2Headers() {
+  return {
+    accept: 'application/json',
+    Authorization: `Bearer ${process.env.REMONLINE_API_TOKEN}`,
+  };
+}
+
+async function fetchV2WithRetry({
+  url,
+  fnName,
+  retryAttempt = 1,
+  authAttempt = 1,
+}) {
   const response = await fetch(url, {
     method: 'GET',
-    headers: { accept: 'application/json' },
+    headers: v2Headers(),
   });
 
   if (V2_RETRYABLE_STATUSES.has(response.status)) {
-    if (attempt > V2_MAX_RETRIES) {
+    if (retryAttempt > V2_MAX_RETRIES) {
       const error = new Error(
         `${fnName}: HTTP ${response.status} after ${V2_MAX_RETRIES} retries`
       );
       error.status = response.status;
       throw error;
     }
-    const delay = 1000 * Math.pow(2, attempt - 1);
+    const delay = 1000 * Math.pow(2, retryAttempt - 1);
     devLog({
       function: fnName,
       message: `Retryable HTTP ${response.status}, retrying`,
       url,
-      attempt,
+      retryAttempt,
       delayMs: delay,
     });
     await new Promise((r) => setTimeout(r, delay));
-    return fetchV2WithRetry({ url, fnName, attempt: attempt + 1 });
+    return fetchV2WithRetry({
+      url,
+      fnName,
+      retryAttempt: retryAttempt + 1,
+      authAttempt,
+    });
   }
 
-  if (
-    (response.status === 403 || response.status === 401) &&
-    attempt <= V2_MAX_RETRIES
-  ) {
-    devLog({ function: fnName, message: 'Auth refresh, retrying' });
+  if (response.status === 401 || response.status === 403) {
+    if (authAttempt > V2_MAX_AUTH_RETRIES) {
+      const error = new Error(
+        `${fnName}: HTTP ${response.status} after ${V2_MAX_AUTH_RETRIES} auth retries`
+      );
+      error.status = response.status;
+      throw error;
+    }
+    devLog({
+      function: fnName,
+      message: 'Auth refresh, retrying',
+      authAttempt,
+    });
     await remonlineTokenToEnv(true);
-    // Rebuild url with the refreshed token.
-    const refreshed = url.replace(
-      /token=[^&]*/,
-      `token=${process.env.REMONLINE_API_TOKEN}`
-    );
-    return fetchV2WithRetry({ url: refreshed, fnName, attempt: attempt + 1 });
+    return fetchV2WithRetry({
+      url,
+      fnName,
+      retryAttempt,
+      authAttempt: authAttempt + 1,
+    });
   }
 
   return response;
@@ -846,7 +871,7 @@ export async function getOrdersV2({
       modified_at: modifiedAtRange.length ? modifiedAtRange : undefined,
       ids: ids && ids.length ? ids : undefined,
     });
-    const url = `${process.env.ROAPP_API}/v2/orders?${qs}`;
+    const url = `${process.env.ROAPP_API}/v2/orders${qs ? `?${qs}` : ''}`;
 
     const response = await fetchV2WithRetry({ url, fnName: 'getOrdersV2' });
     const data = await readV2Json({ response, fnName: 'getOrdersV2' });
@@ -883,8 +908,7 @@ export async function getOrdersV2({
  * a bare array — no paging wrapper.
  */
 export async function getOrderItems(orderId) {
-  const qs = buildV2Query({});
-  const url = `${process.env.ROAPP_API}/v2/orders/${orderId}/items?${qs}`;
+  const url = `${process.env.ROAPP_API}/v2/orders/${orderId}/items`;
   const response = await fetchV2WithRetry({ url, fnName: 'getOrderItems' });
 
   if (response.status === 404) return [];

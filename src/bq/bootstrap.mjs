@@ -13,7 +13,7 @@ export function bqJobs() {
     generateAndSavePolandBookkeepingReportJob.start();
     resetRemonlineTransfersJob.start();
     loadRemonlineTransfersJob.start();
-    loadRemonlineOrdersJob.start();
+    // loadRemonlineOrdersJob.start();
     loadRemonlineOrdersV2Job.start();
     loadRemonlineOrderItemsJob.start();
   } catch (error) {
@@ -24,7 +24,7 @@ export function bqJobs() {
     generateAndSavePolandBookkeepingReportJob.stop();
     resetRemonlineTransfersJob.stop();
     loadRemonlineTransfersJob.stop();
-    loadRemonlineOrdersJob.stop();
+    // loadRemonlineOrdersJob.stop();
     loadRemonlineOrdersV2Job.stop();
     loadRemonlineOrderItemsJob.stop();
     bqJobs();
