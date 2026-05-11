@@ -15,6 +15,7 @@ import { getOrderIdsModifiedAfter } from '../bq-queries.mjs';
 const DATASET_ID = 'RemOnline';
 const TABLE_ID = 'order_items';
 const ENTITY_NAME = 'OrderItem';
+const TEST_REQUEST_LIMIT = 50;
 
 function isoOrNull(value) {
   if (!value) return null;
@@ -93,8 +94,8 @@ export async function loadRemonlineOrderItems() {
   const sync = await getEntitySync(ENTITY_NAME);
   const lastModifiedAt = sync.last_modified_at || null;
 
-  const orders = await getOrderIdsModifiedAfter(lastModifiedAt);
-  if (orders.length === 0) {
+  const allOrders = await getOrderIdsModifiedAfter(lastModifiedAt);
+  if (allOrders.length === 0) {
     console.log({
       time,
       message: 'loadRemonlineOrderItems: no orders past watermark, skipping',
@@ -103,12 +104,21 @@ export async function loadRemonlineOrderItems() {
     return;
   }
 
+  // In TEST mode cap the number of /items requests so a full bootstrap
+  // doesn't hammer the API. The watermark advances past the 50th order so
+  // the next test run picks up where this one left off.
+  const isTest = process.env.ENV === 'TEST';
+  const orders =
+    isTest && allOrders.length > TEST_REQUEST_LIMIT
+      ? allOrders.slice(0, TEST_REQUEST_LIMIT)
+      : allOrders;
   const orderIds = orders.map((o) => o.order_id);
 
   console.log({
     time,
     message: 'loadRemonlineOrderItems',
     lastModifiedAt,
+    ordersAvailable: allOrders.length,
     ordersToProcess: orderIds.length,
   });
 
