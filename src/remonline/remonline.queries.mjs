@@ -1,4 +1,5 @@
 import { db } from '../shared/sqlite.mjs';
+import prisma from './remonline.prisma.mjs';
 
 export async function getLastSidCreatedAt() {
   const sql = `SELECT max(created_at) as created_at from sids`;
@@ -68,4 +69,41 @@ export async function updateLastCreatedTransactionTimeFoxRemonlineCashbox({
 }) {
   const sql = `UPDATE remonline_cashboxes SET last_transaction_created_at = ? WHERE id = ?`;
   return await db.all(sql, createdAt, remonlineCashboxId);
+}
+
+/**
+ * Read sync progress for a named entity (e.g. 'Order', 'OrderItem'). If the
+ * row doesn't exist yet, create it with an empty `syncDetails` and return
+ * that — so the entity always materializes in the table on first read.
+ *
+ * @param {string} entityName
+ * @returns {Promise<Record<string, any>>}
+ */
+export async function getEntitySync(entityName) {
+  let row = await prisma.entitySync.findUnique({ where: { entityName } });
+  if (!row) {
+    try {
+      row = await prisma.entitySync.create({
+        data: { entityName, syncDetails: {} },
+      });
+    } catch (e) {
+      // Race: another writer inserted the same row between our find and
+      // create. Re-read instead of bubbling up the unique-constraint error.
+      row = await prisma.entitySync.findUnique({ where: { entityName } });
+      if (!row) throw e;
+    }
+  }
+  return row.syncDetails;
+}
+
+/**
+ * Persist new sync progress for an entity. `syncDetails` is stored as JSON
+ * verbatim — callers own its shape (e.g. `{ last_modified_at }`).
+ */
+export async function upsertEntitySync(entityName, syncDetails) {
+  await prisma.entitySync.upsert({
+    where: { entityName },
+    create: { entityName, syncDetails },
+    update: { syncDetails },
+  });
 }

@@ -119,13 +119,28 @@ export async function getMaxPostingCreatedAt() {
 }
 
 /**
- * Returns every order_id we know about locally. Used by the items loader to
- * decide which orders still need their items pulled into BQ.
+ * Order ids whose `modified_at` is strictly newer than the given watermark,
+ * paired with their `modified_at` so the caller can advance the watermark
+ * after successful processing.
+ *
+ * Falsy/empty `modifiedAtFrom` returns every known order — the bootstrap
+ * case (no prior EntitySync row).
+ *
+ * @param {string|null|undefined} modifiedAtFrom ISO-8601 timestamp, exclusive lower bound
+ * @returns {Promise<{ order_id: number, modified_at: string }[]>}
  */
-export async function getAllRemonlineOrderIds() {
+export async function getOrderIdsModifiedAfter(modifiedAtFrom) {
+  if (!modifiedAtFrom) {
+    const sql = /*sql*/ `
+        SELECT order_id, modified_at FROM remonline_orders
+        ORDER BY modified_at ASC
+    `;
+    return db.all(sql);
+  }
   const sql = /*sql*/ `
-      SELECT order_id FROM remonline_orders
+      SELECT order_id, modified_at FROM remonline_orders
+      WHERE modified_at > ?
+      ORDER BY modified_at ASC
   `;
-  const rows = await db.all(sql);
-  return rows.map((r) => r.order_id);
+  return db.all(sql, modifiedAtFrom);
 }

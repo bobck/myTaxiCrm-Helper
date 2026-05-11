@@ -1,19 +1,20 @@
 import { getOrdersV2 } from '../../remonline/remonline.utils.mjs';
 import { remonlineTokenToEnv } from '../../remonline/remonline.api.mjs';
 import {
+  getEntitySync,
+  upsertEntitySync,
+} from '../../remonline/remonline.queries.mjs';
+import {
   createOrResetTableByName,
   deleteRowsByParameter,
   loadRowsViaJSONFile,
 } from '../bq-utils.mjs';
 import { ordersV2TableSchema } from '../schemas.mjs';
-import {
-  getMaxOrderModifiedAt,
-  synchronizeRemonlineOrders,
-} from '../bq-queries.mjs';
+import { synchronizeRemonlineOrders } from '../bq-queries.mjs';
 
 const DATASET_ID = 'RemOnline';
 const ORDERS_TABLE_ID = 'orders_v2';
-const ITEMS_TABLE_ID = 'order_items';
+const ENTITY_NAME = 'Order';
 
 function isoOrNull(value) {
   if (!value) return null;
@@ -104,7 +105,8 @@ export function mapOrderToBQRow(order) {
 
 export async function loadRemonlineOrdersV2() {
   const time = new Date();
-  const modifiedAtFrom = (await getMaxOrderModifiedAt()) || undefined;
+  const sync = await getEntitySync(ENTITY_NAME);
+  const modifiedAtFrom = sync.last_modified_at || undefined;
 
   const { orders, count } = await getOrdersV2({
     modifiedAtFrom,
@@ -137,15 +139,6 @@ export async function loadRemonlineOrdersV2() {
       rows,
       schema: ordersV2TableSchema,
     });
-    // Invalidate items: when an order is reloaded, its old items are stale.
-    // The items job will repull them on its next tick by checking which
-    // order_ids from sqlite are missing in `order_items`.
-    await deleteRowsByParameter({
-      arrayToDelete: orderIds,
-      parameter: 'order_id',
-      table_id: ITEMS_TABLE_ID,
-      dataset_id: DATASET_ID,
-    });
   } catch (errors) {
     const list = Array.isArray(errors) ? errors : [errors];
     for (const err of list) {
@@ -161,6 +154,18 @@ export async function loadRemonlineOrdersV2() {
   await synchronizeRemonlineOrders({
     orders: rows.map((r) => ({ id: r.id, modified_at: r.modified_at })),
   });
+
+  // Items invalidation no longer happens here — load-remonline-order-items
+  // watches its own EntitySync watermark against per-order modified_at and
+  // refetches whenever the order's modified_at advances past it.
+  const maxModifiedAt = rows
+    .map((r) => r.modified_at)
+    .filter(Boolean)
+    .sort()
+    .pop();
+  if (maxModifiedAt) {
+    await upsertEntitySync(ENTITY_NAME, { last_modified_at: maxModifiedAt });
+  }
 }
 
 export async function createOrResetOrdersV2Table() {
