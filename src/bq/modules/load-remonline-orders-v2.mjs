@@ -172,6 +172,6 @@ export async function createOrResetOrdersV2Table() {
 if (process.env.ENV === 'TEST') {
   console.log('running loadRemonlineOrdersV2 in TEST mode...');
   await remonlineTokenToEnv(true);
-  createOrResetOrdersV2Table();
+  await createOrResetOrdersV2Table();
   await loadRemonlineOrdersV2();
 }
