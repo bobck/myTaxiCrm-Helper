@@ -118,29 +118,3 @@ export async function getMaxPostingCreatedAt() {
   return row?.maxCreatedAt ?? 0;
 }
 
-/**
- * Order ids whose `modified_at` is strictly newer than the given watermark,
- * paired with their `modified_at` so the caller can advance the watermark
- * after successful processing.
- *
- * Falsy/empty `modifiedAtFrom` returns every known order — the bootstrap
- * case (no prior EntitySync row).
- *
- * @param {string|null|undefined} modifiedAtFrom ISO-8601 timestamp, exclusive lower bound
- * @returns {Promise<{ order_id: number, modified_at: string }[]>}
- */
-export async function getOrderIdsModifiedAfter(modifiedAtFrom) {
-  if (!modifiedAtFrom) {
-    const sql = /*sql*/ `
-        SELECT order_id, modified_at FROM remonline_orders
-        ORDER BY modified_at ASC
-    `;
-    return db.all(sql);
-  }
-  const sql = /*sql*/ `
-      SELECT order_id, modified_at FROM remonline_orders
-      WHERE modified_at > ?
-      ORDER BY modified_at ASC
-  `;
-  return db.all(sql, modifiedAtFrom);
-}

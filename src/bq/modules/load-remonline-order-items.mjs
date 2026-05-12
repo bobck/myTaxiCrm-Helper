@@ -7,10 +7,10 @@ import {
 import {
   createOrResetTableByName,
   deleteRowsByParameter,
+  getOrderIdsModifiedAfterFromBQ,
   loadRowsViaJSONFile,
 } from '../bq-utils.mjs';
 import { orderItemsTableSchema } from '../schemas.mjs';
-import { getOrderIdsModifiedAfter } from '../bq-queries.mjs';
 
 const DATASET_ID = 'RemOnline';
 const TABLE_ID = 'order_items';
@@ -93,7 +93,7 @@ export async function loadRemonlineOrderItems() {
   const sync = await getEntitySync(ENTITY_NAME);
   const lastModifiedAt = sync.last_modified_at || null;
 
-  const orders = await getOrderIdsModifiedAfter(lastModifiedAt);
+  const orders = await getOrderIdsModifiedAfterFromBQ(lastModifiedAt);
   if (orders.length === 0) {
     console.log({
       time,
@@ -188,9 +188,9 @@ export async function createOrResetOrderItemsTable() {
   });
 }
 
-if (process.env.ENV === 'TEST') {
-  console.log('running loadRemonlineOrderItems in TEST mode...');
-  await remonlineTokenToEnv(true);
-  // await createOrResetOrderItemsTable();
-  await loadRemonlineOrderItems();
-}
+// if (process.env.ENV === 'TEST') {
+//   console.log('running loadRemonlineOrderItems in TEST mode...');
+//   await remonlineTokenToEnv(true);
+//   // await createOrResetOrderItemsTable();
+//   await loadRemonlineOrderItems();
+// }

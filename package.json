@@ -81,7 +81,7 @@
     "test:remonline:uoms": "ENV=TEST node -r dotenv/config src/remonline/modules/sync-uoms.mjs",
     "test:remonline:employees": "ENV=TEST node -r dotenv/config src/remonline/modules/sync-employees.mjs",
     "test:remonline:assets": "ENV=DEV node -r dotenv/config src/remonline/modules/sync-assets.mjs",
-    "test:remonline:v2:orders": "ENV=TEST node -r dotenv/config src/bq/modules/load-remonline-orders-v2.mjs",
+    "test:remonline:v2:orders": "ENV=TEST node -r dotenv/config src/bq/jobs/load-remonline-orders-v2-job.mjs",
     "test:remonline:v2:orders:items": "ENV=TEST node -r dotenv/config src/bq/modules/load-remonline-order-items.mjs"
   },
   "author": "bobockx10@gmail.com <bobozlo>",
