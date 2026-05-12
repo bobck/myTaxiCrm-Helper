@@ -127,7 +127,8 @@ export async function loadRemonlineOrderItems() {
   if (successOrders.length === 0) {
     console.log({
       time: new Date(),
-      message: 'loadRemonlineOrderItems: nothing succeeded, watermark unchanged',
+      message:
+        'loadRemonlineOrderItems: nothing succeeded, watermark unchanged',
     });
     return;
   }
