@@ -117,4 +117,3 @@ export async function getMaxPostingCreatedAt() {
   const row = await db.get(sql);
   return row?.maxCreatedAt ?? 0;
 }
-
