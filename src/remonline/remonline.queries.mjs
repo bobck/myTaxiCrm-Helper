@@ -72,27 +72,17 @@ export async function updateLastCreatedTransactionTimeFoxRemonlineCashbox({
 }
 
 /**
- * Read sync progress for a named entity (e.g. 'Order', 'OrderItem'). If the
- * row doesn't exist yet, create it with an empty `syncDetails` and return
- * that — so the entity always materializes in the table on first read.
+ * Read sync progress for a named entity (e.g. 'Order', 'OrderItem'). Rows are
+ * seeded by migration, so a missing row indicates a deployment bug — we
+ * surface it instead of silently materializing a row here.
  *
  * @param {string} entityName
  * @returns {Promise<Record<string, any>>}
  */
 export async function getEntitySync(entityName) {
-  let row = await prisma.entitySync.findUnique({ where: { entityName } });
-  if (!row) {
-    try {
-      row = await prisma.entitySync.create({
-        data: { entityName, syncDetails: {} },
-      });
-    } catch (e) {
-      // Race: another writer inserted the same row between our find and
-      // create. Re-read instead of bubbling up the unique-constraint error.
-      row = await prisma.entitySync.findUnique({ where: { entityName } });
-      if (!row) throw e;
-    }
-  }
+  const row = await prisma.entitySync.findUniqueOrThrow({
+    where: { entityName },
+  });
   return row.syncDetails;
 }
 
