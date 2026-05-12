@@ -12,7 +12,9 @@ const loadRemonlineOrdersV2Job = CronJob.from({
   timeZone,
   onTick: async () => {
     if (isRunning) {
-      console.log('loadRemonlineOrdersV2Job: previous tick still running, skip');
+      console.log(
+        'loadRemonlineOrdersV2Job: previous tick still running, skip'
+      );
       return;
     }
     isRunning = true;

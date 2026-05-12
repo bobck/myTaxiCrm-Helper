@@ -145,16 +145,15 @@ export async function loadRemonlineOrderItems() {
       dataset_id: DATASET_ID,
     });
 
-      const rows = items
-        .filter((item) => !failedSet.has(item.order_id))
-        .map((item) => mapItemToBQRow({ orderId: item.order_id, item }));
-      await loadRowsViaJSONFile({
-        dataset_id: DATASET_ID,
-        table_id: TABLE_ID,
-        rows,
-        schema: orderItemsTableSchema,
-      });
-    
+    const rows = items
+      .filter((item) => !failedSet.has(item.order_id))
+      .map((item) => mapItemToBQRow({ orderId: item.order_id, item }));
+    await loadRowsViaJSONFile({
+      dataset_id: DATASET_ID,
+      table_id: TABLE_ID,
+      rows,
+      schema: orderItemsTableSchema,
+    });
   } catch (errors) {
     const list = Array.isArray(errors) ? errors : [errors];
     for (const err of list) {
