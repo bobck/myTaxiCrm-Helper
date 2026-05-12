@@ -139,6 +139,15 @@ export async function loadRemonlineOrdersV2() {
       rows,
       schema: ordersV2TableSchema,
     });
+
+    const maxModifiedAt = rows
+      .map((r) => r.modified_at)
+      .filter(Boolean)
+      .sort()
+      .pop();
+    if (maxModifiedAt) {
+      await upsertEntitySync(ENTITY_NAME, { last_modified_at: maxModifiedAt });
+    }
   } catch (errors) {
     const list = Array.isArray(errors) ? errors : [errors];
     for (const err of list) {
@@ -149,15 +158,6 @@ export async function loadRemonlineOrdersV2() {
       });
     }
     throw errors;
-  }
-
-  const maxModifiedAt = rows
-    .map((r) => r.modified_at)
-    .filter(Boolean)
-    .sort()
-    .pop();
-  if (maxModifiedAt) {
-    await upsertEntitySync(ENTITY_NAME, { last_modified_at: maxModifiedAt });
   }
 }
 
