@@ -40,7 +40,7 @@ function jsonOrNull(value) {
   ) {
     return null;
   }
-  return JSON.stringify(value);
+  return value;
 }
 
 export function mapItemToBQRow({ orderId, item }) {

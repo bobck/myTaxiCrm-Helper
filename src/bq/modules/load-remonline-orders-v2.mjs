@@ -40,7 +40,7 @@ function pickClientName(client) {
 function jsonOrNull(value) {
   if (value === null || value === undefined) return null;
   if (typeof value === 'object' && Object.keys(value).length === 0) return null;
-  return JSON.stringify(value);
+  return value;
 }
 
 export function mapOrderToBQRow(order) {

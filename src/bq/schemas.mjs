@@ -394,9 +394,9 @@ export const ordersV2TableSchema = [
   { name: 'urgent', type: 'BOOLEAN', mode: 'NULLABLE' },
   { name: 'is_deduction_required', type: 'BOOLEAN', mode: 'NULLABLE' },
   { name: 'ad_campaign_id', type: 'INTEGER', mode: 'NULLABLE' },
-  { name: 'custom_fields', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'asset_custom_fields', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'client_custom_fields', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'custom_fields', type: 'JSON', mode: 'NULLABLE' },
+  { name: 'asset_custom_fields', type: 'JSON', mode: 'NULLABLE' },
+  { name: 'client_custom_fields', type: 'JSON', mode: 'NULLABLE' },
 ];
 
 export const orderItemsTableSchema = [
@@ -430,8 +430,8 @@ export const orderItemsTableSchema = [
   { name: 'warranty_period', type: 'INTEGER', mode: 'NULLABLE' },
   { name: 'warranty_period_units', type: 'STRING', mode: 'NULLABLE' },
   { name: 'expiration_date', type: 'TIMESTAMP', mode: 'NULLABLE' },
-  { name: 'taxes', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'write_offs', type: 'STRING', mode: 'NULLABLE' },
+  { name: 'taxes', type: 'JSON', mode: 'NULLABLE' },
+  { name: 'write_offs', type: 'JSON', mode: 'NULLABLE' },
 ];
 export const closedPolishBitrixDealsTableSchema = [
   { name: 'id', type: 'STRING', mode: 'REQUIRED' },
