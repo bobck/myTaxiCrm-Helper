@@ -145,7 +145,6 @@ export async function loadRemonlineOrderItems() {
       dataset_id: DATASET_ID,
     });
 
-    if (items.length > 0) {
       const rows = items
         .filter((item) => !failedSet.has(item.order_id))
         .map((item) => mapItemToBQRow({ orderId: item.order_id, item }));
@@ -155,7 +154,7 @@ export async function loadRemonlineOrderItems() {
         rows,
         schema: orderItemsTableSchema,
       });
-    }
+    
   } catch (errors) {
     const list = Array.isArray(errors) ? errors : [errors];
     for (const err of list) {
