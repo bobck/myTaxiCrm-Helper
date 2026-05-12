@@ -108,9 +108,11 @@ export async function loadRemonlineOrdersV2() {
   const sync = await getEntitySync(ENTITY_NAME);
   const modifiedAtFrom = sync.last_modified_at || undefined;
 
+  // TODO: dev cap — remove before going to prod
   const { orders, count } = await getOrdersV2({
     modifiedAtFrom,
     sort: 'modified_at',
+    pageLimit: 3,
   });
 
   console.log({

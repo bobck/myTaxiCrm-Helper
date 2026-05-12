@@ -847,6 +847,7 @@ async function readV2Json({ response, fnName }) {
  * @param {string} [opts.modifiedAtTo]   ISO-8601 upper bound for modified_at
  * @param {number[]} [opts.ids]          filter by explicit ids
  * @param {string} [opts.sort='modified_at']  enum: 'modified_at' | '-modified_at'
+ * @param {number} [opts.pageLimit]      stop after this many pages (caller-driven cap)
  * @returns {Promise<{ orders: object[], count: number }>}
  */
 export async function getOrdersV2({
@@ -854,6 +855,7 @@ export async function getOrdersV2({
   modifiedAtTo,
   ids,
   sort = 'modified_at',
+  pageLimit,
 } = {}) {
   const allOrders = [];
   let page = 1;
@@ -888,6 +890,13 @@ export async function getOrdersV2({
     });
 
     if (!paging.total_pages || page >= paging.total_pages) break;
+    if (pageLimit && page >= pageLimit) {
+      devLog({
+        function: 'getOrdersV2',
+        message: `pageLimit reached, stopping at page ${page}`,
+      });
+      break;
+    }
     page += 1;
   }
 
