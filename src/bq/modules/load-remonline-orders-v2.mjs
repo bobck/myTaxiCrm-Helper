@@ -151,13 +151,6 @@ export async function loadRemonlineOrdersV2() {
     throw errors;
   }
 
-  await synchronizeRemonlineOrders({
-    orders: rows.map((r) => ({ id: r.id, modified_at: r.modified_at })),
-  });
-
-  // Items invalidation no longer happens here — load-remonline-order-items
-  // watches its own EntitySync watermark against per-order modified_at and
-  // refetches whenever the order's modified_at advances past it.
   const maxModifiedAt = rows
     .map((r) => r.modified_at)
     .filter(Boolean)
