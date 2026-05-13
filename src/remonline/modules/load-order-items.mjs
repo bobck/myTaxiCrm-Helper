@@ -3,12 +3,14 @@
 // Ожидается, что джоба сначала прогоняет `loadOrders` (он двигает watermark
 // `entity_sync('Order')` и подкладывает новые/обновлённые заказы в PG),
 // а потом этот модуль на основании их `modifiedAt` решает, у кого тянуть items.
-import { getOrderItemsBatch } from '../remonline.utils.mjs';
+import { getOrderItems } from '../remonline.utils.mjs';
 import prisma from '../remonline.prisma.mjs';
 import { devLog } from '../../shared/shared.utils.mjs';
 import { getEntitySync, upsertEntitySync } from '../remonline.queries.mjs';
 
 const ENTITY_NAME = 'OrderItem';
+
+const ORDERS_CHUNK_SIZE = 500;
 
 function isoOrNull(value) {
   if (!value) return null;
@@ -78,78 +80,120 @@ function mapItemToPgRow({ orderId, item }) {
   };
 }
 
+async function processChunk(orders) {
+  const successOrderIds = [];
+  const items = [];
+  let lastFullyProcessedOrder = null;
+  let failedOrderId = null;
+
+  for (const order of orders) {
+    let orderItems;
+    try {
+      orderItems = await getOrderItems(order.id);
+    } catch (e) {
+      console.error({
+        function: 'loadOrderItems',
+        orderId: order.id,
+        status: e?.status,
+        message: e?.message,
+      });
+      failedOrderId = order.id;
+      break;
+    }
+
+    successOrderIds.push(order.id);
+    for (const item of orderItems) {
+      items.push({ order_id: order.id, ...item });
+    }
+    lastFullyProcessedOrder = order;
+  }
+
+  if (successOrderIds.length > 0) {
+    const rows = items.map((item) =>
+      mapItemToPgRow({ orderId: item.order_id, item })
+    );
+    await prisma.$transaction([
+      prisma.orderItem.deleteMany({
+        where: { orderId: { in: successOrderIds } },
+      }),
+      prisma.orderItem.createMany({ data: rows }),
+    ]);
+
+    if (lastFullyProcessedOrder?.modifiedAt) {
+      const iso = lastFullyProcessedOrder.modifiedAt
+        .toISOString()
+        .replace(/\.\d{3}Z$/, 'Z');
+      await upsertEntitySync(ENTITY_NAME, { last_modified_at: iso });
+    }
+  }
+
+  return {
+    savedOrders: successOrderIds.length,
+    savedItems: items.length,
+    failedOrderId,
+  };
+}
+
 export async function loadOrderItems() {
   const time = new Date();
   devLog({ time, message: 'loadOrderItems' });
 
-  const sync = await getEntitySync(ENTITY_NAME);
-  const lastModifiedAt = sync.last_modified_at || null;
+  let totalOrders = 0;
+  let totalItems = 0;
 
-  const orders = await prisma.order.findMany({
-    where: lastModifiedAt
-      ? { modifiedAt: { gt: new Date(lastModifiedAt) } }
-      : {},
-    select: { id: true, modifiedAt: true },
-    orderBy: { modifiedAt: 'asc' },
-  });
+  while (true) {
+    const sync = await getEntitySync(ENTITY_NAME);
+    const lastModifiedAt = sync.last_modified_at || null;
 
-  if (orders.length === 0) {
+    const orders = await prisma.order.findMany({
+      where: lastModifiedAt
+        ? { modifiedAt: { gt: new Date(lastModifiedAt) } }
+        : {},
+      select: { id: true, modifiedAt: true },
+      orderBy: { modifiedAt: 'asc' },
+      take: ORDERS_CHUNK_SIZE,
+    });
+
+    if (orders.length === 0) {
+      devLog({
+        message: 'loadOrderItems: no more orders past watermark',
+        lastModifiedAt,
+      });
+      break;
+    }
+
     devLog({
-      message: 'loadOrderItems: no orders past watermark, skipping',
+      message: 'loadOrderItems chunk',
       lastModifiedAt,
+      ordersInChunk: orders.length,
     });
-    return;
-  }
 
-  const orderIds = orders.map((o) => o.id);
+    const { savedOrders, savedItems, failedOrderId } =
+      await processChunk(orders);
+    totalOrders += savedOrders;
+    totalItems += savedItems;
 
-  devLog({
-    message: 'loadOrderItems',
-    lastModifiedAt,
-    ordersToProcess: orderIds.length,
-  });
-
-  const { items, failedOrderIds } = await getOrderItemsBatch(orderIds);
-  devLog({
-    message: 'loadOrderItems fetched',
-    fetchedItems: items.length,
-    failedOrderIds: failedOrderIds.length,
-  });
-
-  const failedSet = new Set(failedOrderIds);
-  const successIds = orders.map((o) => o.id).filter((id) => !failedSet.has(id));
-
-  if (successIds.length === 0) {
     devLog({
-      message: 'loadOrderItems: nothing succeeded, watermark unchanged',
+      message: 'loadOrderItems chunk saved',
+      savedOrders,
+      savedItems,
+      totalOrders,
+      totalItems,
     });
-    return;
+
+    // On a fetch failure inside the chunk, watermark stopped at the last
+    // successful order. Bailing here lets the next tick retry the failing
+    // order rather than blocking on it indefinitely.
+    if (failedOrderId !== null) {
+      devLog({
+        message: 'loadOrderItems: stopping after first failed order',
+        failedOrderId,
+      });
+      break;
+    }
   }
 
-  const rows = items
-    .filter((item) => !failedSet.has(item.order_id))
-    .map((item) => mapItemToPgRow({ orderId: item.order_id, item }));
-
-  await prisma.$transaction([
-    prisma.orderItem.deleteMany({ where: { orderId: { in: successIds } } }),
-    prisma.orderItem.createMany({ data: rows }),
-  ]);
-
-  // `orders` is sorted ASC by modifiedAt. Advance watermark up to (but not
-  // past) the first failure so failed orders keep getting retried; skipping
-  // that invariant would silently drop any failed order whose modifiedAt
-  // lies below a later success.
-  let newWatermark = null;
-  for (const o of orders) {
-    if (failedSet.has(o.id)) break;
-    if (o.modifiedAt) newWatermark = o.modifiedAt;
-  }
-  if (newWatermark) {
-    const iso = newWatermark.toISOString().replace(/\.\d{3}Z$/, 'Z');
-    await upsertEntitySync(ENTITY_NAME, { last_modified_at: iso });
-  }
-
-  devLog({ message: `Loaded ${rows.length} order items` });
+  devLog({ message: 'loadOrderItems done', totalOrders, totalItems });
 }
 
 // TEST-запуск переехал в `src/remonline/jobs/load-orders-job.mjs`,

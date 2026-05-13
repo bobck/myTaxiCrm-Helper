@@ -8,6 +8,8 @@ import { getEntitySync, upsertEntitySync } from '../remonline.queries.mjs';
 
 const ENTITY_NAME = 'Order';
 
+const BATCH_PAGES_LIMIT = 50;
+
 function isoOrNull(value) {
   if (!value) return null;
   if (!Number.isFinite(Date.parse(value))) return null;
@@ -94,25 +96,8 @@ function mapOrderToPgRow(order) {
   };
 }
 
-export async function loadOrders({ pageLimit } = {}) {
-  const time = new Date();
-  devLog({ time, message: 'loadOrders' });
-
-  const sync = await getEntitySync(ENTITY_NAME);
-  const modifiedAtFrom = sync.last_modified_at || undefined;
-
-  const { orders, count } = await getOrdersV2({
-    modifiedAtFrom,
-    sort: 'modified_at',
-    pageLimit,
-  });
-  devLog({
-    message: 'loadOrders fetched',
-    modifiedAtFrom,
-    fetchedCount: count,
-  });
-
-  if (orders.length === 0) return;
+async function saveOrdersBatch(orders) {
+  if (orders.length === 0) return 0;
 
   const rows = orders.map(mapOrderToPgRow);
   const orderIds = rows.map((r) => r.id);
@@ -132,7 +117,59 @@ export async function loadOrders({ pageLimit } = {}) {
     await upsertEntitySync(ENTITY_NAME, { last_modified_at: iso });
   }
 
-  devLog({ message: `loadOrders synced ${rows.length} orders.` });
+  return rows.length;
+}
+
+export async function loadOrders({ pageLimit } = {}) {
+  const time = new Date();
+  devLog({ time, message: 'loadOrders' });
+
+  const sync = await getEntitySync(ENTITY_NAME);
+  const modifiedAtFrom = sync.last_modified_at || undefined;
+
+  let currentBatch = [];
+  let currentBatchPages = 0;
+  let totalSaved = 0;
+  let lastPage = 0;
+
+  for await (const { orders, page } of getOrdersV2({
+    modifiedAtFrom,
+    sort: 'modified_at',
+    pageLimit,
+  })) {
+    lastPage = page;
+    if (orders.length > 0) currentBatch.push(...orders);
+    currentBatchPages += 1;
+
+    if (currentBatchPages >= BATCH_PAGES_LIMIT) {
+      const saved = await saveOrdersBatch(currentBatch);
+      totalSaved += saved;
+      devLog({
+        message: `loadOrders batch saved at page ${page}`,
+        savedInBatch: saved,
+        totalSaved,
+      });
+      currentBatch = [];
+      currentBatchPages = 0;
+    }
+  }
+
+  if (currentBatch.length > 0) {
+    const saved = await saveOrdersBatch(currentBatch);
+    totalSaved += saved;
+    devLog({
+      message: `loadOrders final batch saved at page ${lastPage}`,
+      savedInBatch: saved,
+      totalSaved,
+    });
+  }
+
+  devLog({
+    message: 'loadOrders done',
+    modifiedAtFrom,
+    totalSaved,
+    lastPage,
+  });
 }
 
 // TEST-запуск переехал в `src/remonline/jobs/load-orders-job.mjs`,

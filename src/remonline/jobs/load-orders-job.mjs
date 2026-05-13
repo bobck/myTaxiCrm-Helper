@@ -40,6 +40,6 @@ export { loadOrdersJob };
 if (process.env.ENV === 'TEST') {
   console.log('Running loadOrdersJob tick once in TEST mode (pageLimit=3)...');
   await remonlineTokenToEnv(true);
-  await runOrdersTick({ pageLimit: 3 });
+  await runOrdersTick({ pageLimit: 2 });
   process.exit(0);
 }

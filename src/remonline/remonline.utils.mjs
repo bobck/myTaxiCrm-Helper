@@ -840,14 +840,13 @@ async function readV2Json({ response, fnName }) {
  * @param {number} [opts.pageLimit]      stop after this many pages (for tests)
  * @returns {Promise<{ orders: object[], count: number }>}
  */
-export async function getOrdersV2({
+export async function* getOrdersV2({
   modifiedAtFrom,
   modifiedAtTo,
   ids,
   sort = 'modified_at',
   pageLimit,
 } = {}) {
-  const allOrders = [];
   let page = 1;
 
   const modifiedAtRange = [];
@@ -868,7 +867,6 @@ export async function getOrdersV2({
 
     const orders = data.data || [];
     const paging = data.paging || {};
-    allOrders.push(...orders);
 
     devLog({
       function: 'getOrdersV2',
@@ -876,15 +874,19 @@ export async function getOrdersV2({
       total_pages: paging.total_pages,
       count: paging.count,
       fetched: orders.length,
-      totalFetched: allOrders.length,
     });
+
+    yield {
+      orders,
+      page,
+      totalPages: paging.total_pages,
+      count: paging.count,
+    };
 
     if (!paging.total_pages || page >= paging.total_pages) break;
     if (pageLimit && page >= pageLimit) break;
     page += 1;
   }
-
-  return { orders: allOrders, count: allOrders.length };
 }
 
 /**
