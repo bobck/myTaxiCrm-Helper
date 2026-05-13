@@ -4,7 +4,6 @@
 import { getOrdersV2 } from '../remonline.utils.mjs';
 import prisma from '../remonline.prisma.mjs';
 import { devLog } from '../../shared/shared.utils.mjs';
-import { remonlineTokenToEnv } from '../remonline.api.mjs';
 import {
   getEntitySync,
   upsertEntitySync,
@@ -35,7 +34,7 @@ function pickClientName(client) {
 function jsonOrNull(value) {
   if (value === null || value === undefined) return null;
   if (typeof value === 'object' && Object.keys(value).length === 0) return null;
-  return JSON.stringify(value);
+  return value;
 }
 
 function mapOrderToPgRow(order) {
@@ -98,7 +97,7 @@ function mapOrderToPgRow(order) {
   };
 }
 
-export async function loadOrders() {
+export async function loadOrders({ pageLimit } = {}) {
   const time = new Date();
   devLog({ time, message: 'loadOrders' });
 
@@ -108,6 +107,7 @@ export async function loadOrders() {
   const { orders, count } = await getOrdersV2({
     modifiedAtFrom,
     sort: 'modified_at',
+    pageLimit,
   });
   devLog({
     message: 'loadOrders fetched',
@@ -138,8 +138,5 @@ export async function loadOrders() {
   devLog({ message: `loadOrders synced ${rows.length} orders.` });
 }
 
-if (process.env.ENV === 'TEST') {
-  devLog({ message: 'Running loadOrders in TEST mode...' });
-  await remonlineTokenToEnv(true);
-  await loadOrders();
-}
+// TEST-запуск переехал в `src/remonline/jobs/load-orders-job.mjs`,
+// чтобы один тик последовательно прогонял orders + items.

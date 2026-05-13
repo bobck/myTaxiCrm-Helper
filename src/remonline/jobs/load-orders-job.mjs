@@ -5,31 +5,41 @@
 import { CronJob } from 'cron';
 import { loadOrders } from '../modules/load-orders.mjs';
 import { loadOrderItems } from '../modules/load-order-items.mjs';
+import { remonlineTokenToEnv } from '../remonline.api.mjs';
 
 const cronTime = '0 */4 * * *';
 const timeZone = 'Europe/Kiev';
 let isFunctionRunning = false;
 
+async function runOrdersTick({ pageLimit } = {}) {
+  if (isFunctionRunning) {
+    console.log('loadOrdersJob: previous tick still running, skip');
+    return;
+  }
+
+  try {
+    isFunctionRunning = true;
+    await loadOrders({ pageLimit });
+    await loadOrderItems();
+  } catch (error) {
+    console.error('Error occurred in onTick loadOrdersJob');
+    console.error({ time: new Date(), error });
+  } finally {
+    isFunctionRunning = false;
+  }
+}
+
 const loadOrdersJob = CronJob.from({
   cronTime,
   timeZone,
-  onTick: async () => {
-    if (isFunctionRunning) {
-      console.log('loadOrdersJob: previous tick still running, skip');
-      return;
-    }
-
-    try {
-      isFunctionRunning = true;
-      await loadOrders();
-      await loadOrderItems();
-    } catch (error) {
-      console.error('Error occurred in onTick loadOrdersJob');
-      console.error({ time: new Date(), error });
-    } finally {
-      isFunctionRunning = false;
-    }
-  },
+  onTick: runOrdersTick,
 });
 
 export { loadOrdersJob };
+
+if (process.env.ENV === 'TEST') {
+  console.log('Running loadOrdersJob tick once in TEST mode (pageLimit=3)...');
+  await remonlineTokenToEnv(true);
+  await runOrdersTick({ pageLimit: 3 });
+  process.exit(0);
+}

@@ -275,9 +275,9 @@ model Order {
   urgent               Boolean?
   isDeductionRequired  Boolean?  @map("is_deduction_required")
   adCampaignId         Int?      @map("ad_campaign_id")
-  customFields         String?   @map("custom_fields")
-  assetCustomFields    String?   @map("asset_custom_fields")
-  clientCustomFields   String?   @map("client_custom_fields")
+  customFields         Json?     @map("custom_fields")
+  assetCustomFields    Json?     @map("asset_custom_fields")
+  clientCustomFields   Json?     @map("client_custom_fields")
 
   @@map("orders")
   @@schema("public")
@@ -315,8 +315,8 @@ model OrderItem {
   warrantyPeriod      Int?      @map("warranty_period")
   warrantyPeriodUnits String?   @map("warranty_period_units")
   expirationDate      DateTime? @map("expiration_date")
-  taxes               String?
-  writeOffs           String?   @map("write_offs")
+  taxes               Json?
+  writeOffs           Json?     @map("write_offs")
 
   @@id([orderId, id])
   @@map("order_items")

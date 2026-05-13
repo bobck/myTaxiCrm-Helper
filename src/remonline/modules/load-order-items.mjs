@@ -6,7 +6,6 @@
 import { getOrderItemsBatch } from '../remonline.utils.mjs';
 import prisma from '../remonline.prisma.mjs';
 import { devLog } from '../../shared/shared.utils.mjs';
-import { remonlineTokenToEnv } from '../remonline.api.mjs';
 import {
   getEntitySync,
   upsertEntitySync,
@@ -37,7 +36,7 @@ function jsonOrNull(value) {
   ) {
     return null;
   }
-  return JSON.stringify(value);
+  return value;
 }
 
 function mapItemToPgRow({ orderId, item }) {
@@ -158,8 +157,5 @@ export async function loadOrderItems() {
   devLog({ message: `Loaded ${rows.length} order items` });
 }
 
-if (process.env.ENV === 'TEST') {
-  devLog({ message: 'Running loadOrderItems in TEST mode...' });
-  await remonlineTokenToEnv(true);
-  await loadOrderItems();
-}
+// TEST-запуск переехал в `src/remonline/jobs/load-orders-job.mjs`,
+// чтобы один тик последовательно прогонял orders + items.

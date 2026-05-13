@@ -45,9 +45,9 @@ CREATE TABLE "public"."orders" (
     "urgent" BOOLEAN,
     "is_deduction_required" BOOLEAN,
     "ad_campaign_id" INTEGER,
-    "custom_fields" TEXT,
-    "asset_custom_fields" TEXT,
-    "client_custom_fields" TEXT,
+    "custom_fields" JSONB,
+    "asset_custom_fields" JSONB,
+    "client_custom_fields" JSONB,
 
     CONSTRAINT "orders_pkey" PRIMARY KEY ("id")
 );
@@ -84,8 +84,8 @@ CREATE TABLE "public"."order_items" (
     "warranty_period" INTEGER,
     "warranty_period_units" TEXT,
     "expiration_date" TIMESTAMP(3),
-    "taxes" TEXT,
-    "write_offs" TEXT,
+    "taxes" JSONB,
+    "write_offs" JSONB,
 
     CONSTRAINT "order_items_pkey" PRIMARY KEY ("order_id","id")
 );
