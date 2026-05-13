@@ -3,6 +3,7 @@ import { generateAndSavePolandBookkeepingReportJob } from './jobs/generate-and-s
 import { loadRemonlineTransfersJob } from './jobs/load-remonline-transfers-job.mjs';
 import { resetRemonlineTransfersJob } from './jobs/reset-remonline-transfers-job.mjs';
 import { loadRemonlineOrdersJob } from './jobs/load-remonline-orders-job.mjs';
+import { loadRemonlineOrdersV2Job } from './jobs/load-remonline-orders-v2-job.mjs';
 
 export function bqJobs() {
   console.log('bqJobs...');
@@ -11,7 +12,8 @@ export function bqJobs() {
     generateAndSavePolandBookkeepingReportJob.start();
     resetRemonlineTransfersJob.start();
     loadRemonlineTransfersJob.start();
-    loadRemonlineOrdersJob.start();
+    // loadRemonlineOrdersJob.start();
+    loadRemonlineOrdersV2Job.start();
   } catch (error) {
     console.error('sync error, app down...');
     console.error({ time: new Date(), error });
@@ -20,7 +22,8 @@ export function bqJobs() {
     generateAndSavePolandBookkeepingReportJob.stop();
     resetRemonlineTransfersJob.stop();
     loadRemonlineTransfersJob.stop();
-    loadRemonlineOrdersJob.stop();
+    // loadRemonlineOrdersJob.stop();
+    loadRemonlineOrdersV2Job.stop();
     bqJobs();
   }
 }
