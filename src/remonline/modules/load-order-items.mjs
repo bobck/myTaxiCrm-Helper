@@ -1,7 +1,18 @@
+// Подгружает позиции (items) заказов из roapp.io v2 API в Postgres.
+// Дискавери — заказы из PG с `modifiedAt > watermark` из `entity_sync('OrderItem')`.
+// Ожидается, что джоба сначала прогоняет `loadOrders` (он двигает watermark
+// `entity_sync('Order')` и подкладывает новые/обновлённые заказы в PG),
+// а потом этот модуль на основании их `modifiedAt` решает, у кого тянуть items.
 import { getOrderItemsBatch } from '../remonline.utils.mjs';
 import prisma from '../remonline.prisma.mjs';
 import { devLog } from '../../shared/shared.utils.mjs';
 import { remonlineTokenToEnv } from '../remonline.api.mjs';
+import {
+  getEntitySync,
+  upsertEntitySync,
+} from '../remonline.queries.mjs';
+
+const ENTITY_NAME = 'OrderItem';
 
 function isoOrNull(value) {
   if (!value) return null;
@@ -75,46 +86,76 @@ export async function loadOrderItems() {
   const time = new Date();
   devLog({ time, message: 'loadOrderItems' });
 
-  const allOrderIds = (await prisma.order.findMany({ select: { id: true } }))
-    .map((r) => r.id);
-  if (allOrderIds.length === 0) {
-    devLog({ message: 'loadOrderItems: no orders, skipping' });
+  const sync = await getEntitySync(ENTITY_NAME);
+  const lastModifiedAt = sync.last_modified_at || null;
+
+  const orders = await prisma.order.findMany({
+    where: lastModifiedAt
+      ? { modifiedAt: { gt: new Date(lastModifiedAt) } }
+      : {},
+    select: { id: true, modifiedAt: true },
+    orderBy: { modifiedAt: 'asc' },
+  });
+
+  if (orders.length === 0) {
+    devLog({
+      message: 'loadOrderItems: no orders past watermark, skipping',
+      lastModifiedAt,
+    });
     return;
   }
 
-  const presentRaw = await prisma.orderItem.findMany({
-    distinct: ['orderId'],
-    select: { orderId: true },
-  });
-  const present = new Set(presentRaw.map((r) => r.orderId));
-  const missingOrderIds = allOrderIds.filter((id) => !present.has(id));
+  const orderIds = orders.map((o) => o.id);
 
   devLog({
     message: 'loadOrderItems',
-    knownOrderIds: allOrderIds.length,
-    missingInPg: missingOrderIds.length,
+    lastModifiedAt,
+    ordersToProcess: orderIds.length,
   });
 
-  if (missingOrderIds.length === 0) return;
-
-  const { items, failedOrderIds } = await getOrderItemsBatch(missingOrderIds);
+  const { items, failedOrderIds } = await getOrderItemsBatch(orderIds);
   devLog({
     message: 'loadOrderItems fetched',
     fetchedItems: items.length,
     failedOrderIds: failedOrderIds.length,
   });
 
-  if (items.length === 0) return;
+  const failedSet = new Set(failedOrderIds);
+  const successIds = orders
+    .map((o) => o.id)
+    .filter((id) => !failedSet.has(id));
 
-  const rows = items.map((item) =>
-    mapItemToPgRow({ orderId: item.order_id, item })
-  );
+  if (successIds.length === 0) {
+    devLog({
+      message: 'loadOrderItems: nothing succeeded, watermark unchanged',
+    });
+    return;
+  }
 
-  const result = await prisma.orderItem.createMany({
-    data: rows,
-    skipDuplicates: true,
-  });
-  devLog({ message: `Loaded ${result.count} new order items` });
+  const rows = items
+    .filter((item) => !failedSet.has(item.order_id))
+    .map((item) => mapItemToPgRow({ orderId: item.order_id, item }));
+
+  await prisma.$transaction([
+    prisma.orderItem.deleteMany({ where: { orderId: { in: successIds } } }),
+    prisma.orderItem.createMany({ data: rows }),
+  ]);
+
+  // `orders` is sorted ASC by modifiedAt. Advance watermark up to (but not
+  // past) the first failure so failed orders keep getting retried; skipping
+  // that invariant would silently drop any failed order whose modifiedAt
+  // lies below a later success.
+  let newWatermark = null;
+  for (const o of orders) {
+    if (failedSet.has(o.id)) break;
+    if (o.modifiedAt) newWatermark = o.modifiedAt;
+  }
+  if (newWatermark) {
+    const iso = newWatermark.toISOString().replace(/\.\d{3}Z$/, 'Z');
+    await upsertEntitySync(ENTITY_NAME, { last_modified_at: iso });
+  }
+
+  devLog({ message: `Loaded ${rows.length} order items` });
 }
 
 if (process.env.ENV === 'TEST') {

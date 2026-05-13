@@ -1,7 +1,16 @@
+// Loads orders from the roapp.io v2 API (`getOrdersV2`) into Postgres.
+// Replaces the legacy BQ pipeline in `src/bq/modules/load-remonline-orders.mjs`,
+// which used the older api.remonline.app endpoint.
 import { getOrdersV2 } from '../remonline.utils.mjs';
 import prisma from '../remonline.prisma.mjs';
 import { devLog } from '../../shared/shared.utils.mjs';
 import { remonlineTokenToEnv } from '../remonline.api.mjs';
+import {
+  getEntitySync,
+  upsertEntitySync,
+} from '../remonline.queries.mjs';
+
+const ENTITY_NAME = 'Order';
 
 function isoOrNull(value) {
   if (!value) return null;
@@ -89,26 +98,19 @@ function mapOrderToPgRow(order) {
   };
 }
 
-export async function loadOrdersV2() {
+export async function loadOrders() {
   const time = new Date();
-  devLog({ time, message: 'loadOrdersV2' });
+  devLog({ time, message: 'loadOrders' });
 
-  const lastOrder = await prisma.order.findFirst({
-    orderBy: { modifiedAt: 'desc' },
-    select: { modifiedAt: true },
-  });
-  const modifiedAtFrom = lastOrder?.modifiedAt
-    ? lastOrder.modifiedAt
-        .toISOString()
-        .replace(/\.\d{3}Z$/, 'Z')
-    : undefined;
+  const sync = await getEntitySync(ENTITY_NAME);
+  const modifiedAtFrom = sync.last_modified_at || undefined;
 
   const { orders, count } = await getOrdersV2({
     modifiedAtFrom,
     sort: 'modified_at',
   });
   devLog({
-    message: 'loadOrdersV2 fetched',
+    message: 'loadOrders fetched',
     modifiedAtFrom,
     fetchedCount: count,
   });
@@ -119,18 +121,25 @@ export async function loadOrdersV2() {
   const orderIds = rows.map((r) => r.id);
 
   await prisma.$transaction([
-    prisma.orderItem.deleteMany({ where: { orderId: { in: orderIds } } }),
     prisma.order.deleteMany({ where: { id: { in: orderIds } } }),
     prisma.order.createMany({ data: rows }),
   ]);
 
-  devLog({
-    message: `loadOrdersV2 synced ${rows.length} orders, invalidated their items.`,
-  });
+  const maxModifiedAt = rows.reduce((max, r) => {
+    if (!r.modifiedAt) return max;
+    if (!max || r.modifiedAt > max) return r.modifiedAt;
+    return max;
+  }, null);
+  if (maxModifiedAt) {
+    const iso = maxModifiedAt.toISOString().replace(/\.\d{3}Z$/, 'Z');
+    await upsertEntitySync(ENTITY_NAME, { last_modified_at: iso });
+  }
+
+  devLog({ message: `loadOrders synced ${rows.length} orders.` });
 }
 
 if (process.env.ENV === 'TEST') {
-  devLog({ message: 'Running loadOrdersV2 in TEST mode...' });
+  devLog({ message: 'Running loadOrders in TEST mode...' });
   await remonlineTokenToEnv(true);
-  await loadOrdersV2();
+  await loadOrders();
 }
