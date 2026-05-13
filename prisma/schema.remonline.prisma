@@ -196,6 +196,15 @@ model Employee {
   @@schema("public")
 }
 
+model EntitySync {
+  entityName  String   @id @map("entity_name")
+  syncDetails Json     @map("sync_details")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("entity_sync")
+  @@schema("public")
+}
+
 model Asset {
   id           Int     @id
   uid          String
