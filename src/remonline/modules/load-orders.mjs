@@ -4,10 +4,7 @@
 import { getOrdersV2 } from '../remonline.utils.mjs';
 import prisma from '../remonline.prisma.mjs';
 import { devLog } from '../../shared/shared.utils.mjs';
-import {
-  getEntitySync,
-  upsertEntitySync,
-} from '../remonline.queries.mjs';
+import { getEntitySync, upsertEntitySync } from '../remonline.queries.mjs';
 
 const ENTITY_NAME = 'Order';
 

@@ -6,10 +6,7 @@
 import { getOrderItemsBatch } from '../remonline.utils.mjs';
 import prisma from '../remonline.prisma.mjs';
 import { devLog } from '../../shared/shared.utils.mjs';
-import {
-  getEntitySync,
-  upsertEntitySync,
-} from '../remonline.queries.mjs';
+import { getEntitySync, upsertEntitySync } from '../remonline.queries.mjs';
 
 const ENTITY_NAME = 'OrderItem';
 
@@ -120,9 +117,7 @@ export async function loadOrderItems() {
   });
 
   const failedSet = new Set(failedOrderIds);
-  const successIds = orders
-    .map((o) => o.id)
-    .filter((id) => !failedSet.has(id));
+  const successIds = orders.map((o) => o.id).filter((id) => !failedSet.has(id));
 
   if (successIds.length === 0) {
     devLog({
