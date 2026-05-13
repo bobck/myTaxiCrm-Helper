@@ -39,11 +39,11 @@ const loadRemonlineOrdersV2Job = CronJob.from({
 
 export { loadRemonlineOrdersV2Job };
 
-if (process.env.ENV === 'TEST') {
-  console.log('running loadRemonlineOrdersV2Job tick once in TEST mode...');
-  await remonlineTokenToEnv(true);
-  // await createOrResetOrdersV2Table();
-  // await createOrResetOrderItemsTable();
-  await runOrdersV2Tick();
-  process.exit(0);
-}
+// if (process.env.ENV === 'TEST') {
+//   console.log('running loadRemonlineOrdersV2Job tick once in TEST mode...');
+//   await remonlineTokenToEnv(true);
+//   // await createOrResetOrdersV2Table();
+//   // await createOrResetOrderItemsTable();
+//   await runOrdersV2Tick();
+//   process.exit(0);
+// }

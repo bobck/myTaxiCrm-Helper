@@ -10,7 +10,6 @@ import {
   loadRowsViaJSONFile,
 } from '../bq-utils.mjs';
 import { ordersV2TableSchema } from '../schemas.mjs';
-import { synchronizeRemonlineOrders } from '../bq-queries.mjs';
 
 const DATASET_ID = 'RemOnline';
 const ORDERS_TABLE_ID = 'orders_v2';
@@ -140,11 +139,12 @@ export async function loadRemonlineOrdersV2() {
       schema: ordersV2TableSchema,
     });
 
-    const maxModifiedAt = rows
-      .map((r) => r.modified_at)
-      .filter(Boolean)
-      .sort()
-      .pop();
+    const maxModifiedAt = rows.reduce((max, r) => {
+      if (!r.modified_at) return max;
+      if (!max || Date.parse(r.modified_at) > Date.parse(max))
+        return r.modified_at;
+      return max;
+    }, null);
     if (maxModifiedAt) {
       await upsertEntitySync(ENTITY_NAME, { last_modified_at: maxModifiedAt });
     }

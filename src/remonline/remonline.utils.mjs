@@ -721,16 +721,6 @@ const V2_RETRYABLE_STATUSES = new Set([414, 429, 500, 502, 503, 504]);
 const V2_MAX_RETRIES = 3;
 const V2_MAX_AUTH_RETRIES = 3;
 
-/**
- * The roapp.io API rejects ISO timestamps with millisecond precision
- * (`Invalid ISO8601 format. Expected: %Y-%m-%dT%H:%M:%SZ`). Trim them.
- */
-function toApiIso(value) {
-  if (!value) return value;
-  // Date.toISOString() always returns YYYY-MM-DDTHH:mm:ss.sssZ — drop the .sss.
-  return String(value).replace(/\.\d+Z$/, 'Z');
-}
-
 function buildV2Query(params) {
   const qs = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
@@ -859,8 +849,8 @@ export async function getOrdersV2({
   let page = 1;
 
   const modifiedAtRange = [];
-  if (modifiedAtFrom) modifiedAtRange.push(toApiIso(modifiedAtFrom));
-  if (modifiedAtTo) modifiedAtRange.push(toApiIso(modifiedAtTo));
+  if (modifiedAtFrom) modifiedAtRange.push(modifiedAtFrom);
+  if (modifiedAtTo) modifiedAtRange.push(modifiedAtTo);
 
   while (true) {
     const qs = buildV2Query({
