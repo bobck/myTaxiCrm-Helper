@@ -19,3 +19,8 @@ app.log
 /src/generated/prisma
 
 /src/generated/prisma
+
+main.db-shm
+main.db-wal
+.claude/
+scripts/tunnel-pg.mjs

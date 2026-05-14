@@ -1,10 +1,4 @@
-import sqlite3 from 'sqlite3';
-import { open } from 'sqlite';
-
-const db = await open({
-  filename: process.env.DEV_DB, // Убедитесь, что это правильный путь к вашей базе данных Work.ua
-  driver: sqlite3.Database,
-});
+import { db } from '../../shared/sqlite.mjs';
 
 export async function createWorkUaVacancy({
   vacancy_id,
