@@ -422,7 +422,7 @@ export const orderItemsTableSchema = [
   { name: 'is_deduction_required', type: 'BOOLEAN', mode: 'NULLABLE' },
   { name: 'is_refunded', type: 'BOOLEAN', mode: 'NULLABLE' },
   { name: 'comment', type: 'STRING', mode: 'NULLABLE' },
-  { name: 'comment_visibility', type: 'INTEGER', mode: 'NULLABLE' },
+  { name: 'comment_visibility', type: 'STRING', mode: 'NULLABLE' },
   { name: 'discount_type', type: 'STRING', mode: 'NULLABLE' },
   { name: 'discount_percentage', type: 'FLOAT', mode: 'NULLABLE' },
   { name: 'discount_amount', type: 'FLOAT', mode: 'NULLABLE' },
