@@ -21,10 +21,12 @@ import {
 } from '../bq-queries.mjs';
 
 async function prepareOrderSequentially() {
-  const modified_at = await getMaxOrderModifiedAt();
+  // Watermark is stored as ISO in sqlite; v1 API expects epoch ms.
+  const modifiedAtIso = await getMaxOrderModifiedAt();
+  const modified_at = modifiedAtIso ? Date.parse(modifiedAtIso) : undefined;
   const sort_dir = 'asc';
   const { orders, count } = await getOrders({ modified_at, sort_dir });
-  return { orders, orderCount: count, modified_at };
+  return { orders, orderCount: count, modified_at: modifiedAtIso };
 }
 
 async function parseOrdersToSeparateTables({ orders }) {
@@ -458,8 +460,14 @@ export async function loadRemonlineOrders() {
     return;
   }
 
+  // v1 stores `modified_at` as unix ms; convert to ISO before persisting the
+  // shared watermark (the table now uses ISO strings — see migration
+  // 20260507011348-recreate-remonline-orders-iso).
   await synchronizeRemonlineOrders({
-    orders: handledOrders,
+    orders: handledOrders.map((o) => ({
+      id: o.id,
+      modified_at: o.modified_at ? new Date(o.modified_at).toISOString() : null,
+    })),
   });
 
   await insertOrderResourcesBatch(handledOrderResources);
