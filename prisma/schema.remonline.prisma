@@ -165,3 +165,66 @@ model Product {
   @@map("products")
   @@schema("public")
 }
+
+model Uom {
+  id          Int      @id
+  description String?
+  title       String?
+  uomType     String?  @map("uom_type")
+  isImperial  Boolean? @map("is_imperial")
+  isSystem    Boolean? @map("is_system")
+  entityTypes String[] @map("entity_types")
+
+  @@map("uoms")
+  @@schema("public")
+}
+
+model Employee {
+  id          Int     @id
+  email       String?
+  firstName   String? @map("first_name")
+  lastName    String? @map("last_name")
+  notes       String?
+  phone       String?
+  deleted     Boolean
+  position    String?
+  createdAt   BigInt  @map("created_at")
+  startedWork BigInt  @map("started_work")
+  avatar      String?
+
+  @@map("employees")
+  @@schema("public")
+}
+
+model EntitySync {
+  entityName  String   @id @map("entity_name")
+  syncDetails Json     @map("sync_details")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("entity_sync")
+  @@schema("public")
+}
+
+model Asset {
+  id           Int     @id
+  uid          String
+  title        String?
+  color        String?
+  state        String?
+  cost         Int?
+  group        String?
+  brand        String?
+  model        String?
+  modification String?
+  description  String?
+  year         String?
+  regNumber    String  @map("reg_number")
+  ownerName    String? @map("owner_name")
+  warehouse    Json
+  address      String?
+  image        String?
+  customFields Json    @map("custom_fields")
+
+  @@map("assets")
+  @@schema("public")
+}
