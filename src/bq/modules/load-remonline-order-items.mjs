@@ -181,8 +181,9 @@ export async function loadRemonlineOrderItems() {
     ? sync.failed_order_ids
     : [];
 
-  const upsertedOrders =
-    await getOrderIdsModifiedAfterFromBQ(initialLastModifiedAt);
+  const upsertedOrders = await getOrderIdsModifiedAfterFromBQ(
+    initialLastModifiedAt
+  );
   const upsertedOrderIdSet = new Set(
     upsertedOrders.map((order) => order.order_id)
   );
