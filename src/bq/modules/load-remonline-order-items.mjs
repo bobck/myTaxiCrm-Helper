@@ -19,7 +19,6 @@ const ENTITY_NAME = 'OrderItem';
 function isoOrNull(value) {
   if (!value) return null;
   if (!Number.isFinite(Date.parse(value))) return null;
-  // Date-only ('YYYY-MM-DD') → pad to UTC midnight so BQ TIMESTAMP accepts it.
   if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return `${value}T00:00:00Z`;
   return value;
 }
@@ -88,13 +87,27 @@ export function mapItemToBQRow({ orderId, item }) {
 export async function loadRemonlineOrderItems() {
   const time = new Date();
 
-  // Watermark = max(modified_at) of orders whose items we've already synced.
-  // First run (no row) → empty object → fetch items for every known order.
+  /**
+   * orderItemSync={
+   *  entityName:"OrderItem",
+   *  syncDetails:{
+   *    last_modified_at: Date,
+   *    failed_ids:numer[]
+   *  }
+   * }
+   */
   const sync = await getEntitySync(ENTITY_NAME);
   const lastModifiedAt = sync.last_modified_at || null;
+  const failedOrderIdsToRetry = Array.isArray(sync.failed_order_ids)
+    ? sync.failed_order_ids
+    : [];
 
-  const orders = await getOrderIdsModifiedAfterFromBQ(lastModifiedAt);
-  if (orders.length === 0) {
+  const upsertedOrders = await getOrderIdsModifiedAfterFromBQ(lastModifiedAt);
+  const newOrderIdSet = new Set(upsertedOrders.map((o) => o.order_id));
+  const retryIds = failedOrderIdsToRetry.filter((id) => !newOrderIdSet.has(id));
+  const orderIds = [...retryIds, ...upsertedOrders.map((o) => o.order_id)];
+
+  if (orderIds.length === 0) {
     console.log({
       time,
       message: 'loadRemonlineOrderItems: no orders past watermark, skipping',
@@ -103,13 +116,12 @@ export async function loadRemonlineOrderItems() {
     return;
   }
 
-  const orderIds = orders.map((o) => o.order_id);
-
   console.log({
     time,
     message: 'loadRemonlineOrderItems',
     lastModifiedAt,
     ordersToProcess: orderIds.length,
+    retryCount: retryIds.length,
   });
 
   const { items, failedOrderIds } = await getOrderItemsBatch(orderIds);
@@ -122,62 +134,52 @@ export async function loadRemonlineOrderItems() {
   });
 
   const failedSet = new Set(failedOrderIds);
-  const successOrders = orders.filter((o) => !failedSet.has(o.order_id));
+  const successIds = orderIds.filter((id) => !failedSet.has(id));
 
-  if (successOrders.length === 0) {
-    console.log({
-      time: new Date(),
-      message:
-        'loadRemonlineOrderItems: nothing succeeded, watermark unchanged',
-    });
-    return;
-  }
-
-  const successIds = successOrders.map((o) => o.order_id);
-
-  try {
-    // Stale rows from a previous sync of these same orders. Safe to delete
-    // even when `items` is empty — clears items for orders that lost lines.
-    await deleteRowsByParameter({
-      arrayToDelete: successIds,
-      parameter: 'order_id',
-      table_id: TABLE_ID,
-      dataset_id: DATASET_ID,
-    });
-
-    const rows = items
-      .filter((item) => !failedSet.has(item.order_id))
-      .map((item) => mapItemToBQRow({ orderId: item.order_id, item }));
-    await loadRowsViaJSONFile({
-      dataset_id: DATASET_ID,
-      table_id: TABLE_ID,
-      rows,
-      schema: orderItemsTableSchema,
-    });
-  } catch (errors) {
-    const list = Array.isArray(errors) ? errors : [errors];
-    for (const err of list) {
-      console.error({
-        function: 'loadRemonlineOrderItems',
-        status: err?.status,
-        reason: err?.reason ?? err?.message,
+  if (successIds.length > 0) {
+    try {
+      await deleteRowsByParameter({
+        arrayToDelete: successIds,
+        parameter: 'order_id',
+        table_id: TABLE_ID,
+        dataset_id: DATASET_ID,
       });
+
+      const rows = items
+        .filter((item) => !failedSet.has(item.order_id))
+        .map((item) => mapItemToBQRow({ orderId: item.order_id, item }));
+      if (rows.length > 0) {
+        await loadRowsViaJSONFile({
+          dataset_id: DATASET_ID,
+          table_id: TABLE_ID,
+          rows,
+          schema: orderItemsTableSchema,
+        });
+      }
+    } catch (errors) {
+      const list = Array.isArray(errors) ? errors : [errors];
+      for (const err of list) {
+        console.error({
+          function: 'loadRemonlineOrderItems',
+          status: err?.status,
+          reason: err?.reason ?? err?.message,
+        });
+      }
+      throw errors;
     }
-    throw errors;
   }
 
-  // `orders` is sorted ASC by modified_at. Advance the watermark up to (but
-  // not past) the first failure so retries keep working. Skipping that
-  // invariant would silently drop any failed order whose modified_at lies
-  // below a later success.
-  let newWatermark = null;
-  for (const o of orders) {
-    if (failedSet.has(o.order_id)) break;
-    if (o.modified_at) newWatermark = o.modified_at;
-  }
-  if (newWatermark) {
-    await upsertEntitySync(ENTITY_NAME, { last_modified_at: newWatermark });
-  }
+  const newWatermark = upsertedOrders.reduce((max, o) => {
+    if (!o.modified_at) return max;
+    if (!max || Date.parse(o.modified_at) > Date.parse(max))
+      return o.modified_at;
+    return max;
+  }, null);
+
+  await upsertEntitySync(ENTITY_NAME, {
+    last_modified_at: newWatermark || lastModifiedAt || null,
+    failed_order_ids: failedOrderIds,
+  });
 }
 
 export async function createOrResetOrderItemsTable() {
