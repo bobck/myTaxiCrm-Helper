@@ -249,13 +249,6 @@ export async function createOrResetTableByName({
   // console.log({ response })
 }
 
-export async function generateCarsRoutsReport({ date }) {
-  const sqlp = fs.readFileSync('./src/sql/cars_routs_report.sql').toString();
-  const result = await pool.query(sqlp, [date]);
-  const { rows } = result;
-  return { rows };
-}
-
 export async function generatePolandBookkeepingReport({
   periodFrom,
   periodTo,
@@ -301,6 +294,7 @@ export async function getBrandedLicencePlateNumbersFromBQ({
 
   return { brandedLicencePlateNumbers };
 }
+
 /**
  * Deletes all rows from `datasetId.tableName` whose order_id matches one
  * of the IDs in `orders`. Runs as a single atomic DML job.
@@ -340,6 +334,48 @@ export async function deleteRowsByParameter({
     };
     throw { info, error };
   }
+}
+
+/**
+ * Read order ids from BQ `orders_v2` whose `modified_at` is at or after the
+ * given ISO-8601 watermark. Falsy watermark returns every order.
+ *
+ * The comparison is intentionally inclusive (`>=`). The Remonline V2
+ * `/v2/orders` filter is inclusive, so `orders_v2` may contain rows whose
+ * `modified_at` exactly equals the previous items watermark; a strict `>`
+ * would silently drop them. The items loader deletes rows by `order_id`
+ * before re-inserting, so reprocessing the boundary order(s) on each tick
+ * is idempotent — we trade 1–2 extra item-requests per tick for zero loss.
+ *
+ * Returned rows match the shape the items loader expects:
+ *   { order_id: number, modified_at: string (ISO-8601 `Z`) }
+ *
+ * @param {string|null|undefined} modifiedAtFrom
+ * @returns {Promise<{ order_id: number, modified_at: string }[]>}
+ */
+export async function getOrderIdsModifiedAfterFromBQ(modifiedAtFrom) {
+  const table = `\`${process.env.BQ_PROJECT_NAME}.RemOnline.orders_v2\``;
+  const select = `
+    SELECT id AS order_id,
+           FORMAT_TIMESTAMP('%Y-%m-%dT%H:%M:%SZ', modified_at) AS modified_at
+    FROM ${table}
+    WHERE modified_at IS NOT NULL
+  `;
+
+  const options = modifiedAtFrom
+    ? {
+        query: `${select} AND modified_at >= TIMESTAMP(@modifiedAtFrom) ORDER BY modified_at ASC`,
+        location: 'US',
+        params: { modifiedAtFrom },
+        parameterMode: 'NAMED',
+      }
+    : {
+        query: `${select} ORDER BY modified_at ASC`,
+        location: 'US',
+      };
+
+  const [rows] = await bigquery.query(options);
+  return rows;
 }
 
 export async function loadRowsViaJSONFile({

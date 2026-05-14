@@ -119,6 +119,7 @@ WITH
   )
 SELECT
   c.license_plate,
+  c.id as car_id,
   d.full_name AS driver_name,
   bd.bill_period_start::text,
   bd.bill_period_end::text,

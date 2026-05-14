@@ -1,12 +1,5 @@
-import sqlite3 from 'sqlite3';
-import { open } from 'sqlite';
-
-const db = await open({
-  filename: process.env.DEV_DB,
-  driver: sqlite3.Database,
-});
-
-await db.exec('PRAGMA foreign_keys = ON;');
+import { db } from '../shared/sqlite.mjs';
+import prisma from './remonline.prisma.mjs';
 
 export async function getLastSidCreatedAt() {
   const sql = `SELECT max(created_at) as created_at from sids`;
@@ -76,4 +69,31 @@ export async function updateLastCreatedTransactionTimeFoxRemonlineCashbox({
 }) {
   const sql = `UPDATE remonline_cashboxes SET last_transaction_created_at = ? WHERE id = ?`;
   return await db.all(sql, createdAt, remonlineCashboxId);
+}
+
+/**
+ * Read sync progress for a named entity (e.g. 'Order', 'OrderItem'). Rows are
+ * seeded by migration, so a missing row indicates a deployment bug — we
+ * surface it instead of silently materializing a row here.
+ *
+ * @param {string} entityName
+ * @returns {Promise<Record<string, any>>}
+ */
+export async function getEntitySync(entityName) {
+  const row = await prisma.entitySync.findUniqueOrThrow({
+    where: { entityName },
+  });
+  return row.syncDetails;
+}
+
+/**
+ * Persist new sync progress for an entity. `syncDetails` is stored as JSON
+ * verbatim — callers own its shape (e.g. `{ last_modified_at }`).
+ */
+export async function upsertEntitySync(entityName, syncDetails) {
+  await prisma.entitySync.upsert({
+    where: { entityName },
+    create: { entityName, syncDetails },
+    update: { syncDetails },
+  });
 }

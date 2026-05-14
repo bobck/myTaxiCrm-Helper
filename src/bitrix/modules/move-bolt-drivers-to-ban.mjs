@@ -1,9 +1,12 @@
 import { getBoltDriversToBan } from '../../web.api/web.api.utlites.mjs';
 import { cityListWithAssignedBy as cityList } from '../bitrix.constants.mjs';
 import { chunkArray, updateRequestedDrivers } from '../bitrix.utils.mjs';
-import { openSShTunnel } from '../../../ssh.mjs';
+
 import { DateTime } from 'luxon';
-import { getALLBoltDriversToBan } from '../bitrix.queries.mjs';
+import {
+  getALLBoltDriversToBan,
+  markManyDriversAsSent,
+} from '../bitrix.queries.mjs';
 
 const Seven_days_without_trips_message_type = 3430;
 const debtorState = 3434;
@@ -40,13 +43,6 @@ function processDBCard({ driver_id, driversToBan }) {
   } = dbcard;
 
   if (!is_first_letter_approved) {
-    console.log(`driver ${driver_id} hasn't received first letter approvement`);
-    return { bitrix_deal_id: null };
-  }
-  if (is_second_letter_approved) {
-    console.log(
-      `driver ${driver_id} has already received second letter approvement, which means that he is already banned.`
-    );
     return { bitrix_deal_id: null };
   }
 
@@ -104,6 +100,8 @@ export const moveBoltDriversToBan = async () => {
     const bitrixRespObj = await updateRequestedDrivers({
       cards: chunk,
     });
+
+    await markManyDriversAsSent({ drivers: [...chunk] });
   }
 };
 
@@ -111,7 +109,6 @@ if (process.env.ENV === 'TEST') {
   console.log(
     `testing bolt drivers ban cards creation\ncards count :${process.env.BOLT_DRIVERS_BAN_CARDS}\nchunk size:${process.env.CHUNK_SIZE}`
   );
-  await openSShTunnel;
 
   await moveBoltDriversToBan();
 }

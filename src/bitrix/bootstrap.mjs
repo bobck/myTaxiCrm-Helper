@@ -22,6 +22,7 @@ import { updateBrandingCardsJob } from './jobs/update-driver-branding-cards-job.
 import { moveBrandingCardsJob } from './jobs/move-driver-branding-cards-job.mjs';
 import { updateFiredDebtorDriversCardsJob } from './jobs/update-fired-debtor-driver-cards-job.mjs';
 import { createFiredDebtorDriversCardsJob } from './jobs/create-fired-debtor-driver-cards-job.mjs';
+import { syncInsuranceInvoicesJob } from './jobs/sync-insurance-invoices-job.mjs';
 
 export function bitrixJobs() {
   try {
@@ -49,6 +50,7 @@ export function bitrixJobs() {
     createFiredDebtorDriversCardsJob.start();
     updateFiredDebtorDriversCardsJob.start();
     moveBoltDriverBanRequestsJob.start();
+    syncInsuranceInvoicesJob.start();
     console.log('Bitrix Jobs has been started');
   } catch (error) {
     console.error({
@@ -83,6 +85,7 @@ export function bitrixJobs() {
     updateBrandingCardsJob.stop();
     createFiredDebtorDriversCardsJob.stop();
     updateFiredDebtorDriversCardsJob.stop();
+    syncInsuranceInvoicesJob.stop();
     bitrixJobs();
   }
 }

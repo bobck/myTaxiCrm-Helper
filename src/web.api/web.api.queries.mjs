@@ -1,25 +1,26 @@
-import sqlite3 from 'sqlite3';
-import { open } from 'sqlite';
+import { devLog } from '../shared/shared.utils.mjs';
+import { db } from '../shared/sqlite.mjs';
 
-const db = await open({
-  filename: process.env.DEV_DB,
-  driver: sqlite3.Database,
-});
-
-export async function saveCreatedDriverCustomTariffId({ tariffId, driverId }) {
-  const sql = `INSERT INTO drivers_custom_tariff_ids(tariff_id, driver_id) VALUES(?,?)`;
-  await db.run(sql, tariffId, driverId);
+export async function saveCreatedDriverCustomTariffId({
+  tariffId,
+  driverId,
+  autoParkId,
+}) {
+  const sql = `INSERT INTO drivers_custom_tariff_ids(tariff_id, driver_id,auto_park_id) VALUES(?,?,?)`;
+  devLog({ sql, arguments });
+  await db.run(sql, tariffId, driverId, autoParkId);
 }
 
 export async function getUndeletedDriversCustomTariffIds() {
-  const sql = `SELECT tariff_id,driver_id FROM drivers_custom_tariff_ids WHERE is_deleted = false`;
+  const sql = `SELECT driver_id,auto_park_id,tariff_id FROM drivers_custom_tariff_ids WHERE is_deleted = false`;
+  devLog({ sql, arguments });
   const undeletedDriversCustomTariffIds = await db.all(sql);
   return { undeletedDriversCustomTariffIds };
 }
 
-export async function markDriverCustomTariffAsDeleted({ tariffId }) {
-  const sql = `UPDATE drivers_custom_tariff_ids SET is_deleted=true WHERE tariff_id = ?`;
-  await db.run(sql, tariffId);
+export async function markDriverCustomTariffAsDeleted({ tariffId, driverId }) {
+  const sql = `UPDATE drivers_custom_tariff_ids SET is_deleted=true WHERE tariff_id = ? and driver_id = ?`;
+  await db.run(sql, tariffId, driverId);
 }
 
 export async function saveCreatedDriverBonusRuleId({
@@ -178,3 +179,217 @@ export const getDriversIgnoringCashBlockRules = () => {
   const sql = `SELECT driver_id FROM drivers_ignoring_cash_block_rules WHERE is_active=TRUE`;
   return db.all(sql);
 };
+/**
+ * Deactivates a batch of drivers by setting their 'is_active' flag to false
+ * and updating their 'updated_at' timestamp.
+ *
+ * This function uses the 'sqlite' promise-based wrapper.
+ *
+ * @param {string[]} driverIds An array of driver UUIDs to deactivate.
+ * @returns {Promise<object>} A promise that resolves with the result object from the db driver,
+ * which contains 'changes' for the number of affected rows.
+ * @throws {Error} Throws an error if the update fails or if driverIds is invalid.
+ */
+export async function deactivateDriversIgnoringDCBR(driverIds) {
+  if (!Array.isArray(driverIds)) {
+    throw new Error('Input must be a non-empty array of driver IDs.');
+  }
+  if (driverIds.length === 0) {
+    return;
+  }
+  const placeholders = driverIds.map(() => '?').join(',');
+  const sql = `
+    UPDATE drivers_ignoring_cash_block_rules
+    SET
+      is_active = 0,
+      updated_at = CURRENT_TIMESTAMP
+    WHERE
+      driver_id IN (${placeholders})
+  `;
+
+  const result = await db.run(sql, driverIds);
+  return result;
+}
+/**
+ * Creates new drivers from an array of driver IDs, setting them as active.
+ *
+ * This function uses a transaction to ensure all drivers are created atomically.
+ *
+ * @param {string[]} driverIds An array of driver UUIDs to create.
+ * @returns {Promise<number>} A promise that resolves with the number of newly created drivers.
+ * @throws {Error} Throws an error if the transaction fails or if driverIds is invalid.
+ */
+export async function createDriversIgnoringDCBR(driverIds) {
+  if (!Array.isArray(driverIds)) {
+    throw new Error('Input must be a non-empty array of driver IDs.');
+  }
+  if (driverIds.length === 0) {
+    return;
+  }
+
+  const sql = `
+    INSERT INTO drivers_ignoring_cash_block_rules (driver_id, is_active, created_at, updated_at)
+    VALUES (?, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+  `;
+  let createdCount = 0;
+
+  try {
+    await db.exec('BEGIN TRANSACTION');
+
+    const stmt = await db.prepare(sql);
+
+    for (const id of driverIds) {
+      const result = await stmt.run(id);
+      createdCount += result.changes;
+    }
+
+    await stmt.finalize();
+    await db.exec('COMMIT');
+
+    return createdCount;
+  } catch (err) {
+    console.error('Transaction failed, rolling back.', err.message);
+    await db.exec('ROLLBACK');
+    throw err;
+  }
+}
+
+export const getAutoParksExcludedFromCashBlockRules = () => {
+  const sql = `SELECT auto_park_id FROM auto_parks_excluded_from_cash_block_rules WHERE is_active=TRUE`;
+  return db.all(sql);
+};
+
+export async function deactivateAutoParksExcludedFromDCBR(autoParkIds) {
+  if (!Array.isArray(autoParkIds)) {
+    throw new Error('Input must be a non-empty array of auto park IDs.');
+  }
+  if (autoParkIds.length === 0) {
+    return;
+  }
+  const placeholders = autoParkIds.map(() => '?').join(',');
+  const sql = `
+    UPDATE auto_parks_excluded_from_cash_block_rules
+    SET
+      is_active = 0,
+      updated_at = CURRENT_TIMESTAMP
+    WHERE
+      auto_park_id IN (${placeholders})
+  `;
+
+  const result = await db.run(sql, autoParkIds);
+  return result;
+}
+
+export async function createAutoParksExcludedFromDCBR(autoParkIds) {
+  if (!Array.isArray(autoParkIds)) {
+    throw new Error('Input must be a non-empty array of auto park IDs.');
+  }
+  if (autoParkIds.length === 0) {
+    return;
+  }
+
+  const sql = `
+    INSERT INTO auto_parks_excluded_from_cash_block_rules (auto_park_id, is_active, created_at, updated_at)
+    VALUES (?, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+  `;
+  let createdCount = 0;
+
+  try {
+    await db.exec('BEGIN TRANSACTION');
+
+    const stmt = await db.prepare(sql);
+
+    for (const id of autoParkIds) {
+      const result = await stmt.run(id);
+      createdCount += result.changes;
+    }
+
+    await stmt.finalize();
+    await db.exec('COMMIT');
+
+    return createdCount;
+  } catch (err) {
+    console.error('Transaction failed, rolling back.', err.message);
+    await db.exec('ROLLBACK');
+    throw err;
+  }
+}
+
+export const getAutoParkCustomCashBlockRules = () => {
+  const sql = `SELECT * FROM auto_park_custom_cash_block_rules WHERE is_active=TRUE`;
+  return db.all(sql);
+};
+
+export async function synchronizeAutoParkRulesTransaction({
+  newAutoParkRules,
+  deletedAutoParkRuleIds,
+}) {
+  try {
+    // Start the transaction
+    await db.run('BEGIN TRANSACTION;');
+
+    // Step 1: Deactivate rules based on the deletedAutoParkRules array.
+    // This will set is_active to false for all existing rules matching the auto_park_id.
+    if (deletedAutoParkRuleIds && deletedAutoParkRuleIds.length > 0) {
+      const placeholders = deletedAutoParkRuleIds.map(() => '?').join(',');
+      const updateSql = `
+        UPDATE auto_park_custom_cash_block_rules
+        SET is_active = false, updated_at = CURRENT_TIMESTAMP
+        WHERE rule_id IN (${placeholders});
+      `;
+      await db.run(updateSql, deletedAutoParkRuleIds);
+    }
+
+    // Step 2: Insert all new rules from the newAutoParkRules array.
+    // Since auto_park_id can be repeated, we perform a simple insert for each new rule.
+    if (newAutoParkRules && newAutoParkRules.length > 0) {
+      const insertSql = `
+        INSERT INTO auto_park_custom_cash_block_rules
+        (auto_park_id, mode, target, balanceActivationValue, depositActivationValue, maxDebt)
+        VALUES (?, ?, ?, ?, ?, ?);
+      `;
+
+      // For optimal performance, a database driver's "prepare" statement method
+      // should be used before looping to execute the same query multiple times.
+      for (const rule of newAutoParkRules) {
+        const params = [
+          rule.auto_park_id,
+          rule.mode,
+          rule.target,
+          rule.balanceActivationValue,
+          rule.depositActivationValue,
+          rule.maxDebt,
+        ];
+        await db.run(insertSql, params);
+      }
+    }
+
+    // Commit the transaction if all operations succeed
+    await db.run('COMMIT;');
+  } catch (error) {
+    // If any error occurs, rollback the entire transaction
+    console.error(
+      'Error during synchronization, rolling back transaction.',
+      error
+    );
+    await db.run('ROLLBACK;');
+    // Re-throw the error so the calling code is aware of the failure
+    throw error;
+  }
+}
+export function getCatalogTariffByWeekDayAndAutoParkId({
+  auto_park_id,
+  weekDay,
+}) {
+  devLog({ auto_park_id, weekDay });
+  return db.get(
+    'select id from catalog_tariffs ct where ct.auto_park_id = ? and ct.weekDay = ?',
+    auto_park_id,
+    weekDay
+  );
+}
+export function getAllCatalogTariffs() {
+  return db.all(
+    'select id,auto_park_id from catalog_tariffs where is_active = true'
+  );
+}
