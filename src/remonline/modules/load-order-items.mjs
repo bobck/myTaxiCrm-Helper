@@ -140,15 +140,6 @@ async function processOrdersChunk(chunkOrders) {
   };
 }
 
-/**
- * orderItemSync = {
- *   entityName: "OrderItem",
- *   syncDetails: {
- *     last_modified_at: string | null,
- *     failed_order_ids: number[]
- *   }
- * }
- */
 export async function loadOrderItems() {
   const time = new Date();
   devLog({ time, message: 'loadOrderItems' });

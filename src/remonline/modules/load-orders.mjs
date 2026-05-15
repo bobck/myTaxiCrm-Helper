@@ -1,6 +1,3 @@
-// Loads orders from the roapp.io v2 API (`getOrdersV2`) into Postgres.
-// Replaces the legacy BQ pipeline in `src/bq/modules/load-remonline-orders.mjs`,
-// which used the older api.remonline.app endpoint.
 import { getOrdersV2 } from '../remonline.utils.mjs';
 import prisma from '../remonline.prisma.mjs';
 import { devLog } from '../../shared/shared.utils.mjs';
@@ -171,6 +168,3 @@ export async function loadOrders({ pageLimit } = {}) {
     lastPage,
   });
 }
-
-// TEST-запуск переехал в `src/remonline/jobs/load-orders-job.mjs`,
-// чтобы один тик последовательно прогонял orders + items.
