@@ -168,25 +168,30 @@ export async function loadOrderItems() {
   let lastChunkLastModifiedAt = initialLastModifiedAt;
 
   const orderChunks = chunkArray(allOrders, ORDERS_CHUNK_SIZE);
-  for (const [chunkOffset, chunkOrders] of orderChunks.entries()) {
-    const chunkIndex = chunkOffset + 1;
 
-    const { itemsSaved, chunkFailedOrderIds, lastModifiedAt } =
-      await processOrdersChunk(chunkOrders);
+  try {
+    for (const [chunkOffset, chunkOrders] of orderChunks.entries()) {
+      const chunkIndex = chunkOffset + 1;
 
-    totalItemsSaved += itemsSaved;
-    totalFailedOrderIds += chunkFailedOrderIds.length;
-    lastChunkLastModifiedAt = lastModifiedAt;
+      const { itemsSaved, chunkFailedOrderIds, lastModifiedAt } =
+        await processOrdersChunk(chunkOrders);
 
-    devLog({
-      message: 'loadOrderItems chunk saved',
-      chunkIndex,
-      chunkOrders: chunkOrders.length,
-      itemsSaved,
-      chunkFailedIds: chunkFailedOrderIds.length,
-      totalItemsSaved,
-      lastModifiedAt,
-    });
+      totalItemsSaved += itemsSaved;
+      totalFailedOrderIds += chunkFailedOrderIds.length;
+      lastChunkLastModifiedAt = lastModifiedAt;
+
+      devLog({
+        message: 'loadOrderItems chunk saved',
+        chunkIndex,
+        chunkOrders: chunkOrders.length,
+        itemsSaved,
+        chunkFailedIds: chunkFailedOrderIds.length,
+        totalItemsSaved,
+        lastModifiedAt,
+      });
+    }
+  } catch (e) {
+    console.error({ message: 'loadOrderItems', date: new Date(), e });
   }
 
   console.log({
