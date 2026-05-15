@@ -76,7 +76,7 @@ CREATE TABLE "public"."order_items" (
     "is_deduction_required" BOOLEAN,
     "is_refunded" BOOLEAN,
     "comment" TEXT,
-    "comment_visibility" INTEGER,
+    "comment_visibility" TEXT,
     "discount_type" TEXT,
     "discount_percentage" DOUBLE PRECISION,
     "discount_amount" DOUBLE PRECISION,

@@ -307,7 +307,7 @@ model OrderItem {
   isDeductionRequired Boolean?  @map("is_deduction_required")
   isRefunded          Boolean?  @map("is_refunded")
   comment             String?
-  commentVisibility   Int?      @map("comment_visibility")
+  commentVisibility   String?      @map("comment_visibility")
   discountType        String?   @map("discount_type")
   discountPercentage  Float?    @map("discount_percentage")
   discountAmount      Float?    @map("discount_amount")
