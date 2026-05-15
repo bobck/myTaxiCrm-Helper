@@ -97,9 +97,7 @@ async function saveOrdersBatch(orders) {
   ];
   if (maxModifiedAt) {
     const syncDetails = {
-      last_modified_at: maxModifiedAt
-        .toISOString()
-        .replace(/\.\d{3}Z$/, 'Z'),
+      last_modified_at: maxModifiedAt.toISOString().replace(/\.\d{3}Z$/, 'Z'),
     };
     transactionOps.push(
       prisma.entitySync.upsert({
@@ -125,58 +123,49 @@ export async function loadOrders({ pageLimit } = {}) {
   let totalSaved = 0;
   let lastPage = 0;
 
-  for await (const { orders, page } of getOrdersV2({
-    modifiedAtFrom,
-    sort: 'modified_at',
-    pageLimit,
-  })) {
-    lastPage = page;
-    if (orders.length > 0) currentBatch.push(...orders);
-    currentBatchPages += 1;
+  try {
+    for await (const { orders, page } of getOrdersV2({
+      modifiedAtFrom,
+      sort: 'modified_at',
+      pageLimit,
+    })) {
+      lastPage = page;
+      if (orders.length > 0) currentBatch.push(...orders);
+      currentBatchPages += 1;
 
-    if (currentBatchPages >= BATCH_PAGES_LIMIT) {
-      try {
-        const saved = await saveOrdersBatch(currentBatch);
+      if (currentBatchPages >= BATCH_PAGES_LIMIT) {
+        const batchToSave = currentBatch;
+        currentBatch = [];
+        currentBatchPages = 0;
+        const saved = await saveOrdersBatch(batchToSave);
         totalSaved += saved;
         devLog({
           message: `loadOrders batch saved at page ${page}`,
           savedInBatch: saved,
           totalSaved,
         });
-      } catch (error) {
-        console.error({
-          message: 'loadOrders batch failed',
-          page,
-          batchSize: currentBatch.length,
-          totalSavedBeforeFailure: totalSaved,
-          error,
-        });
-        throw error;
       }
-      currentBatch = [];
-      currentBatchPages = 0;
     }
-  }
 
-  if (currentBatch.length > 0) {
-    try {
-      const saved = await saveOrdersBatch(currentBatch);
+    if (currentBatch.length > 0) {
+      const batchToSave = currentBatch;
+      currentBatch = [];
+      const saved = await saveOrdersBatch(batchToSave);
       totalSaved += saved;
       devLog({
         message: `loadOrders final batch saved at page ${lastPage}`,
         savedInBatch: saved,
         totalSaved,
       });
-    } catch (error) {
-      console.error({
-        message: 'loadOrders final batch failed',
-        lastPage,
-        batchSize: currentBatch.length,
-        totalSavedBeforeFailure: totalSaved,
-        error,
-      });
-      throw error;
     }
+  } catch (error) {
+    console.error({
+      message: 'loadOrders failed',
+      lastPage,
+      bufferedBatchSize: currentBatch.length,
+      totalSavedBeforeFailure: totalSaved,
+      error,
+    });
   }
 
   console.log({
