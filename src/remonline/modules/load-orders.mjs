@@ -1,36 +1,22 @@
 import { getOrdersV2 } from '../remonline.utils.mjs';
 import prisma from '../remonline.prisma.mjs';
-import { devLog } from '../../shared/shared.utils.mjs';
-import { getEntitySync, upsertEntitySync } from '../remonline.queries.mjs';
+import {
+  devLog,
+  isoOrNull,
+  jsonOrNull,
+  toFloat,
+} from '../../shared/shared.utils.mjs';
+import { getEntitySync } from '../remonline.queries.mjs';
 
 const ENTITY_NAME = 'Order';
 
 const BATCH_PAGES_LIMIT = 50;
-
-function isoOrNull(value) {
-  if (!value) return null;
-  if (!Number.isFinite(Date.parse(value))) return null;
-  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return new Date(`${value}T00:00:00Z`);
-  return new Date(value);
-}
-
-function toFloat(value) {
-  if (value === null || value === undefined || value === '') return null;
-  const n = Number(value);
-  return Number.isFinite(n) ? n : null;
-}
 
 function pickClientName(client) {
   if (!client) return null;
   if (client.name) return client.name;
   const parts = [client.first_name, client.last_name].filter(Boolean);
   return parts.length ? parts.join(' ') : null;
-}
-
-function jsonOrNull(value) {
-  if (value === null || value === undefined) return null;
-  if (typeof value === 'object' && Object.keys(value).length === 0) return null;
-  return value;
 }
 
 function mapOrderToPgRow(order) {
@@ -97,29 +83,39 @@ async function saveOrdersBatch(orders) {
   if (orders.length === 0) return 0;
 
   const rows = orders.map(mapOrderToPgRow);
-  const orderIds = rows.map((r) => r.id);
+  const orderIds = rows.map((row) => row.id);
 
-  await prisma.$transaction([
-    prisma.order.deleteMany({ where: { id: { in: orderIds } } }),
-    prisma.order.createMany({ data: rows }),
-  ]);
-
-  const maxModifiedAt = rows.reduce((max, r) => {
-    if (!r.modifiedAt) return max;
-    if (!max || r.modifiedAt > max) return r.modifiedAt;
+  const maxModifiedAt = rows.reduce((max, row) => {
+    if (!row.modifiedAt) return max;
+    if (!max || row.modifiedAt > max) return row.modifiedAt;
     return max;
   }, null);
+
+  const transactionOps = [
+    prisma.order.deleteMany({ where: { id: { in: orderIds } } }),
+    prisma.order.createMany({ data: rows }),
+  ];
   if (maxModifiedAt) {
-    const iso = maxModifiedAt.toISOString().replace(/\.\d{3}Z$/, 'Z');
-    await upsertEntitySync(ENTITY_NAME, { last_modified_at: iso });
+    const syncDetails = {
+      last_modified_at: maxModifiedAt
+        .toISOString()
+        .replace(/\.\d{3}Z$/, 'Z'),
+    };
+    transactionOps.push(
+      prisma.entitySync.upsert({
+        where: { entityName: ENTITY_NAME },
+        create: { entityName: ENTITY_NAME, syncDetails },
+        update: { syncDetails },
+      })
+    );
   }
+  await prisma.$transaction(transactionOps);
 
   return rows.length;
 }
 
 export async function loadOrders({ pageLimit } = {}) {
-  const time = new Date();
-  devLog({ time, message: 'loadOrders' });
+  console.log({ time: new Date(), message: 'loadOrders start' });
 
   const sync = await getEntitySync(ENTITY_NAME);
   const modifiedAtFrom = sync.last_modified_at || undefined;
@@ -139,29 +135,51 @@ export async function loadOrders({ pageLimit } = {}) {
     currentBatchPages += 1;
 
     if (currentBatchPages >= BATCH_PAGES_LIMIT) {
-      const saved = await saveOrdersBatch(currentBatch);
-      totalSaved += saved;
-      devLog({
-        message: `loadOrders batch saved at page ${page}`,
-        savedInBatch: saved,
-        totalSaved,
-      });
+      try {
+        const saved = await saveOrdersBatch(currentBatch);
+        totalSaved += saved;
+        devLog({
+          message: `loadOrders batch saved at page ${page}`,
+          savedInBatch: saved,
+          totalSaved,
+        });
+      } catch (error) {
+        console.error({
+          message: 'loadOrders batch failed',
+          page,
+          batchSize: currentBatch.length,
+          totalSavedBeforeFailure: totalSaved,
+          error,
+        });
+        throw error;
+      }
       currentBatch = [];
       currentBatchPages = 0;
     }
   }
 
   if (currentBatch.length > 0) {
-    const saved = await saveOrdersBatch(currentBatch);
-    totalSaved += saved;
-    devLog({
-      message: `loadOrders final batch saved at page ${lastPage}`,
-      savedInBatch: saved,
-      totalSaved,
-    });
+    try {
+      const saved = await saveOrdersBatch(currentBatch);
+      totalSaved += saved;
+      devLog({
+        message: `loadOrders final batch saved at page ${lastPage}`,
+        savedInBatch: saved,
+        totalSaved,
+      });
+    } catch (error) {
+      console.error({
+        message: 'loadOrders final batch failed',
+        lastPage,
+        batchSize: currentBatch.length,
+        totalSavedBeforeFailure: totalSaved,
+        error,
+      });
+      throw error;
+    }
   }
 
-  devLog({
+  console.log({
     message: 'loadOrders done',
     modifiedAtFrom,
     totalSaved,

@@ -1,36 +1,16 @@
 import { getOrderItemsBatch } from '../remonline.utils.mjs';
 import prisma from '../remonline.prisma.mjs';
-import { chunkArray, devLog } from '../../shared/shared.utils.mjs';
+import {
+  chunkArray,
+  devLog,
+  isoOrNull,
+  jsonOrNull,
+  toFloat,
+} from '../../shared/shared.utils.mjs';
 import { getEntitySync, upsertEntitySync } from '../remonline.queries.mjs';
 
 const ENTITY_NAME = 'OrderItem';
 const ORDERS_CHUNK_SIZE = 500;
-
-function isoOrNull(value) {
-  if (!value) return null;
-  if (!Number.isFinite(Date.parse(value))) return null;
-  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return new Date(`${value}T00:00:00Z`);
-  return new Date(value);
-}
-
-function toFloat(value) {
-  if (value === null || value === undefined || value === '') return null;
-  const number = Number(value);
-  return Number.isFinite(number) ? number : null;
-}
-
-function jsonOrNull(value) {
-  if (value === null || value === undefined) return null;
-  if (Array.isArray(value) && value.length === 0) return null;
-  if (
-    typeof value === 'object' &&
-    !Array.isArray(value) &&
-    Object.keys(value).length === 0
-  ) {
-    return null;
-  }
-  return value;
-}
 
 function mapItemToPgRow({ orderId, item }) {
   const entity = item.entity || {};
@@ -125,7 +105,7 @@ async function processOrdersChunk(chunkOrders) {
     chunkWatermark &&
     (!existingLastModifiedAt ||
       chunkWatermark > new Date(existingLastModifiedAt))
-      ? chunkWatermark.toISOString().replace(/\.\d{3}Z$/, 'Z')
+      ? chunkWatermark.toISOString()
       : existingLastModifiedAt;
 
   await upsertEntitySync(ENTITY_NAME, {
@@ -141,8 +121,7 @@ async function processOrdersChunk(chunkOrders) {
 }
 
 export async function loadOrderItems() {
-  const time = new Date();
-  devLog({ time, message: 'loadOrderItems' });
+  console.log({ time: new Date(), message: 'loadOrderItems start' });
 
   const sync = await getEntitySync(ENTITY_NAME);
   const initialLastModifiedAt = sync.last_modified_at || null;
@@ -210,7 +189,7 @@ export async function loadOrderItems() {
     });
   }
 
-  devLog({
+  console.log({
     message: 'loadOrderItems done',
     totalItemsSaved,
     totalFailedOrderIds,
