@@ -1,15 +1,9 @@
-// Подгружает позиции (items) заказов из roapp.io v2 API в Postgres.
-// Дискавери — заказы из PG с `modifiedAt > watermark` из `entity_sync('OrderItem')`.
-// Ожидается, что джоба сначала прогоняет `loadOrders` (он двигает watermark
-// `entity_sync('Order')` и подкладывает новые/обновлённые заказы в PG),
-// а потом этот модуль на основании их `modifiedAt` решает, у кого тянуть items.
-import { getOrderItems } from '../remonline.utils.mjs';
+import { getOrderItemsBatch } from '../remonline.utils.mjs';
 import prisma from '../remonline.prisma.mjs';
-import { devLog } from '../../shared/shared.utils.mjs';
+import { chunkArray, devLog } from '../../shared/shared.utils.mjs';
 import { getEntitySync, upsertEntitySync } from '../remonline.queries.mjs';
 
 const ENTITY_NAME = 'OrderItem';
-
 const ORDERS_CHUNK_SIZE = 500;
 
 function isoOrNull(value) {
@@ -21,8 +15,8 @@ function isoOrNull(value) {
 
 function toFloat(value) {
   if (value === null || value === undefined || value === '') return null;
-  const n = Number(value);
-  return Number.isFinite(n) ? n : null;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
 }
 
 function jsonOrNull(value) {
@@ -80,33 +74,22 @@ function mapItemToPgRow({ orderId, item }) {
   };
 }
 
-async function processChunk(orders) {
-  const successOrderIds = [];
-  const items = [];
-  let lastFullyProcessedOrder = null;
-  let failedOrderId = null;
+async function processOrdersChunk(chunkOrders) {
+  const sync = await getEntitySync(ENTITY_NAME);
+  const existingLastModifiedAt = sync.last_modified_at || null;
+  const existingFailedOrderIds = Array.isArray(sync.failed_order_ids)
+    ? sync.failed_order_ids
+    : [];
 
-  for (const order of orders) {
-    let orderItems;
-    try {
-      orderItems = await getOrderItems(order.id);
-    } catch (e) {
-      console.error({
-        function: 'loadOrderItems',
-        orderId: order.id,
-        status: e?.status,
-        message: e?.message,
-      });
-      failedOrderId = order.id;
-      break;
-    }
+  const chunkOrderIds = chunkOrders.map((order) => order.id);
 
-    successOrderIds.push(order.id);
-    for (const item of orderItems) {
-      items.push({ order_id: order.id, ...item });
-    }
-    lastFullyProcessedOrder = order;
-  }
+  const { items, failedOrderIds: chunkFailedOrderIds } =
+    await getOrderItemsBatch(chunkOrderIds);
+
+  const chunkFailedOrderIdSet = new Set(chunkFailedOrderIds);
+  const successOrderIds = chunkOrderIds.filter(
+    (orderId) => !chunkFailedOrderIdSet.has(orderId)
+  );
 
   if (successOrderIds.length > 0) {
     const rows = items.map((item) =>
@@ -118,83 +101,128 @@ async function processChunk(orders) {
       }),
       prisma.orderItem.createMany({ data: rows }),
     ]);
-
-    if (lastFullyProcessedOrder?.modifiedAt) {
-      const iso = lastFullyProcessedOrder.modifiedAt
-        .toISOString()
-        .replace(/\.\d{3}Z$/, 'Z');
-      await upsertEntitySync(ENTITY_NAME, { last_modified_at: iso });
-    }
   }
 
+  const chunkWatermark = chunkOrders.reduce((maxModifiedAt, order) => {
+    if (!order.modifiedAt) return maxModifiedAt;
+    if (!maxModifiedAt || order.modifiedAt > maxModifiedAt) {
+      return order.modifiedAt;
+    }
+    return maxModifiedAt;
+  }, null);
+
+  const successOrderIdSet = new Set(successOrderIds);
+  const mergedFailedOrderIds = [
+    ...existingFailedOrderIds.filter(
+      (orderId) => !successOrderIdSet.has(orderId)
+    ),
+    ...chunkFailedOrderIds.filter(
+      (orderId) => !existingFailedOrderIds.includes(orderId)
+    ),
+  ];
+
+  const newLastModifiedAt =
+    chunkWatermark &&
+    (!existingLastModifiedAt ||
+      chunkWatermark > new Date(existingLastModifiedAt))
+      ? chunkWatermark.toISOString().replace(/\.\d{3}Z$/, 'Z')
+      : existingLastModifiedAt;
+
+  await upsertEntitySync(ENTITY_NAME, {
+    last_modified_at: newLastModifiedAt,
+    failed_order_ids: mergedFailedOrderIds,
+  });
+
   return {
-    savedOrders: successOrderIds.length,
-    savedItems: items.length,
-    failedOrderId,
+    itemsSaved: items.length,
+    chunkFailedOrderIds,
+    lastModifiedAt: newLastModifiedAt,
   };
 }
 
+/**
+ * orderItemSync = {
+ *   entityName: "OrderItem",
+ *   syncDetails: {
+ *     last_modified_at: string | null,
+ *     failed_order_ids: number[]
+ *   }
+ * }
+ */
 export async function loadOrderItems() {
   const time = new Date();
   devLog({ time, message: 'loadOrderItems' });
 
-  let totalOrders = 0;
-  let totalItems = 0;
+  const sync = await getEntitySync(ENTITY_NAME);
+  const initialLastModifiedAt = sync.last_modified_at || null;
+  const failedOrderIdsToRetry = Array.isArray(sync.failed_order_ids)
+    ? sync.failed_order_ids
+    : [];
 
-  while (true) {
-    const sync = await getEntitySync(ENTITY_NAME);
-    const lastModifiedAt = sync.last_modified_at || null;
+  const upsertedOrders = await prisma.order.findMany({
+    where: initialLastModifiedAt
+      ? { modifiedAt: { gt: new Date(initialLastModifiedAt) } }
+      : {},
+    select: { id: true, modifiedAt: true },
+    orderBy: { modifiedAt: 'asc' },
+  });
 
-    const orders = await prisma.order.findMany({
-      where: lastModifiedAt
-        ? { modifiedAt: { gt: new Date(lastModifiedAt) } }
-        : {},
-      select: { id: true, modifiedAt: true },
-      orderBy: { modifiedAt: 'asc' },
-      take: ORDERS_CHUNK_SIZE,
-    });
+  const upsertedOrderIdSet = new Set(upsertedOrders.map((order) => order.id));
+  const retryOrderIds = failedOrderIdsToRetry.filter(
+    (orderId) => !upsertedOrderIdSet.has(orderId)
+  );
 
-    if (orders.length === 0) {
-      devLog({
-        message: 'loadOrderItems: no more orders past watermark',
-        lastModifiedAt,
-      });
-      break;
-    }
+  const allOrders = [
+    ...retryOrderIds.map((orderId) => ({ id: orderId, modifiedAt: null })),
+    ...upsertedOrders,
+  ];
 
+  if (allOrders.length === 0) {
     devLog({
-      message: 'loadOrderItems chunk',
-      lastModifiedAt,
-      ordersInChunk: orders.length,
+      message: 'loadOrderItems: no orders past watermark, skipping',
+      lastModifiedAt: initialLastModifiedAt,
     });
+    return;
+  }
 
-    const { savedOrders, savedItems, failedOrderId } =
-      await processChunk(orders);
-    totalOrders += savedOrders;
-    totalItems += savedItems;
+  devLog({
+    message: 'loadOrderItems starting',
+    lastModifiedAt: initialLastModifiedAt,
+    ordersToProcess: allOrders.length,
+    retryCount: retryOrderIds.length,
+    chunkSize: ORDERS_CHUNK_SIZE,
+  });
+
+  let totalItemsSaved = 0;
+  let totalFailedOrderIds = 0;
+  let lastChunkLastModifiedAt = initialLastModifiedAt;
+
+  const orderChunks = chunkArray(allOrders, ORDERS_CHUNK_SIZE);
+  for (const [chunkOffset, chunkOrders] of orderChunks.entries()) {
+    const chunkIndex = chunkOffset + 1;
+
+    const { itemsSaved, chunkFailedOrderIds, lastModifiedAt } =
+      await processOrdersChunk(chunkOrders);
+
+    totalItemsSaved += itemsSaved;
+    totalFailedOrderIds += chunkFailedOrderIds.length;
+    lastChunkLastModifiedAt = lastModifiedAt;
 
     devLog({
       message: 'loadOrderItems chunk saved',
-      savedOrders,
-      savedItems,
-      totalOrders,
-      totalItems,
+      chunkIndex,
+      chunkOrders: chunkOrders.length,
+      itemsSaved,
+      chunkFailedIds: chunkFailedOrderIds.length,
+      totalItemsSaved,
+      lastModifiedAt,
     });
-
-    // On a fetch failure inside the chunk, watermark stopped at the last
-    // successful order. Bailing here lets the next tick retry the failing
-    // order rather than blocking on it indefinitely.
-    if (failedOrderId !== null) {
-      devLog({
-        message: 'loadOrderItems: stopping after first failed order',
-        failedOrderId,
-      });
-      break;
-    }
   }
 
-  devLog({ message: 'loadOrderItems done', totalOrders, totalItems });
+  devLog({
+    message: 'loadOrderItems done',
+    totalItemsSaved,
+    totalFailedOrderIds,
+    lastModifiedAt: lastChunkLastModifiedAt,
+  });
 }
-
-// TEST-запуск переехал в `src/remonline/jobs/load-orders-job.mjs`,
-// чтобы один тик последовательно прогонял orders + items.
