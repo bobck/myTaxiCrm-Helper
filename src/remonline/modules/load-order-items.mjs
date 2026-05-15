@@ -7,7 +7,7 @@ import {
   jsonOrNull,
   toFloat,
 } from '../../shared/shared.utils.mjs';
-import { getEntitySync, upsertEntitySync } from '../remonline.queries.mjs';
+import { getEntitySync } from '../remonline.queries.mjs';
 
 const ENTITY_NAME = 'OrderItem';
 const ORDERS_CHUNK_SIZE = 500;
@@ -71,18 +71,6 @@ async function processOrdersChunk(chunkOrders) {
     (orderId) => !chunkFailedOrderIdSet.has(orderId)
   );
 
-  if (successOrderIds.length > 0) {
-    const rows = items.map((item) =>
-      mapItemToPgRow({ orderId: item.order_id, item })
-    );
-    await prisma.$transaction([
-      prisma.orderItem.deleteMany({
-        where: { orderId: { in: successOrderIds } },
-      }),
-      prisma.orderItem.createMany({ data: rows }),
-    ]);
-  }
-
   const chunkWatermark = chunkOrders.reduce((maxModifiedAt, order) => {
     if (!order.modifiedAt) return maxModifiedAt;
     if (!maxModifiedAt || order.modifiedAt > maxModifiedAt) {
@@ -108,10 +96,31 @@ async function processOrdersChunk(chunkOrders) {
       ? chunkWatermark.toISOString()
       : existingLastModifiedAt;
 
-  await upsertEntitySync(ENTITY_NAME, {
+  const syncDetails = {
     last_modified_at: newLastModifiedAt,
     failed_order_ids: mergedFailedOrderIds,
-  });
+  };
+
+  const transactionOps = [];
+  if (successOrderIds.length > 0) {
+    const rows = items.map((item) =>
+      mapItemToPgRow({ orderId: item.order_id, item })
+    );
+    transactionOps.push(
+      prisma.orderItem.deleteMany({
+        where: { orderId: { in: successOrderIds } },
+      }),
+      prisma.orderItem.createMany({ data: rows })
+    );
+  }
+  transactionOps.push(
+    prisma.entitySync.upsert({
+      where: { entityName: ENTITY_NAME },
+      create: { entityName: ENTITY_NAME, syncDetails },
+      update: { syncDetails },
+    })
+  );
+  await prisma.$transaction(transactionOps);
 
   return {
     itemsSaved: items.length,
