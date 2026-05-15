@@ -88,3 +88,29 @@ export function chunkArray(array, chunkSize) {
   }
   return result;
 }
+
+export function isoOrNull(value) {
+  if (!value) return null;
+  if (!Number.isFinite(Date.parse(value))) return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return new Date(`${value}T00:00:00Z`);
+  return new Date(value);
+}
+
+export function toFloat(value) {
+  if (value === null || value === undefined || value === '') return null;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
+export function jsonOrNull(value) {
+  if (value === null || value === undefined) return null;
+  if (Array.isArray(value) && value.length === 0) return null;
+  if (
+    typeof value === 'object' &&
+    !Array.isArray(value) &&
+    Object.keys(value).length === 0
+  ) {
+    return null;
+  }
+  return value;
+}
