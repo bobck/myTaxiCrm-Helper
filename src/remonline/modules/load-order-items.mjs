@@ -175,12 +175,13 @@ export async function loadOrderItems() {
   let totalItemsSaved = 0;
   let totalFailedOrderIds = 0;
   let lastChunkLastModifiedAt = initialLastModifiedAt;
+  let lastChunkIndex = 0;
 
   const orderChunks = chunkArray(allOrders, ORDERS_CHUNK_SIZE);
 
   try {
     for (const [chunkOffset, chunkOrders] of orderChunks.entries()) {
-      const chunkIndex = chunkOffset + 1;
+      lastChunkIndex = chunkOffset + 1;
 
       const { itemsSaved, chunkFailedOrderIds, lastModifiedAt } =
         await processOrdersChunk(chunkOrders);
@@ -191,7 +192,7 @@ export async function loadOrderItems() {
 
       devLog({
         message: 'loadOrderItems chunk saved',
-        chunkIndex,
+        chunkIndex: lastChunkIndex,
         chunkOrders: chunkOrders.length,
         itemsSaved,
         chunkFailedIds: chunkFailedOrderIds.length,
@@ -199,8 +200,16 @@ export async function loadOrderItems() {
         lastModifiedAt,
       });
     }
-  } catch (e) {
-    console.error({ message: 'loadOrderItems', date: new Date(), e });
+  } catch (error) {
+    console.error({
+      message: 'loadOrderItems failed',
+      initialLastModifiedAt,
+      lastChunkIndex,
+      totalItemsSavedBeforeFailure: totalItemsSaved,
+      totalFailedOrderIdsBeforeFailure: totalFailedOrderIds,
+      lastModifiedAt: lastChunkLastModifiedAt,
+      error,
+    });
   }
 
   console.log({

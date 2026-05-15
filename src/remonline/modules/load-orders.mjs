@@ -161,6 +161,7 @@ export async function loadOrders({ pageLimit } = {}) {
   } catch (error) {
     console.error({
       message: 'loadOrders failed',
+      modifiedAtFrom,
       lastPage,
       bufferedBatchSize: currentBatch.length,
       totalSavedBeforeFailure: totalSaved,
