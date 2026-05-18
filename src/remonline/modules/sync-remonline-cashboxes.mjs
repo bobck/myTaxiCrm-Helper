@@ -11,37 +11,56 @@ export async function syncRemonlineCashboxes() {
 
   devLog({ message: `Fetched ${cashboxes.length} cashboxes from Remonline` });
 
-  let upserted = 0;
+  const remoteIds = cashboxes.map((cashbox) => cashbox.id);
 
-  for (const cashbox of cashboxes) {
-    const { id, title, type, currency, balance, is_global } = cashbox;
+  const { upserted, disabledCount } = await prisma.$transaction(
+    async (tx) => {
+      let upserted = 0;
 
-    await prisma.cashbox.upsert({
-      where: { id },
-      create: {
-        id,
-        title,
-        type,
-        currencyName: currency?.name,
-        currencyCode: currency?.code,
-        balance,
-        isGlobal: is_global,
-        isEnabled: true,
-      },
-      update: {
-        title,
-        type,
-        currencyName: currency?.name,
-        currencyCode: currency?.code,
-        balance,
-        isGlobal: is_global,
-      },
-    });
+      for (const cashbox of cashboxes) {
+        const { id, title, type, currency, balance, is_global } = cashbox;
 
-    upserted++;
-  }
+        await tx.cashbox.upsert({
+          where: { id },
+          create: {
+            id,
+            title,
+            type,
+            currencyName: currency?.name,
+            currencyCode: currency?.code,
+            balance,
+            isGlobal: is_global,
+            isEnabled: true,
+          },
+          update: {
+            title,
+            type,
+            currencyName: currency?.name,
+            currencyCode: currency?.code,
+            balance,
+            isGlobal: is_global,
+          },
+        });
 
-  devLog({ message: `Upserted ${upserted} cashboxes` });
+        upserted++;
+      }
+
+      const disabled = await tx.cashbox.updateMany({
+        where: { id: { notIn: remoteIds }, isEnabled: true },
+        data: { isEnabled: false },
+      });
+
+      return { upserted, disabledCount: disabled.count };
+    },
+    {
+      maxWait: 5000,
+      timeout: 60000,
+    }
+  );
+
+  devLog({
+    message: `Upserted ${upserted} cashboxes, disabled ${disabledCount} stale cashboxes`,
+  });
 }
 
 if (process.env.ENV === 'TEST') {
