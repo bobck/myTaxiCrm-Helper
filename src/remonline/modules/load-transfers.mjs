@@ -11,7 +11,7 @@ function mapTransferToPgRow(transfer) {
     id: transfer.id,
     branchId: transfer.branch_id,
     warehouseId: transfer.warehouse_id,
-    createdAt: new Date(transfer.created_at),
+    createdAt: BigInt(transfer.created_at),
     description: transfer.description ?? null,
     createdById: transfer.created_by_id,
     idLabel: transfer.id_label,

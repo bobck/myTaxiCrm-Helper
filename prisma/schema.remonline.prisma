@@ -246,7 +246,8 @@ model Transfer {
   branchId             Int      @map("branch_id")
   warehouseId          Int      @map("warehouse_id")
   id                   Int
-  createdAt            DateTime @map("created_at")
+  createdAt            BigInt   @map("created_at")
+  dbCreatedAt          DateTime @default(now()) @map("db_created_at")
   description          String?
   createdById          Int      @map("created_by_id")
   idLabel              String   @map("id_label")
