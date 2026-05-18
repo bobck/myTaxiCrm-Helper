@@ -183,16 +183,27 @@ export async function getCashboxTransactions({ createdAt, cashboxId }) {
       const { success } = data;
 
       if (!success) {
-        const { message, code } = data;
-        const { validation } = message;
+        const { message } = data;
+        const validation = message?.validation;
 
         console.error({
           function: 'getCashboxTransactions',
+          cashboxId,
+          response_status: response.status,
           message,
           validation,
-          response_status: response.status,
         });
-        throw validation;
+
+        if (response.status === 400 && validation?.cashbox_id) {
+          console.error({
+            hint: 'Cashbox is likely inactive in Remonline (Wrong cashbox id). Consider disabling it in DB.',
+          });
+        }
+        const error = new Error(
+          `getCashboxTransactions failed: ${JSON.stringify(message)}`
+        );
+        error.status = response.status;
+        throw error;
       }
 
       const { data: transactions, count, page } = data;
