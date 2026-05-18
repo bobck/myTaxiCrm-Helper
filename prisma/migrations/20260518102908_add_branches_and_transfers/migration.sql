@@ -55,6 +55,5 @@ CREATE INDEX "transfers_id_idx" ON "public"."transfers"("id");
 -- CreateIndex
 CREATE INDEX "transfer_products_transfer_id_idx" ON "public"."transfer_products"("transfer_id");
 
--- Seed entity_sync row so loadTransfers can read state without bootstrap branching.
 INSERT INTO "public"."entity_sync" ("entity_name", "sync_details", "updated_at") VALUES
     ('Transfer', '{}'::jsonb, CURRENT_TIMESTAMP);

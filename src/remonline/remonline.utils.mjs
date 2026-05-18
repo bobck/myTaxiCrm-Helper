@@ -286,7 +286,7 @@ export async function getCashboxes() {
     return { cashboxes };
   }
 }
-//v2
+
 export async function getLocations() {
   const url = `${process.env.ROAPP_API}/v2/company/locations`;
   const response = await fetchV2WithRetry({ url, fnName: 'getLocations' });
@@ -296,15 +296,6 @@ export async function getLocations() {
   return Object.values(data || {});
 }
 
-/**
- * Fetch all warehouse moves for a single branch from the v1-shaped endpoint
- * hosted on ROAPP_API. Filter by `created_at[]=<unix-ms>` (lower bound).
- *
- * @param {object} opts
- * @param {number} opts.branchId
- * @param {number} [opts.createdAtFromMs] unix ms; results returned where created_at >= this
- * @returns {Promise<{ transfers: object[] }>}
- */
 export async function getTransfers({ branchId, createdAtFromMs } = {}) {
   if (branchId == null) throw new Error('getTransfers: branchId is required');
 

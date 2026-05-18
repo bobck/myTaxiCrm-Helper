@@ -1,7 +1,7 @@
 import { CronJob } from 'cron';
 import { syncBranches } from '../modules/sync-branches.mjs';
 
-const cronTime = '0 2 * * 0'; // Sundays at 02:00 — same cadence as UOMs/employees/assets
+const cronTime = '0 2 * * 0';
 const timeZone = 'Europe/Kiev';
 
 const syncBranchesJob = CronJob.from({

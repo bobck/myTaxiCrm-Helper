@@ -1,7 +1,7 @@
 import { CronJob } from 'cron';
 import { loadTransfers } from '../modules/load-transfers.mjs';
 
-const cronTime = '0 */4 * * *'; // Every 4 hours, mirrors orders/items cadence
+const cronTime = '0 */4 * * *';
 const timeZone = 'Europe/Kiev';
 
 const loadTransfersJob = CronJob.from({
