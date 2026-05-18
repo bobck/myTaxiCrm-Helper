@@ -229,6 +229,59 @@ model Asset {
   @@schema("public")
 }
 
+model Branch {
+  id            Int      @id
+  createdAt     DateTime @map("created_at")
+  name          String
+  address       String?
+  isArchived    Boolean  @map("is_archived")
+  legalEntityId Int?     @map("legal_entity_id")
+  timezone      String?
+
+  @@map("branches")
+  @@schema("public")
+}
+
+model Transfer {
+  branchId             Int      @map("branch_id")
+  warehouseId          Int      @map("warehouse_id")
+  id                   Int
+  createdAt            DateTime @map("created_at")
+  description          String?
+  createdById          Int      @map("created_by_id")
+  idLabel              String   @map("id_label")
+  cost                 Float
+  sourceWarehouseTitle String   @map("source_warehouse_title")
+  targetWarehouseTitle String   @map("target_warehouse_title")
+  createdByFullname    String   @map("created_by_fullname")
+
+  @@id([branchId, warehouseId, id])
+  @@map("transfers")
+  @@schema("public")
+  @@index([createdAt])
+  @@index([id])
+}
+
+model TransferProduct {
+  branchId       Int     @map("branch_id")
+  warehouseId    Int     @map("warehouse_id")
+  transferId     Int     @map("transfer_id")
+  id             Int
+  title          String
+  isSerial       Boolean @map("is_serial")
+  code           String?
+  article        String?
+  amount         Float
+  uomId          Int?    @map("uom_id")
+  uomTitle       String? @map("uom_title")
+  uomDescription String? @map("uom_description")
+
+  @@id([branchId, warehouseId, transferId, id])
+  @@map("transfer_products")
+  @@schema("public")
+  @@index([transferId])
+}
+
 model Order {
   id                   Int       @id
   number               String?
