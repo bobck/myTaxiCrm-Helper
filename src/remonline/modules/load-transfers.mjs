@@ -2,6 +2,9 @@ import { getTransfers } from '../remonline.utils.mjs';
 import prisma from '../remonline.prisma.mjs';
 import { devLog, toFloat } from '../../shared/shared.utils.mjs';
 import { remonlineTokenToEnv } from '../remonline.api.mjs';
+import { getEntitySync } from '../remonline.queries.mjs';
+
+const ENTITY_NAME = 'Transfer';
 
 function mapTransferToPgRow(transfer) {
   return {
@@ -41,16 +44,13 @@ export async function loadTransfers() {
   const time = new Date();
   devLog({ time, message: 'loadTransfers' });
 
-  const lastTransfer = await prisma.transfer.findFirst({
-    orderBy: { createdAt: 'desc' },
-    select: { createdAt: true },
-  });
-  const createdAtFromMs = lastTransfer?.createdAt
-    ? lastTransfer.createdAt.getTime()
+  const sync = await getEntitySync(ENTITY_NAME);
+  const createdAtFromMs = sync.last_created_at_ms
+    ? sync.last_created_at_ms
     : undefined;
 
   const branches = await prisma.branch.findMany({
-    select: { id: true }
+    select: { id: true },
   });
   devLog({
     message: 'loadTransfers: fetched branches from DB',
@@ -58,7 +58,7 @@ export async function loadTransfers() {
     createdAtFromMs,
   });
 
-   const allTransfers = [];
+  const allTransfers = [];
   for (const branch of branches) {
     const { transfers } = await getTransfers({
       branchId: branch.id,
@@ -66,7 +66,7 @@ export async function loadTransfers() {
     });
     allTransfers.push(...transfers);
   }
-  devLog(allTransfers)
+  devLog(allTransfers);
   if (allTransfers.length === 0) {
     devLog({ message: 'loadTransfers: nothing new, skipping' });
     return;
@@ -74,9 +74,15 @@ export async function loadTransfers() {
 
   const transferRows = allTransfers.map(mapTransferToPgRow);
   const productRows = allTransfers.flatMap((t) =>
-    (t.products || []).map((product) => mapProductToPgRow({ transfer: t, product }))
+    (t.products || []).map((product) =>
+      mapProductToPgRow({ transfer: t, product })
+    )
   );
   const transferIds = [...new Set(transferRows.map((r) => r.id))];
+  const maxCreatedAtMs = Math.max(
+    ...allTransfers.map((transfer) => transfer.created_at)
+  );
+  const syncDetails = { last_created_at_ms: maxCreatedAtMs };
 
   await prisma.$transaction([
     prisma.transferProduct.deleteMany({
@@ -88,10 +94,16 @@ export async function loadTransfers() {
       data: productRows,
       skipDuplicates: true,
     }),
+    prisma.entitySync.upsert({
+      where: { entityName: ENTITY_NAME },
+      create: { entityName: ENTITY_NAME, syncDetails },
+      update: { syncDetails },
+    }),
   ]);
 
   devLog({
     message: `loadTransfers synced ${transferRows.length} transfers, ${productRows.length} products.`,
+    maxCreatedAtMs,
   });
 }
 

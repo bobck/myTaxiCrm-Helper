@@ -8,10 +8,7 @@ const loadTransfersJob = CronJob.from({
   cronTime,
   timeZone,
   onTick: async () => {
-   
-
     try {
-    
       await loadTransfers();
     } catch (error) {
       console.error('Error occurred in onTick loadTransfers');
