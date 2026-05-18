@@ -66,7 +66,7 @@ export async function loadTransfers() {
     });
     allTransfers.push(...transfers);
   }
-  devLog(allTransfers);
+
   if (allTransfers.length === 0) {
     devLog({ message: 'loadTransfers: nothing new, skipping' });
     return;
