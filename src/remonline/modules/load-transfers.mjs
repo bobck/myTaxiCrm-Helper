@@ -1,4 +1,4 @@
-import { getLocationsV2, getTransfersV2 } from '../remonline.utils.mjs';
+import { getTransfers } from '../remonline.utils.mjs';
 import prisma from '../remonline.prisma.mjs';
 import { devLog, toFloat } from '../../shared/shared.utils.mjs';
 import { remonlineTokenToEnv } from '../remonline.api.mjs';
@@ -49,24 +49,24 @@ export async function loadTransfers() {
     ? lastTransfer.createdAt.getTime()
     : undefined;
 
-  const branches = await getLocationsV2();
+  const branches = await prisma.branch.findMany({
+    select: { id: true }
+  });
   devLog({
-    message: 'loadTransfers: fetched branches',
+    message: 'loadTransfers: fetched branches from DB',
     branchCount: branches.length,
     createdAtFromMs,
   });
 
-  // The same transfer surfaces under both source and target branches; we keep
-  // both rows because the Prisma PK is composite (`@@id([branchId, warehouseId, id])`).
-  const allTransfers = [];
+   const allTransfers = [];
   for (const branch of branches) {
-    const { transfers } = await getTransfersV2({
+    const { transfers } = await getTransfers({
       branchId: branch.id,
       createdAtFromMs,
     });
     allTransfers.push(...transfers);
   }
-
+  devLog(allTransfers)
   if (allTransfers.length === 0) {
     devLog({ message: 'loadTransfers: nothing new, skipping' });
     return;

@@ -275,12 +275,11 @@ export async function getCashboxes() {
     return { cashboxes };
   }
 }
-
-export async function getLocationsV2() {
-  const qs = buildV2Query({});
-  const url = `${process.env.ROAPP_API}/v2/company/locations?${qs}`;
-  const response = await fetchV2WithRetry({ url, fnName: 'getLocationsV2' });
-  const data = await readV2Json({ response, fnName: 'getLocationsV2' });
+//v2
+export async function getLocations() {
+  const url = `${process.env.ROAPP_API}/v2/company/locations`;
+  const response = await fetchV2WithRetry({ url, fnName: 'getLocations' });
+  const data = await readV2Json({ response, fnName: 'getLocations' });
   if (Array.isArray(data)) return data;
   if (Array.isArray(data?.data)) return data.data;
   return Object.values(data || {});
@@ -295,8 +294,8 @@ export async function getLocationsV2() {
  * @param {number} [opts.createdAtFromMs] unix ms; results returned where created_at >= this
  * @returns {Promise<{ transfers: object[] }>}
  */
-export async function getTransfersV2({ branchId, createdAtFromMs } = {}) {
-  if (branchId == null) throw new Error('getTransfersV2: branchId is required');
+export async function getTransfers({ branchId, createdAtFromMs } = {}) {
+  if (branchId == null) throw new Error('getTransfers: branchId is required');
 
   const allTransfers = [];
   let page = 1;
@@ -309,12 +308,12 @@ export async function getTransfersV2({ branchId, createdAtFromMs } = {}) {
     });
     const url = `${process.env.ROAPP_API}/warehouse/moves/?${qs}`;
 
-    const response = await fetchV2WithRetry({ url, fnName: 'getTransfersV2' });
-    const data = await readV2Json({ response, fnName: 'getTransfersV2' });
+    const response = await fetchV2WithRetry({ url, fnName: 'getTransfers' });
+    const data = await readV2Json({ response, fnName: 'getTransfers' });
 
     const { success } = data;
     if (!success) {
-      const error = new Error(`getTransfersV2: unsuccessful response`);
+      const error = new Error(`getTransfers: unsuccessful response`);
       error.data = data;
       throw error;
     }
@@ -326,7 +325,7 @@ export async function getTransfersV2({ branchId, createdAtFromMs } = {}) {
     const leftToFinish = count - doneOnPrevPage - transfers.length;
 
     devLog({
-      function: 'getTransfersV2',
+      function: 'getTransfers',
       branchId,
       page: gotPage,
       count,
