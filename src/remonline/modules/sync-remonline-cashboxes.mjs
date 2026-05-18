@@ -11,7 +11,7 @@ export async function syncRemonlineCashboxes() {
 
   devLog({ message: `Fetched ${cashboxes.length} cashboxes from Remonline` });
 
-  const remoteIds = cashboxes.map((cashbox) => cashbox.id);
+  const cashboxIds = cashboxes.map((cashbox) => cashbox.id);
 
   const { upserted, disabledCount } = await prisma.$transaction(
     async (tx) => {
@@ -46,7 +46,7 @@ export async function syncRemonlineCashboxes() {
       }
 
       const disabled = await tx.cashbox.updateMany({
-        where: { id: { notIn: remoteIds }, isEnabled: true },
+        where: { id: { notIn: cashboxIds }, isEnabled: true },
         data: { isEnabled: false },
       });
 
