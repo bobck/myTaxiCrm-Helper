@@ -101,7 +101,6 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
       last_apply_date: theLatestApplyDate,
     });
     logInfo.processedApplies += applies.length;
-    return;
   }
   console.log(logInfo);
 };
