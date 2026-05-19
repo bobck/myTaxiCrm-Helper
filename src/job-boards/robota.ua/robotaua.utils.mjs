@@ -1,7 +1,7 @@
 import { devLog } from '../../shared/shared.utils.mjs';
 import RobotaUaApiClient from './robotaua.api.mjs';
 
-const PAGE_API_LIMIT = 500;
+const PAGE_API_LIMIT = 100;
 
 let robotaUaAPI = await RobotaUaApiClient.initialize({
   email: process.env.ROBOTA_UA_EMAIL,
