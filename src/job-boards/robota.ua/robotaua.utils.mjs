@@ -60,7 +60,6 @@ export const getRobotaUaVacancyApplies = async ({
       applies: data.applies.length,
     });
     current_page++;
-
   } while (theOldestApplyDate > targetDate && current_page < PAGE_API_LIMIT);
 
   const filteredAppliesByDate = applies.filter(
