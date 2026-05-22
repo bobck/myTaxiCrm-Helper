@@ -612,6 +612,132 @@ export async function getPostings(
   }
 }
 
+/**
+ * Iterate clients from the legacy v1 endpoint `/clients/`, page-by-page.
+ *
+ * Auth is the v1 `?token=` mechanism. `modified_at[]` accepts a 2-value range
+ * (epoch ms): `modified_at[]=<from>&modified_at[]=<to>`.
+ *
+ * @param {object} [opts]
+ * @param {number} [opts.modifiedAtFrom] epoch ms lower bound
+ * @param {number} [opts.modifiedAtTo]   epoch ms upper bound
+ * @param {number} [opts.pageLimit] stop after this many pages (for tests)
+ * @yields {{ clients: object[], page: number, count: number }}
+ */
+export async function* getClients({
+  modifiedAtFrom,
+  modifiedAtTo,
+  pageLimit,
+} = {}) {
+  const MAX_RETRIES = 3;
+  let _page = 1;
+  let _attempt = 1;
+
+  while (true) {
+    const params = new URLSearchParams();
+    params.append('token', process.env.REMONLINE_API_TOKEN);
+    params.append('page', String(_page));
+    if (modifiedAtFrom !== undefined && modifiedAtFrom !== null) {
+      params.append('modified_at[]', String(modifiedAtFrom));
+    }
+    if (modifiedAtTo !== undefined && modifiedAtTo !== null) {
+      params.append('modified_at[]', String(modifiedAtTo));
+    }
+    const url = `${process.env.REMONLINE_API}/clients/?${params.toString()}`;
+
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: { accept: 'application/json' },
+      });
+
+      if (
+        response.status === 414 ||
+        response.status === 429 ||
+        response.status === 500 ||
+        response.status === 502 ||
+        response.status === 503 ||
+        response.status === 504
+      ) {
+        const error = new Error(`API error: HTTP ${response.status}`);
+        error.status = response.status;
+        throw error;
+      }
+
+      let data;
+      try {
+        data = await response.json();
+      } catch (e) {
+        const error = new Error('Error parsing JSON');
+        error.originalError = e;
+        error.status = response.status;
+        throw error;
+      }
+
+      const { success } = data;
+      if (!success) {
+        const { message, code } = data;
+        if ((response.status === 403 && code === 101) || response.status === 401) {
+          devLog({ function: 'getClients', message: 'Get new Auth' });
+          await remonlineTokenToEnv(true);
+          _attempt = 1;
+          continue;
+        }
+        const error = new Error(`Unsuccessful response: ${JSON.stringify(message)}`);
+        error.status = response.status;
+        error.data = data;
+        throw error;
+      }
+
+      const { data: clients, count, page } = data;
+      const doneOnPrevPage = (page - 1) * 50;
+      const leftToFinish = count - doneOnPrevPage - clients.length;
+
+      devLog({
+        function: 'getClients',
+        page,
+        count,
+        fetched: clients.length,
+        leftToFinish,
+      });
+
+      yield { clients, page, count };
+
+      if (leftToFinish <= 0) break;
+      if (pageLimit && _page >= pageLimit) break;
+
+      _page = parseInt(page) + 1;
+      _attempt = 1;
+    } catch (error) {
+      if (_attempt <= MAX_RETRIES) {
+        const delay = 1000 * Math.pow(2, _attempt - 1);
+        devLog({
+          function: 'getClients',
+          message: `Retryable error: ${error.message}, retrying...`,
+          status: error.status,
+          url,
+          page: _page,
+          attempt: _attempt,
+          delayMs: delay,
+        });
+        await new Promise((r) => setTimeout(r, delay));
+        _attempt++;
+        continue;
+      }
+      devLog({
+        function: 'getClients',
+        message: `Error after max retries: ${error.message}`,
+        status: error.status,
+        url,
+        page: _page,
+      });
+      error.page = _page;
+      error.url = url;
+      throw error;
+    }
+  }
+}
+
 export async function* getProducts(_page = 1, _attempt = 1) {
   const MAX_RETRIES = 3;
 

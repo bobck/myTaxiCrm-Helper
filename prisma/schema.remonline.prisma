@@ -322,3 +322,30 @@ model OrderItem {
   @@map("order_items")
   @@schema("public")
 }
+
+model Client {
+  id                    Int      @id
+  name                  String?
+  firstName             String?  @map("first_name")
+  lastName              String?  @map("last_name")
+  email                 String?
+  phone                 Json?
+  notes                 String?
+  address               String?
+  supplier              Boolean?
+  juridical             Boolean?
+  conflicted            Boolean?
+  modifiedAt            BigInt?  @map("modified_at")
+  createdAt             BigInt?  @map("created_at")
+  discountCode          String?  @map("discount_code")
+  discountGoods         Float?   @map("discount_goods")
+  orderDiscountServices Float?   @map("order_discount_services")
+  saleDiscountServices  Float?   @map("sale_discount_services")
+  discountMaterials     Float?   @map("discount_materials")
+  customFields          Json?    @map("custom_fields")
+  adCampaignId          Int?     @map("ad_campaign_id")
+
+  @@index([modifiedAt])
+  @@map("clients")
+  @@schema("public")
+}
