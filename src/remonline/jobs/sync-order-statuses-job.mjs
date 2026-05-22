@@ -11,7 +11,9 @@ const syncOrderStatusesJob = CronJob.from({
     try {
       await syncOrderStatuses();
     } catch (e) {
-      console.error('An error occurred while syncing Remonline order statuses.');
+      console.error(
+        'An error occurred while syncing Remonline order statuses.'
+      );
       console.error(e);
     }
   },

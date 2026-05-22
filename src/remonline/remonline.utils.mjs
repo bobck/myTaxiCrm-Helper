@@ -677,13 +677,18 @@ export async function* getClients({
       const { success } = data;
       if (!success) {
         const { message, code } = data;
-        if ((response.status === 403 && code === 101) || response.status === 401) {
+        if (
+          (response.status === 403 && code === 101) ||
+          response.status === 401
+        ) {
           devLog({ function: 'getClients', message: 'Get new Auth' });
           await remonlineTokenToEnv(true);
           _attempt = 1;
           continue;
         }
-        const error = new Error(`Unsuccessful response: ${JSON.stringify(message)}`);
+        const error = new Error(
+          `Unsuccessful response: ${JSON.stringify(message)}`
+        );
         error.status = response.status;
         error.data = data;
         throw error;
