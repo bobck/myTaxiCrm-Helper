@@ -1156,3 +1156,25 @@ export async function getRefunds({ createdAt } = {}) {
 
   return { refunds: allRefunds };
 }
+
+/**
+ * Fetch all warehouses. Endpoint returns `{ data, count, success }` in one shot.
+ */
+export async function getWarehouses() {
+  const url = `${process.env.ROAPP_API}/warehouse/`;
+  const response = await fetchV2WithRetry({ url, fnName: 'getWarehouses' });
+  const data = await readV2Json({ response, fnName: 'getWarehouses' });
+  if (Array.isArray(data?.data)) return data.data;
+  return [];
+}
+
+/**
+ * Fetch all cells for a given warehouse. Same `{ data, count, success }` shape.
+ */
+export async function getWarehouseCells(warehouseId) {
+  const url = `${process.env.ROAPP_API}/warehouse/${warehouseId}/cells`;
+  const response = await fetchV2WithRetry({ url, fnName: 'getWarehouseCells' });
+  const data = await readV2Json({ response, fnName: 'getWarehouseCells' });
+  if (Array.isArray(data?.data)) return data.data;
+  return [];
+}

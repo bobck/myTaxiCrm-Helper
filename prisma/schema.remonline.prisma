@@ -365,3 +365,29 @@ model Client {
   @@map("clients")
   @@schema("public")
 }
+
+model Warehouse {
+  id       Int      @id
+  title    String?
+  isGlobal Boolean? @map("is_global")
+  type     String?
+
+  cells WarehouseCell[]
+
+  @@map("warehouses")
+  @@schema("public")
+}
+
+model WarehouseCell {
+  id          Int      @id
+  warehouseId Int      @map("warehouse_id")
+  code        String?
+  isDefault   Boolean? @map("is_default")
+  title       String?
+
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+
+  @@map("warehouse_cells")
+  @@schema("public")
+  @@index([warehouseId])
+}
