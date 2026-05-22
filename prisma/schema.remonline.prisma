@@ -279,9 +279,25 @@ model Order {
   assetCustomFields    Json?     @map("asset_custom_fields")
   clientCustomFields   Json?     @map("client_custom_fields")
 
+  status OrderStatus? @relation(fields: [statusId], references: [id])
+
   @@map("orders")
   @@schema("public")
   @@index([modifiedAt])
+  @@index([statusId])
+}
+
+model OrderStatus {
+  id        Int     @id
+  name      String
+  color     String?
+  groupType Int?    @map("group_type")
+  groupName String? @map("group_name")
+
+  orders Order[]
+
+  @@map("order_statuses")
+  @@schema("public")
 }
 
 model OrderItem {

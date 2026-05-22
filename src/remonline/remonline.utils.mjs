@@ -1027,6 +1027,18 @@ export async function* getOrdersV2({
 }
 
 /**
+ * Fetch all order statuses from the v2 API. Bare array, no paging.
+ */
+export async function getOrderStatuses() {
+  const url = `${process.env.ROAPP_API}/v2/orders/statuses`;
+  const response = await fetchV2WithRetry({ url, fnName: 'getOrderStatuses' });
+  const data = await readV2Json({ response, fnName: 'getOrderStatuses' });
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.data)) return data.data;
+  return [];
+}
+
+/**
  * Line items (parts/works/services/products) for one order. Endpoint returns
  * a bare array — no paging wrapper.
  */

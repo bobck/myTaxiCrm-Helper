@@ -11,6 +11,7 @@ import { syncRemonlineEmployeesJob } from './jobs/sync-employees-job.mjs';
 import { syncRemonlineAssetsJob } from './jobs/sync-assets-job.mjs';
 import { loadOrdersJob } from './jobs/load-orders-job.mjs';
 import { loadClientsJob } from './jobs/load-clients-job.mjs';
+import { syncOrderStatusesJob } from './jobs/sync-order-statuses-job.mjs';
 
 export function remonlineJobs() {
   console.log('remonlineJobs...');
@@ -28,6 +29,7 @@ export function remonlineJobs() {
     syncRemonlineAssetsJob.start();
     loadOrdersJob.start();
     loadClientsJob.start();
+    syncOrderStatusesJob.start();
     console.log(
       'syncRemonlineCashboxes and loadRemonlineCashboxTransactions Jobs runs...'
     );
@@ -49,6 +51,7 @@ export function remonlineJobs() {
     syncRemonlineAssetsJob.stop();
     loadOrdersJob.stop();
     loadClientsJob.stop();
+    syncOrderStatusesJob.stop();
 
     remonlineJobs();
   }
