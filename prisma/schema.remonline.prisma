@@ -279,9 +279,25 @@ model Order {
   assetCustomFields    Json?     @map("asset_custom_fields")
   clientCustomFields   Json?     @map("client_custom_fields")
 
+  status OrderStatus? @relation(fields: [statusId], references: [id])
+
   @@map("orders")
   @@schema("public")
   @@index([modifiedAt])
+  @@index([statusId])
+}
+
+model OrderStatus {
+  id        Int     @id
+  name      String
+  color     String?
+  groupType Int?    @map("group_type")
+  groupName String? @map("group_name")
+
+  orders Order[]
+
+  @@map("order_statuses")
+  @@schema("public")
 }
 
 model OrderItem {
@@ -321,4 +337,57 @@ model OrderItem {
   @@id([orderId, id])
   @@map("order_items")
   @@schema("public")
+}
+
+model Client {
+  id                    Int      @id
+  name                  String?
+  firstName             String?  @map("first_name")
+  lastName              String?  @map("last_name")
+  email                 String?
+  phone                 Json?
+  notes                 String?
+  address               String?
+  supplier              Boolean?
+  juridical             Boolean?
+  conflicted            Boolean?
+  modifiedAt            BigInt?  @map("modified_at")
+  createdAt             BigInt?  @map("created_at")
+  discountCode          String?  @map("discount_code")
+  discountGoods         Float?   @map("discount_goods")
+  orderDiscountServices Float?   @map("order_discount_services")
+  saleDiscountServices  Float?   @map("sale_discount_services")
+  discountMaterials     Float?   @map("discount_materials")
+  customFields          Json?    @map("custom_fields")
+  adCampaignId          Int?     @map("ad_campaign_id")
+
+  @@index([modifiedAt])
+  @@map("clients")
+  @@schema("public")
+}
+
+model Warehouse {
+  id       Int      @id
+  title    String?
+  isGlobal Boolean? @map("is_global")
+  type     String?
+
+  cells WarehouseCell[]
+
+  @@map("warehouses")
+  @@schema("public")
+}
+
+model WarehouseCell {
+  id          Int      @id
+  warehouseId Int      @map("warehouse_id")
+  code        String?
+  isDefault   Boolean? @map("is_default")
+  title       String?
+
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+
+  @@map("warehouse_cells")
+  @@schema("public")
+  @@index([warehouseId])
 }

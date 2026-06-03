@@ -82,6 +82,9 @@
     "test:remonline:employees": "ENV=TEST node -r dotenv/config src/remonline/modules/sync-employees.mjs",
     "test:remonline:assets": "ENV=DEV node -r dotenv/config src/remonline/modules/sync-assets.mjs",
     "test:remonline:orders": "ENV=TEST node -r dotenv/config src/remonline/jobs/load-orders-job.mjs",
+    "test:remonline:clients": "ENV=TEST node -r dotenv/config src/remonline/modules/load-clients.mjs",
+    "test:remonline:order:statuses": "ENV=TEST node -r dotenv/config src/remonline/modules/sync-order-statuses.mjs",
+    "test:remonline:warehouses": "ENV=TEST node -r dotenv/config src/remonline/modules/sync-warehouses.mjs",
     "tunnel:pg": "node -r dotenv/config scripts/tunnel-pg.mjs"
   },
   "author": "bobockx10@gmail.com <bobozlo>",
