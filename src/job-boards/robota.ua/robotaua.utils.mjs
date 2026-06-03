@@ -116,3 +116,75 @@ export const getRobotaUaPublicationLeftOvers = async ({ page }) => {
 
 export const getRobotaUaTicketRest = async ({ ticketType }) =>
   await robotaUaAPI.getTicketRest({ ticketType });
+/**
+ * Cold sources candidates with pagination and ID filtration.
+ * @param {Object} searchParams - The search criteria (keyWords, cityId, etc.)
+ * @param {Array<number|string>} excludeIds - Array of Resume IDs to exclude
+ * @param {number} limit - Target number of unique candidates to find
+ * @param {number} maxPages - Safety limit for pages to fetch
+ */
+export const coldSourceRobotaUaByTerm = async (
+  searchParams,
+  excludeIds = [],
+  limit = 20,
+  maxPages = 50
+) => {
+  const auth = {
+    email: process.env.ROBOTA_UA_EMAIL,
+    password: process.env.ROBOTA_UA_PASSWORD,
+  };
+
+  const client = await RobotaUaApiClient.initialize(auth);
+
+  let allCandidates = [];
+  let page = 0;
+  let hasMore = true;
+  const pageSize = searchParams.count || 20;
+
+  devLog(
+    `Starting Cold Source: "${searchParams.keyWords}" (Need: ${limit}, Excluding: ${excludeIds.length} IDs)`
+  );
+
+  while (hasMore && page < maxPages && allCandidates.length < limit) {
+    const currentParams = {
+      period: 'ThreeDays',
+      searchType: 'default',
+      count: 20,
+      ...searchParams,
+      page,
+      count: pageSize,
+    };
+
+    const response = await client.searchResumes(currentParams);
+    const { documents } = response;
+
+    if (!documents || documents.length === 0) {
+      hasMore = false;
+      break;
+    }
+    const newCandidates = documents.filter(
+      (doc) => !excludeIds.includes(doc.resumeId)
+    );
+
+    if (newCandidates.length < documents.length) {
+      devLog(
+        `Page ${page}: Skipped ${documents.length - newCandidates.length} duplicates.`
+      );
+    }
+
+    allCandidates = [...allCandidates, ...newCandidates];
+
+    if (documents.length < pageSize) {
+      hasMore = false;
+    }
+
+    page++;
+  }
+
+  const finalCandidates = allCandidates.slice(0, limit);
+
+  return {
+    documents: finalCandidates,
+    totalCount: finalCandidates.length,
+  };
+};
