@@ -1,7 +1,7 @@
 import {
   getAllActiveRobotaUaVacancies,
   getLastRobotaUaApplyDate,
-  updateVacancyProgress,
+  updateActiveVacancyProgress,
 } from '../robotaua.queries.mjs';
 import {
   checkIfRobotaUaVacancyStaysActive,
@@ -46,6 +46,14 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
     }
     activeVacancyAppliesMap.get(apply.vacancyId).push(apply);
   }
+
+  //robota ua employee api returns vacancy applies FROM THE NEWEST TO THE OLDEST.
+  const [lastApplication] = applies;
+  if (!lastApplication) {
+    return;
+  }
+  const { addDate: paginationMarker } = lastApplication;
+  devLog(paginationMarker);
 
   //applies processing
   for (const [vacancyId, applies] of activeVacancyAppliesMap) {
@@ -92,17 +100,12 @@ export const getAndSaveRobotaUaVacancyApplies = async () => {
     const processedApplies = appliesWithAssignedPayload.map(processApiResponse);
     await createVacancyResponseCards({ dtos: processedApplies });
     devLog({ vacancyId, applies: applies.length });
-    //robota ua employee api returns vacancy applies FROM THE NEWEST TO THE OLDEST.
-    const [theLatestApply] = applies;
-    const { addDate: theLatestApplyDate } = theLatestApply;
-    devLog({ theLatestApplyDate });
-    await updateVacancyProgress({
-      robota_ua_vacancy_id,
-      last_apply_date: theLatestApplyDate,
-    });
+
     logInfo.processedApplies += applies.length;
-    return;
   }
+  await updateActiveVacancyProgress({
+    last_apply_date: paginationMarker,
+  });
   console.log(logInfo);
 };
 if (process.env.ENV === 'DEV' || process.env.ENV === 'TEST') {
