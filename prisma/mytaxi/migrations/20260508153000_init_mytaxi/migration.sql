@@ -5,6 +5,21 @@ CREATE SCHEMA IF NOT EXISTS "public";
 CREATE TYPE "public"."car_event_type" AS ENUM ('BUSY_WITH_PRIVATE_TRADER', 'RENTAL', 'ON_SERVICE_STATION', 'BUSY_WITH_CREW', 'ROAD_ACCIDENT', 'OTHER', 'AUTO_POUND');
 
 -- CreateTable
+CREATE TABLE "public"."auto_parks" (
+    "id" TEXT NOT NULL,
+    "company_id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "timezone" TEXT NOT NULL,
+    "currency_id" TEXT NOT NULL,
+    "country_code" TEXT NOT NULL,
+    "code" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "auto_parks_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "public"."cars" (
     "id" TEXT NOT NULL,
     "status" "public"."car_event_type" NOT NULL,
@@ -28,6 +43,9 @@ CREATE TABLE "public"."car_status_log" (
 );
 
 -- CreateIndex
+CREATE INDEX "auto_parks_company_id_idx" ON "public"."auto_parks"("company_id");
+
+-- CreateIndex
 CREATE INDEX "cars_status_idx" ON "public"."cars"("status");
 
 -- CreateIndex
@@ -41,4 +59,3 @@ CREATE INDEX "car_status_log_car_id_changed_at_idx" ON "public"."car_status_log"
 
 -- CreateIndex
 CREATE INDEX "car_status_log_changed_at_idx" ON "public"."car_status_log"("changed_at");
-

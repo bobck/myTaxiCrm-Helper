@@ -1,18 +1,7 @@
-import fs from 'fs';
 import { Telegram } from 'telegraf';
-import { pool } from '../../api/pool.mjs';
 import mytaxiPrisma from '../../web.api/mytaxi.prisma.mjs';
 
 const PROBLEM_STATUSES = ['ON_SERVICE_STATION', 'ROAD_ACCIDENT', 'AUTO_POUND'];
-
-async function getCarsInfo(carIds) {
-  if (carIds.length === 0) return new Map();
-  const sql = fs
-    .readFileSync('./src/sql/cars-license-plate-and-city.sql')
-    .toString();
-  const { rows } = await pool.query(sql, [carIds]);
-  return new Map(rows.map((r) => [r.id, r]));
-}
 
 export async function notifyCarsStatusChanges() {
   console.log({ time: new Date(), message: 'notifyCarsStatusChanges start' });
@@ -33,6 +22,7 @@ export async function notifyCarsStatusChanges() {
       nextStatus: { notIn: PROBLEM_STATUSES },
     },
     orderBy: { changedAt: 'asc' },
+    include: { car: { include: { autoPark: true } } },
   });
 
   console.log({ pendingNotifications: logs.length });
@@ -41,19 +31,16 @@ export async function notifyCarsStatusChanges() {
     return;
   }
 
-  const carIds = [...new Set(logs.map((l) => l.carId))];
-  const carsById = await getCarsInfo(carIds);
-
   const bot = new Telegram(token);
 
   let sent = 0;
   for (const log of logs) {
-    const car = carsById.get(log.carId);
-    if (!car) {
-      console.warn({ carId: log.carId, msg: 'no info from main DB, skip' });
+    const car = log.car;
+    if (!car || !car.autoPark) {
+      console.warn({ carId: log.carId, msg: 'no car/autoPark info, skip' });
       continue;
     }
-    const text = `${car.license_plate} ${car.city} - Перешло в работу`;
+    const text = `${car.licensePlate} ${car.autoPark.name} - Перешло в работу`;
     try {
       await bot.sendMessage(managerChatId, text);
       await mytaxiPrisma.carStatusLog.update({

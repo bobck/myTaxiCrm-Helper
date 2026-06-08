@@ -24,12 +24,33 @@ enum CarEventType {
   @@schema("public")
 }
 
+model AutoPark {
+  id          String   @id
+  companyId   String   @map("company_id")
+  name        String
+  timezone    String
+  currencyId  String   @map("currency_id")
+  countryCode String   @map("country_code")
+  code        String
+  createdAt   DateTime @map("created_at")
+  updatedAt   DateTime @map("updated_at")
+
+  cars Car[]
+
+  @@index([companyId])
+  @@map("auto_parks")
+  @@schema("public")
+}
+
 model Car {
   id           String       @id
   status       CarEventType
   licensePlate String       @map("license_plate")
   autoParkId   String       @map("auto_park_id")
   updatedAt    DateTime     @updatedAt @map("updated_at")
+
+  autoPark   AutoPark       @relation(fields: [autoParkId], references: [id])
+  statusLogs CarStatusLog[]
 
   @@index([status])
   @@index([licensePlate])
@@ -45,6 +66,8 @@ model CarStatusLog {
   nextStatus        CarEventType  @map("next_status")
   isManagerNotified Boolean       @default(false) @map("is_manager_notified")
   changedAt         DateTime      @default(now()) @map("changed_at")
+
+  car Car @relation(fields: [carId], references: [id])
 
   @@index([carId, changedAt])
   @@index([changedAt])
