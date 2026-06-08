@@ -39,7 +39,11 @@ export async function syncAutoParks() {
 
   await mytaxiPrisma.$transaction(ops);
 
-  console.log({ time: new Date(), message: 'syncAutoParks done', count: ops.length });
+  console.log({
+    time: new Date(),
+    message: 'syncAutoParks done',
+    count: ops.length,
+  });
 }
 
 if (process.env.ENV == 'TEST') {

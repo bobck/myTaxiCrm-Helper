@@ -1,4 +1,4 @@
-import fs from 'fs';
+import fs, { stat } from 'fs';
 import { CarEventType } from '@prisma/client-mytaxi';
 import { pool } from '../../api/pool.mjs';
 import mytaxiPrisma from '../mytaxi.prisma.mjs';
@@ -31,8 +31,14 @@ export async function syncCarsStatuses() {
   const changedCars = [];
   const logEntries = [];
 
-  for (const row of rows) {
-    const { id, status, license_plate: licensePlate, auto_park_id: autoParkId } = row;
+  for (const [i, row] of rows.entries()) {
+    let {
+      id,
+      status,
+      license_plate: licensePlate,
+      auto_park_id: autoParkId,
+    } = row;
+    //  status = i % 100 ? status : 'ON_SERVICE_STATION';
     const isExisting = existingById.has(id);
     const prevStatus = existingById.get(id);
 
