@@ -228,3 +228,97 @@ model Asset {
   @@map("assets")
   @@schema("public")
 }
+
+model Order {
+  id                   Int       @id
+  number               String?
+  statusId             Int?      @map("status_id")
+  statusName           String?   @map("status_name")
+  statusOverdue        Boolean?  @map("status_overdue")
+  createdAt            DateTime? @map("created_at")
+  createdById          Int?      @map("created_by_id")
+  modifiedAt           DateTime? @map("modified_at")
+  doneAt               DateTime? @map("done_at")
+  closedAt             DateTime? @map("closed_at")
+  closedById           Int?      @map("closed_by_id")
+  branchId             Int?      @map("branch_id")
+  orderTypeId          Int?      @map("order_type_id")
+  orderTypeName        String?   @map("order_type_name")
+  managerId            Int?      @map("manager_id")
+  assigneeId           Int?      @map("assignee_id")
+  assetId              Int?      @map("asset_id")
+  assetUid             String?   @map("asset_uid")
+  assetBrand           String?   @map("asset_brand")
+  assetModel           String?   @map("asset_model")
+  assetYear            String?   @map("asset_year")
+  clientId             Int?      @map("client_id")
+  clientName           String?   @map("client_name")
+  clientIsOrganization Boolean?  @map("client_is_organization")
+  payerId              Int?      @map("payer_id")
+  payerName            String?   @map("payer_name")
+  scheduledFor         DateTime? @map("scheduled_for")
+  scheduledTo          DateTime? @map("scheduled_to")
+  resourceId           Int?      @map("resource_id")
+  resourceName         String?   @map("resource_name")
+  malfunction          String?
+  managerNotes         String?   @map("manager_notes")
+  engineerNotes        String?   @map("engineer_notes")
+  address              String?
+  resume               String?
+  estimatedPrice       Float?    @map("estimated_price")
+  dueDate              DateTime? @map("due_date")
+  overdue              Boolean?
+  discountSum          Float?    @map("discount_sum")
+  payed                Float?
+  total                Float?
+  warrantyDate         DateTime? @map("warranty_date")
+  urgent               Boolean?
+  isDeductionRequired  Boolean?  @map("is_deduction_required")
+  adCampaignId         Int?      @map("ad_campaign_id")
+  customFields         Json?     @map("custom_fields")
+  assetCustomFields    Json?     @map("asset_custom_fields")
+  clientCustomFields   Json?     @map("client_custom_fields")
+
+  @@map("orders")
+  @@schema("public")
+  @@index([modifiedAt])
+}
+
+model OrderItem {
+  orderId             Int       @map("order_id")
+  id                  Int
+  createdAt           DateTime? @map("created_at")
+  assigneeId          Int?      @map("assignee_id")
+  entityId            Int?      @map("entity_id")
+  entityType          String?   @map("entity_type")
+  entityTitle         String?   @map("entity_title")
+  entityCode          String?   @map("entity_code")
+  entitySku           String?   @map("entity_sku")
+  entityDescription   String?   @map("entity_description")
+  entitySnAccounting  Boolean?  @map("entity_sn_accounting")
+  entityIsHidden      Boolean?  @map("entity_is_hidden")
+  uomId               Int?      @map("uom_id")
+  uomTitle            String?   @map("uom_title")
+  uomDescription      String?   @map("uom_description")
+  quantity            Float?
+  price               Float?
+  cost                Float?
+  marginId            Int?      @map("margin_id")
+  isDeductionRequired Boolean?  @map("is_deduction_required")
+  isRefunded          Boolean?  @map("is_refunded")
+  comment             String?
+  commentVisibility   String?      @map("comment_visibility")
+  discountType        String?   @map("discount_type")
+  discountPercentage  Float?    @map("discount_percentage")
+  discountAmount      Float?    @map("discount_amount")
+  discountSponsor     String?   @map("discount_sponsor")
+  warrantyPeriod      Int?      @map("warranty_period")
+  warrantyPeriodUnits String?   @map("warranty_period_units")
+  expirationDate      DateTime? @map("expiration_date")
+  taxes               Json?
+  writeOffs           Json?     @map("write_offs")
+
+  @@id([orderId, id])
+  @@map("order_items")
+  @@schema("public")
+}

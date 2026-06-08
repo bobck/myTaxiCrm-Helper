@@ -373,7 +373,7 @@ export const cityTextRecruitToPayments = {
   },
   Тернопіль: {
     id: '2912',
-    assigned_by_id: '69410',
+    assigned_by_id: '54946',
   },
   Луцьк: {
     id: '2916',

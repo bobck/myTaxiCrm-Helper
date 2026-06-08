@@ -183,16 +183,27 @@ export async function getCashboxTransactions({ createdAt, cashboxId }) {
       const { success } = data;
 
       if (!success) {
-        const { message, code } = data;
-        const { validation } = message;
+        const { message } = data;
+        const validation = message?.validation;
 
         console.error({
           function: 'getCashboxTransactions',
+          cashboxId,
+          response_status: response.status,
           message,
           validation,
-          response_status: response.status,
         });
-        throw validation;
+
+        if (response.status === 400 && validation?.cashbox_id) {
+          console.error({
+            hint: 'Cashbox is likely inactive in Remonline (Wrong cashbox id). Consider disabling it in DB.',
+          });
+        }
+        const error = new Error(
+          `getCashboxTransactions failed: ${JSON.stringify(message)}`
+        );
+        error.status = response.status;
+        throw error;
       }
 
       const { data: transactions, count, page } = data;
@@ -837,15 +848,16 @@ async function readV2Json({ response, fnName }) {
  * @param {string} [opts.modifiedAtTo]   ISO-8601 upper bound for modified_at
  * @param {number[]} [opts.ids]          filter by explicit ids
  * @param {string} [opts.sort='modified_at']  enum: 'modified_at' | '-modified_at'
+ * @param {number} [opts.pageLimit]      stop after this many pages (for tests)
  * @returns {Promise<{ orders: object[], count: number }>}
  */
-export async function getOrdersV2({
+export async function* getOrdersV2({
   modifiedAtFrom,
   modifiedAtTo,
   ids,
   sort = 'modified_at',
+  pageLimit,
 } = {}) {
-  const allOrders = [];
   let page = 1;
 
   const modifiedAtRange = [];
@@ -866,7 +878,6 @@ export async function getOrdersV2({
 
     const orders = data.data || [];
     const paging = data.paging || {};
-    allOrders.push(...orders);
 
     devLog({
       function: 'getOrdersV2',
@@ -874,14 +885,19 @@ export async function getOrdersV2({
       total_pages: paging.total_pages,
       count: paging.count,
       fetched: orders.length,
-      totalFetched: allOrders.length,
     });
 
+    yield {
+      orders,
+      page,
+      totalPages: paging.total_pages,
+      count: paging.count,
+    };
+
     if (!paging.total_pages || page >= paging.total_pages) break;
+    if (pageLimit && page >= pageLimit) break;
     page += 1;
   }
-
-  return { orders: allOrders, count: allOrders.length };
 }
 
 /**
