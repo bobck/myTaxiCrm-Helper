@@ -9,6 +9,7 @@ CREATE TABLE "public"."cars" (
     "id" TEXT NOT NULL,
     "status" "public"."car_event_type" NOT NULL,
     "license_plate" TEXT NOT NULL,
+    "auto_park_id" TEXT NOT NULL,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "cars_pkey" PRIMARY KEY ("id")
@@ -31,6 +32,9 @@ CREATE INDEX "cars_status_idx" ON "public"."cars"("status");
 
 -- CreateIndex
 CREATE INDEX "cars_license_plate_idx" ON "public"."cars"("license_plate");
+
+-- CreateIndex
+CREATE INDEX "cars_auto_park_id_idx" ON "public"."cars"("auto_park_id");
 
 -- CreateIndex
 CREATE INDEX "car_status_log_car_id_changed_at_idx" ON "public"."car_status_log"("car_id", "changed_at");

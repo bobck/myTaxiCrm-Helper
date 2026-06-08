@@ -32,7 +32,7 @@ export async function syncCarsStatuses() {
   const logEntries = [];
 
   for (const row of rows) {
-    const { id, status, license_plate: licensePlate } = row;
+    const { id, status, license_plate: licensePlate, auto_park_id: autoParkId } = row;
     const isExisting = existingById.has(id);
     const prevStatus = existingById.get(id);
 
@@ -41,14 +41,14 @@ export async function syncCarsStatuses() {
     }
 
     if (isExisting) {
-      changedCars.push({ id, status, licensePlate });
+      changedCars.push({ id, status, licensePlate, autoParkId });
       logEntries.push({
         carId: id,
         prevStatus,
         nextStatus: status,
       });
     } else {
-      newCars.push({ id, status, licensePlate });
+      newCars.push({ id, status, licensePlate, autoParkId });
     }
   }
 
@@ -66,7 +66,11 @@ export async function syncCarsStatuses() {
     ops.push(
       mytaxiPrisma.car.update({
         where: { id: car.id },
-        data: { status: car.status, licensePlate: car.licensePlate },
+        data: {
+          status: car.status,
+          licensePlate: car.licensePlate,
+          autoParkId: car.autoParkId,
+        },
       })
     );
   }

@@ -28,10 +28,12 @@ model Car {
   id           String       @id
   status       CarEventType
   licensePlate String       @map("license_plate")
+  autoParkId   String       @map("auto_park_id")
   updatedAt    DateTime     @updatedAt @map("updated_at")
 
   @@index([status])
   @@index([licensePlate])
+  @@index([autoParkId])
   @@map("cars")
   @@schema("public")
 }
