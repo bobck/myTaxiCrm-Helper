@@ -1,6 +1,6 @@
 import { getTransfers } from '../remonline.utils.mjs';
 import prisma from '../remonline.prisma.mjs';
-import { devLog, toFloat } from '../../shared/shared.utils.mjs';
+import { devLog, toFloat, toBigInt } from '../../shared/shared.utils.mjs';
 import { remonlineTokenToEnv } from '../remonline.api.mjs';
 import { getEntitySync } from '../remonline.queries.mjs';
 
@@ -11,7 +11,7 @@ function mapTransferToPgRow(transfer) {
     id: transfer.id,
     branchId: transfer.branch_id,
     warehouseId: transfer.warehouse_id,
-    createdAt: BigInt(transfer.created_at),
+    createdAt: toBigInt(transfer.created_at) ?? 0n,
     description: transfer.description ?? null,
     createdById: transfer.created_by_id,
     idLabel: transfer.id_label,
@@ -79,8 +79,9 @@ export async function loadTransfers() {
     )
   );
   const transferIds = [...new Set(transferRows.map((r) => r.id))];
-  const maxCreatedAtMs = Math.max(
-    ...allTransfers.map((transfer) => transfer.created_at)
+  const maxCreatedAtMs = allTransfers.reduce(
+    (max, transfer) => (transfer.created_at > max ? transfer.created_at : max),
+    0
   );
   const syncDetails = { last_created_at_ms: maxCreatedAtMs };
 
@@ -90,10 +91,7 @@ export async function loadTransfers() {
     }),
     prisma.transfer.deleteMany({ where: { id: { in: transferIds } } }),
     prisma.transfer.createMany({ data: transferRows }),
-    prisma.transferProduct.createMany({
-      data: productRows,
-      skipDuplicates: true,
-    }),
+    prisma.transferProduct.createMany({ data: productRows }),
     prisma.entitySync.upsert({
       where: { entityName: ENTITY_NAME },
       create: { entityName: ENTITY_NAME, syncDetails },
