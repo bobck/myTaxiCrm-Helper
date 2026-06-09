@@ -296,17 +296,21 @@ export async function getLocations() {
   return Object.values(data || {});
 }
 
-export async function getTransfers({ branchId, createdAtFromMs } = {}) {
+export async function* getTransfers({
+  branchId,
+  createdAtFromMs,
+  createdAtToMs,
+} = {}) {
   if (branchId == null) throw new Error('getTransfers: branchId is required');
 
-  const allTransfers = [];
   let page = 1;
+  let totalFetched = 0;
 
   while (true) {
     const qs = buildV2Query({
       page,
       branch_id: branchId,
-      created_at: createdAtFromMs != null ? [createdAtFromMs] : undefined,
+      created_at: [createdAtFromMs ?? 0, createdAtToMs],
     });
     const url = `${process.env.ROAPP_API}/warehouse/moves/?${qs}`;
 
@@ -321,7 +325,8 @@ export async function getTransfers({ branchId, createdAtFromMs } = {}) {
     }
 
     const { data: transfers, page: gotPage, count } = data;
-    allTransfers.push(...transfers.map((t) => ({ branch_id: branchId, ...t })));
+    const branchTransfers = transfers.map((t) => ({ branch_id: branchId, ...t }));
+    totalFetched += branchTransfers.length;
 
     const doneOnPrevPage = (gotPage - 1) * 50;
     const leftToFinish = count - doneOnPrevPage - transfers.length;
@@ -332,15 +337,15 @@ export async function getTransfers({ branchId, createdAtFromMs } = {}) {
       page: gotPage,
       count,
       fetched: transfers.length,
-      totalFetched: allTransfers.length,
+      totalFetched,
       leftToFinish,
     });
+
+    yield { transfers: branchTransfers, page: gotPage, count };
 
     if (leftToFinish <= 0) break;
     page = parseInt(gotPage) + 1;
   }
-
-  return { transfers: allTransfers };
 }
 export async function getEmployees() {
   const url = `${process.env.REMONLINE_API}/employees/?token=${process.env.REMONLINE_API_TOKEN}`;

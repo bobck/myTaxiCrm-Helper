@@ -48,6 +48,7 @@ export async function loadTransfers() {
   const createdAtFromMs = sync.last_created_at_ms
     ? sync.last_created_at_ms
     : undefined;
+  const createdAtToMs = time.getTime();
 
   const branches = await prisma.branch.findMany({
     select: { id: true },
@@ -56,15 +57,18 @@ export async function loadTransfers() {
     message: 'loadTransfers: fetched branches from DB',
     branchCount: branches.length,
     createdAtFromMs,
+    createdAtToMs,
   });
 
   const allTransfers = [];
   for (const branch of branches) {
-    const { transfers } = await getTransfers({
+    for await (const { transfers } of getTransfers({
       branchId: branch.id,
       createdAtFromMs,
-    });
-    allTransfers.push(...transfers);
+      createdAtToMs,
+    })) {
+      allTransfers.push(...transfers);
+    }
   }
 
   if (allTransfers.length === 0) {
@@ -78,6 +82,20 @@ export async function loadTransfers() {
       mapProductToPgRow({ transfer: t, product })
     )
   );
+  const mergedProductRows = [
+    ...productRows
+      .reduce((byKey, row) => {
+        const key = `${row.branchId}-${row.warehouseId}-${row.transferId}-${row.id}`;
+        const existing = byKey.get(key);
+        if (existing) {
+          existing.amount += row.amount;
+        } else {
+          byKey.set(key, { ...row });
+        }
+        return byKey;
+      }, new Map())
+      .values(),
+  ];
   const transferIds = [...new Set(transferRows.map((r) => r.id))];
   const maxCreatedAtMs = allTransfers.reduce(
     (max, transfer) => (transfer.created_at > max ? transfer.created_at : max),
@@ -91,7 +109,7 @@ export async function loadTransfers() {
     }),
     prisma.transfer.deleteMany({ where: { id: { in: transferIds } } }),
     prisma.transfer.createMany({ data: transferRows }),
-    prisma.transferProduct.createMany({ data: productRows }),
+    prisma.transferProduct.createMany({ data: mergedProductRows }),
     prisma.entitySync.upsert({
       where: { entityName: ENTITY_NAME },
       create: { entityName: ENTITY_NAME, syncDetails },
@@ -100,7 +118,7 @@ export async function loadTransfers() {
   ]);
 
   devLog({
-    message: `loadTransfers synced ${transferRows.length} transfers, ${productRows.length} products.`,
+    message: `loadTransfers synced ${transferRows.length} transfers, ${mergedProductRows.length} products.`,
     maxCreatedAtMs,
   });
 }
