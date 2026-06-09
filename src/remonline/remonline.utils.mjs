@@ -325,7 +325,10 @@ export async function* getTransfers({
     }
 
     const { data: transfers, page: gotPage, count } = data;
-    const branchTransfers = transfers.map((t) => ({ branch_id: branchId, ...t }));
+    const branchTransfers = transfers.map((t) => ({
+      branch_id: branchId,
+      ...t,
+    }));
     totalFetched += branchTransfers.length;
 
     const doneOnPrevPage = (gotPage - 1) * 50;
