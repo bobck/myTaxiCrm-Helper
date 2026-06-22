@@ -21,8 +21,7 @@ export const getVacancyList = async ({ last_page }) => {
   do {
     data = await robotaUaAPI.getVacancies({
       page: current_page,
-      // vacancyStateId: 'Publicated',
-      vacancyStateId: 4,
+      vacancyStateId: 'Publicated',
     });
     vacancies.push(...data.vacancies);
     console.log({ current_page, vacancies: data.vacancies.length });
