@@ -42,10 +42,20 @@ export const getRobotaUaVacancyApplies = async ({
   devLog(targetDate);
   let theOldestApplyDate;
   do {
-    data = await robotaUaAPI.getApplies({
-      vacancyId: robota_ua_vacancy_id,
-      page: current_page,
-    });
+    try {
+      data = await robotaUaAPI.getApplies({
+        vacancyId: robota_ua_vacancy_id,
+        page: current_page,
+      });
+    } catch (error) {
+      devLog({
+        skippedPage: current_page,
+        status: error.response?.status,
+        reason: error.response?.data?.key,
+      });
+      current_page++;
+      continue;
+    }
 
     applies.push(...data.applies);
 

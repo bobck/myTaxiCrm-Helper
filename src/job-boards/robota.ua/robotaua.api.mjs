@@ -1,18 +1,24 @@
 import axios from 'axios';
 import { devLog } from '../../shared/shared.utils.mjs';
 
+const USER_AGENT = 'mytaxicrm-helper/1.0.0';
+
 class RobotaUaApiClient {
   constructor(token) {
     this.employerApi = axios.create({
       baseURL: process.env.ROBOTA_UA_API,
       headers: {
         Authorization: `Bearer ${token}`,
+        'User-Agent': USER_AGENT,
       },
     });
   }
   static async initialize({ email, password }) {
     const authApi = axios.create({
       baseURL: process.env.ROBOTA_UA_AUTH_API,
+      headers: {
+        'User-Agent': USER_AGENT,
+      },
     });
 
     try {
