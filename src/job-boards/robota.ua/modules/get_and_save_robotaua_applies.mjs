@@ -15,6 +15,7 @@ import { assignPayloadToVacancyApply } from '../../job-board.utils.mjs';
 import { processApiResponse } from '../robotaua.business-entity.mjs';
 import { cityListWithAssignedBy as bitrixCities } from '../../../bitrix/bitrix.constants.mjs';
 import { robotaUaCities } from '../robotaua.constants.mjs';
+import { vacancyRequestTypeId } from '../../job-board.constants.mjs';
 import { devLog } from '../../../shared/shared.utils.mjs';
 
 export const getAndSaveRobotaUaVacancyApplies = async () => {

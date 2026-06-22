@@ -3,7 +3,7 @@ import { api_status_codes } from '../../api.constants.mjs';
 import { devLog } from '../../../shared/shared.utils.mjs';
 const { OK: SUCCESS_AUTH } = api_status_codes;
 export const authorizationMiddleware = (req, res, next) => {
-  const { api_key } = req.query;
+  const api_key = req.query.api_key ?? req.get('Authorization');
   const { code, status, message } = authorizeAPIClient({ api_key });
 
   if (code !== SUCCESS_AUTH) {
