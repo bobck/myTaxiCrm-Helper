@@ -1,18 +1,24 @@
 import axios from 'axios';
 import { devLog } from '../../shared/shared.utils.mjs';
 
+const USER_AGENT = 'mytaxicrm-helper/1.0.0';
+
 class RobotaUaApiClient {
   constructor(token) {
     this.employerApi = axios.create({
       baseURL: process.env.ROBOTA_UA_API,
       headers: {
         Authorization: `Bearer ${token}`,
+        'User-Agent': USER_AGENT,
       },
     });
   }
   static async initialize({ email, password }) {
     const authApi = axios.create({
       baseURL: process.env.ROBOTA_UA_AUTH_API,
+      headers: {
+        'User-Agent': USER_AGENT,
+      },
     });
 
     try {
@@ -65,22 +71,6 @@ class RobotaUaApiClient {
     }
   }
 
-  async changeVacancyState(vacancyId, state) {
-    const validStates = ['Deleted', 'Closed', 'Publicated', 'NotPublicated'];
-    if (!validStates.includes(state)) {
-      throw new Error(
-        `Invalid state: ${state}. Must be one of ${validStates.join(', ')}`
-      );
-    }
-    try {
-      const response = await this.employerApi.post(
-        `/vacancy/state/${vacancyId}?state=${state}`
-      );
-      return response.data;
-    } catch (error) {
-      this.handleApiError(error);
-    }
-  }
   async getResume({ resumeId }) {
     try {
       const response = await this.employerApi.get(`/resume/${resumeId}`);
@@ -99,7 +89,7 @@ class RobotaUaApiClient {
   }
   async getPublicationLeftOvers({ page }) {
     try {
-      const response = await this.employerApi.get(`/api/service/list${page}`);
+      const response = await this.employerApi.get(`/api/service/list/${page}`);
       return response.data;
     } catch (error) {
       this.handleApiError(error);
@@ -122,7 +112,7 @@ class RobotaUaApiClient {
       const response = await this.employerApi.post('/vacancy/add', {
         id: vacancyId,
         publishType,
-        Name: vacancyName,
+        name: vacancyName,
         description,
         cityId,
         salary,
@@ -153,6 +143,7 @@ class RobotaUaApiClient {
         `/vacancy/state/${vacancyId}?state=${state}`
       );
       devLog(data);
+      return data;
     } catch (error) {
       this.handleApiError(error);
     }

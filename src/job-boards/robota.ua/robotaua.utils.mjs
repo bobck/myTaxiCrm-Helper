@@ -1,6 +1,8 @@
 import { devLog } from '../../shared/shared.utils.mjs';
 import RobotaUaApiClient from './robotaua.api.mjs';
 
+const PAGE_API_LIMIT = 100;
+
 let robotaUaAPI = await RobotaUaApiClient.initialize({
   email: process.env.ROBOTA_UA_EMAIL,
   password: process.env.ROBOTA_UA_PASSWORD,
@@ -19,8 +21,7 @@ export const getVacancyList = async ({ last_page }) => {
   do {
     data = await robotaUaAPI.getVacancies({
       page: current_page,
-      // vacancyStateId: 'Publicated',
-      vacancyStateId: 4,
+      vacancyStateId: 'Publicated',
     });
     vacancies.push(...data.vacancies);
     console.log({ current_page, vacancies: data.vacancies.length });
@@ -41,10 +42,20 @@ export const getRobotaUaVacancyApplies = async ({
   devLog(targetDate);
   let theOldestApplyDate;
   do {
-    data = await robotaUaAPI.getApplies({
-      vacancyId: robota_ua_vacancy_id,
-      page: current_page,
-    });
+    try {
+      data = await robotaUaAPI.getApplies({
+        vacancyId: robota_ua_vacancy_id,
+        page: current_page,
+      });
+    } catch (error) {
+      devLog({
+        skippedPage: current_page,
+        status: error.response?.status,
+        reason: error.response?.data?.key,
+      });
+      current_page++;
+      continue;
+    }
 
     applies.push(...data.applies);
 
@@ -52,13 +63,13 @@ export const getRobotaUaVacancyApplies = async ({
       applies[applies.length - 1];
     theOldestApplyDate = new Date(theOldestApplyDateStringified);
 
-    current_page++;
     devLog({
       theOldestApplyDate,
       current_page,
       applies: data.applies.length,
     });
-  } while (theOldestApplyDate > targetDate);
+    current_page++;
+  } while (theOldestApplyDate > targetDate && current_page < PAGE_API_LIMIT);
 
   const filteredAppliesByDate = applies.filter(
     (apply) => new Date(apply.addDate) > targetDate

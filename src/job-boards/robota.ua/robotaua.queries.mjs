@@ -1,16 +1,13 @@
 import { db } from '../../shared/sqlite.mjs';
 
-export async function updateVacancyProgress({
-  robota_ua_vacancy_id,
-  last_apply_date,
-}) {
+export async function updateActiveVacancyProgress({ last_apply_date }) {
   const sql = /*sql*/ `UPDATE 
                     robota_ua_pagination
                 SET 
                     last_apply_date = ?
                 WHERE 
-                    robota_ua_vacancy_id = ?`;
-  await db.run(sql, last_apply_date, robota_ua_vacancy_id);
+                    is_active = TRUE`;
+  await db.run(sql, last_apply_date);
 }
 
 export async function updateRobotaUaVacancyActivityState({
