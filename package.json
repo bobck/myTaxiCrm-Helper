@@ -82,7 +82,6 @@
     "test:remonline:assets": "ENV=DEV node -r dotenv/config src/remonline/modules/sync-assets.mjs",
     "test:remonline:orders": "ENV=TEST node -r dotenv/config src/remonline/jobs/load-orders-job.mjs",
     "tunnel:pg": "node -r dotenv/config scripts/tunnel-pg.mjs",
-    "test:robotaua:coldSourcing": "ENV=DEV node -r dotenv/config src/job-boards/robota.ua/modules/cold_sourcing.mjs",
     "test:remonline:transfers": "ENV=TEST node -r dotenv/config src/remonline/modules/load-transfers.mjs",
     "test:remonline:branches": "ENV=TEST node -r dotenv/config src/remonline/modules/sync-branches.mjs"
   },
