@@ -7,7 +7,6 @@ import { driversCustomTariffJobs } from './src/web.api/bootstrap.mjs';
 
 import { bitrixJobs } from './src/bitrix/bootstrap.mjs';
 import { initApi } from './src/api/api.mjs';
-import { startJobBoardJobs } from './src/job-boards/bootstrap.mjs';
 
 await initApi();
 
@@ -20,5 +19,3 @@ remonlineJobs();
 
 driversCustomTariffJobs();
 bitrixJobs();
-
-//startJobBoardJobs();
