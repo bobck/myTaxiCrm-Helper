@@ -15,7 +15,7 @@ coreRouter.use('/bolt', boltRouter);
 
 coreRouter.use('/query', queryRouter);
 coreRouter.use('/', referralRouter);
-coreRouter.use('/job-boards', jobBoardRouter);
+//coreRouter.use('/job-boards', jobBoardRouter);
 
 coreRouter.use('/', CoreController.handleCore);
 
