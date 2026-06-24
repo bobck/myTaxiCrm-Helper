@@ -288,67 +288,68 @@ export async function getCashboxes() {
 }
 
 export async function getLocations() {
-  const url = `${process.env.ROAPP_API}/v2/company/locations`;
-  const response = await fetchV2WithRetry({ url, fnName: 'getLocations' });
-  const data = await readV2Json({ response, fnName: 'getLocations' });
-  if (Array.isArray(data)) return data;
-  if (Array.isArray(data?.data)) return data.data;
-  return Object.values(data || {});
+  // return await fetch(`${process.env.REMONLINE_API}/branches/?token=${process.env.REMONLINE_API_TOKEN}`);
+  const url = `${process.env.REMONLINE_API}/branches/?token=${process.env.REMONLINE_API_TOKEN}`;
+  const options = { method: 'GET', headers: { accept: 'application/json' } };
+
+  const response = await fetch(url, options);
+  const { data } = await response.json();
+  return data;
 }
 
-export async function* getTransfers({
-  branchId,
-  createdAtFromMs,
-  createdAtToMs,
-} = {}) {
-  if (branchId == null) throw new Error('getTransfers: branchId is required');
-
-  let page = 1;
-  let totalFetched = 0;
+export async function getTransfers({ branch_id }) {
+  const options = { method: 'GET', headers: { accept: 'application/json' } };
+  const allTransfers = [];
+  let _page = 1;
 
   while (true) {
-    const qs = buildV2Query({
-      page,
-      branch_id: branchId,
-      created_at: [createdAtFromMs ?? 0, createdAtToMs],
-    });
-    const url = `${process.env.ROAPP_API}/warehouse/moves/?${qs}`;
+    const url = `${process.env.REMONLINE_API}/warehouse/moves/?page=${_page}&branch_id=${branch_id}&token=${process.env.REMONLINE_API_TOKEN}`;
 
-    const response = await fetchV2WithRetry({ url, fnName: 'getTransfers' });
-    const data = await readV2Json({ response, fnName: 'getTransfers' });
+    const response = await fetch(url, options);
 
+    const data = await response.json();
     const { success } = data;
     if (!success) {
-      const error = new Error(`getTransfers: unsuccessful response`);
-      error.data = data;
-      throw error;
+      const { message, code } = data;
+      const { validation } = message;
+      if ((response.status == 403 && code == 101) || response.status == 401) {
+        console.info({ function: 'getTransfers', message: 'Get new Auth' });
+        await remonlineTokenToEnv(true);
+        continue;
+      }
+      console.error({
+        function: 'getTransfers',
+        message,
+        validation,
+        status: response.status,
+      });
+      return;
     }
-
-    const { data: transfers, page: gotPage, count } = data;
-    const branchTransfers = transfers.map((t) => ({
-      branch_id: branchId,
-      ...t,
-    }));
-    totalFetched += branchTransfers.length;
-
-    const doneOnPrevPage = (gotPage - 1) * 50;
+    const { data: transfers, page, count } = data;
+    const doneOnPrevPage = (page - 1) * 50;
     const leftToFinish = count - doneOnPrevPage - transfers.length;
+
+    allTransfers.push(
+      ...transfers.map((transfer) => {
+        return { branch_id, ...transfer };
+      })
+    );
 
     devLog({
       function: 'getTransfers',
-      branchId,
-      page: gotPage,
+      branch_id,
+      page,
       count,
       fetched: transfers.length,
-      totalFetched,
+      totalFetched: allTransfers.length,
       leftToFinish,
     });
 
-    yield { transfers: branchTransfers, page: gotPage, count };
-
     if (leftToFinish <= 0) break;
-    page = parseInt(gotPage) + 1;
+    _page = parseInt(page) + 1;
   }
+
+  return { transfers: allTransfers };
 }
 export async function getEmployees() {
   const url = `${process.env.REMONLINE_API}/employees/?token=${process.env.REMONLINE_API_TOKEN}`;

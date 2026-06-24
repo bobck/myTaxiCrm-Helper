@@ -102,15 +102,6 @@ export function toFloat(value) {
   return Number.isFinite(number) ? number : null;
 }
 
-export function toBigInt(value) {
-  if (value === null || value === undefined || value === '') return null;
-  try {
-    return BigInt(value);
-  } catch {
-    return null;
-  }
-}
-
 export function jsonOrNull(value) {
   if (value === null || value === undefined) return null;
   if (Array.isArray(value) && value.length === 0) return null;
