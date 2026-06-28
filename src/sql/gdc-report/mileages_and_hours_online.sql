@@ -5,8 +5,8 @@ WITH hours_online AS (SELECT
 			FROM driver_report_cards drc 
 			WHERE company_id = '4ea03592-9278-4ede-adf8-f7345a856893'
 			AND time_online > 0
-			AND (EXTRACT(week FROM drc.date AT TIME ZONE 'europe/kyiv') >= $1 AND EXTRACT(year FROM drc.date AT TIME ZONE 'europe/kyiv') = $2)
-			AND (EXTRACT(week FROM drc.date AT TIME ZONE 'europe/kyiv') <= $1 AND EXTRACT(year FROM drc.date AT TIME ZONE 'europe/kyiv') = $2)
+			AND (EXTRACT(week FROM drc.date) >= $1 AND EXTRACT(year FROM drc.date) = $2)
+			AND (EXTRACT(week FROM drc.date) <= $1 AND EXTRACT(year FROM drc.date) = $2)
 			), 
 			hours_online_group AS (
 			SELECT 
