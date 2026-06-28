@@ -19,7 +19,8 @@ WITH hours_online AS (SELECT
 				cr.auto_park_id,
 				sum(mileage)/1000 AS mileage
 			FROM car_routes cr 
-			WHERE t.company_id = '4ea03592-9278-4ede-adf8-f7345a856893'
+			WHERE cr.company_id = '4ea03592-9278-4ede-adf8-f7345a856893' 
+			AND trip_id IS NOT NULL
 			AND (EXTRACT(week FROM t.call_date AT TIME ZONE 'europe/kyiv') = $1 AND EXTRACT(year FROM t.call_date AT TIME ZONE 'europe/kyiv') = $2)
 			GROUP BY t.auto_park_id),
 			odometr_end_value AS (
