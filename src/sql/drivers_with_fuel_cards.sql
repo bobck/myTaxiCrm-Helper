@@ -44,8 +44,8 @@ WITH
       CAST($1 AS DATE)::text AS DATE,
 	s.event_period_start as schedule_event_period_start,
 	s.event_period_end as schedule_event_period_end,
-	drc.period_from as driver_report_card_period_from,
-	drc.period_to as driver_report_card_period_to
+	drc.date as driver_report_card_period_from,
+	drc.date as driver_report_card_period_to
     FROM
       drivers d
       LEFT JOIN auto_parks ap ON ap.company_id = d.company_id
@@ -67,8 +67,8 @@ WITH
       AND s.event_period_end >= $1
       AND s.is_latest_version
       AND NOT s.is_deleted
-      AND drc.period_from <= $1
-      AND drc.period_to >= $1
+      AND drc.date <= $1
+      AND drc.date >= $1
   )
 SELECT
   *
