@@ -15,10 +15,10 @@ WITH hours_online AS (SELECT
 			FROM hours_online ho
 			GROUP BY ho.auto_park_id
 			),
-			mileage_on_trips AS (SELECT
-				t.auto_park_id,
-				sum(t.mileage)/1000 AS mileage
-			FROM analytics.trips t
+			mileage_on_trips AS (SELECT 
+				cr.auto_park_id,
+				sum(mileage)/1000 AS mileage
+			FROM car_routes cr 
 			WHERE t.company_id = '4ea03592-9278-4ede-adf8-f7345a856893'
 			AND (EXTRACT(week FROM t.call_date AT TIME ZONE 'europe/kyiv') = $1 AND EXTRACT(year FROM t.call_date AT TIME ZONE 'europe/kyiv') = $2)
 			GROUP BY t.auto_park_id),
