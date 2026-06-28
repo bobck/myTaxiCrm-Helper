@@ -21,8 +21,9 @@ WITH hours_online AS (SELECT
 			FROM car_routes cr 
 			WHERE cr.company_id = '4ea03592-9278-4ede-adf8-f7345a856893' 
 			AND trip_id IS NOT NULL
-			AND (EXTRACT(week FROM t.call_date AT TIME ZONE 'europe/kyiv') = $1 AND EXTRACT(year FROM t.call_date AT TIME ZONE 'europe/kyiv') = $2)
-			GROUP BY t.auto_park_id),
+			AND (EXTRACT(week FROM cr.period_from AT TIME ZONE 'europe/kyiv') >= $1 AND EXTRACT(year FROM cr.period_from AT TIME ZONE 'europe/kyiv') = $2)
+			AND (EXTRACT(week FROM cr.period_to AT TIME ZONE 'europe/kyiv') <= $1 AND EXTRACT(year FROM cr.period_to AT TIME ZONE 'europe/kyiv') = $2) 
+			GROUP BY cr.auto_park_id),
 			odometr_end_value AS (
 			SELECT DISTINCT ON (coh.car_id)
 				coh.car_id,
