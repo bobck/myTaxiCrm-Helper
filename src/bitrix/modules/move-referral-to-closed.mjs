@@ -18,6 +18,11 @@ export async function moveReferralToClosed() {
   });
   for (let referral of finishedRefferals) {
     const { referral_id, created_at } = referral;
+    // Guard against blank ids: Bitrix crm.item.update rejects an empty id with a
+    // 400 Bad Request. The query already filters these out; this is defence in depth.
+    if (!referral_id || String(referral_id).trim() === '') {
+      continue;
+    }
     try {
       await changeItemStage({
         referralTypeId,
@@ -46,6 +51,11 @@ export async function moveReferralProcentageRewardToClosed() {
   });
   for (let referral of finishedRefferalsProcentageReward) {
     const { referral_id, created_at } = referral;
+    // Guard against blank ids: Bitrix crm.item.update rejects an empty id with a
+    // 400 Bad Request. The query already filters these out; this is defence in depth.
+    if (!referral_id || String(referral_id).trim() === '') {
+      continue;
+    }
     try {
       await changeItemStage({
         referralTypeId,

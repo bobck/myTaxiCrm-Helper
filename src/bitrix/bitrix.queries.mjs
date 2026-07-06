@@ -460,9 +460,10 @@ export async function getFinishedRefferals({ procentageRewardAutoParkIds }) {
   const sql = `SELECT 
                     referral_id,
                     created_at
-                FROM referral 
+                FROM referral
                 WHERE date(expiry_after) < current_date
                 AND referral_id is not null
+                AND TRIM(referral_id) <> ''
                 AND is_closed is FALSE
                 ${autoParkFilter}`;
 
@@ -481,9 +482,10 @@ export async function getFinishedRefferalsProcentageReward({
   const sql = `SELECT 
                     referral_id,
                     created_at
-                FROM referral 
+                FROM referral
                 WHERE date(procent_reward_expiry_after) < current_date
                 AND referral_id is not null
+                AND TRIM(referral_id) <> ''
                 AND is_closed is FALSE
                 ${autoParkFilter}`;
 
