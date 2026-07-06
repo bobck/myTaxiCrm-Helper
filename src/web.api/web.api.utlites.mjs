@@ -75,6 +75,14 @@ async function makeCRMRequestWithRetry({ body }) {
         return { bonus_not_found: true };
       }
 
+      // "Cash block rule not found" (CASH_BLOCK_RULES_NOT_FOUND) is permanent: the
+      // rule is already gone in the CRM, so retrying only burns the backoff budget
+      // and ends in "Max retries reached". Fail fast and let the caller converge
+      // local state. Re-throw the array so its extensions.code stays inspectable.
+      if (message == 'Cash block rule not found') {
+        throw error;
+      }
+
       // console.error(`Attempt ${retryCount + 1} failed. Retrying in ${retryDelay}ms.`);
 
       if (retryCount < maxRetries - 1) {
