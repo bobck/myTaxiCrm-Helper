@@ -334,8 +334,33 @@ export async function saveRecruitDeal({
   assigned_by_id,
   city_id,
 }) {
-  const sql = `INSERT INTO referral(driver_id,auto_park_id,deal_id,task_id,contract,doc_id,first_name,last_name,expiry_after,contact_id,assigned_by_id,city_id,procent_reward_expiry_after) 
-                    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+  // deal_id has a UNIQUE constraint. Re-validating the same deal (e.g. the operator
+  // re-fires the webhook, or Bitrix retries it) would otherwise throw
+  // SQLITE_CONSTRAINT: UNIQUE constraint failed: referral.deal_id and leave the
+  // Bitrix task uncompleted. Upsert so re-validation refreshes the deal data and
+  // still lets completeBitrixTaskById run.
+  //
+  // The reward windows expiry_after / procent_reward_expiry_after are intentionally
+  // NOT updated on conflict: they are anchored to the first validation. Rewriting
+  // them to a fresh now()+31d / now()+5w on every re-validation would slide the
+  // window forward (inflating payouts) and, worse, push an already-closed referral's
+  // dates back into the future — the active-reward queries (getActiveRefferals*)
+  // filter on those dates without checking is_closed, so it would resurrect a closed
+  // referral for percentage payouts. Columns owned by later steps (referral_id,
+  // is_approved, is_closed, referrer_*) and created_at are likewise preserved.
+  const sql = `INSERT INTO referral(driver_id,auto_park_id,deal_id,task_id,contract,doc_id,first_name,last_name,expiry_after,contact_id,assigned_by_id,city_id,procent_reward_expiry_after)
+                    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)
+                ON CONFLICT(deal_id) DO UPDATE SET
+                    driver_id = excluded.driver_id,
+                    auto_park_id = excluded.auto_park_id,
+                    task_id = excluded.task_id,
+                    contract = excluded.contract,
+                    doc_id = excluded.doc_id,
+                    first_name = excluded.first_name,
+                    last_name = excluded.last_name,
+                    contact_id = excluded.contact_id,
+                    assigned_by_id = excluded.assigned_by_id,
+                    city_id = excluded.city_id`;
 
   await db.run(
     sql,
