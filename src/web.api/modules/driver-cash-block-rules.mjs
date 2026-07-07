@@ -155,6 +155,13 @@ export const setDriverCashBlockRules = async () => {
     }
   }
 };
+// The CRM reports an already-removed rule as CASH_BLOCK_RULES_NOT_FOUND; the error
+// arrives either as the raw GraphQL array or a single error object.
+const isCashBlockRuleNotFound = (error) => {
+  const [first] = Array.isArray(error) ? error : [error];
+  return first?.extensions?.code === 'CASH_BLOCK_RULES_NOT_FOUND';
+};
+
 export const updateDriverCashBlockRules = async () => {
   const { year, weekNumber } = calculateCurrentWeekAndYear();
   const driversWithCashBlockRules = await getDriversWithActiveCashBlockRules();
@@ -178,43 +185,31 @@ export const updateDriverCashBlockRules = async () => {
     return;
   }
   for (const driver of drivers) {
+    const { driver_id } = driver;
     try {
-      const { driver_id } = driver;
       const { driver_cash_block_rule_id } = driversWithCashBlockRules.find(
         (d) => d.driver_id === driver_id
       );
-
-      try {
-        const { success, errors } =
-          await deleteDriverCustomCashBlockRuleMutation({
-            driver_id,
-            driver_cash_block_rule_id,
-          });
-        if (!success) {
-          throw errors;
-        }
-      } catch (error) {
-        // If the CRM reports the rule is already gone, converge local state instead
-        // of failing every day: fall through and mark it deleted. Rethrow anything
-        // else so it is retried on the next run.
-        const code = Array.isArray(error)
-          ? error[0]?.extensions?.code
-          : error?.extensions?.code;
-        if (code !== 'CASH_BLOCK_RULES_NOT_FOUND') {
-          throw error;
-        }
-        console.warn({
-          message:
-            'updateDriverCashBlockRules: rule already absent in CRM, marking deleted locally',
+      const { success, errors } = await deleteDriverCustomCashBlockRuleMutation(
+        {
           driver_id,
-        });
+          driver_cash_block_rule_id,
+        }
+      );
+      if (!success) {
+        throw errors;
       }
-
-      await markDriverCashBlockRulesAsDeleted({ driver_id });
     } catch (error) {
-      console.error('error while updateDriverCashBlockRules', error);
-      continue;
+      // A missing rule means it is already gone in the CRM, so we still want to
+      // mark it deleted locally (fall through). Any other error is a real failure:
+      // skip the local update so it is retried on the next run.
+      if (!isCashBlockRuleNotFound(error)) {
+        console.error('error while updateDriverCashBlockRules', error);
+        continue;
+      }
     }
+    // Reached on a successful delete or a benign "already gone" — converge state.
+    await markDriverCashBlockRulesAsDeleted({ driver_id });
   }
 };
 
