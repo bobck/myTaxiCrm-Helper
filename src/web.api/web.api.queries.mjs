@@ -1,5 +1,5 @@
 import { devLog } from '../shared/shared.utils.mjs';
-import { db } from '../shared/sqlite.mjs';
+import { db, runInTransaction } from '../shared/sqlite.mjs';
 
 export async function saveCreatedDriverCustomTariffId({
   tariffId,
@@ -82,19 +82,18 @@ export async function updateSavedCashlessApplicationId({ id, status }) {
 }
 
 export async function insertContractors(contractorsList) {
-  await db.exec('DELETE FROM contractors');
-  await db.exec('BEGIN TRANSACTION');
   try {
-    for (const contractor of contractorsList) {
-      await db.run(
-        'INSERT INTO contractors (id,name) VALUES (?,?)',
-        contractor.id,
-        contractor.name
-      );
-    }
-    await db.exec('COMMIT');
+    await runInTransaction(async () => {
+      await db.run('DELETE FROM contractors');
+      for (const contractor of contractorsList) {
+        await db.run(
+          'INSERT INTO contractors (id,name) VALUES (?,?)',
+          contractor.id,
+          contractor.name
+        );
+      }
+    });
   } catch (error) {
-    await db.exec('ROLLBACK');
     console.error('Ошибка при вставке данных:', error);
   }
 }
@@ -105,30 +104,29 @@ export async function getContractorIdByName(contractorName) {
 }
 
 export async function insertDriversWithRevenue(driversWithRevenue) {
-  await db.exec('BEGIN TRANSACTION');
   try {
-    for (const driver of driversWithRevenue) {
-      const {
-        company_id,
-        auto_park_id,
-        driver_id,
-        phone,
-        auto_park_revenue,
-        rides_count,
-      } = driver;
-      await db.run(
-        'INSERT INTO drivers_revenue (company_id,auto_park_id,driver_id,phone,auto_park_revenue,rides_count) VALUES (?,?,?,?,?,?)',
-        company_id,
-        auto_park_id,
-        driver_id,
-        phone,
-        auto_park_revenue,
-        rides_count
-      );
-    }
-    await db.exec('COMMIT');
+    await runInTransaction(async () => {
+      for (const driver of driversWithRevenue) {
+        const {
+          company_id,
+          auto_park_id,
+          driver_id,
+          phone,
+          auto_park_revenue,
+          rides_count,
+        } = driver;
+        await db.run(
+          'INSERT INTO drivers_revenue (company_id,auto_park_id,driver_id,phone,auto_park_revenue,rides_count) VALUES (?,?,?,?,?,?)',
+          company_id,
+          auto_park_id,
+          driver_id,
+          phone,
+          auto_park_revenue,
+          rides_count
+        );
+      }
+    });
   } catch (error) {
-    await db.exec('ROLLBACK');
     console.error('Ошибка при вставке данных:', error);
   }
 }
@@ -143,20 +141,19 @@ export async function getExistedDriversWithRevenue(driverIds) {
 export async function updateExistedDriversWithRevenue(
   updatedExistedDriversWithRevenue
 ) {
-  await db.exec('BEGIN TRANSACTION');
   try {
-    for (const driver of updatedExistedDriversWithRevenue) {
-      const { driver_id, auto_park_revenue, rides_count } = driver;
-      await db.run(
-        'UPDATE drivers_revenue SET auto_park_revenue = ?, rides_count = ?, updated_at = CURRENT_TIMESTAMP WHERE driver_id = ?',
-        auto_park_revenue,
-        rides_count,
-        driver_id
-      );
-    }
-    await db.exec('COMMIT');
+    await runInTransaction(async () => {
+      for (const driver of updatedExistedDriversWithRevenue) {
+        const { driver_id, auto_park_revenue, rides_count } = driver;
+        await db.run(
+          'UPDATE drivers_revenue SET auto_park_revenue = ?, rides_count = ?, updated_at = CURRENT_TIMESTAMP WHERE driver_id = ?',
+          auto_park_revenue,
+          rides_count,
+          driver_id
+        );
+      }
+    });
   } catch (error) {
-    await db.exec('ROLLBACK');
     console.error('Ошибка при вставке данных:', error);
   }
 }
@@ -234,22 +231,20 @@ export async function createDriversIgnoringDCBR(driverIds) {
   let createdCount = 0;
 
   try {
-    await db.exec('BEGIN TRANSACTION');
+    await runInTransaction(async () => {
+      const stmt = await db.prepare(sql);
 
-    const stmt = await db.prepare(sql);
+      for (const id of driverIds) {
+        const result = await stmt.run(id);
+        createdCount += result.changes;
+      }
 
-    for (const id of driverIds) {
-      const result = await stmt.run(id);
-      createdCount += result.changes;
-    }
-
-    await stmt.finalize();
-    await db.exec('COMMIT');
+      await stmt.finalize();
+    });
 
     return createdCount;
   } catch (err) {
     console.error('Transaction failed, rolling back.', err.message);
-    await db.exec('ROLLBACK');
     throw err;
   }
 }
@@ -295,22 +290,20 @@ export async function createAutoParksExcludedFromDCBR(autoParkIds) {
   let createdCount = 0;
 
   try {
-    await db.exec('BEGIN TRANSACTION');
+    await runInTransaction(async () => {
+      const stmt = await db.prepare(sql);
 
-    const stmt = await db.prepare(sql);
+      for (const id of autoParkIds) {
+        const result = await stmt.run(id);
+        createdCount += result.changes;
+      }
 
-    for (const id of autoParkIds) {
-      const result = await stmt.run(id);
-      createdCount += result.changes;
-    }
-
-    await stmt.finalize();
-    await db.exec('COMMIT');
+      await stmt.finalize();
+    });
 
     return createdCount;
   } catch (err) {
     console.error('Transaction failed, rolling back.', err.message);
-    await db.exec('ROLLBACK');
     throw err;
   }
 }
@@ -325,54 +318,49 @@ export async function synchronizeAutoParkRulesTransaction({
   deletedAutoParkRuleIds,
 }) {
   try {
-    // Start the transaction
-    await db.run('BEGIN TRANSACTION;');
-
-    // Step 1: Deactivate rules based on the deletedAutoParkRules array.
-    // This will set is_active to false for all existing rules matching the auto_park_id.
-    if (deletedAutoParkRuleIds && deletedAutoParkRuleIds.length > 0) {
-      const placeholders = deletedAutoParkRuleIds.map(() => '?').join(',');
-      const updateSql = `
-        UPDATE auto_park_custom_cash_block_rules
-        SET is_active = false, updated_at = CURRENT_TIMESTAMP
-        WHERE rule_id IN (${placeholders});
-      `;
-      await db.run(updateSql, deletedAutoParkRuleIds);
-    }
-
-    // Step 2: Insert all new rules from the newAutoParkRules array.
-    // Since auto_park_id can be repeated, we perform a simple insert for each new rule.
-    if (newAutoParkRules && newAutoParkRules.length > 0) {
-      const insertSql = `
-        INSERT INTO auto_park_custom_cash_block_rules
-        (auto_park_id, mode, target, balanceActivationValue, depositActivationValue, maxDebt)
-        VALUES (?, ?, ?, ?, ?, ?);
-      `;
-
-      // For optimal performance, a database driver's "prepare" statement method
-      // should be used before looping to execute the same query multiple times.
-      for (const rule of newAutoParkRules) {
-        const params = [
-          rule.auto_park_id,
-          rule.mode,
-          rule.target,
-          rule.balanceActivationValue,
-          rule.depositActivationValue,
-          rule.maxDebt,
-        ];
-        await db.run(insertSql, params);
+    await runInTransaction(async () => {
+      // Step 1: Deactivate rules based on the deletedAutoParkRules array.
+      // This will set is_active to false for all existing rules matching the auto_park_id.
+      if (deletedAutoParkRuleIds && deletedAutoParkRuleIds.length > 0) {
+        const placeholders = deletedAutoParkRuleIds.map(() => '?').join(',');
+        const updateSql = `
+          UPDATE auto_park_custom_cash_block_rules
+          SET is_active = false, updated_at = CURRENT_TIMESTAMP
+          WHERE rule_id IN (${placeholders});
+        `;
+        await db.run(updateSql, deletedAutoParkRuleIds);
       }
-    }
 
-    // Commit the transaction if all operations succeed
-    await db.run('COMMIT;');
+      // Step 2: Insert all new rules from the newAutoParkRules array.
+      // Since auto_park_id can be repeated, we perform a simple insert for each new rule.
+      if (newAutoParkRules && newAutoParkRules.length > 0) {
+        const insertSql = `
+          INSERT INTO auto_park_custom_cash_block_rules
+          (auto_park_id, mode, target, balanceActivationValue, depositActivationValue, maxDebt)
+          VALUES (?, ?, ?, ?, ?, ?);
+        `;
+
+        // For optimal performance, a database driver's "prepare" statement method
+        // should be used before looping to execute the same query multiple times.
+        for (const rule of newAutoParkRules) {
+          const params = [
+            rule.auto_park_id,
+            rule.mode,
+            rule.target,
+            rule.balanceActivationValue,
+            rule.depositActivationValue,
+            rule.maxDebt,
+          ];
+          await db.run(insertSql, params);
+        }
+      }
+    });
   } catch (error) {
-    // If any error occurs, rollback the entire transaction
+    // If any error occurs, the transaction is already rolled back; surface it.
     console.error(
       'Error during synchronization, rolling back transaction.',
       error
     );
-    await db.run('ROLLBACK;');
     // Re-throw the error so the calling code is aware of the failure
     throw error;
   }

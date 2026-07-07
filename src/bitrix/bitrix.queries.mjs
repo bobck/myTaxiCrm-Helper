@@ -1,4 +1,4 @@
-import { db } from '../shared/sqlite.mjs';
+import { db, runInTransaction } from '../shared/sqlite.mjs';
 
 /**
  * Create a branding process and return the whole record.
@@ -144,37 +144,35 @@ export async function getAllDriversWithRevenueWitnConcactsAndNoDeals({
 export async function updateContactsInDriversWithRevenue(
   driversWithRevenueAndContacts
 ) {
-  await db.exec('BEGIN TRANSACTION');
   try {
-    for (const driver of driversWithRevenueAndContacts) {
-      const { driver_id, contacts } = driver;
-      await db.run(
-        'UPDATE drivers_revenue SET contacts_array = ?, contacts_add_at = CURRENT_TIMESTAMP WHERE driver_id = ?',
-        JSON.stringify(contacts),
-        driver_id
-      );
-    }
-    await db.exec('COMMIT');
+    await runInTransaction(async () => {
+      for (const driver of driversWithRevenueAndContacts) {
+        const { driver_id, contacts } = driver;
+        await db.run(
+          'UPDATE drivers_revenue SET contacts_array = ?, contacts_add_at = CURRENT_TIMESTAMP WHERE driver_id = ?',
+          JSON.stringify(contacts),
+          driver_id
+        );
+      }
+    });
   } catch (error) {
-    await db.exec('ROLLBACK');
     console.error('Ошибка при вставке данных:', error);
   }
 }
 
 export async function updateLeadInDriversWithRevenue(concatsWithDeals) {
-  await db.exec('BEGIN TRANSACTION');
   try {
-    for (const driver of concatsWithDeals) {
-      const { deal_id, concact_id } = driver;
-      await db.run(
-        `UPDATE drivers_revenue SET deal_id = ?, deat_add_at = CURRENT_TIMESTAMP WHERE contacts_array like ?`,
-        deal_id,
-        `%${concact_id}%`
-      );
-    }
-    await db.exec('COMMIT');
+    await runInTransaction(async () => {
+      for (const driver of concatsWithDeals) {
+        const { deal_id, concact_id } = driver;
+        await db.run(
+          `UPDATE drivers_revenue SET deal_id = ?, deat_add_at = CURRENT_TIMESTAMP WHERE contacts_array like ?`,
+          deal_id,
+          `%${concact_id}%`
+        );
+      }
+    });
   } catch (error) {
-    await db.exec('ROLLBACK');
     console.error('Ошибка при вставке данных:', error);
   }
 }
@@ -186,18 +184,17 @@ export async function getDriversWithRevenueWitnDealSyncReady() {
 }
 
 export async function updateSyncTimeForDriversWithRevenue(updatedDealsInChunk) {
-  await db.exec('BEGIN TRANSACTION');
   try {
-    for (const driver of updatedDealsInChunk) {
-      const { deal_id } = driver;
-      await db.run(
-        `UPDATE drivers_revenue SET sync_at = CURRENT_TIMESTAMP WHERE deal_id = ?`,
-        deal_id
-      );
-    }
-    await db.exec('COMMIT');
+    await runInTransaction(async () => {
+      for (const driver of updatedDealsInChunk) {
+        const { deal_id } = driver;
+        await db.run(
+          `UPDATE drivers_revenue SET sync_at = CURRENT_TIMESTAMP WHERE deal_id = ?`,
+          deal_id
+        );
+      }
+    });
   } catch (error) {
-    await db.exec('ROLLBACK');
     console.error('Ошибка при вставке данных:', error);
   }
 }
@@ -208,30 +205,29 @@ export async function clearManifoldDealsTable() {
 }
 
 export async function insertManifoldDeals(manifoldDeals) {
-  await db.exec('BEGIN TRANSACTION');
   try {
-    for (const deal of manifoldDeals) {
-      const {
-        id,
-        deal_created_at,
-        stage_id,
-        city_name,
-        assigned_by_id,
-        title,
-      } = deal;
-      await db.run(
-        'INSERT INTO manifold_deals (id,deal_created_at,stage_id,city_name,assigned_by_id,title) VALUES (?,?,?,?,?,?)',
-        id,
-        deal_created_at,
-        stage_id,
-        city_name,
-        assigned_by_id,
-        title
-      );
-    }
-    await db.exec('COMMIT');
+    await runInTransaction(async () => {
+      for (const deal of manifoldDeals) {
+        const {
+          id,
+          deal_created_at,
+          stage_id,
+          city_name,
+          assigned_by_id,
+          title,
+        } = deal;
+        await db.run(
+          'INSERT INTO manifold_deals (id,deal_created_at,stage_id,city_name,assigned_by_id,title) VALUES (?,?,?,?,?,?)',
+          id,
+          deal_created_at,
+          stage_id,
+          city_name,
+          assigned_by_id,
+          title
+        );
+      }
+    });
   } catch (error) {
-    await db.exec('ROLLBACK');
     console.error('Ошибка при вставке данных:', error);
   }
 }
@@ -261,60 +257,57 @@ export async function getSavedManifoldContactIdsWithNoPhone() {
 }
 
 export async function updateManifoldDealsAncidentData(manifoldDealsData) {
-  await db.exec('BEGIN TRANSACTION');
   try {
-    for (let [id, data] of Object.entries(manifoldDealsData)) {
-      const {
-        UF_CRM_1654602086875: accident_id,
-        UF_CRM_1672920789484: aviable_for_office_only,
-      } = data;
+    await runInTransaction(async () => {
+      for (let [id, data] of Object.entries(manifoldDealsData)) {
+        const {
+          UF_CRM_1654602086875: accident_id,
+          UF_CRM_1672920789484: aviable_for_office_only,
+        } = data;
 
-      let aviable = aviable_for_office_only == '' ? 0 : 1;
-      await db.run(
-        `UPDATE manifold_deals SET accident_id = ?, aviable_for_office_only = ? WHERE id = ?`,
-        accident_id,
-        aviable,
-        id
-      );
-    }
-    await db.exec('COMMIT');
+        let aviable = aviable_for_office_only == '' ? 0 : 1;
+        await db.run(
+          `UPDATE manifold_deals SET accident_id = ?, aviable_for_office_only = ? WHERE id = ?`,
+          accident_id,
+          aviable,
+          id
+        );
+      }
+    });
   } catch (error) {
-    await db.exec('ROLLBACK');
     console.error('Ошибка при вставке данных:', error);
   }
 }
 
 export async function updateManifoldDealsContactId(manifoldDealsData) {
-  await db.exec('BEGIN TRANSACTION');
   try {
-    for (let [id, data] of Object.entries(manifoldDealsData)) {
-      const { CONTACT_ID: contact_id } = data;
-      await db.run(
-        `UPDATE manifold_deals SET contact_id = ? WHERE id = ?`,
-        contact_id,
-        id
-      );
-    }
-    await db.exec('COMMIT');
+    await runInTransaction(async () => {
+      for (let [id, data] of Object.entries(manifoldDealsData)) {
+        const { CONTACT_ID: contact_id } = data;
+        await db.run(
+          `UPDATE manifold_deals SET contact_id = ? WHERE id = ?`,
+          contact_id,
+          id
+        );
+      }
+    });
   } catch (error) {
-    await db.exec('ROLLBACK');
     console.error('Ошибка при вставке данных:', error);
   }
 }
 
 export async function updateManifoldDealsPhone(manifoldDealsData) {
-  await db.exec('BEGIN TRANSACTION');
   try {
-    for (let [contact_id, data] of Object.entries(manifoldDealsData)) {
-      await db.run(
-        `UPDATE manifold_deals SET contact_phone = ?, contacts_add_at = CURRENT_TIMESTAMP WHERE contact_id = ?`,
-        data.phone,
-        contact_id
-      );
-    }
-    await db.exec('COMMIT');
+    await runInTransaction(async () => {
+      for (let [contact_id, data] of Object.entries(manifoldDealsData)) {
+        await db.run(
+          `UPDATE manifold_deals SET contact_phone = ?, contacts_add_at = CURRENT_TIMESTAMP WHERE contact_id = ?`,
+          data.phone,
+          contact_id
+        );
+      }
+    });
   } catch (error) {
-    await db.exec('ROLLBACK');
     console.error('Ошибка при вставке данных:', error);
   }
 }
@@ -526,36 +519,35 @@ export async function getNewWorkingDriverWorked7Days({ date }) {
 }
 
 export async function saveDtpDebtTransactions(dtpDebtTopUps) {
-  await db.exec('BEGIN TRANSACTION');
   try {
-    for (const transaction of dtpDebtTopUps) {
-      const {
-        auto_park_id,
-        driver_id,
-        human_id,
-        purpose,
-        sum,
-        added_by_user_name,
-        dtp_deal_id,
-        created_at,
-      } = transaction;
-      await db.run(
-        `INSERT INTO 
-                dtp_debt_transactions (auto_park_id,driver_id,human_id,purpose,sum,added_by_user_name,dtp_deal_id,created_at) 
+    await runInTransaction(async () => {
+      for (const transaction of dtpDebtTopUps) {
+        const {
+          auto_park_id,
+          driver_id,
+          human_id,
+          purpose,
+          sum,
+          added_by_user_name,
+          dtp_deal_id,
+          created_at,
+        } = transaction;
+        await db.run(
+          `INSERT INTO
+                dtp_debt_transactions (auto_park_id,driver_id,human_id,purpose,sum,added_by_user_name,dtp_deal_id,created_at)
                 VALUES (?,?,?,?,?,?,?,?)`,
-        auto_park_id,
-        driver_id,
-        human_id,
-        purpose,
-        sum,
-        added_by_user_name,
-        dtp_deal_id,
-        created_at
-      );
-    }
-    await db.exec('COMMIT');
+          auto_park_id,
+          driver_id,
+          human_id,
+          purpose,
+          sum,
+          added_by_user_name,
+          dtp_deal_id,
+          created_at
+        );
+      }
+    });
   } catch (error) {
-    await db.exec('ROLLBACK');
     console.error('Ошибка при вставке данных:', error);
   }
 }
