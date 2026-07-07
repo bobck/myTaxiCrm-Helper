@@ -10,17 +10,6 @@ await db.exec('PRAGMA journal_mode = WAL');
 await db.exec('PRAGMA busy_timeout = 5000');
 await db.exec('PRAGMA foreign_keys = ON');
 
-// Serialize every write transaction on this single shared connection.
-//
-// sqlite3 serializes individual statements, but the `await` points between the
-// statements of a transaction yield to the event loop. Two transactions that
-// overlap in time (e.g. two cron jobs firing on the same minute) therefore
-// interleave, the second `BEGIN` runs while the first transaction is still open,
-// and SQLite throws "cannot start a transaction within a transaction".
-//
-// A promise-chained mutex makes each transaction wait for the previous one to
-// COMMIT/ROLLBACK before it issues its own BEGIN, so transactions never nest.
-// All BEGIN/COMMIT/ROLLBACK must go through this helper for the guarantee to hold.
 let txChain = Promise.resolve();
 
 export function runInTransaction(work) {
@@ -39,8 +28,6 @@ export function runInTransaction(work) {
       throw error;
     }
   });
-  // Keep the queue alive even if this transaction rejects, so a single failure
-  // doesn't wedge every subsequent transaction.
   txChain = result.then(
     () => undefined,
     () => undefined
