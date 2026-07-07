@@ -75,6 +75,10 @@ async function makeCRMRequestWithRetry({ body }) {
         return { bonus_not_found: true };
       }
 
+      if (message == 'Cash block rule not found') {
+        throw error;
+      }
+
       // console.error(`Attempt ${retryCount + 1} failed. Retrying in ${retryDelay}ms.`);
 
       if (retryCount < maxRetries - 1) {

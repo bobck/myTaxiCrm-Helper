@@ -155,6 +155,7 @@ export const setDriverCashBlockRules = async () => {
     }
   }
 };
+
 export const updateDriverCashBlockRules = async () => {
   const { year, weekNumber } = calculateCurrentWeekAndYear();
   const driversWithCashBlockRules = await getDriversWithActiveCashBlockRules();
@@ -178,26 +179,30 @@ export const updateDriverCashBlockRules = async () => {
     return;
   }
   for (const driver of drivers) {
+    const { driver_id } = driver;
     try {
-      const { driver_id } = driver;
       const { driver_cash_block_rule_id } = driversWithCashBlockRules.find(
         (d) => d.driver_id === driver_id
       );
-
       const { success, errors } = await deleteDriverCustomCashBlockRuleMutation(
         {
           driver_id,
           driver_cash_block_rule_id,
         }
       );
-      await markDriverCashBlockRulesAsDeleted({ driver_id });
       if (!success) {
         throw errors;
       }
     } catch (error) {
-      console.error('error while updateDriverCashBlockRules', error);
-      continue;
+      const [first] = Array.isArray(error) ? error : [error];
+      const isCashBlockRuleNotFound =
+        first?.extensions?.code === 'CASH_BLOCK_RULES_NOT_FOUND';
+      if (!isCashBlockRuleNotFound) {
+        console.error('error while updateDriverCashBlockRules', error);
+        continue;
+      }
     }
+    await markDriverCashBlockRulesAsDeleted({ driver_id });
   }
 };
 
