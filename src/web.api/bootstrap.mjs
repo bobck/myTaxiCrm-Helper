@@ -1,8 +1,3 @@
-import { deleteDriversCustomTariffJob } from './jobs/delete-drivers-custom-tarrif-job.mjs';
-import { setDriversCustomTariffJob } from './jobs/set-drivers-custom-tarrif-job.mjs';
-import { setDriversCustomBonusJob } from './jobs/set-drivers-custom-bonus-job.mjs';
-import { deleteDriversCustomBonusJob } from './jobs/delete-drivers-custom-bonus-job.mjs';
-import { updateDriversCustomNotFoundBonusJob } from './jobs/update-drivers-custom-bonus-job.mjs';
 import { saveContractorsListJob } from './jobs/save-and-update-contractors.mjs';
 import { addNewDriversAutoparkRevenueJob } from './jobs/add-drivers-with-revenue-job.mjs';
 import { updateDriversWithRevenueJob } from './jobs/update-drivers-with-revenue-job.mjs';
@@ -18,15 +13,8 @@ import { saveRepairAndAccidentCarsReportJob } from './jobs/save-repair-and-accid
 import { getAndSaveClosedPolishBitrixDealsJob } from './gdc-report/jobs/get-and-save-closed-polish-bitrix-deals-job.mjs';
 import { updateAndSaveDriverCashBlockRulesJob } from './jobs/update-and-save-driver-cash-block-rules-job.mjs';
 
-export function driversCustomTariffJobs() {
+export function webApiJobs() {
   try {
-    deleteDriversCustomTariffJob.start();
-    setDriversCustomTariffJob.start();
-
-    setDriversCustomBonusJob.start();
-    deleteDriversCustomBonusJob.start();
-    updateDriversCustomNotFoundBonusJob.start();
-    console.log('driversCustomTariff And Bonus Jobs runs...');
     saveContractorsListJob.start();
     updateDriversWithRevenueJob.start();
     addNewDriversAutoparkRevenueJob.start();
@@ -48,12 +36,6 @@ export function driversCustomTariffJobs() {
     console.error('sync error, app down...');
     console.error({ time: new Date(), error });
     console.error('Trying to restart...');
-    deleteDriversCustomTariffJob.stop();
-    setDriversCustomTariffJob.stop();
-
-    setDriversCustomBonusJob.stop();
-    deleteDriversCustomBonusJob.stop();
-    updateDriversCustomNotFoundBonusJob.stop();
     saveContractorsListJob.stop();
 
     updateDriversWithRevenueJob.stop();
@@ -72,6 +54,6 @@ export function driversCustomTariffJobs() {
     getAndSaveClosedPolishBitrixDealsJob.stop();
 
     updateAndSaveDriverCashBlockRulesJob.stop();
-    driversCustomTariffJobs();
+    webApiJobs();
   }
 }

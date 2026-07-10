@@ -1,71 +1,4 @@
-import { devLog } from '../shared/shared.utils.mjs';
 import { db } from '../shared/sqlite.mjs';
-
-export async function saveCreatedDriverCustomTariffId({
-  tariffId,
-  driverId,
-  autoParkId,
-}) {
-  const sql = `INSERT INTO drivers_custom_tariff_ids(tariff_id, driver_id,auto_park_id) VALUES(?,?,?)`;
-  devLog({ sql, arguments });
-  await db.run(sql, tariffId, driverId, autoParkId);
-}
-
-export async function getUndeletedDriversCustomTariffIds() {
-  const sql = `SELECT driver_id,auto_park_id,tariff_id FROM drivers_custom_tariff_ids WHERE is_deleted = false`;
-  devLog({ sql, arguments });
-  const undeletedDriversCustomTariffIds = await db.all(sql);
-  return { undeletedDriversCustomTariffIds };
-}
-
-export async function markDriverCustomTariffAsDeleted({ tariffId, driverId }) {
-  const sql = `UPDATE drivers_custom_tariff_ids SET is_deleted=true WHERE tariff_id = ? and driver_id = ?`;
-  await db.run(sql, tariffId, driverId);
-}
-
-export async function saveCreatedDriverBonusRuleId({
-  autoParkId,
-  driverId,
-  bonusRuleId,
-}) {
-  const sql = `INSERT INTO drivers_custom_bonus_rules_ids(auto_park_id, driver_id,bonus_rule_id) VALUES(?,?,?)`;
-  await db.run(sql, autoParkId, driverId, bonusRuleId);
-}
-
-export async function getUndeletedDriversCustomBonuses() {
-  const sql = `SELECT auto_park_id,bonus_rule_id FROM drivers_custom_bonus_rules_ids WHERE is_deleted = false AND is_not_found = false`;
-  const undeletedDriversCustomBonuses = await db.all(sql);
-  return { undeletedDriversCustomBonuses };
-}
-
-export async function markDriverCustomBonusRulesAsDeleted({ bonusRuleId }) {
-  const sql = `UPDATE drivers_custom_bonus_rules_ids SET is_deleted=true WHERE bonus_rule_id = ?`;
-  await db.run(sql, bonusRuleId);
-}
-
-export async function markDriverCustomBonusRulesAsNotFound({ bonusRuleId }) {
-  const sql = `UPDATE drivers_custom_bonus_rules_ids SET is_not_found=true WHERE bonus_rule_id = ?`;
-  await db.run(sql, bonusRuleId);
-}
-
-export async function getNotFoundDriversCustomBonuses() {
-  const sql = `SELECT driver_id,bonus_rule_id FROM drivers_custom_bonus_rules_ids WHERE is_not_found = true AND is_deleted = false`;
-  const notFoundDriversCustomBonuses = await db.all(sql);
-  return { notFoundDriversCustomBonuses };
-}
-
-export async function replaceOldDriverCustomBonusRulesWithNewId({
-  bonusRuleId,
-  newBonusRuleId,
-}) {
-  const sql = `UPDATE drivers_custom_bonus_rules_ids SET bonus_rule_id=?,is_not_found=false WHERE bonus_rule_id = ?`;
-  await db.run(sql, newBonusRuleId, bonusRuleId);
-}
-
-export async function markDriverCustomBonusRulesIsUnDeletedle({ bonusRuleId }) {
-  const sql = `UPDATE drivers_custom_bonus_rules_ids SET is_deleted=null WHERE bonus_rule_id = ?`;
-  await db.run(sql, bonusRuleId);
-}
 
 export async function saveCreatedCashlessApplicationId({
   id,
@@ -376,20 +309,4 @@ export async function synchronizeAutoParkRulesTransaction({
     // Re-throw the error so the calling code is aware of the failure
     throw error;
   }
-}
-export function getCatalogTariffByWeekDayAndAutoParkId({
-  auto_park_id,
-  weekDay,
-}) {
-  devLog({ auto_park_id, weekDay });
-  return db.get(
-    'select id from catalog_tariffs ct where ct.auto_park_id = ? and ct.weekDay = ?',
-    auto_park_id,
-    weekDay
-  );
-}
-export function getAllCatalogTariffs() {
-  return db.all(
-    'select id,auto_park_id from catalog_tariffs where is_active = true'
-  );
 }
