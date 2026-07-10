@@ -511,4 +511,3 @@ export async function getTheMostRecentDriverCashBlockRuleIdByDriverId({
   const { rows, rowCount } = result;
   return { rows };
 }
-
