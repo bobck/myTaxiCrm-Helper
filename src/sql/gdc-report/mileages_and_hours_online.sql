@@ -5,8 +5,8 @@ WITH hours_online AS (SELECT
 			FROM driver_report_cards drc 
 			WHERE company_id = '4ea03592-9278-4ede-adf8-f7345a856893'
 			AND time_online > 0
-			AND (EXTRACT(week FROM drc.period_from AT TIME ZONE 'europe/kyiv') >= $1 AND EXTRACT(year FROM drc.period_from AT TIME ZONE 'europe/kyiv') = $2)
-			AND (EXTRACT(week FROM drc.period_to AT TIME ZONE 'europe/kyiv') <= $1 AND EXTRACT(year FROM drc.period_to AT TIME ZONE 'europe/kyiv') = $2)
+			AND (EXTRACT(week FROM drc.date) >= $1 AND EXTRACT(year FROM drc.date) = $2)
+			AND (EXTRACT(week FROM drc.date) <= $1 AND EXTRACT(year FROM drc.date) = $2)
 			), 
 			hours_online_group AS (
 			SELECT 
@@ -29,19 +29,17 @@ WITH hours_online AS (SELECT
 				coh.car_id,
 				coh.auto_park_id,
 				coh.end_value
-			FROM car_odometer_history coh 
+			FROM car_odometer_history coh
 			WHERE company_id = '4ea03592-9278-4ede-adf8-f7345a856893'
-			AND (EXTRACT(week FROM coh.period_from AT TIME ZONE 'europe/kyiv') >= $1 AND EXTRACT(year FROM coh.period_from AT TIME ZONE 'europe/kyiv') = $2)
-			AND (EXTRACT(week FROM coh.period_to AT TIME ZONE 'europe/kyiv') <= $1 AND EXTRACT(year FROM coh.period_to AT TIME ZONE 'europe/kyiv') = $2)
+			AND (EXTRACT(week FROM coh.created_at AT TIME ZONE 'europe/kyiv') = $1 AND EXTRACT(year FROM coh.created_at AT TIME ZONE 'europe/kyiv') = $2)
 			AND coh.auto_park_id IS NOT null
-			ORDER BY coh.car_id, coh.period_to DESC),
+			ORDER BY coh.car_id, coh.created_at DESC),
 			mileage_total AS (SELECT 
 			coh.auto_park_id,
 			sum(coh.end_value-coh.start_value)/1000 AS mileage
 		FROM car_odometer_history coh
-		WHERE coh.company_id = '4ea03592-9278-4ede-adf8-f7345a856893' 
-		AND (EXTRACT(week FROM coh.period_from AT TIME ZONE 'europe/kyiv') >= $1 AND EXTRACT(year FROM coh.period_from AT TIME ZONE 'europe/kyiv') = $2)
-		AND (EXTRACT(week FROM coh.period_to AT TIME ZONE 'europe/kyiv') <= $1 AND EXTRACT(year FROM coh.period_to AT TIME ZONE 'europe/kyiv') = $2)
+		WHERE coh.company_id = '4ea03592-9278-4ede-adf8-f7345a856893'
+		AND (EXTRACT(week FROM coh.created_at AT TIME ZONE 'europe/kyiv') = $1 AND EXTRACT(year FROM coh.created_at AT TIME ZONE 'europe/kyiv') = $2)
 		GROUP BY coh.auto_park_id)
 			SELECT 
 					oev.auto_park_id,

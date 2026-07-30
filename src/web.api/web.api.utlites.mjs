@@ -71,10 +71,6 @@ async function makeCRMRequestWithRetry({ body }) {
         throw new Error(message);
       }
 
-      if (message == 'Driver bonus rule not found') {
-        return { bonus_not_found: true };
-      }
-
       // console.error(`Attempt ${retryCount + 1} failed. Retrying in ${retryDelay}ms.`);
 
       if (retryCount < maxRetries - 1) {
@@ -92,115 +88,6 @@ async function makeCRMRequestWithRetry({ body }) {
 export const makeCRMRequestlimited = globalLimiter.wrap(
   makeCRMRequestWithRetry
 );
-
-const discountByDay = {
-  Tuesday: 0.833,
-  Wednesday: 0.667,
-  Thursday: 0.5,
-  Friday: 0.333,
-};
-
-export async function getDriversCandidatsForCustomTerms({
-  isoDate,
-  companyId,
-  autoParksIds,
-  weekNumber,
-  year,
-  allRuleIds,
-}) {
-  console.log({ isoDate });
-
-  const sql = fs
-    .readFileSync('./src/sql/drivers_for_custom_terms.sql')
-    .toString();
-
-  const result = await pool.query(sql, [
-    isoDate,
-    companyId,
-    autoParksIds,
-    weekNumber,
-    year,
-    allRuleIds,
-  ]);
-  const { rows, rowCount } = result;
-  return { driversCandidatsForCustomTerms: rows };
-}
-
-async function getOriginalTariffs({ companyId, autoParksIds }) {
-  const sql = fs
-    .readFileSync('./src/sql/tariffs_to_be_discounted.sql')
-    .toString();
-
-  const result = await pool.query(sql, [companyId, autoParksIds]);
-  const { rows, rowCount } = result;
-  return { rows };
-}
-
-async function getOriginalBonuses({ companyId, autoParksIds }) {
-  const sql = fs
-    .readFileSync('./src/sql/bonuses_to_be_discounted.sql')
-    .toString();
-
-  const result = await pool.query(sql, [companyId, autoParksIds]);
-  const { rows, rowCount } = result;
-  return { rows };
-}
-
-export async function getDiscountBonusesByAutoparksAndIntegrationsByDay({
-  dayOfWeek,
-  companyId,
-  autoParksIds,
-}) {
-  const discount = discountByDay[dayOfWeek];
-  console.log({ dayOfWeek, discount });
-
-  let { rows } = await getOriginalBonuses({ companyId, autoParksIds });
-  const discountBonusesByAutoparksAndIntegrations = [];
-  for (let bonuseRuleCard of rows) {
-    const createDriverBonusRulesInput = {};
-    const { auto_park_id, avg_check_rules, integration_ids, trips_rules } =
-      bonuseRuleCard;
-
-    createDriverBonusRulesInput.autoParkId = auto_park_id;
-    createDriverBonusRulesInput.bonusRules = {};
-    createDriverBonusRulesInput.bonusRules.integrationIds = integration_ids;
-
-    createDriverBonusRulesInput.bonusRules.avgCheckRules = [];
-
-    for (let avg_check_rule of avg_check_rules) {
-      if (avg_check_rule.to === 1000000) {
-        delete avg_check_rule.to;
-      }
-      createDriverBonusRulesInput.bonusRules.avgCheckRules.push(avg_check_rule);
-    }
-
-    createDriverBonusRulesInput.bonusRules.tripsRules = [];
-
-    let prevTo = null;
-    for (let row of trips_rules.reverse()) {
-      const rule = {};
-
-      if (row.from != 0) {
-        rule.from = Math.round(row.from * discount);
-      }
-
-      if (prevTo) {
-        rule.to = prevTo;
-        prevTo = null;
-      }
-
-      prevTo = rule.from - 1;
-
-      rule.bonusValues = row.bonusValues;
-
-      createDriverBonusRulesInput.bonusRules.tripsRules.unshift(rule);
-    }
-
-    discountBonusesByAutoparksAndIntegrations.push(createDriverBonusRulesInput);
-  }
-
-  return { discountBonusesByAutoparksAndIntegrations };
-}
 
 export async function createCashlessPaymentApplication({
   type,
@@ -394,15 +281,6 @@ export async function getCarUsageReport({ date }) {
     .toString();
   const result = await pool.query(sql, [date]);
   const { rows, rowCount } = result;
-  return { rows };
-}
-
-export async function getDriversWithActiveBonusesByDriverId({ driversIds }) {
-  const sqlp = fs
-    .readFileSync('./src/sql/drivers_with_active_bonuses.sql')
-    .toString();
-  const result = await pool.query(sqlp, [driversIds]);
-  const { rows } = result;
   return { rows };
 }
 
@@ -632,26 +510,4 @@ export async function getTheMostRecentDriverCashBlockRuleIdByDriverId({
   const result = await pool.query(sql, [driver_id]);
   const { rows, rowCount } = result;
   return { rows };
-}
-
-export async function assignDriversToCatalogTariff({
-  autoParkId,
-  driverIds,
-  catalogTariffId,
-}) {
-  const body = {
-    operationName: 'AssignDriversToCatalogTariff',
-    variables: {
-      assignDriversToCatalogTariffInput: {
-        autoParkId,
-        driverIds,
-        catalogTariffId,
-      },
-    },
-    query:
-      'mutation AssignDriversToCatalogTariff($assignDriversToCatalogTariffInput: AssignDriversToCatalogTariffInput!) {\n  assignDriversToCatalogTariff(\n    assignDriversToCatalogTariffInput: $assignDriversToCatalogTariffInput\n  ) {\n    success\n    __typename\n  }\n}\n',
-  };
-  const { data } = await makeCRMRequestlimited({ body });
-  const { assignDriversToCatalogTariff: result } = data;
-  return { result };
 }

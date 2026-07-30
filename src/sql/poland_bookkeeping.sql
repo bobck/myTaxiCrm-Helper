@@ -4,16 +4,16 @@ WITH
       drc.driver_id,
       ap.name AS auto_park_name,
       drc.auto_park_id,
-      MIN(drc.period_from AT TIME zone 'europe/warsaw') AS period_from,
-      MAX(drc.period_to AT TIME zone 'europe/warsaw') AS period_to
+      MIN(drc.date) AS period_from,
+      MAX(drc.date) AS period_to
     FROM
       driver_report_cards drc
       LEFT JOIN auto_parks ap ON ap.id = drc.auto_park_id
     WHERE
       drc.auto_park_id = $3
       AND drc.total_income > 0
-      AND drc.period_from AT TIME zone 'europe/warsaw' >= $1
-      AND drc.period_from AT TIME zone 'europe/warsaw' <= $2
+      AND drc.date >= $1
+      AND drc.date <= $2
     GROUP BY
       drc.driver_id,
       ap.name,
