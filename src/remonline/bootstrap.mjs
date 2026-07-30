@@ -10,6 +10,9 @@ import { syncRemonlineUOMsJob } from './jobs/sync-uoms-job.mjs';
 import { syncRemonlineEmployeesJob } from './jobs/sync-employees-job.mjs';
 import { syncRemonlineAssetsJob } from './jobs/sync-assets-job.mjs';
 import { loadOrdersJob } from './jobs/load-orders-job.mjs';
+import { loadClientsJob } from './jobs/load-clients-job.mjs';
+import { syncOrderStatusesJob } from './jobs/sync-order-statuses-job.mjs';
+import { syncWarehousesJob } from './jobs/sync-warehouses-job.mjs';
 import { syncBranchesJob } from './jobs/sync-branches-job.mjs';
 import { loadTransfersJob } from './jobs/load-transfers-job.mjs';
 
@@ -28,6 +31,9 @@ export function remonlineJobs() {
     syncRemonlineEmployeesJob.start();
     syncRemonlineAssetsJob.start();
     loadOrdersJob.start();
+    loadClientsJob.start();
+    syncOrderStatusesJob.start();
+    syncWarehousesJob.start();
     syncBranchesJob.start();
     loadTransfersJob.start();
     console.log(
@@ -50,6 +56,9 @@ export function remonlineJobs() {
     syncRemonlineEmployeesJob.stop();
     syncRemonlineAssetsJob.stop();
     loadOrdersJob.stop();
+    loadClientsJob.stop();
+    syncOrderStatusesJob.stop();
+    syncWarehousesJob.stop();
     syncBranchesJob.stop();
     loadTransfersJob.stop();
 
