@@ -393,7 +393,7 @@ export const cityTextRecruitToPayments = {
   },
   Мукачево: {
     id: '2938',
-    assigned_by_id: '173554',
+    assigned_by_id: '232094',
   },
   "Кам'янське": {
     id: '2924',
