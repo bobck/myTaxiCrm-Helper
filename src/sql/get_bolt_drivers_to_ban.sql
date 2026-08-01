@@ -2,7 +2,7 @@ WITH aggregated_reports AS (
     SELECT
         drc.driver_id
     FROM driver_report_cards drc
-    WHERE drc.period_from >= $1
+    WHERE drc.date >= $1
       AND drc.auto_park_id IN (
                                'e4df553f-4ec2-43a8-b012-4795259e983a', '052da49c-2175-4033-8010-c8e1f9a755ab',
                                '03328f6b-1336-4ee3-8407-bf5520411136', '2964e082-0e86-4695-b5f5-98915d190518',
