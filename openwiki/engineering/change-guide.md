@@ -11,18 +11,18 @@ Use this page to locate an ownership area, choose a proportionate validation pat
 
 ## Source map
 
-| Path | Responsibility | When changing it |
-| --- | --- | --- |
-| `app.mjs` | Runtime composition and job-group registration | Check startup ordering and whether API/cron workload effects are intended. |
-| `src/api/` | Express app, middleware, HTTP routes, generic PG access | Review parent router mounting and authorization as well as controller logic. |
-| `src/remonline/` | RemOnline API client, cron jobs, loaders, Prisma queries | Preserve pagination, retries, throttling, watermark, and transaction semantics. |
-| `src/web.api/` | MyTaxiCRM/Web API jobs, driver controls, GDC and inflow/outflow reporting | Validate business thresholds, source SQL, dates, and provider-side effects. |
-| `src/bitrix/` | Bitrix automation, job scheduling, CRM workflows, Prisma persistence | Validate record identity and idempotency against realistic data. |
-| `src/bq/` and `src/sql/` | BigQuery loaders and report source SQL | Treat date ranges and delete/reload behavior as data-change logic. |
-| `src/sheets/` | Spreadsheet configuration/exclusions | Trace settings through their downstream consumer before changing data shape. |
-| `prisma/` | RemOnline and Bitrix schemas plus migrations | Generate clients and apply the matching migration in a safe database. |
-| `migrations/` | Legacy SQLite migrations | Validate against a disposable SQLite database. |
-| `playground/` | Read-only PostgreSQL SQL comparison tooling | Use for query correctness/performance investigation. |
+| Path                     | Responsibility                                                            | When changing it                                                                |
+| ------------------------ | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `app.mjs`                | Runtime composition and job-group registration                            | Check startup ordering and whether API/cron workload effects are intended.      |
+| `src/api/`               | Express app, middleware, HTTP routes, generic PG access                   | Review parent router mounting and authorization as well as controller logic.    |
+| `src/remonline/`         | RemOnline API client, cron jobs, loaders, Prisma queries                  | Preserve pagination, retries, throttling, watermark, and transaction semantics. |
+| `src/web.api/`           | MyTaxiCRM/Web API jobs, driver controls, GDC and inflow/outflow reporting | Validate business thresholds, source SQL, dates, and provider-side effects.     |
+| `src/bitrix/`            | Bitrix automation, job scheduling, CRM workflows, Prisma persistence      | Validate record identity and idempotency against realistic data.                |
+| `src/bq/` and `src/sql/` | BigQuery loaders and report source SQL                                    | Treat date ranges and delete/reload behavior as data-change logic.              |
+| `src/sheets/`            | Spreadsheet configuration/exclusions                                      | Trace settings through their downstream consumer before changing data shape.    |
+| `prisma/`                | RemOnline and Bitrix schemas plus migrations                              | Generate clients and apply the matching migration in a safe database.           |
+| `migrations/`            | Legacy SQLite migrations                                                  | Validate against a disposable SQLite database.                                  |
+| `playground/`            | Read-only PostgreSQL SQL comparison tooling                               | Use for query correctness/performance investigation.                            |
 
 ## Validation ladder
 

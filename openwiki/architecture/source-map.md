@@ -9,23 +9,23 @@ tags: [architecture, source-map, maintenance]
 
 Use this page after the [architecture overview](overview.md) to find the smallest appropriate change surface. The repository is organized by external system and business job family rather than by a single application-layer hierarchy.
 
-| Location | Owns | Start here when | Related concept |
-| --- | --- | --- | --- |
-| `app.mjs` | Production composition and bootstrap order | Enabling/disabling a job group or changing startup | [Runtime architecture](overview.md) |
-| `src/api/` | Express app, root routing, middleware, Bolt/referral/query callbacks, source PG pool | Changing HTTP behavior or request authorization | [Runtime architecture](overview.md) |
-| `src/web.api/` | MyTaxiCRM web-client helpers, driver revenue/cash controls, GDC and inflow/outflow reports | Changing driver policy or CRM-derived reporting | [Synchronization and reporting workflows](../workflows/sync-and-reporting.md) |
-| `src/sql/` | SQL statements backing source-PostgreSQL reports and policies | Changing report definition or source-data selection | [Synchronization and reporting workflows](../workflows/sync-and-reporting.md) |
-| `src/remonline/` | RemOnline API/token client, cron jobs, entity mapping and replication modules | Changing workshop, inventory, finance, branch, order, or transfer sync | [Synchronization and reporting workflows](../workflows/sync-and-reporting.md) |
-| `src/bitrix/` | Bitrix API/client utilities and CRM workflow jobs | Changing deal/contact/recruiting/referral/debt/Bolt/branding processing | [Synchronization and reporting workflows](../workflows/sync-and-reporting.md) |
-| `src/bq/` | BigQuery utilities and report publication jobs | Changing output datasets or finance/bookkeeping reports | [API and connected systems](../integrations/api-and-systems.md) |
-| `src/sheets/` | Google Sheets imports and cash-block exclusion synchronization | Changing operational exception inputs | [Synchronization and reporting workflows](../workflows/sync-and-reporting.md) |
-| `src/telegram/` | Room notification capability | Re-enabling or modifying notifications | [Runtime architecture](overview.md) |
-| `src/shared/` | SQLite access and shared helpers | Changing legacy local-state behavior | [API and connected systems](../integrations/api-and-systems.md) |
-| `prisma/schema.remonline.prisma` | RemOnline PostgreSQL models | Changing replicated RemOnline data | [API and connected systems](../integrations/api-and-systems.md) |
-| `prisma/bitrix/schema.prisma` | Bitrix PostgreSQL models | Changing insurance-invoice persistence | [API and connected systems](../integrations/api-and-systems.md) |
-| `migrations/` | Legacy SQLite migrations | Changing SQLite schema only | [Operations runbook](../operations/runbook.md) |
-| `.github/workflows/deploy.yml` | Format check and main-branch deployment | Changing CI/deploy steps | [Operations runbook](../operations/runbook.md) |
-| `scripts/tunnel-pg.mjs` | Local SSH port forward to remote PostgreSQL | Investigating remote database access | [Operations runbook](../operations/runbook.md) |
+| Location                         | Owns                                                                                       | Start here when                                                         | Related concept                                                               |
+| -------------------------------- | ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `app.mjs`                        | Production composition and bootstrap order                                                 | Enabling/disabling a job group or changing startup                      | [Runtime architecture](overview.md)                                           |
+| `src/api/`                       | Express app, root routing, middleware, Bolt/referral/query callbacks, source PG pool       | Changing HTTP behavior or request authorization                         | [Runtime architecture](overview.md)                                           |
+| `src/web.api/`                   | MyTaxiCRM web-client helpers, driver revenue/cash controls, GDC and inflow/outflow reports | Changing driver policy or CRM-derived reporting                         | [Synchronization and reporting workflows](../workflows/sync-and-reporting.md) |
+| `src/sql/`                       | SQL statements backing source-PostgreSQL reports and policies                              | Changing report definition or source-data selection                     | [Synchronization and reporting workflows](../workflows/sync-and-reporting.md) |
+| `src/remonline/`                 | RemOnline API/token client, cron jobs, entity mapping and replication modules              | Changing workshop, inventory, finance, branch, order, or transfer sync  | [Synchronization and reporting workflows](../workflows/sync-and-reporting.md) |
+| `src/bitrix/`                    | Bitrix API/client utilities and CRM workflow jobs                                          | Changing deal/contact/recruiting/referral/debt/Bolt/branding processing | [Synchronization and reporting workflows](../workflows/sync-and-reporting.md) |
+| `src/bq/`                        | BigQuery utilities and report publication jobs                                             | Changing output datasets or finance/bookkeeping reports                 | [API and connected systems](../integrations/api-and-systems.md)               |
+| `src/sheets/`                    | Google Sheets imports and cash-block exclusion synchronization                             | Changing operational exception inputs                                   | [Synchronization and reporting workflows](../workflows/sync-and-reporting.md) |
+| `src/telegram/`                  | Room notification capability                                                               | Re-enabling or modifying notifications                                  | [Runtime architecture](overview.md)                                           |
+| `src/shared/`                    | SQLite access and shared helpers                                                           | Changing legacy local-state behavior                                    | [API and connected systems](../integrations/api-and-systems.md)               |
+| `prisma/schema.remonline.prisma` | RemOnline PostgreSQL models                                                                | Changing replicated RemOnline data                                      | [API and connected systems](../integrations/api-and-systems.md)               |
+| `prisma/bitrix/schema.prisma`    | Bitrix PostgreSQL models                                                                   | Changing insurance-invoice persistence                                  | [API and connected systems](../integrations/api-and-systems.md)               |
+| `migrations/`                    | Legacy SQLite migrations                                                                   | Changing SQLite schema only                                             | [Operations runbook](../operations/runbook.md)                                |
+| `.github/workflows/deploy.yml`   | Format check and main-branch deployment                                                    | Changing CI/deploy steps                                                | [Operations runbook](../operations/runbook.md)                                |
+| `scripts/tunnel-pg.mjs`          | Local SSH port forward to remote PostgreSQL                                                | Investigating remote database access                                    | [Operations runbook](../operations/runbook.md)                                |
 
 ## Pattern within a domain
 

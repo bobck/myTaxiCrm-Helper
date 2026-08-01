@@ -34,12 +34,12 @@ This shows the enabled startup order implemented by `app.mjs`; individual job ca
 
 `src/api/api.mjs` builds an Express application with JSON parsing, mounts the core router at `/`, and listens on `API_HOST:3000`. The core router adds request logging, then dispatches to:
 
-| Route area | Local protection | Responsibility | Source |
-| --- | --- | --- | --- |
-| `/bolt/letters/*` | `authorizationMiddleware` | Bolt letter callbacks and approval operations | `src/api/modules/bolt/bolt.route.mjs` |
-| `/query` | `authorizationMiddleware` | Runs a submitted SQL query through the source PostgreSQL query service | `src/api/modules/query/query.route.mjs` |
-| `/referral-add`, `/referral-validation`, `/referral-approval` | no router-local middleware visible | Referral creation, validation, and approval actions | `src/api/modules/referrals/referrals.route.mjs` |
-| fallback `/` | none | Core greeting handler | `src/api/core/core.route.mjs` |
+| Route area                                                    | Local protection                   | Responsibility                                                         | Source                                          |
+| ------------------------------------------------------------- | ---------------------------------- | ---------------------------------------------------------------------- | ----------------------------------------------- |
+| `/bolt/letters/*`                                             | `authorizationMiddleware`          | Bolt letter callbacks and approval operations                          | `src/api/modules/bolt/bolt.route.mjs`           |
+| `/query`                                                      | `authorizationMiddleware`          | Runs a submitted SQL query through the source PostgreSQL query service | `src/api/modules/query/query.route.mjs`         |
+| `/referral-add`, `/referral-validation`, `/referral-approval` | no router-local middleware visible | Referral creation, validation, and approval actions                    | `src/api/modules/referrals/referrals.route.mjs` |
+| fallback `/`                                                  | none                               | Core greeting handler                                                  | `src/api/core/core.route.mjs`                   |
 
 The authorization middleware accepts `api_key` from the query string or `Authorization` header and compares it through `authorizeAPIClient`. It logs the supplied key on failed authorization, so avoid passing credentials in URLs where they may be captured by infrastructure logs. The referral routes are mounted without this middleware; treat whether they are protected upstream as an open security question, not an assumed guarantee. The [operations runbook](../operations/runbook.md) records this as a pre-deployment review point.
 
@@ -59,13 +59,13 @@ These workers implement the business behavior described in [synchronization and 
 
 The service deliberately spans multiple stores:
 
-| Store | Purpose | Main access layer |
-| --- | --- | --- |
-| Local SQLite | Legacy operational state such as tokens, chat/autopark settings, and older tracking tables | `src/shared/sqlite.mjs`, legacy `migrations/` |
-| Source PostgreSQL | CRM operational data queried by API, reports, and many jobs | `src/api/pool.mjs` and SQL in `src/sql/` |
-| RemOnline PostgreSQL | Prisma-managed replica of RemOnline entities and synchronization state | `prisma/schema.remonline.prisma` |
-| Bitrix PostgreSQL | Prisma-managed insurance invoice data and synchronization metadata | `prisma/bitrix/schema.prisma` |
-| BigQuery | Published operational and finance reporting | `src/bq/` and reporting modules |
+| Store                | Purpose                                                                                    | Main access layer                             |
+| -------------------- | ------------------------------------------------------------------------------------------ | --------------------------------------------- |
+| Local SQLite         | Legacy operational state such as tokens, chat/autopark settings, and older tracking tables | `src/shared/sqlite.mjs`, legacy `migrations/` |
+| Source PostgreSQL    | CRM operational data queried by API, reports, and many jobs                                | `src/api/pool.mjs` and SQL in `src/sql/`      |
+| RemOnline PostgreSQL | Prisma-managed replica of RemOnline entities and synchronization state                     | `prisma/schema.remonline.prisma`              |
+| Bitrix PostgreSQL    | Prisma-managed insurance invoice data and synchronization metadata                         | `prisma/bitrix/schema.prisma`                 |
+| BigQuery             | Published operational and finance reporting                                                | `src/bq/` and reporting modules               |
 
 The [API and connected systems](../integrations/api-and-systems.md) page explains the ownership of these boundaries. In particular, `EntitySync` in the RemOnline schema stores JSON synchronization cursors; workflows must update records and their high-water mark atomically where the implementation does so.
 

@@ -39,11 +39,11 @@ The root `readme.md` provides the original SQLite and PM2 setup sequence. This p
 
 There are three migration tracks; apply the right one for the changed schema:
 
-| Changed store | Schema/migrations | Commands |
-| --- | --- | --- |
-| Legacy SQLite | `migrations/`, `database.json` | `npm run migrate:up` |
-| RemOnline PostgreSQL | `prisma/schema.remonline.prisma`, `prisma/migrations/` | `npm run prisma:migrate:dev:remonline` locally or `npm run prisma:migrate:deploy:remonline` in deployment |
-| Bitrix PostgreSQL | `prisma/bitrix/schema.prisma`, `prisma/bitrix/migrations/` | `npm run prisma:migrate:dev:bitrix` locally or `npm run prisma:migrate:deploy:bitrix` in deployment |
+| Changed store        | Schema/migrations                                          | Commands                                                                                                  |
+| -------------------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Legacy SQLite        | `migrations/`, `database.json`                             | `npm run migrate:up`                                                                                      |
+| RemOnline PostgreSQL | `prisma/schema.remonline.prisma`, `prisma/migrations/`     | `npm run prisma:migrate:dev:remonline` locally or `npm run prisma:migrate:deploy:remonline` in deployment |
+| Bitrix PostgreSQL    | `prisma/bitrix/schema.prisma`, `prisma/bitrix/migrations/` | `npm run prisma:migrate:dev:bitrix` locally or `npm run prisma:migrate:deploy:bitrix` in deployment       |
 
 Use `npm run prisma:migrate:deploy:all` only when both Prisma stores have deployable migration state. A migration must match the store accessed by the workflow in [API and connected systems](../integrations/api-and-systems.md); legacy SQLite migration commands do not change Prisma databases.
 

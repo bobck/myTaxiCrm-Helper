@@ -52,14 +52,14 @@ These reporting workflows share infrastructure with the [connected systems guide
 
 The Web API and Bitrix groups implement fleet lifecycle and control workflows.
 
-| Workflow | Behavior | Source area |
-| --- | --- | --- |
-| Driver revenue and contractors | Syncs contractor lists and driver revenue for CRM/reporting use | `src/web.api/jobs/`, `src/bitrix/jobs/` |
-| Driver cash-block rules | Selects eligible drivers, applies/removes cash-block rules, and persists applied rule IDs | `src/web.api/modules/driver-cash-block-rules.mjs` |
-| Recruitment and referrals | Creates/synchronizes leads and deals, manages referral payment and closed states | `src/bitrix/bootstrap.mjs`, `src/api/modules/referrals/` |
-| Driver lifecycle | Handles fired-driver, new-working-driver, debtor, DTP-debt, and branding workflows | `src/bitrix/bootstrap.mjs` |
-| Bolt bans | Moves Bitrix ban requests and accepts Bolt-related HTTP callbacks | `src/bitrix/jobs/move-bolt-driver-ban-requests-job.mjs`, `src/api/modules/bolt/` |
-| Insurance invoices | Incrementally synchronizes invoice records and sync metadata | `src/bitrix/modules/sync-insurance-invoices.mjs` |
+| Workflow                       | Behavior                                                                                  | Source area                                                                      |
+| ------------------------------ | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Driver revenue and contractors | Syncs contractor lists and driver revenue for CRM/reporting use                           | `src/web.api/jobs/`, `src/bitrix/jobs/`                                          |
+| Driver cash-block rules        | Selects eligible drivers, applies/removes cash-block rules, and persists applied rule IDs | `src/web.api/modules/driver-cash-block-rules.mjs`                                |
+| Recruitment and referrals      | Creates/synchronizes leads and deals, manages referral payment and closed states          | `src/bitrix/bootstrap.mjs`, `src/api/modules/referrals/`                         |
+| Driver lifecycle               | Handles fired-driver, new-working-driver, debtor, DTP-debt, and branding workflows        | `src/bitrix/bootstrap.mjs`                                                       |
+| Bolt bans                      | Moves Bitrix ban requests and accepts Bolt-related HTTP callbacks                         | `src/bitrix/jobs/move-bolt-driver-ban-requests-job.mjs`, `src/api/modules/bolt/` |
+| Insurance invoices             | Incrementally synchronizes invoice records and sync metadata                              | `src/bitrix/modules/sync-insurance-invoices.mjs`                                 |
 
 Cash-block, CRM, and provider mutations are business-impacting. Treat any `test:*` or manual invocation as a production-affecting operation until the called module is inspected. The [API and connected systems guide](../integrations/api-and-systems.md) identifies the inbound routes that can trigger related Bitrix changes.
 
