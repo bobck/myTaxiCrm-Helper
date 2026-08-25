@@ -313,7 +313,7 @@ export const cityTextRecruitToPayments = {
   },
   Харків: {
     id: '2882',
-    assigned_by_id: '166486',
+    assigned_by_id: '231992',
   },
   Одеса: {
     id: '2884',
