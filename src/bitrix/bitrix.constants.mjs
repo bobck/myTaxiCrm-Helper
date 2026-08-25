@@ -313,7 +313,7 @@ export const cityTextRecruitToPayments = {
   },
   Харків: {
     id: '2882',
-    assigned_by_id: '231992',
+    assigned_by_id: '166486',
   },
   Одеса: {
     id: '2884',
@@ -393,7 +393,7 @@ export const cityTextRecruitToPayments = {
   },
   Мукачево: {
     id: '2938',
-    assigned_by_id: '232094',
+    assigned_by_id: '173554',
   },
   "Кам'янське": {
     id: '2924',
