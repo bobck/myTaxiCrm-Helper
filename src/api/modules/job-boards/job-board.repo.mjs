@@ -1,0 +1,253 @@
+import {
+  changeBitrixVacancyActivityState,
+  createBitrixVacancy,
+  markBitrixVacancyAsDeleted,
+  getBitrixVacancyById,
+  updateBitrixVacancy,
+} from '../../../job-boards/job-board.queries.mjs';
+import {
+  createRobotaUaSynchronizedVacancy,
+  markRobotaUaSynchronizedVacancyAsDeleted,
+  getAnyRobotaUaVacancyByBitrixId,
+  getAnyRobotaUaVacancyById,
+  updateRobotaUaSynchronizedVacancy,
+} from '../../../job-boards/robota.ua/robotaua.queries.mjs';
+import {
+  createWorkUaSynchronizedVacancy,
+  markWorkUaSynchronizedVacancyAsDeleted,
+  getAnyWorkUaVacancyByBitrixId,
+  getAnyWorkUaVacancyById,
+  updateWorkUaSynchronizedVacancy,
+} from '../../../job-boards/work.ua/workua.queries.mjs';
+import { devLog } from '../../../shared/shared.utils.mjs';
+
+export const getExistingVacancy = async ({ bitrix_vacancy_id }) => {
+  const payload = {};
+  payload.bitrixVacancy = await getBitrixVacancyById({ bitrix_vacancy_id });
+  if (!payload.bitrixVacancy) {
+    return payload;
+  }
+  const { work_ua_vacancy_id, robota_ua_vacancy_id } = payload.bitrixVacancy;
+  if (work_ua_vacancy_id) {
+    payload.localWorkUaVacancy = await getAnyWorkUaVacancyByBitrixId({
+      bitrix_vacancy_id,
+    });
+  }
+  if (robota_ua_vacancy_id) {
+    payload.localRobotaUaVacancy = await getAnyWorkUaVacancyByBitrixId({
+      bitrix_vacancy_id,
+    });
+  }
+
+  return payload;
+};
+export const addVacancySynchronously = async ({
+  bitrix_vacancy_id,
+  vacancy_name,
+  workUaVacancy,
+  robotaUaVacancy,
+  is_active,
+  assigned_by_id,
+  // work_ua_publication_type,
+  // robota_ua_publication_type,
+}) => {
+  const _comments = [];
+  let commentsLimit = 0;
+  const payload = { assigned_by_id };
+  if (workUaVacancy) {
+    const { id: work_ua_vacancy_id } = workUaVacancy;
+    const existingWorkUaVacancy = await getAnyWorkUaVacancyById({
+      work_ua_vacancy_id,
+    });
+
+    commentsLimit++;
+    if (existingWorkUaVacancy) {
+      _comments.push(
+        `Подана вакансія work.ua id:${work_ua_vacancy_id} вже існує в системі.`
+      );
+    } else {
+      await createWorkUaSynchronizedVacancy({
+        bitrix_vacancy_id,
+        workUaVacancy,
+        // work_ua_publication_type,
+      });
+      payload.work_ua_vacancy_id = work_ua_vacancy_id;
+    }
+  }
+
+  if (robotaUaVacancy) {
+    const { vacancyId: robota_ua_vacancy_id } = robotaUaVacancy;
+    const existingRobotaUaVacancy = await getAnyRobotaUaVacancyById({
+      robota_ua_vacancy_id,
+    });
+    commentsLimit++;
+    if (existingRobotaUaVacancy) {
+      _comments.push(
+        `Подана вакансія robota.ua id:${robota_ua_vacancy_id} вже існує в системі.`
+      );
+    } else {
+      await createRobotaUaSynchronizedVacancy({
+        bitrix_vacancy_id,
+        robotaUaVacancy,
+        // robota_ua_publication_type,
+      });
+      payload.robota_ua_vacancy_id = robota_ua_vacancy_id;
+    }
+  }
+
+  if (commentsLimit <= _comments.length) {
+    return { _comments, isAnyVacancyCreated: false };
+  }
+  await createBitrixVacancy({
+    bitrix_vacancy_id,
+    vacancy_name,
+    is_active,
+    ...payload,
+  });
+  return { _comments, isAnyVacancyCreated: true };
+};
+export const updateVacancySynchronously = async ({
+  bitrix_vacancy_id,
+  vacancy_name,
+  is_active,
+  workUaVacancy,
+  robotaUaVacancy,
+  bitrixVacancy,
+  assigned_by_id,
+  // work_ua_publication_type,
+  // robota_ua_publication_type,
+}) => {
+  const _comments = [];
+  let commentsLimit = 0;
+  const payload = {};
+
+  if (robotaUaVacancy) {
+    const { vacancyId: robota_ua_vacancy_id } = robotaUaVacancy;
+    const existingRobotaUaVacancy = await getAnyRobotaUaVacancyById({
+      robota_ua_vacancy_id,
+    });
+
+    commentsLimit++;
+    if (existingRobotaUaVacancy) {
+      if (existingRobotaUaVacancy.bitrix_vacancy_id == bitrix_vacancy_id) {
+        await updateRobotaUaSynchronizedVacancy({
+          bitrix_vacancy_id,
+          robotaUaVacancy,
+          // robota_ua_publication_type,
+        });
+        payload.robota_ua_vacancy_id = robota_ua_vacancy_id;
+      } else {
+        _comments.push(
+          `Подана вакансія robota.ua id:${robota_ua_vacancy_id} вже існує в системі.`
+        );
+      }
+    } else {
+      const existingRobotaUaVacancyByBitrixId =
+        await getAnyRobotaUaVacancyByBitrixId({ bitrix_vacancy_id });
+      if (existingRobotaUaVacancyByBitrixId) {
+        await updateRobotaUaSynchronizedVacancy({
+          bitrix_vacancy_id,
+          robotaUaVacancy,
+        });
+      } else {
+        await createRobotaUaSynchronizedVacancy({
+          bitrix_vacancy_id,
+          robotaUaVacancy,
+        });
+      }
+
+      payload.robota_ua_vacancy_id = robota_ua_vacancy_id;
+    }
+  }
+  if (workUaVacancy) {
+    const { id: work_ua_vacancy_id } = workUaVacancy;
+    const existingWorkUaVacancy = await getAnyWorkUaVacancyById({
+      work_ua_vacancy_id,
+    });
+    commentsLimit++;
+    if (existingWorkUaVacancy) {
+      if (existingWorkUaVacancy.bitrix_vacancy_id == bitrix_vacancy_id) {
+        await updateWorkUaSynchronizedVacancy({
+          bitrix_vacancy_id,
+          workUaVacancy,
+          // work_ua_publication_type,
+        });
+        payload.work_ua_vacancy_id = work_ua_vacancy_id;
+      } else {
+        _comments.push(
+          `Подана вакансія work.ua id:${work_ua_vacancy_id} вже існує в системі.`
+        );
+      }
+    } else {
+      const existingWorkUaVacancyByBitrixId =
+        await getAnyWorkUaVacancyByBitrixId({ bitrix_vacancy_id });
+      if (existingWorkUaVacancyByBitrixId) {
+        await updateWorkUaSynchronizedVacancy({
+          bitrix_vacancy_id,
+          workUaVacancy,
+          // work_ua_publication_type,
+        });
+      } else {
+        await createWorkUaSynchronizedVacancy({
+          bitrix_vacancy_id,
+          workUaVacancy,
+          // work_ua_publication_type,
+        });
+      }
+      payload.work_ua_vacancy_id = work_ua_vacancy_id;
+    }
+  }
+  if (assigned_by_id && bitrixVacancy.assigned_by_id !== assigned_by_id) {
+    commentsLimit++;
+    payload.assigned_by_id = assigned_by_id;
+  }
+  if (_comments.length >= commentsLimit) {
+    return { _comments, isAnyVacancyUpdated: false };
+  }
+  await updateBitrixVacancy({
+    bitrix_vacancy_id,
+    vacancy_name,
+    is_active,
+    ...payload,
+  });
+  return { _comments, isAnyVacancyUpdated: true };
+};
+export const getVacancySynchronously = async ({ bitrix_vacancy_id }) => {
+  const bitrixVacancy = await getBitrixVacancyById({ bitrix_vacancy_id });
+  const robotaUaVacancy = await getAnyRobotaUaVacancyByBitrixId({
+    bitrix_vacancy_id,
+  });
+  const workUaVacancy = await getAnyWorkUaVacancyByBitrixId({
+    bitrix_vacancy_id,
+  });
+  return { bitrixVacancy, robotaUaVacancy, workUaVacancy };
+};
+export const markVacancyAsDeletedSynchronously = async ({
+  bitrix_vacancy_id,
+}) => {
+  devLog({
+    message: 'deleting vacancy',
+    bitrix_vacancy_id,
+  });
+  await markRobotaUaSynchronizedVacancyAsDeleted({ bitrix_vacancy_id });
+  await markWorkUaSynchronizedVacancyAsDeleted({ bitrix_vacancy_id });
+  await markBitrixVacancyAsDeleted({ bitrix_vacancy_id });
+  devLog({
+    message: 'vacancy deleted',
+    bitrix_vacancy_id,
+  });
+};
+export const changeVacancyActivityState = async ({
+  bitrix_vacancy_id,
+  activityState,
+}) => {
+  if (
+    activityState.is_work_ua_vacancy_activated ||
+    activityState.is_robota_ua_vacancy_activated
+  ) {
+    await changeBitrixVacancyActivityState({
+      bitrix_vacancy_id,
+      is_active: true,
+    });
+  }
+};

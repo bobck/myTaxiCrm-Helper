@@ -1,6 +1,7 @@
 import { Bitrix, Method } from '@2bad/bitrix';
 import fs from 'fs';
 import { pool } from './../api/pool.mjs';
+import { jobBoardApplymentParametersToBitrixKeys } from './bitrix.constants.mjs';
 import { BitrixAPIClient } from './bitrix.api.mjs';
 import { devLog } from '../shared/shared.utils.mjs';
 const bitrix = Bitrix(
@@ -699,6 +700,28 @@ export async function addManyCommentsToAnEntity({
 
   return result;
 }
+
+export const createVacancyResponseCards = async ({ dtos }) => {
+  const batchObj = {};
+  for (let dto of dtos) {
+    const { sourceOfApplyment, id } = dto;
+    const params = {};
+    for (const param in dto) {
+      if (
+        !Object.keys(jobBoardApplymentParametersToBitrixKeys).includes(param) ||
+        dto[param] === null ||
+        dto[param] === undefined
+      ) {
+        continue;
+      }
+      params[jobBoardApplymentParametersToBitrixKeys[param]] = dto[param];
+    }
+    params['entityTypeId'] = '1142';
+    params['fields[STAGE_ID]'] = 'DT1142_64:NEW';
+    batchObj[`${sourceOfApplyment}:${id}`] = { method: 'crm.item.add', params };
+  }
+  return await bitrixAPIClient.batch({ batchObj });
+};
 
 export async function updateRequestedDrivers({ cards }) {
   const batchObj = {};
