@@ -325,7 +325,7 @@ export const cityTextRecruitToPayments = {
   },
   Львів: {
     id: '2888',
-    assigned_by_id: '78112',
+    assigned_by_id: '232778',
   },
   Запоріжжя: {
     id: '2890',
