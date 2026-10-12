@@ -333,7 +333,7 @@ export const cityTextRecruitToPayments = {
   },
   Вінниця: {
     id: '2892',
-    assigned_by_id: '178592',
+    assigned_by_id: '245714',
   },
   Чернігів: {
     id: '2894',
@@ -346,6 +346,10 @@ export const cityTextRecruitToPayments = {
   'Івано-Франківськ': {
     id: '2898',
     assigned_by_id: '225',
+  },
+  Миколаїв: {
+    id: '2900',
+    assigned_by_id: '236008',
   },
   'Кривий Ріг': {
     id: '2902',
